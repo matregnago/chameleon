@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -20,6 +20,7 @@
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Samuel Thibault
+ * @author Gwenole Lucas
  * @author Alycia Lisito
  * @date 2025-12-19
  * @precisions normal z -> c d s
@@ -73,6 +74,26 @@ struct cl_zlacpy_args_s {
     int lda;
     int ldb;
 };
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_zlacpy_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_zlacpy_args_s *clargs  = (struct cl_zlacpy_args_s *)(t->cl_arg);
+    rectask_args_t          *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t        request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pzlacpy( clargs->uplo,
+                       rtargs->tiles[0]->mat,
+                       rtargs->tiles[1]->mat,
+                       rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
 static void cl_zlacpy_starpu_func(void *descr[], void *cl_arg)
@@ -182,10 +203,13 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
                           int displA, const CHAM_desc_t *A, int Am, int An, int lda,
                           int displB, const CHAM_desc_t *B, int Bm, int Bn, int ldb )
 {
-    int          exec    = 0;
-    char        *cl_name = "zlacpyx";
-    CHAM_tile_t *tileA   = A->get_blktile( A, Am, An );
-    CHAM_tile_t *tileB   = B->get_blktile( B, Bm, Bn );
+    int             exec       = 0;
+    char           *cl_name    = "zlacpyx";
+    CHAM_tile_t    *tileA      = A->get_blktile( A, Am, An );
+    CHAM_tile_t    *tileB      = B->get_blktile( B, Bm, Bn );
+    int             is_rectask = 0;
+    rectask_args_t *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -217,7 +241,22 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
 
     struct cl_zlacpy_args_s *clargs = NULL;
 
-    if ( exec ) {
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileB->format & CHAMELEON_TILE_DESC ) );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t *) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        rtargs->tiles[1] = tileB;
+        cl_name = "zlacpy_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zlacpy_args_s ) );
         clargs->uplo   = uplo;
         clargs->m      = m;
@@ -241,6 +280,9 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlacpyx ),
         STARPU_NAME, cl_name,
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zlacpy )
         0 );
 
     (void)tileA;
@@ -252,10 +294,13 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
-    int          exec    = 0;
-    char        *cl_name = "zlacpy";
-    CHAM_tile_t *tileA   = A->get_blktile( A, Am, An );
-    CHAM_tile_t *tileB   = B->get_blktile( B, Bm, Bn );
+    int             exec       = 0;
+    char           *cl_name    = "zlacpy";
+    CHAM_tile_t    *tileA      = A->get_blktile( A, Am, An );
+    CHAM_tile_t    *tileB      = B->get_blktile( B, Bm, Bn );
+    int             is_rectask = 0;
+    rectask_args_t *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -286,7 +331,22 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
 
     struct cl_zlacpy_args_s *clargs = NULL;
 
-    if ( exec ) {
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileB->format & CHAMELEON_TILE_DESC ) );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t *) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        rtargs->tiles[1] = tileB;
+        cl_name = "zlacpy_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zlacpy_args_s ) );
         clargs->uplo   = uplo;
         clargs->m      = m;
@@ -309,5 +369,8 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlacpy ),
         STARPU_NAME, cl_name,
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zlacpy )
         0 );
 }
