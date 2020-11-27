@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -19,6 +19,7 @@
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Samuel Thibault
+ * @author Gwenole Lucas
  * @date 2024-10-18
  * @precisions normal z -> c d s
  *
@@ -33,6 +34,24 @@ struct cl_zlaset_args_s {
     CHAMELEON_Complex64_t alpha;
     CHAMELEON_Complex64_t beta;
 };
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_zlaset_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_zlaset_args_s *clargs  = (struct cl_zlaset_args_s *)(t->cl_arg);
+    rectask_args_t          *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t        request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pzlaset( clargs->uplo, clargs->alpha, clargs->beta, rtargs->tiles[0]->mat,
+                       rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
@@ -60,6 +79,10 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
     struct cl_zlaset_args_s *clargs = NULL;
     int                      exec = 0;
     const char              *cl_name = "zlaset";
+    CHAM_tile_t             *tileA;
+    int                      is_rectask = 0;
+    rectask_args_t          *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -67,7 +90,22 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
     exec = __chameleon_need_exec;
     CHAMELEON_END_ACCESS_DECLARATION;
 
-    if ( exec ) {
+    tileA = A->get_blktile( A, Am, An );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( tileA->format & CHAMELEON_TILE_DESC );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        cl_name = "zlaset_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zlaset_args_s ) );
         clargs->uplo  = uplo;
         clargs->m     = m;
@@ -86,5 +124,10 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlaset ),
         STARPU_NAME,              cl_name,
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zlaset )
         0 );
+
+    (void)tileA;
 }
