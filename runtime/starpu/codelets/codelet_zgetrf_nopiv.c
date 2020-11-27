@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -35,6 +35,23 @@ struct cl_zgetrf_nopiv_args_s {
     RUNTIME_sequence_t *sequence;
     RUNTIME_request_t  *request;
 };
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_zgetrf_nopiv_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_zgetrf_nopiv_args_s *clargs  = (struct cl_zgetrf_nopiv_args_s *)(t->cl_arg);
+    rectask_args_t                *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t              request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pzgetrf_nopiv( NULL, rtargs->tiles[0]->mat, rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 /*
  * Codelet CPU
@@ -71,6 +88,10 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
     struct cl_zgetrf_nopiv_args_s *clargs  = NULL;
     int                            exec    = 0;
     const char                    *cl_name = "zgetrf_nopiv";
+    CHAM_tile_t                   *tileA;
+    int                            is_rectask = 0;
+    rectask_args_t                *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -78,8 +99,23 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
     exec = __chameleon_need_exec;
     CHAMELEON_END_ACCESS_DECLARATION;
 
+    tileA = A->get_blktile( A, Am, An );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( tileA->format & CHAMELEON_TILE_DESC );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        cl_name = "zgetrf_nopiv_rectask";
+    }
+#endif
+
     /* Set codelet parameters */
-    if ( exec ) {
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zgetrf_nopiv_args_s ) );
         clargs->m        = m;
         clargs->n        = n;
@@ -89,11 +125,8 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
         clargs->request  = options->request;
     }
 
-    /* Callback for profiling information */
-
     /* Refine name */
-    cl_name = chameleon_codelet_name( cl_name, 1,
-                                      A->get_blktile( A, Am, An ) );
+    cl_name = chameleon_codelet_name( cl_name, 1, tileA );
 
     rt_starpu_insert_task(
         &cl_zgetrf_nopiv,
@@ -104,8 +137,12 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zgetrf_nopiv ),
         STARPU_NAME,              cl_name,
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zgetrf_nopiv )
         0 );
 
+    (void)tileA;
     (void)nb;
 }
 
