@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -32,6 +32,26 @@
  */
 #include "chameleon_starpu_internal.h"
 #include "runtime_codelet_z.h"
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_zgemm_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_zgemm_args_s *clargs  = (struct cl_zgemm_args_s *)(t->cl_arg);
+    rectask_args_t         *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t       request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pzgemm( NULL, clargs->transA, clargs->transB,
+                      clargs->alpha, rtargs->tiles[0]->mat, rtargs->tiles[1]->mat,
+                      clargs->beta,  rtargs->tiles[2]->mat,
+                      rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
@@ -226,6 +246,12 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
     const char              *cl_name = "zgemm";
     uint32_t                 where   = cl_zgemm.where;
     int                      accessC;
+    CHAM_tile_t             *tileA;
+    CHAM_tile_t             *tileB;
+    CHAM_tile_t             *tileC;
+    int                      is_rectask = 0;
+    rectask_args_t          *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -235,7 +261,28 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
     exec = __chameleon_need_exec;
     CHAMELEON_END_ACCESS_DECLARATION;
 
-    if ( exec ) {
+    tileA = A->get_blktile( A, Am, An );
+    tileB = B->get_blktile( B, Bm, Bn );
+    tileC = C->get_blktile( C, Cm, Cn );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileB->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileC->format & CHAMELEON_TILE_DESC ) );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + 2 * sizeof(CHAM_tile_t*) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority;
+        rtargs->tiles[0] = tileA;
+        rtargs->tiles[1] = tileB;
+        rtargs->tiles[2] = tileC;
+        cl_name = "zgemm_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zgemm_args_s ) );
         clargs->transA = transA;
         clargs->transB = transB;
@@ -247,14 +294,19 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
     }
 
     /* Reduce the C access if needed */
-    accessC = ( beta == (CHAMELEON_Complex64_t)0. ) ? STARPU_W :
-        (STARPU_RW | ((beta == (CHAMELEON_Complex64_t)1.) ? STARPU_COMMUTE : 0));
+    if ( beta == (CHAMELEON_Complex64_t)0. ) {
+        accessC = STARPU_W;
+    }
+    else {
+        accessC = STARPU_RW;
+        /* rectask is not compatible with commute yet */
+        if ( (beta == (CHAMELEON_Complex64_t)1.) && !is_rectask ) {
+            accessC |= STARPU_COMMUTE;
+        }
+    }
 
     /* Refine name */
-    cl_name = chameleon_codelet_name( cl_name, 3,
-                                      A->get_blktile( A, Am, An ),
-                                      B->get_blktile( B, Bm, Bn ),
-                                      C->get_blktile( C, Cm, Cn ) );
+    cl_name = chameleon_codelet_name( cl_name, 3, tileA, tileB, tileC );
 
     /* WARNING: CUDA 12.3 has an issue when m or n or k=1 in double complex,
        thus we disable gemm on gpu in these cases */
@@ -280,7 +332,14 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zgemm( m, n, k ),
         STARPU_EXECUTE_WHERE,     where,
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zgemm )
         0 );
+
+    (void)tileA;
+    (void)tileB;
+    (void)tileC;
 }
 
 #else /* defined(CHAMELEON_STARPU_USE_INSERT) */
