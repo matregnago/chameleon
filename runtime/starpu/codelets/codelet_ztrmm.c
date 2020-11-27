@@ -19,6 +19,7 @@
  * @author Cedric Castagnede
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
+ * @author Gwenole Lucas
  * @author Loris Lucido
  * @author Alycia Lisito
  * @author Brieuc Nicolas
@@ -38,6 +39,25 @@ struct cl_ztrmm_args_s {
     int                   n;
     CHAMELEON_Complex64_t alpha;
 };
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_ztrmm_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_ztrmm_args_s *clargs  = (struct cl_ztrmm_args_s *)(t->cl_arg);
+    rectask_args_t         *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t       request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pztrmm( clargs->side, clargs->uplo, clargs->transA, clargs->diag,
+                      clargs->alpha, rtargs->tiles[0]->mat, rtargs->tiles[1]->mat,
+                      rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
@@ -114,6 +134,11 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
     struct cl_ztrmm_args_s *clargs   = NULL;
     int                      exec    = 0;
     const char              *cl_name = "ztrmm";
+    CHAM_tile_t             *tileA;
+    CHAM_tile_t             *tileB;
+    int                      is_rectask = 0;
+    rectask_args_t          *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -122,7 +147,25 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
     exec = __chameleon_need_exec;
     CHAMELEON_END_ACCESS_DECLARATION;
 
-    if ( exec ) {
+    tileA = A->get_blktile( A, Am, An );
+    tileB = B->get_blktile( B, Bm, Bn );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileB->format & CHAMELEON_TILE_DESC ) );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t*) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        rtargs->tiles[1] = tileB;
+        cl_name = "ztrmm_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_ztrmm_args_s ) );
         clargs->side   = side;
         clargs->uplo   = uplo;
@@ -134,9 +177,7 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
     }
 
     /* Refine name */
-    cl_name = chameleon_codelet_name( cl_name, 2,
-                                      A->get_blktile( A, Am, An ),
-                                      B->get_blktile( B, Bm, Bn ) );
+    cl_name = chameleon_codelet_name( cl_name, 2, tileA, tileB );
 
     /* Insert the task */
     rt_starpu_insert_task(
@@ -150,8 +191,13 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
         INSERT_TASK_COMMON_TASK_PARAMS( ztrmm ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_ztrmm( side, m, n ),
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( ztrmm )
         0 );
 
+    (void)tileA;
+    (void)tileB;
     (void)nb;
 }
 
