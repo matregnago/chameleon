@@ -16,6 +16,7 @@
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Samuel Thibault
+ * @author Gwenole Lucas
  * @author Alycia Lisito
  * @date 2025-12-19
  * @precisions normal z -> c d s
@@ -32,6 +33,26 @@ struct cl_ztradd_args_s {
     CHAMELEON_Complex64_t alpha;
     CHAMELEON_Complex64_t beta;
 };
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_ztradd_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_ztradd_args_s *clargs  = (struct cl_ztradd_args_s *)(t->cl_arg);
+    rectask_args_t          *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t        request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pztradd( clargs->uplo, clargs->trans,
+                       clargs->alpha, rtargs->tiles[0]->mat,
+                       clargs->beta,  rtargs->tiles[1]->mat,
+                       rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
@@ -71,6 +92,11 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
     int                      exec    = 0;
     const char              *cl_name = "ztradd";
     int                      accessB;
+    CHAM_tile_t             *tileA;
+    CHAM_tile_t             *tileB;
+    int                      is_rectask = 0;
+    rectask_args_t          *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -79,7 +105,25 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
     exec = __chameleon_need_exec;
     CHAMELEON_END_ACCESS_DECLARATION;
 
-    if ( exec ) {
+    tileA = A->get_blktile( A, Am, An );
+    tileB = B->get_blktile( B, Bm, Bn );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileB->format & CHAMELEON_TILE_DESC ) );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t*) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        rtargs->tiles[1] = tileB;
+        cl_name = "ztradd_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_ztradd_args_s ) );
         clargs->uplo  = uplo;
         clargs->trans = trans;
@@ -103,8 +147,13 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( ztradd ),
         STARPU_NAME,              cl_name,
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( ztradd )
         0 );
 
+    (void)tileA;
+    (void)tileB;
     (void)nb;
 }
 
