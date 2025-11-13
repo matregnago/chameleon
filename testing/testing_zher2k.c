@@ -104,7 +104,7 @@ testing_zher2k_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Check the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Desc_Create(
             &descCinit, CHAMELEON_MAT_ALLOC_TILE, ChamComplexDouble, nb, nb, nb * nb, LDC, N, 0, 0, N, N, P, Q );
         CHAMELEON_zplghe_Tile( bump, uplo, descCinit, seedC );
@@ -213,7 +213,7 @@ testing_zher2k_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Check the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *Cinit;
         Cinit = malloc( sizeof(CHAMELEON_Complex64_t) * LDC*N );
         CHAMELEON_zplghe( bump, uplo, N, Cinit, LDC, seedC );

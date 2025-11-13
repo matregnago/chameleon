@@ -114,7 +114,7 @@ testing_zunmlq_hqr_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and orthogonality */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descC0 = CHAMELEON_Desc_Copy( descC, CHAMELEON_MAT_ALLOC_TILE );
         CHAM_desc_t *descQ;
 
@@ -215,7 +215,7 @@ testing_zunmlq_hqr_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and orthogonality */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *C0   = malloc( sizeof(CHAMELEON_Complex64_t) * LDC*N );
         CHAMELEON_Complex64_t *Qlap = malloc( sizeof(CHAMELEON_Complex64_t) * An*An );
 

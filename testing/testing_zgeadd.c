@@ -102,7 +102,7 @@ testing_zgeadd_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Check the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descB0 = CHAMELEON_Desc_Copy( descB, CHAMELEON_MAT_ALLOC_TILE );
         CHAMELEON_zplrnt_Tile( descB0, seedB );
 
@@ -163,7 +163,7 @@ testing_zgeadd_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Check the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *B0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDB*N  );
         CHAMELEON_zplrnt( M, N, B0, LDB, seedB );
 

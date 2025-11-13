@@ -90,7 +90,7 @@ testing_ztrmm_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Desc_Create(
             &descBinit, CHAMELEON_MAT_ALLOC_TILE, ChamComplexDouble, nb, nb, nb * nb, LDB, N, 0, 0, M, N, P, Q );
         CHAMELEON_zplrnt_Tile( descBinit, seedB );
@@ -179,7 +179,7 @@ testing_ztrmm_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *Binit;
         Binit = malloc( sizeof(CHAMELEON_Complex64_t) * LDB*N );
         CHAMELEON_zplrnt( M, N, Binit, LDB, seedB );

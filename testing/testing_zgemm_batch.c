@@ -101,7 +101,7 @@ testing_zgemm_batch_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Check the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         fprintf( stderr, "Check is not available for zgemm_batch\n" );
     }
 

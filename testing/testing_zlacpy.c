@@ -107,7 +107,7 @@ testing_zlacpy_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks their differences */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres += check_zmatrices( args, uplo, descA, descB );
     }
 
@@ -170,7 +170,7 @@ testing_zlacpy_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks their differences */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres += check_zmatrices_std( args, uplo, M, N, A, LDA, B, LDB );
     }
 

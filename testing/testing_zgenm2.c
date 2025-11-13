@@ -111,7 +111,7 @@ testing_zgenm2_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         double res = fabs(dmax - norm) / (dmax * tol);
 
         run_arg_add_double( args, "||A||", dmax );
@@ -185,7 +185,7 @@ testing_zgenm2_std( run_arg_list_t *args, int check )
     testing_stop( &test_data, flops_zgenm2( M, N ) );
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         double res = fabs(dmax - norm) / (dmax * tol);
 
         run_arg_add_double( args, "||A||", dmax );

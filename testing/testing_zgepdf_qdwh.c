@@ -92,7 +92,7 @@ testing_zgepdf_qdwh_desc( run_arg_list_t *args, int check )
      * now prevents to call it again later in the check (indeed descA is modified
      * with the call to CHAMELEON_zgepdf_qdwh_Tile[_Async]).
      */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
         CHAMELEON_zlacpy_Tile( ChamUpperLower, descA, descA0 );
     }
@@ -113,7 +113,7 @@ testing_zgepdf_qdwh_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres += check_zxxpd( args, descA0, descA, descH );
         hres += check_zortho( args, descA );
 
@@ -178,7 +178,7 @@ testing_zgepdf_qdwh_std( run_arg_list_t *args, int check )
      * now prevents to call it again later in the check (indeed A is modified
      * with the call to CHAMELEON_zgepdf_qdwh).
      */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         A0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*N );
         CHAMELEON_zlacpy( ChamUpperLower, M, N, A, LDA, A0, LDA );
     }
@@ -191,7 +191,7 @@ testing_zgepdf_qdwh_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres += check_zxxpd_std ( args, M, N, A0, A, LDA, H, LDB );
         hres += check_zortho_std( args, M, N, A, LDA );
 

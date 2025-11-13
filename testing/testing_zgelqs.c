@@ -88,7 +88,7 @@ testing_zgelqs_desc( run_arg_list_t *args, int check )
     hres = CHAMELEON_zgelqf_Tile( descA, descT );
 
     /* Checks the factorisation, orthogonality and residue */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
         CHAM_desc_t *descB  = CHAMELEON_Desc_Copy( descX, CHAMELEON_MAT_ALLOC_TILE );
         CHAM_desc_t *subX   = CHAMELEON_Desc_SubMatrix( descX, 0, 0, N, NRHS );

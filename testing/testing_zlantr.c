@@ -127,7 +127,7 @@ testing_zlantr_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_znorm( args, ChamTriangular, norm_type, uplo, diag, norm, descA );
     }
 
@@ -197,7 +197,7 @@ testing_zlantr_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_znorm_std( args, ChamTriangular, norm_type, uplo, diag, norm, M, N, A, LDA );
     }
 #endif

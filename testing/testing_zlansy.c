@@ -103,7 +103,7 @@ testing_zlansy_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_znorm( args, ChamSymmetric, norm_type, uplo, ChamNonUnit, norm, descA );
     }
 
@@ -174,7 +174,7 @@ testing_zlansy_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_znorm_std( args, ChamSymmetric, norm_type, uplo, ChamNonUnit, norm, N, N, A, LDA );
     }
 #endif

@@ -110,7 +110,7 @@ testing_zhemm_desc( run_arg_list_t *args, int check )
     }
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Desc_Create(
             &descCinit, CHAMELEON_MAT_ALLOC_TILE, ChamComplexDouble, nb, nb, nb * nb, LDC, N, 0, 0, M, N, P, Q );
         CHAMELEON_zplrnt_Tile( descCinit, seedC );
@@ -207,7 +207,7 @@ testing_zhemm_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *Cinit;
         Cinit = malloc( sizeof(CHAMELEON_Complex64_t) * LDC*N );
         CHAMELEON_zplrnt( M, N, Cinit, LDC, seedC );

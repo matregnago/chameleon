@@ -63,7 +63,7 @@ testing_zplrnk_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_zrankk( args, K, descC );
     }
 
@@ -103,7 +103,7 @@ testing_zplrnk_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_zrankk_std( args, M, N, K, C, LDC );
     }
 

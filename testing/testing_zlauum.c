@@ -73,7 +73,7 @@ testing_zlauum_desc( run_arg_list_t *args, int check )
     testing_stop( &test_data, flops_zlauum( N ) );
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
         CHAMELEON_zplghe_Tile( 0., uplo, descA0, seedA );
 
@@ -136,7 +136,7 @@ testing_zlauum_std( run_arg_list_t *args, int check )
     testing_stop( &test_data, flops_zlauum( N ) );
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *A0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*N );
         CHAMELEON_zplghe( 0., uplo, N, A0, LDA, seedA );
 

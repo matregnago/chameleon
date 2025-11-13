@@ -96,7 +96,7 @@ testing_zlascal_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Desc_Create(
             &descAinit, CHAMELEON_MAT_ALLOC_TILE, ChamComplexDouble, nb, nb, nb * nb, LDA, N, 0, 0, M, N, P, Q );
         CHAMELEON_zplrnt_Tile( descAinit, seedA );
@@ -145,7 +145,7 @@ testing_zlascal_std( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *Ainit = malloc( sizeof(CHAMELEON_Complex64_t) * LDA * N );
         CHAMELEON_zplrnt( M, N, Ainit, LDA, seedA );
 

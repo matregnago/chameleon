@@ -112,7 +112,7 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
     }
 
 #if !defined(CHAMELEON_SIMULATION)
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0, *descA0c;
         int          INCX = ( dir == ChamDirForward ) ? 1 : -1;
 
