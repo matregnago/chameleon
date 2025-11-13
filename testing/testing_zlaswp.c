@@ -126,12 +126,9 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
         CHAMELEON_zplrnt_Tile( descA0c, seedA );
 
         if ( CHAMELEON_Comm_rank() == 0 ) {
-            if ( side == ChamLeft ){
-                LAPACKE_zlaswp( LAPACK_COL_MAJOR, N, descA0c->mat, M, K1, K2, IPIV, INCX );
-            }
-            else {
-                LAPACKE_zlaswp( LAPACK_ROW_MAJOR, M, descA0c->mat, M, K1, K2, IPIV, INCX );
-            }
+            int nbelt   = ( side == ChamLeft ) ? N : M;
+            int storage = ( side == ChamLeft ) ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
+            LAPACKE_zlaswp( storage, nbelt, descA0c->mat, M, K1, K2, IPIV, INCX );
         }
 
         CHAMELEON_zlacpy_Tile( ChamUpperLower, descA0c, descA0 );
