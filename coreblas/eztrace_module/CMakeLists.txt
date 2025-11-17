@@ -24,25 +24,6 @@
 #  @date 2025-07-22
 #
 ###
-
-set(CHAMELEON_ENABLE_EZTRACE OFF CACHE INTERNAL "Enable if available the EZTrace modules")
-cmake_dependent_option(CHAMELEON_USE_EZTRACE
-                    "Enable Kernel Tracing with eztrace" OFF
-                    "BUILD_SHARED_LIBS" OFF)
-
-if (NOT EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
-    find_package(EZTRACE REQUIRED)
-    set(CHAMELEON_ENABLE_EZTRACE ON FORCE)
-endif()
-
-if ( CHAMELEON_ENABLE_EZTRACE )
-    set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-
-    set(EZTRACE_INCLUDE_DIRS ${EZTRACE_INCLUDE_DIRS} CACHE INTERNAL "EZTRACE include directory")
-    set(EZTRACE_LINK_LIBRARIES ${EZTRACE_LINK_LIBRARIES} CACHE INTERNAL "EZTRACE lib directory")
-
-endif()
-
 if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
     if( EZTRACE_VERSION VERSION_GREATER "2.0.0" )
 
@@ -55,15 +36,7 @@ if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
 
             add_library(eztrace-coreblas_${_module} SHARED ${MODULE_SRCS_GENERATED} ${_module}.c)
 
-            target_link_libraries(eztrace-coreblas_${_module}
-                PUBLIC
-                ${EZTRACE_LINK_LIBRARIES}
-            )
-
-            target_include_directories(eztrace-coreblas_${_module}
-                PRIVATE
-                ${EZTRACE_INCLUDE_DIRS}
-            )
+            target_link_libraries(eztrace-coreblas_${_module} PUBLIC MORSE::EZTRACE)
 
             add_dependencies(eztrace-coreblas_${_module} coreblas_include)
 

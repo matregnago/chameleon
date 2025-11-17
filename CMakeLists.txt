@@ -190,6 +190,10 @@ endif()
 # Additional options
 # ------------------
 
+cmake_dependent_option(CHAMELEON_USE_EZTRACE
+                    "Enable Kernel Tracing with eztrace" OFF
+                    "BUILD_SHARED_LIBS" OFF)
+
 # Enable the distributed interface (allowed only when StarPU is enabled)
 # TODO: Default should be changed to ON/OFF when it will be ok
 cmake_dependent_option(CHAMELEON_USE_MPI
@@ -588,6 +592,10 @@ if(NOT CHAMELEON_SIMULATION)
         endif()
 
     endif (CHAMELEON_USE_MPI)
+
+    if (CHAMELEON_USE_EZTRACE)
+      find_package(EZTRACE REQUIRED)
+    endif()
 
 else (NOT CHAMELEON_SIMULATION)
 
