@@ -61,6 +61,12 @@ testing_zgetrf_desc( run_arg_list_t *args, int check )
 
     /* Creates the matrices */
     parameters_desc_create( "A", &descA, ChamComplexDouble, nb, nb, LDA, N, M, N );
+    if ( descA->get_rankof_init != chameleon_getrankof_2d ) {
+        parameters_desc_destroy( &descA );
+        fprintf( stderr,
+                 "SKIPPED: zgetrf kernel only supports 2DBC data distributions\n" );
+        return -1;
+    }
 
     P = chameleon_desc_datadist_get_iparam( descA, 0 );
     Q = chameleon_desc_datadist_get_iparam( descA, 1 );

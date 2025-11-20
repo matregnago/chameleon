@@ -79,6 +79,12 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
 
     /* Creates the matrices */
     parameters_desc_create( "A", &descA, ChamComplexDouble, nb, nb, LDA, N, M, N );
+    if ( descA->get_rankof_init != chameleon_getrankof_2d ) {
+        parameters_desc_destroy( &descA );
+        fprintf( stderr,
+                 "SKIPPED: zlaswp kernel only supports 2DBC data distributions\n" );
+        return -1;
+    }
     CHAMELEON_Ipiv_Create( &descIPIV, side, kb, K, P, P*Q, IPIV );
 
     /* Fill the matrices with random values */
