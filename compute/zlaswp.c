@@ -254,9 +254,8 @@ int CHAMELEON_zlaswp( cham_side_t            side,
     RUNTIME_sequence_t *sequence = NULL;
     RUNTIME_request_t   request  = RUNTIME_REQUEST_INITIALIZER;
     CHAM_desc_t         descAl, descAt;
-    CHAM_ipiv_t        *descIPIV;
+    CHAM_ipiv_t         descIPIV;
     int                 K = ( side == ChamLeft ) ? M : N;
-    int                 P, Q;
     void               *ws;
 
     chamctxt = chameleon_context_self();
@@ -307,26 +306,22 @@ int CHAMELEON_zlaswp( cham_side_t            side,
     chameleon_zlap2tile( chamctxt, "A", &descAl, &descAt, ChamDescInput, ChamUpperLower,
                          A, NB, NB, LDA, N, M, N, sequence, &request );
 
-    P = chameleon_desc_datadist_get_iparam( &descAt, 0 );
-    Q = chameleon_desc_datadist_get_iparam( &descAt, 1 );
-
-    CHAMELEON_Ipiv_Create( &descIPIV, side, descAt.mb, K, P, P*Q, IPIV );
-
-    CHAMELEON_Ipiv_Init( descIPIV );
+    chameleon_ipiv_init( &descIPIV, side, descAt.mb, K2, 1, 1, IPIV, NULL );
+    CHAMELEON_Ipiv_Init( &descIPIV );
 
     /* Call the tile interface */
     ws = CHAMELEON_zlaswp_WS_Alloc( side, &descAt );
-    CHAMELEON_zlaswp_Tile_Async( side, dir, &descAt, K1, K2, descIPIV, ws, sequence, &request );
+    CHAMELEON_zlaswp_Tile_Async( side, dir, &descAt, K1, K2, &descIPIV, ws, sequence, &request );
 
     /* Submit the matrix conversion back */
     chameleon_ztile2lap( chamctxt, &descAl, &descAt,
                          ChamDescInput, ChamUpperLower, sequence, &request );
 
     chameleon_sequence_wait( chamctxt, sequence );
-    CHAMELEON_zlaswp_WS_Free( ws );
 
     /* Cleanup the temporary data */
-    CHAMELEON_Ipiv_Destroy( &descIPIV );
+    CHAMELEON_zlaswp_WS_Free( ws );
+    chameleon_ipiv_destroy( &descIPIV );
     chameleon_ztile2lap_cleanup( chamctxt, &descAl, &descAt );
 
     chameleon_sequence_destroy( chamctxt, sequence );
@@ -550,7 +545,7 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
         if ( side == ChamLeft ) {
             int tempkm, m0;
 
-            for ( k = 0; k < A->mt; k++ ) {
+            for ( k = 0; k < IPIV->mt; k++ ) {
                 tempkm = A->get_blkdim( A, k, DIM_m, A->m );
                 m0 = k * A->mb;
                 if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
@@ -564,7 +559,7 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
         else {
             int tempkn, n0;
 
-            for ( k = 0; k < A->nt; k++ ) {
+            for ( k = 0; k < IPIV->mt; k++ ) {
                 tempkn = A->get_blkdim( A, k, DIM_n, A->n );
                 n0 = k * A->nb;
                 if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
