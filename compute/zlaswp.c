@@ -61,6 +61,10 @@ CHAMELEON_zlaswp_WS_Alloc( cham_side_t side, const CHAM_desc_t *A )
         return NULL;
     }
 
+    if ( A->get_rankof_init != chameleon_getrankof_2d ) {
+        chameleon_fatal_error("CHAMELEON_zlaswp_WS_Alloc", "zlaswp supports only 2DBC descriptors");
+        return NULL;
+    }
     ws = calloc( 1, sizeof(struct chameleon_pzlaswp_s) );
 
     ws->allreduce = 0;
@@ -520,6 +524,10 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
     /* Check descriptors for correctness */
     if ( chameleon_desc_check(A) != CHAMELEON_SUCCESS ) {
         chameleon_error("CHAMELEON_zlaswp_Tile_Async", "invalid first descriptor");
+        return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
+    }
+    if ( A->get_rankof_init != chameleon_getrankof_2d ) {
+        chameleon_fatal_error("CHAMELEON_zlaswp_Tile_Async", "zlaswp supports only 2DBC descriptors");
         return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
     /* Check input arguments */

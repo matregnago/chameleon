@@ -74,6 +74,10 @@ CHAMELEON_zgetrf_WS_Alloc( const CHAM_desc_t *A )
     ws->ib  = CHAMELEON_IB;
 
     ws->laswp = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, A );
+    if ( ws->laswp == NULL ) {
+        chameleon_fatal_error("CHAMELEON_zgetrf_WS_Alloc", "Failed to allocate laswp workspace for getrf");
+        return NULL;
+    }
     ws->laswp->allreduce = 1;
 
     {
@@ -493,17 +497,21 @@ CHAMELEON_zgetrf_Tile_Async( CHAM_desc_t        *A,
 
     /* Check descriptors for correctness */
     if ( chameleon_desc_check( A ) != CHAMELEON_SUCCESS ) {
-        chameleon_error( "CHAMELEON_zgetrf_Tile", "invalid first descriptor" );
+        chameleon_error( "CHAMELEON_zgetrf_Tile_Async", "invalid first descriptor" );
         return chameleon_request_fail( sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE );
+    }
+    if ( A->get_rankof_init != chameleon_getrankof_2d ) {
+        chameleon_fatal_error("CHAMELEON_zgetrf_Tile_Async", "zgetrf supports only 2DBC descriptors for now");
+        return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
 
     /* Check input arguments */
     if ( A->nb != A->mb ) {
-        chameleon_error( "CHAMELEON_zgetrf_Tile", "only square tiles supported" );
+        chameleon_error( "CHAMELEON_zgetrf_Tile_Async", "only square tiles supported" );
         return chameleon_request_fail( sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE );
     }
     if ( IPIV->mb != A->mb ) {
-        chameleon_error( "CHAMELEON_zgetrf_Tile", "IPIV tiles must have the number of rows as tiles of A" );
+        chameleon_error( "CHAMELEON_zgetrf_Tile_Async", "IPIV tiles must have the number of rows as tiles of A" );
         return chameleon_request_fail( sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE );
     }
 
