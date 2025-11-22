@@ -61,6 +61,12 @@ testing_zgetrf_desc( run_arg_list_t *args, int check )
 
     /* Creates the matrices */
     parameters_desc_create( "A", &descA, ChamComplexDouble, nb, nb, LDA, N, M, N );
+    if ( descA->get_rankof_init != chameleon_getrankof_2d ) {
+        parameters_desc_destroy( &descA );
+        fprintf( stderr,
+                 "SKIPPED: zgetrf kernel only supports 2DBC data distributions\n" );
+        return -1;
+    }
 
     P = chameleon_desc_datadist_get_iparam( descA, 0 );
     Q = chameleon_desc_datadist_get_iparam( descA, 1 );
@@ -85,9 +91,10 @@ testing_zgetrf_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgetrf( M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorization and residual */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
 
         CHAMELEON_zplrnt_Tile( descA0, seedA );
@@ -146,6 +153,7 @@ testing_zgetrf_std( run_arg_list_t *args, int check )
     hres = LAPACKE_zgetrf( LAPACK_COL_MAJOR, M, N, A, LDA, IPIV );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgetrf( M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 #else
     testing_start( &test_data );
     switch ( api ) {
@@ -166,10 +174,11 @@ testing_zgetrf_std( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgetrf( M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
 #if !defined(CHAMELEON_SIMULATION)
     /* Checks the factorisation and residue */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *A0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*N );
         CHAMELEON_zplrnt( M, N, A0, LDA, seedA );
 

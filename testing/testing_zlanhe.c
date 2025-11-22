@@ -100,9 +100,10 @@ testing_zlanhe_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zlanhe( norm_type, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_znorm( args, ChamHermitian, norm_type, uplo, ChamNonUnit, norm, descA );
     }
 
@@ -170,9 +171,10 @@ testing_zlanhe_std( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zlanhe( norm_type, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_znorm_std( args, ChamHermitian, norm_type, uplo, ChamNonUnit, norm, N, N, A, LDA );
     }
 #endif

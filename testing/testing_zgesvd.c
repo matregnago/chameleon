@@ -139,7 +139,7 @@ testing_zgesvd_desc( run_arg_list_t *args, int check )
      * now prevents to call it again later in the check (indeed descA is modified
      * with the call to CHAMELEON_zgepdf_qdwh_Tile[_Async]).
      */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
         CHAMELEON_zlacpy_Tile( ChamUpperLower, descA, descA0 );
     }
@@ -156,9 +156,10 @@ testing_zgesvd_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgesvd( M, N, K, jobu, jobvt ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and residue */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres += check_zgesvd( args, jobu, jobvt, descA0, descA, D, S, U, LDU, Vt, LDVt );
         CHAMELEON_Desc_Destroy( &descA0 );
     }
@@ -249,7 +250,7 @@ testing_zgesvd_std( run_arg_list_t *args, int check )
      * now prevents to call it again later in the check (indeed A is modified
      * with the call to CHAMELEON_zgepdf_qdwh).
      */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         A0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*N );
         CHAMELEON_zlacpy( ChamUpperLower, M, N, A, LDA, A0, LDA );
     }
@@ -259,9 +260,10 @@ testing_zgesvd_std( run_arg_list_t *args, int check )
     hres = CHAMELEON_zgesvd( jobu, jobvt, M, N, A, LDA, S, descT, U, LDU, Vt, LDVt );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgesvd( M, N, K, jobu, jobvt ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and residue */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
 
         hres += check_zgesvd_std( args, jobu, jobvt, M, N, A0, A, LDA, D, S, U, LDU, Vt, LDVt );
         free( A0 );

@@ -66,6 +66,14 @@ testing_zunmlq_desc( run_arg_list_t *args, int check )
     /* Calculates the dimensions according to the transposition and the side */
     An = ( side == ChamLeft ) ? M : N;
 
+    if ( K > An )
+    {
+        if ( CHAMELEON_Comm_rank() == 0 ) {
+            fprintf( stderr, "SKIPPED: Incorrect parameter K for unmqr\n" );
+        }
+        return -1;
+    }
+
     /* Creates the matrices */
     CHAMELEON_Desc_Create(
         &descA, (void*)(-mtxfmt), ChamComplexDouble, nb, nb, nb * nb, LDA, An, 0, 0, K, An, P, Q );
@@ -95,9 +103,10 @@ testing_zunmlq_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zunmlq( side, M, N, K ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and orthogonality */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descC0 = CHAMELEON_Desc_Copy( descC, CHAMELEON_MAT_ALLOC_TILE );
         CHAM_desc_t *descQ;
 
@@ -161,6 +170,14 @@ testing_zunmlq_std( run_arg_list_t *args, int check )
     /* Calculates the dimensions according to the transposition and the side */
     An = ( side == ChamLeft ) ? M : N;
 
+    if ( K > An )
+    {
+        if ( CHAMELEON_Comm_rank() == 0 ) {
+            fprintf( stderr, "SKIPPED: Incorrect parameter K for unmqr\n" );
+        }
+        return -1;
+    }
+
     /* Creates the matrices */
     A = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*An );
     C = malloc( sizeof(CHAMELEON_Complex64_t) * LDC*N  );
@@ -178,9 +195,10 @@ testing_zunmlq_std( run_arg_list_t *args, int check )
     hres += CHAMELEON_zunmlq( side, trans, M, N, K, A, LDA, descT, C, LDC );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zunmlq( side, M, N, K ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and orthogonality */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *C0   = malloc( sizeof(CHAMELEON_Complex64_t) * LDC*N );
         CHAMELEON_Complex64_t *Qlap = malloc( sizeof(CHAMELEON_Complex64_t) * An*An );
 

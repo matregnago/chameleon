@@ -145,6 +145,7 @@ testing_zgepdf_qr_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgepdf_qr( M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     CHAMELEON_Dealloc_Workspace( &TS1 );
     CHAMELEON_Dealloc_Workspace( &TS2 );
@@ -155,7 +156,7 @@ testing_zgepdf_qr_desc( run_arg_list_t *args, int check )
     libhqr_finalize( &qrtreeB );
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA01, *descA02;
         descA01 = CHAMELEON_Desc_Copy( descA1, CHAMELEON_MAT_ALLOC_TILE );
         descA02 = descA2; /* A2 is useless now */

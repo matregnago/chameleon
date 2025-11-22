@@ -101,8 +101,9 @@ testing_zgels_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgels( trans, M, N, NRHS ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0, *descB;
         CHAM_desc_t *subX, *subB;
 
@@ -194,8 +195,9 @@ testing_zgels_std( run_arg_list_t *args, int check )
     hres = CHAMELEON_zgels( trans, M, N, NRHS, A, LDA, descT, X, LDB );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgels( trans, M, N, NRHS ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *A0, *B;
 
         A0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*N );

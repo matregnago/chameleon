@@ -79,6 +79,12 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
 
     /* Creates the matrices */
     parameters_desc_create( "A", &descA, ChamComplexDouble, nb, nb, LDA, N, M, N );
+    if ( descA->get_rankof_init != chameleon_getrankof_2d ) {
+        parameters_desc_destroy( &descA );
+        fprintf( stderr,
+                 "SKIPPED: zlaswp kernel only supports 2DBC data distributions\n" );
+        return -1;
+    }
     CHAMELEON_Ipiv_Create( &descIPIV, side, kb, K, P, P*Q, IPIV );
 
     /* Fill the matrices with random values */
@@ -105,9 +111,14 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zlaswp( M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
+
+    if ( ws != NULL ) {
+        CHAMELEON_zlaswp_WS_Free( ws );
+    }
 
 #if !defined(CHAMELEON_SIMULATION)
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0, *descA0c;
         int          INCX = ( dir == ChamDirForward ) ? 1 : -1;
 
@@ -121,12 +132,9 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
         CHAMELEON_zplrnt_Tile( descA0c, seedA );
 
         if ( CHAMELEON_Comm_rank() == 0 ) {
-            if ( side == ChamLeft ){
-                LAPACKE_zlaswp( LAPACK_COL_MAJOR, N, descA0c->mat, M, K1, K2, IPIV, INCX );
-            }
-            else {
-                LAPACKE_zlaswp( LAPACK_ROW_MAJOR, M, descA0c->mat, M, K1, K2, IPIV, INCX );
-            }
+            int nbelt   = ( side == ChamLeft ) ? N : M;
+            int storage = ( side == ChamLeft ) ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
+            LAPACKE_zlaswp( storage, nbelt, descA0c->mat, M, K1, K2, IPIV, INCX );
         }
 
         CHAMELEON_zlacpy_Tile( ChamUpperLower, descA0c, descA0 );

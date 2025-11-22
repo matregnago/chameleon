@@ -102,9 +102,10 @@ testing_zunglq_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zunglq( M, N, K ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and orthogonality */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
         CHAMELEON_zplrnt_Tile( descA0, seedA );
 
@@ -184,9 +185,10 @@ testing_zunglq_std( run_arg_list_t *args, int check )
     hres = CHAMELEON_zunglq( M, N, K, A, LDA, descT, Qlap, LDA );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zunglq( M, N, K ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and orthogonality */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *A0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDA*N );
         CHAMELEON_zplrnt( K, N, A0, LDA, seedA );
 

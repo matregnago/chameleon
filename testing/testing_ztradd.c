@@ -128,9 +128,10 @@ testing_ztradd_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_ztradd( uplo, M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descB0 = CHAMELEON_Desc_Copy( descB, CHAMELEON_MAT_ALLOC_TILE );
 
         if ( uplo == ChamUpperLower ) {
@@ -215,9 +216,10 @@ testing_ztradd_std( run_arg_list_t *args, int check )
     hres = CHAMELEON_ztradd( uplo, trans, M, N, alpha, A, LDA, beta, B, LDB );
     test_data.hres = hres;
     testing_stop( &test_data, flops_ztradd( uplo, M, N ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *B0 = malloc( sizeof(CHAMELEON_Complex64_t) * LDB*N );
 
         if ( uplo == ChamUpperLower ) {

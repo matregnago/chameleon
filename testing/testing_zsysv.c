@@ -73,9 +73,10 @@ testing_zsysv_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zsysv( N, NRHS ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and residue */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAM_desc_t *descA0, *descB;
 
         /* Check the factorization */
@@ -135,9 +136,10 @@ testing_zsysv_std( run_arg_list_t *args, int check )
     hres = CHAMELEON_zsysv( uplo, N, NRHS, A, LDA, X, LDB );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zsysv( N, NRHS ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the factorisation and residue */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         CHAMELEON_Complex64_t *A0, *B;
 
         /* Check the factorization */

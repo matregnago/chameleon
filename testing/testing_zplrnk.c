@@ -60,9 +60,10 @@ testing_zplrnk_desc( run_arg_list_t *args, int check )
     }
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgemm( M, N, K ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_zrankk( args, K, descC );
     }
 
@@ -99,9 +100,10 @@ testing_zplrnk_std( run_arg_list_t *args, int check )
     hres = CHAMELEON_zplrnk( M, N, K, C, LDC, seedA, seedB );
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgemm( M, N, K ) );
+    hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     /* Checks the solution */
-    if ( check ) {
+    if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
         hres = check_zrankk_std( args, M, N, K, C, LDC );
     }
 

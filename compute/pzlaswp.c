@@ -236,6 +236,8 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
 
+    assert( A->get_rankof_init == chameleon_getrankof_2d );
+
     if ( dir == ChamDirForward ) {
         for ( k = 0; k < IPIV->mt; k++ ) {
             for ( n = 0; n < A->nt; n++ ) {
