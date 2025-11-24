@@ -16,7 +16,7 @@ test_starpu_master:
   parallel:
     matrix:
       - PRECISION: [s, d, c, z]
-        CATEGORY: [shm, mpi]
+        CATEGORY: [shm, mpi, cdist]
 
 test_starpu_mr:
   extends: .test_script_starpu
@@ -29,6 +29,8 @@ test_starpu_mr:
         CATEGORY: [shm]
       - PRECISION: [s]
         CATEGORY: [mpi]
+      - PRECISION: [c]
+        CATEGORY: [cdist]
 
 test_starpu_macosx:
   stage: test

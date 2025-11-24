@@ -1,12 +1,11 @@
 #
 # Check testing/
 #
-set(NP 2) # Amount of MPI processes
 set(THREADS 2) # Amount of threads
 set(N_GPUS 0) # Amount of graphic cards
 set(TEST_CATEGORIES shm)
 if (CHAMELEON_USE_MPI AND MPI_C_FOUND)
-  set( TEST_CATEGORIES ${TEST_CATEGORIES} mpi )
+  set( TEST_CATEGORIES ${TEST_CATEGORIES} mpi cdist )
 endif()
 if (CHAMELEON_USE_CUDA AND CUDA_FOUND)
   set(N_GPUS 0 1)
@@ -86,10 +85,12 @@ if (NOT CHAMELEON_SIMULATION)
       foreach( gpus ${N_GPUS} )
 
         set( TESTSTMP ${TESTS} )
-        if ( ${cat} STREQUAL "mpi" )
-            set ( P ${NP} )
+        if ( ${cat} STREQUAL "cdist" )
+            set ( NP 3 )
+        elseif ( ${cat} STREQUAL "mpi" )
+            set ( NP 2 )
         else()
-            set ( P 1 )
+            set ( NP 1 )
         endif()
 
         if ( NOT ( ${gpus} EQUAL 0 ) )
@@ -97,18 +98,24 @@ if (NOT CHAMELEON_SIMULATION)
           list( REMOVE_ITEM TESTSTMP gram lacpy lanhe lange lansy lantr lascal plrnk print )
         endif()
 
-        if ( ${cat} STREQUAL "mpi" )
+        if ( ${cat} STREQUAL "shm")
+          set ( PREFIX "" )
+        else()
           set ( PREFIX mpiexec --bind-to none -n ${NP} )
           list( REMOVE_ITEM TESTSTMP gesvd )
+        endif()
+
+        if( ${cat} STREQUAL "cdist" )
+          set ( CDIST --custom input/dist_3.txt )
         else()
-          set ( PREFIX "" )
+          set ( CDIST "" )
         endif()
 
         foreach( test ${TESTSTMP} )
           if ( ${test} IN_LIST SINGLE_TESTS AND ${prec} IN_LIST SINGLE_PRECISIONS )
-            add_test( test_${cat}_${prec}${test} ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P 1 -f input/${test}_32.in )
+            add_test( test_${cat}_${prec}${test} ${PREFIX} ${CMD} ${CDIST} -c -t ${THREADS} -g ${gpus} -P 1 -f input/${test}_32.in )
           else()
-            add_test( test_${cat}_${prec}${test} ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P 1 -f input/${test}.in )
+            add_test( test_${cat}_${prec}${test} ${PREFIX} ${CMD} ${CDIST} -c -t ${THREADS} -g ${gpus} -P 1 -f input/${test}.in )
           endif()
         endforeach()
 
@@ -116,12 +123,12 @@ if (NOT CHAMELEON_SIMULATION)
           set( laswp_test_prefix test_${cat}_${prec}laswp )
 
           if ( ${cat} STREQUAL "mpi" )
-            add_test( test_${cat}_${prec}laswp_allreduce ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${P} -f input/laswp.in )
+            add_test( test_${cat}_${prec}laswp_allreduce ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${NP} -f input/laswp.in )
             set_tests_properties( ${laswp_test_prefix}_allreduce
                 PROPERTIES ENVIRONMENT "CHAMELEON_LASWP_ALLREDUCE=1" )
           endif()
 
-          add_test( test_${cat}_${prec}laswp_batch ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${P} -f input/laswp.in )
+          add_test( test_${cat}_${prec}laswp_batch ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${NP} -f input/laswp.in )
           set_tests_properties( test_${cat}_${prec}laswp_batch
             PROPERTIES ENVIRONMENT "CHAMELEON_BATCH_SIZE=3" )
 
@@ -132,7 +139,7 @@ if (NOT CHAMELEON_SIMULATION)
 
         if ( CHAMELEON_SCHED_STARPU AND HAVE_STARPU_NONE_NONZERO )
           set( getrf_test_prefix test_${cat}_${prec}getrf )
-          set( getrf_test_cmd ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${P} -f input/getrf.in )
+          set( getrf_test_cmd ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${NP} -f input/getrf.in )
 
           add_test( ${getrf_test_prefix}_ppivpercol ${getrf_test_cmd} )
           set_tests_properties( ${getrf_test_prefix}_ppivpercol
@@ -161,7 +168,7 @@ if (NOT CHAMELEON_SIMULATION)
 
         list( REMOVE_ITEM TESTSTMP print gepdf_qr laswp )
 
-        if ( NOT (${cat} STREQUAL "mpi"))
+        if ( ${cat} STREQUAL "shm" )
           foreach( test ${TESTSTMP} )
             if ( ${test} IN_LIST SINGLE_TESTS AND ${prec} IN_LIST SINGLE_PRECISIONS )
               add_test( test_${cat}_${prec}${test}_std ${CMD} -c -t ${THREADS} -g ${gpus} -P 1 -f input/${test}_32.in --api=1 )
