@@ -62,28 +62,27 @@ fi
 GUIX_ADHOC="coreutils gawk grep hwloc jube perl slurm@23"
 GUIX_RULE="-D $GUIX_ENV $GUIX_ENV_MPI $GUIX_ADHOC $GUIX_ADHOC_MPI"
 
-# Submit jobs
+# 1. Run benchmark
+guix time-machine --url=https://codeberg.org/guix/guix-mirror.git \
+  --channels=./tools/bench/guix-channels.scm \
+  -- shell --pure \
+  --preserve="PLATFORM|NODE|^CI|^SLURM|^JUBE|^MPI|^STARPU|^CHAMELEON" \
+  $GUIX_RULE \
+  -- /bin/bash --norc ./tools/bench/plafrim/slurm.sh
+err1=$?
 
-#exec guix shell --pure \
-exec guix time-machine \
-       --url=https://codeberg.org/guix/guix-mirror.git \
-       --channels=./tools/bench/guix-channels.scm \
-       -- shell --pure \
-       --preserve="PLATFORM|NODE|^CI|^SLURM|^JUBE|^MPI|^STARPU|^CHAMELEON" \
-       $GUIX_RULE \
-       -- /bin/bash --norc ./tools/bench/plafrim/slurm.sh
-err=$?
-
-# send results to the elasticsearch server
+# 2. Upload results
 guix time-machine --url=https://codeberg.org/guix/guix-mirror.git \
   --channels=./tools/bench/guix-channels-elk.scm \
   -- shell --pure --preserve="proxy$" \
   curl nss-certs python python-click python-certifi python-elasticsearch python-gitpython \
   -- python3 tools/bench/jube/add_result.py -e https://elasticsearch.bordeaux.inria.fr \
   -t hiepacs -p chameleon -m $MPI chameleon\-$NODE\-$MPI.csv
+err2=$?
 
-# clean tmp
+# 3. Clean up
 rm -rf /tmp/guix-$$
 
-# exit with error code from the guix command
-exit $err
+# Final exit code = any non-zero status
+final_err=$(( err1 || err2 ))
+exit "$final_err"
