@@ -21,8 +21,10 @@
  */
 #include "chameleon_quark.h"
 
-void RUNTIME_options_init( RUNTIME_option_t *options, CHAM_context_t *chamctxt,
-                           RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+void RUNTIME_options_init( RUNTIME_option_t     *options,
+                           const CHAM_context_t *chamctxt,
+                           RUNTIME_sequence_t   *sequence,
+                           RUNTIME_request_t    *request )
 {
     /* Create the task flag */
     quark_option_t *qopt = (quark_option_t*) malloc(sizeof(quark_option_t));
@@ -57,7 +59,8 @@ void RUNTIME_options_init( RUNTIME_option_t *options, CHAM_context_t *chamctxt,
     return;
 }
 
-void RUNTIME_options_finalize( RUNTIME_option_t *options, CHAM_context_t *chamctxt )
+void RUNTIME_options_finalize( RUNTIME_option_t     *options,
+                               const CHAM_context_t *chamctxt )
 {
     /* we can free the task_flags without waiting for quark
        because they should have been copied for every task */

@@ -21,8 +21,10 @@
  */
 #include "chameleon_openmp.h"
 
-void RUNTIME_options_init( RUNTIME_option_t *options, CHAM_context_t *chamctxt,
-                           RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+void RUNTIME_options_init( RUNTIME_option_t     *options,
+                           const CHAM_context_t *chamctxt,
+                           RUNTIME_sequence_t   *sequence,
+                           RUNTIME_request_t    *request )
 {
     options->sequence  = sequence;
     options->request   = request;
@@ -39,9 +41,10 @@ void RUNTIME_options_init( RUNTIME_option_t *options, CHAM_context_t *chamctxt,
     return;
 }
 
-void RUNTIME_options_finalize( RUNTIME_option_t *option, CHAM_context_t *chamctxt )
+void RUNTIME_options_finalize( RUNTIME_option_t     *options,
+                               const CHAM_context_t *chamctxt )
 {
-    (void)option;
+    (void)options;
     (void)chamctxt;
     return;
 }

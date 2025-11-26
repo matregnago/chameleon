@@ -423,7 +423,9 @@ void RUNTIME_perm_flushk( const RUNTIME_sequence_t *sequence,
 }
 
 void RUNTIME_ipiv_gather( const RUNTIME_sequence_t *sequence,
-                          CHAM_ipiv_t *desc, int *ipiv, int node )
+                          const CHAM_ipiv_t        *desc,
+                          int                      *ipiv,
+                          int                       node )
 {
     int64_t mt   = desc->mt;
     int64_t mb   = desc->mb;
