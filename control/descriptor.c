@@ -373,6 +373,32 @@ CHAM_desc_t* chameleon_desc_submatrix( CHAM_desc_t *descA, int i, int j, int m, 
     return descB;
 }
 
+void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
+                                    const RUNTIME_sequence_t *sequence )
+{
+    int m, n;
+
+    for ( n=0; n<desc->nt; n++ ) {
+        for ( m=0; m<desc->mt; m++ ) {
+            CHAM_tile_t *tile;
+
+            tile = desc->get_blktile( desc, m, n );
+
+            if ( tile->format == CHAMELEON_TILE_DESC ) {
+                CHAM_desc_t *tiledesc = tile->mat;
+                chameleon_desc_destroy_submit( tiledesc, sequence );
+            }
+        }
+    }
+
+    RUNTIME_desc_destroy_submit( desc, sequence );
+
+    /*
+     * Note that global free operation can't be done here, since the data can
+     * still be used until the next call to wait
+     */
+}
+
 void chameleon_desc_destroy( CHAM_desc_t *desc )
 {
     int m, n;
@@ -916,6 +942,55 @@ int CHAMELEON_Desc_Destroy(CHAM_desc_t **descptr)
     chameleon_desc_destroy( desc );
     free(desc);
     *descptr = NULL;
+    return CHAMELEON_SUCCESS;
+}
+
+/**
+ *****************************************************************************
+ *
+ * @ingroup Descriptor
+ *
+ *  CHAMELEON_Desc_Destroy_Submit - Submit the unregisytration/destruction of
+ *  the matrix descriptor, data is unregistered when all tasks accessing it are
+ *  done. It still needs a call to destroy after a CHAMELEON_Sequence_Wait() to
+ *  be fully freed.
+ *
+ ******************************************************************************
+ *
+ * @param[inout] desc
+ *          Matrix descriptor.
+ *
+ * @param[in] sequence
+ *          Identifies the set of routines to which submit the
+ *          destruction/unregistration.
+ *
+ ******************************************************************************
+ *
+ * @retval CHAMELEON_SUCCESS successful exit
+ *
+ */
+int CHAMELEON_Desc_Destroy_Submit( CHAM_desc_t *desc,
+                                   const RUNTIME_sequence_t *sequence )
+{
+    CHAM_context_t *chamctxt;
+
+    chamctxt = chameleon_context_self();
+    if (chamctxt == NULL) {
+        chameleon_error("CHAMELEON_Desc_Destroy_Submit", "CHAMELEON not initialized");
+        return CHAMELEON_ERR_NOT_INITIALIZED;
+    }
+
+    if (desc == NULL) {
+        chameleon_error("CHAMELEON_Desc_Destroy_Submit", "attempting to destroy a NULL descriptor");
+        return CHAMELEON_ERR_UNALLOCATED;
+    }
+
+    if (sequence == NULL) {
+        chameleon_error("CHAMELEON_Desc_Destroy_Submit", "incorrect sequence provided to submit unregistration");
+        return CHAMELEON_ERR_UNALLOCATED;
+    }
+
+    chameleon_desc_destroy_submit( desc, sequence );
     return CHAMELEON_SUCCESS;
 }
 

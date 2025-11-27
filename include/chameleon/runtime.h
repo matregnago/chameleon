@@ -347,6 +347,23 @@ void
 RUNTIME_desc_create( CHAM_desc_t *desc );
 
 /**
+ * @brief Submit unregistration/destruction of the data handles of a descriptor
+ * for asynchronous memory de-allocation.
+ * The handles cannot be re-registered between the unregistration and the
+ * following wait in distributed to avoid tags reuse conflict. This can be done
+ * in shared memory even if not recommended.
+ *
+ * @param[in,out] desc
+ *            The descriptor to submit the unregistration of.
+ *
+ * @param[in] sequence
+ *            The sequence of operation, the unregistration belongs to.
+ */
+void
+RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
+                             const RUNTIME_sequence_t *sequence );
+
+/**
  * @brief Finalize runtime specific data structure of a given descriptor.
  *
  * @param[in,out] desc
@@ -401,7 +418,7 @@ RUNTIME_desc_release( const CHAM_desc_t *desc );
  *            The sequence in which the data is used.
  */
 void
-RUNTIME_desc_flush( const CHAM_desc_t     *desc,
+RUNTIME_desc_flush( const CHAM_desc_t        *desc,
                     const RUNTIME_sequence_t *sequence );
 
 /**

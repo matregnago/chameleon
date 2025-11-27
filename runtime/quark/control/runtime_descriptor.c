@@ -41,6 +41,13 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
     return;
 }
 
+void RUNTIME_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence )
+{
+    (void)desc;
+    (void)sequence;
+    return;
+}
+
 void RUNTIME_desc_destroy( CHAM_desc_t *desc )
 {
     (void)desc;
