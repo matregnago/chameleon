@@ -853,3 +853,12 @@ TCORE_zgram( cham_uplo_t        uplo,
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
     return 0;
 }
+
+void
+TCORE_zprint( FILE *file, const char *header,
+              cham_uplo_t uplo, int M, int N,
+              int Am, int An, const CHAM_tile_t *A )
+{
+    coreblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+}
