@@ -49,6 +49,9 @@ RUN apt-get purge -y
 
 RUN update-ca-certificates
 
+# Fix eztrace.pc
+RUN sed -i 's+/usr//usr/+/usr/+' /usr/lib/x86_64-linux-gnu/pkgconfig/eztrace.pc
+
 # Install PARSEC
 RUN git clone https://bitbucket.org/mfaverge/parsec.git && \
     cd parsec && \
