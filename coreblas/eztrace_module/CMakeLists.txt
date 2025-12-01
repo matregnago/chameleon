@@ -24,11 +24,6 @@
 #  @date 2025-07-22
 #
 ###
-
-if (NOT EZTRACE_FOUND)
-    find_package(EZTRACE)
-endif()
-
 if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
     if( EZTRACE_VERSION VERSION_GREATER "2.0.0" )
 
@@ -41,15 +36,7 @@ if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
 
             add_library(eztrace-coreblas_${_module} SHARED ${MODULE_SRCS_GENERATED} ${_module}.c)
 
-            target_link_libraries(eztrace-coreblas_${_module}
-                PUBLIC
-                ${EZTRACE_LINK_LIBRARIES}
-            )
-
-            target_include_directories(eztrace-coreblas_${_module}
-                PRIVATE
-                ${EZTRACE_INCLUDE_DIRS}
-            )
+            target_link_libraries(eztrace-coreblas_${_module} PUBLIC MORSE::EZTRACE)
 
             add_dependencies(eztrace-coreblas_${_module} coreblas_include)
 

@@ -24,11 +24,6 @@
 #  @date 2025-07-09
 #
 ###
-
-if (NOT EZTRACE_FOUND)
-    find_package(EZTRACE)
-endif()
-
 if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
 
     if( EZTRACE_VERSION VERSION_GREATER "2.0.0" )
@@ -48,11 +43,8 @@ if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
         add_library(eztrace-gpucublas SHARED ${MODULE_SRCS_GENERATED} gpucublas.c)
         add_dependencies(eztrace-gpucublas
             gpucublas_include)
-        target_link_libraries(eztrace-gpucublas
-            PUBLIC
-            ${EZTRACE_LINK_LIBRARIES}
-        )
 
+        target_link_libraries(eztrace-gpucublas PUBLIC MORSE::EZTRACE)
         target_link_libraries(eztrace-gpucublas PRIVATE coreblas CUDA::CUBLAS)
 
         target_include_directories(eztrace-gpucublas PUBLIC
@@ -61,12 +53,6 @@ if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
             $<BUILD_INTERFACE:${CHAMELEON_SOURCE_DIR}/include>
             $<BUILD_INTERFACE:${CHAMELEON_BINARY_DIR}/include>
             $<INSTALL_INTERFACE:include>)
-
-        target_include_directories(eztrace-gpucublas
-            PRIVATE
-            ${EZTRACE_INCLUDE_DIRS}
-        )
-
 
         # Install the shared library
         install(
