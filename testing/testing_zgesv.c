@@ -54,8 +54,7 @@ testing_zgesv_desc( run_arg_list_t *args, int check )
     /* Descriptors */
     CHAM_desc_t *descA, *descX;
     CHAM_ipiv_t *descIPIV;
-    void        *wsA = NULL;
-    void        *wsB = NULL;
+    void        *ws = NULL;
 
     CHAMELEON_Set( CHAMELEON_TILE_SIZE, nb );
     CHAMELEON_Set( CHAMELEON_INNER_BLOCK_SIZE, ib );
@@ -74,14 +73,13 @@ testing_zgesv_desc( run_arg_list_t *args, int check )
     CHAMELEON_zplrnt_Tile( descX, seedB );
 
     if ( async ) {
-        wsA = CHAMELEON_zgetrf_WS_Alloc( descA );
-        wsB = CHAMELEON_zgetrf_WS_Alloc( descX );
+        ws = CHAMELEON_zgetrf_WS_Alloc( descA );
     }
 
     /* Calculates the solution */
     testing_start( &test_data );
     if ( async ) {
-        hres = CHAMELEON_zgesv_Tile_Async( descA, descIPIV, descX, wsA, wsB,
+        hres = CHAMELEON_zgesv_Tile_Async( descA, descIPIV, descX, ws,
                                            test_data.sequence, &test_data.request );
         CHAMELEON_Desc_Flush( descA, test_data.sequence );
         CHAMELEON_Desc_Flush( descX, test_data.sequence );
@@ -94,8 +92,7 @@ testing_zgesv_desc( run_arg_list_t *args, int check )
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
 
     if ( async ) {
-        CHAMELEON_zgetrf_WS_Free( wsA );
-        CHAMELEON_zgetrf_WS_Free( wsB );
+        CHAMELEON_zgetrf_WS_Free( ws );
     }
 
     /* Checks the factorisation and the residual */

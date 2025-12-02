@@ -70,7 +70,7 @@ testing_zgetrs_desc( run_arg_list_t *args, int check )
     CHAMELEON_zgetrf_Tile( descA, descIPIV );
 
     if ( async ) {
-        ws = CHAMELEON_zgetrf_WS_Alloc( descX );
+        ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, descA );
     }
 
     /* Calculates the solution */
@@ -85,6 +85,10 @@ testing_zgetrs_desc( run_arg_list_t *args, int check )
     test_data.hres = hres;
     testing_stop( &test_data, flops_zgetrs( N, NRHS ) );
     hres = ( hres == CHAMELEON_SUCCESS ) ? 0 : 1;
+
+    if ( ws != NULL ) {
+        CHAMELEON_zlaswp_WS_Free( ws );
+    }
 
     /* Checks the factorization and residual */
 #if !defined(CHAMELEON_SIMULATION)
@@ -103,10 +107,6 @@ testing_zgetrs_desc( run_arg_list_t *args, int check )
         CHAMELEON_Desc_Destroy( &descB );
     }
 #endif /* !defined(CHAMELEON_SIMULATION) */
-
-    if ( ws != NULL ) {
-        CHAMELEON_zgetrf_WS_Free( ws );
-    }
 
     CHAMELEON_Ipiv_Destroy( &descIPIV );
     parameters_desc_destroy( &descA );

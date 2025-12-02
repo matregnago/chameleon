@@ -319,9 +319,10 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
                                  RUNTIME_request_t  *request )
 {
     CHAM_context_t             *chamctxt;
-    struct chameleon_pzgetrf_s *ws;
+    struct chameleon_pzlaswp_s *ws;
     RUNTIME_option_t            options;
     int                         k, tempkm;
+    CHAMELEON_Complex64_t       zone = (CHAMELEON_Complex64_t)1.;
 
     chamctxt = chameleon_context_self();
     if ( ( trans != ChamTrans ) && ( trans != ChamNoTrans ) ) {
@@ -364,7 +365,7 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
     }
 
     if ( user_ws == NULL ) {
-        ws = CHAMELEON_zgetrf_WS_Alloc( B );
+        ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, A );
     }
     else {
         ws = user_ws;
@@ -381,22 +382,26 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
     }
 
     if ( trans == ChamNoTrans ) {
-        chameleon_pzlaswp( ws->laswp, ChamDirForward, B, IPIV, sequence, request );
+        chameleon_pzlaswp( ws, ChamDirForward,
+                           B, IPIV, sequence, request );
 
-        chameleon_pztrsm( ChamLeft, ChamLower, ChamNoTrans, ChamUnit, (CHAMELEON_Complex64_t)1.0, A, B, sequence, request );
-
-        chameleon_pztrsm( ChamLeft, ChamUpper, ChamNoTrans, ChamNonUnit, (CHAMELEON_Complex64_t)1.0, A, B, sequence, request );
+        chameleon_pztrsm( ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
+                          zone, A, B, sequence, request );
+        chameleon_pztrsm( ChamLeft, ChamUpper, ChamNoTrans, ChamNonUnit,
+                          zone, A, B, sequence, request );
     }
     else {
-        chameleon_pztrsm( ChamLeft, ChamUpper, ChamTrans, ChamNonUnit, (CHAMELEON_Complex64_t)1.0, A, B, sequence, request );
+        chameleon_pztrsm( ChamLeft, ChamUpper, ChamTrans, ChamNonUnit,
+                          zone, A, B, sequence, request );
+        chameleon_pztrsm( ChamLeft, ChamLower, ChamTrans, ChamUnit,
+                          zone, A, B, sequence, request );
 
-        chameleon_pztrsm( ChamLeft, ChamLower, ChamTrans, ChamUnit, (CHAMELEON_Complex64_t)1.0, A, B, sequence, request );
-
-        chameleon_pzlaswp( ws->laswp, ChamDirBackward, B, IPIV, sequence, request );
+        chameleon_pzlaswp( ws, ChamDirBackward,
+                           B, IPIV, sequence, request );
     }
 
     if ( user_ws == NULL ) {
-        CHAMELEON_zgetrf_WS_Free( ws );
+        CHAMELEON_zlaswp_WS_Free( ws );
     }
 
     return CHAMELEON_SUCCESS;

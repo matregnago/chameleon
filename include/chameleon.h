@@ -217,20 +217,22 @@ int  CHAMELEON_Recursive_Desc_Create( CHAM_desc_t **descptr, void *mat,
                                       blkrankof_fct_t get_rankof, void* get_rankof_arg,
                                       const char *name );
 
-int CHAMELEON_Ipiv_Create ( CHAM_ipiv_t        **ipivptr,
-                            cham_side_t          side,
-                            int                  mb,
-                            int                  m,
-                            int                  p,
-                            int                  np,
-                            void                *data );
+int CHAMELEON_Ipiv_Create( CHAM_ipiv_t **ipivptr,
+                           cham_side_t   side,
+                           int           mb,
+                           int           m,
+                           int           p,
+                           int           np,
+                           void         *data );
 int CHAMELEON_Ipiv_Destroy( CHAM_ipiv_t **ipivptr );
-int CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t  *ipiv,
-                          const RUNTIME_sequence_t *sequence );
-int CHAMELEON_Ipiv_Gather( CHAM_ipiv_t *ipivdesc,
-                           int         *ipiv,
-                           int          root );
-void CHAMELEON_Ipiv_Print ( const CHAM_ipiv_t *ipiv );
+
+void CHAMELEON_Ipiv_Init( CHAM_ipiv_t *descIPIV );
+int  CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t        *ipiv,
+                           const RUNTIME_sequence_t *sequence );
+int  CHAMELEON_Ipiv_Gather( const CHAM_ipiv_t *ipivdesc,
+                            int               *ipiv,
+                            int                root );
+void CHAMELEON_Ipiv_Print( const CHAM_ipiv_t *ipiv );
 
 /* Numerical helpers */
 float CHAMELEON_slamch( void );

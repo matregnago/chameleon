@@ -400,7 +400,9 @@ int CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t        *ipiv,
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_Ipiv_Gather( CHAM_ipiv_t *ipivdesc, int *ipiv, int root )
+int CHAMELEON_Ipiv_Gather( const CHAM_ipiv_t *ipivdesc,
+                           int               *ipiv,
+                           int                root )
 {
     CHAM_context_t     *chamctxt = chameleon_context_self();
     RUNTIME_sequence_t *sequence = NULL;

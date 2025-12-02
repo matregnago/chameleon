@@ -21,8 +21,10 @@
  */
 #include "chameleon_starpu_internal.h"
 
-void RUNTIME_options_init( RUNTIME_option_t *options, CHAM_context_t *chamctxt,
-                           RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+void RUNTIME_options_init( RUNTIME_option_t     *options,
+                           const CHAM_context_t *chamctxt,
+                           RUNTIME_sequence_t   *sequence,
+                           RUNTIME_request_t    *request )
 {
     RUNTIME_request_starpu_t* schedopt = (RUNTIME_request_starpu_t *)(request->schedopt);
     options->sequence  = sequence;
@@ -41,9 +43,10 @@ void RUNTIME_options_init( RUNTIME_option_t *options, CHAM_context_t *chamctxt,
     return;
 }
 
-void RUNTIME_options_finalize( RUNTIME_option_t *option, CHAM_context_t *chamctxt )
+void RUNTIME_options_finalize( RUNTIME_option_t     *options,
+                               const CHAM_context_t *chamctxt )
 {
-    (void)option;
+    (void)options;
     (void)chamctxt;
     return;
 }

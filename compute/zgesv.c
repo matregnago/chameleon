@@ -84,8 +84,8 @@ int CHAMELEON_zgesv( int N, int NRHS,
     RUNTIME_request_t           request  = RUNTIME_REQUEST_INITIALIZER;
     CHAM_desc_t                 descAl, descAt;
     CHAM_desc_t                 descBl, descBt;
-    struct chameleon_pzgetrf_s *wsA,   *wsB;
-    int                         P,      Q;
+    struct chameleon_pzgetrf_s *ws;
+    int                         P, Q;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -136,13 +136,12 @@ int CHAMELEON_zgesv( int N, int NRHS,
     Q = chameleon_desc_datadist_get_iparam( &descAt, 1 );
 
     /* Allocate workspace for partial pivoting */
-    wsA = CHAMELEON_zgetrf_WS_Alloc( &descAt );
-    wsB = CHAMELEON_zgetrf_WS_Alloc( &descBt );
+    ws = CHAMELEON_zgetrf_WS_Alloc( &descAt );
 
     chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N, P, P*Q, IPIV, chameleon_getrankof_ipiv_2d_diag );
 
     /* Call the tile interface */
-    CHAMELEON_zgesv_Tile_Async( &descAt, &descIPIV, &descBt, wsA, wsB, sequence, &request );
+    CHAMELEON_zgesv_Tile_Async( &descAt, &descIPIV, &descBt, ws, sequence, &request );
 
     /* Submit the matrix conversion back */
     chameleon_ztile2lap( chamctxt, &descAl, &descAt,
@@ -158,8 +157,7 @@ int CHAMELEON_zgesv( int N, int NRHS,
     chameleon_ipiv_destroy( &descIPIV );
 
     /* Cleanup the temporary data */
-    CHAMELEON_zgetrf_WS_Free( wsA );
-    CHAMELEON_zgetrf_WS_Free( wsB );
+    CHAMELEON_zgetrf_WS_Free( ws );
     chameleon_ztile2lap_cleanup( chamctxt, &descAl, &descAt );
     chameleon_ztile2lap_cleanup( chamctxt, &descBl, &descBt );
 
@@ -219,7 +217,7 @@ int CHAMELEON_zgesv_Tile( CHAM_desc_t *A, CHAM_ipiv_t *IPIV, CHAM_desc_t *B )
     RUNTIME_sequence_t *sequence = NULL;
     RUNTIME_request_t   request  = RUNTIME_REQUEST_INITIALIZER;
     int                 status;
-    void               *wsA, *wsB;
+    void               *ws;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -228,16 +226,14 @@ int CHAMELEON_zgesv_Tile( CHAM_desc_t *A, CHAM_ipiv_t *IPIV, CHAM_desc_t *B )
     }
     chameleon_sequence_create( chamctxt, &sequence );
 
-    wsA = CHAMELEON_zgetrf_WS_Alloc( A );
-    wsB = CHAMELEON_zgetrf_WS_Alloc( B );
-    CHAMELEON_zgesv_Tile_Async( A, IPIV, B, wsA, wsB, sequence, &request );
+    ws = CHAMELEON_zgetrf_WS_Alloc( A );
+    CHAMELEON_zgesv_Tile_Async( A, IPIV, B, ws, sequence, &request );
 
     CHAMELEON_Desc_Flush( A, sequence );
     CHAMELEON_Desc_Flush( B, sequence );
 
     chameleon_sequence_wait( chamctxt, sequence );
-    CHAMELEON_zgetrf_WS_Free( wsA );
-    CHAMELEON_zgetrf_WS_Free( wsB );
+    CHAMELEON_zgetrf_WS_Free( ws );
 
     status = sequence->status;
     chameleon_sequence_destroy( chamctxt, sequence );
@@ -303,13 +299,12 @@ int CHAMELEON_zgesv_Tile( CHAM_desc_t *A, CHAM_ipiv_t *IPIV, CHAM_desc_t *B )
 int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
                                 CHAM_ipiv_t        *IPIV,
                                 CHAM_desc_t        *B,
-                                void               *user_wsA,
-                                void               *user_wsB,
+                                void               *user_ws,
                                 RUNTIME_sequence_t *sequence,
                                 RUNTIME_request_t  *request )
 {
-    CHAM_context_t *chamctxt;
-    struct chameleon_pzgetrf_s *wsA, *wsB;
+    CHAM_context_t             *chamctxt;
+    struct chameleon_pzgetrf_s *ws;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -347,35 +342,27 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
         return chameleon_request_fail( sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE );
     }
 
-    if ( user_wsA == NULL ) {
-        wsA = CHAMELEON_zgetrf_WS_Alloc( A );
+    if ( user_ws == NULL ) {
+        ws = CHAMELEON_zgetrf_WS_Alloc( A );
     }
     else {
-        wsA = user_wsA;
+        ws = user_ws;
     }
 
-    if ( user_wsB == NULL ) {
-        wsB = CHAMELEON_zgetrf_WS_Alloc( B );
-    }
-    else {
-        wsB = user_wsB;
-    }
-
+    // TODO: What the fuck !!!!!!
     IPIV->get_rankof = chameleon_getrankof_ipiv_2d_diag;
 
-    chameleon_pzgetrf( wsA, A, IPIV, sequence, request );
+    chameleon_pzgetrf( ws, A, IPIV, sequence, request );
 
-    CHAMELEON_zgetrs_Tile_Async( ChamNoTrans, A, IPIV, B, wsB, sequence, request );
+    CHAMELEON_zgetrs_Tile_Async( ChamNoTrans, A, IPIV, B, ws->laswp, sequence, request );
 
-    if ( user_wsA == NULL ) {
+    if ( user_ws == NULL ) {
         CHAMELEON_Desc_Flush( A, sequence );
         CHAMELEON_Desc_Flush( B, sequence );
         chameleon_sequence_wait( chamctxt, sequence );
-        CHAMELEON_zgetrf_WS_Free( wsA );
+        CHAMELEON_zgetrf_WS_Free( ws );
     }
-    if ( user_wsB == NULL ) {
-        CHAMELEON_zgetrf_WS_Free( wsB );
-    }
+
     return CHAMELEON_SUCCESS;
 }
 
