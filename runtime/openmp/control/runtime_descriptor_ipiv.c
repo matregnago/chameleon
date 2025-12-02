@@ -26,30 +26,10 @@ void RUNTIME_ipiv_create( CHAM_ipiv_t *ipiv )
     (void)ipiv;
 }
 
-void RUNTIME_pivot_create( CHAM_desc_pivot_t *pivot )
-{
-    assert( 0 );
-    (void)pivot;
-}
-
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv )
 {
     assert( 0 );
     (void)ipiv;
-}
-
-void RUNTIME_pivot_destroy_submit( const RUNTIME_sequence_t *sequence,
-                                   CHAM_desc_pivot_t        *pivot )
-{
-    assert( 0 );
-    (void)sequence;
-    (void)pivot;
-}
-
-void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot )
-{
-    assert( 0 );
-    (void)pivot;
 }
 
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m )
@@ -57,26 +37,6 @@ void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m )
     assert( 0 );
     (void)ipiv;
     (void)m;
-    return NULL;
-}
-
-void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h )
-{
-    assert( 0 );
-    (void)pivot;
-    (void)rank;
-    (void)k;
-    (void)h;
-    return NULL;
-}
-
-void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h )
-{
-    assert( 0 );
-    (void)pivot;
-    (void)rank;
-    (void)k;
-    (void)h;
     return NULL;
 }
 
@@ -96,32 +56,7 @@ void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int k )
     return NULL;
 }
 
-void RUNTIME_pivot_flushk( const RUNTIME_sequence_t *sequence,
-                           const CHAM_desc_pivot_t *pivot, int rank )
-{
-    assert( 0 );
-    (void)sequence;
-    (void)pivot;
-    (void)rank;
-}
-
-void RUNTIME_pivot_flush( const RUNTIME_sequence_t *sequence,
-                          const CHAM_desc_pivot_t  *pivot )
-{
-    assert( 0 );
-    (void)pivot;
-    (void)sequence;
-}
-
-void RUNTIME_ipiv_flush( const RUNTIME_sequence_t *sequence,
-                         const CHAM_ipiv_t        *ipiv )
-{
-    assert( 0 );
-    (void)sequence;
-    (void)ipiv;
-}
-
-void RUNTIME_ipiv_flushk( const RUNTIME_sequence_t *sequence,
+void RUNTIME_ipiv_flushk( RUNTIME_sequence_t *sequence,
                           const CHAM_ipiv_t *ipiv, int m )
 {
     assert( 0 );
@@ -130,18 +65,15 @@ void RUNTIME_ipiv_flushk( const RUNTIME_sequence_t *sequence,
     (void)m;
 }
 
-void RUNTIME_ipiv_invalidate( CHAM_desc_pivot_t *pivot,
-                              int                k,
-                              int                h,
-                              int                myrank )
+void RUNTIME_ipiv_flush( RUNTIME_sequence_t *sequence,
+                         const CHAM_ipiv_t  *ipiv )
 {
-    (void)pivot;
-    (void)k;
-    (void)h;
-    (void)myrank;
+    assert( 0 );
+    (void)ipiv;
+    (void)sequence;
 }
 
-void RUNTIME_perm_flushk( const RUNTIME_sequence_t *sequence,
+void RUNTIME_perm_flushk( RUNTIME_sequence_t *sequence,
                           const CHAM_ipiv_t *ipiv, int m )
 {
     assert( 0 );
@@ -150,10 +82,10 @@ void RUNTIME_perm_flushk( const RUNTIME_sequence_t *sequence,
     (void)m;
 }
 
-void RUNTIME_ipiv_gather( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *desc,
-                          int                      *ipiv,
-                          int                       node )
+void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
+                          const CHAM_ipiv_t  *desc,
+                          int                *ipiv,
+                          int                 node )
 {
     assert( 0 );
     (void)sequence;
@@ -162,7 +94,7 @@ void RUNTIME_ipiv_gather( const RUNTIME_sequence_t *sequence,
     (void)node;
 }
 
-void RUNTIME_cpui_create ( CHAM_perm_t *ws )
+void RUNTIME_cpui_create( CHAM_perm_t *ws )
 {
     assert( 0 );
     (void)ws;
@@ -185,11 +117,11 @@ void RUNTIME_cpui_destroy( CHAM_perm_t *ws )
     (void)ws;
 }
 
-void RUNTIME_cpui_flushk( const RUNTIME_sequence_t *sequence,
-                          int                       rank,
-                          const CHAM_perm_t        *ws,
-                          int                       m,
-                          int                       n )
+void RUNTIME_cpui_flushk( RUNTIME_sequence_t *sequence,
+                          int                 rank,
+                          const CHAM_perm_t  *ws,
+                          int                 m,
+                          int                 n )
 {
     assert( 0 );
     (void)sequence;

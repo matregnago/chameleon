@@ -1,0 +1,91 @@
+/**
+ *
+ * @file quark/runtime_descriptor_ipiv.c
+ *
+ * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ *                      Univ. Bordeaux. All rights reserved.
+ *
+ ***
+ *
+ * @brief Chameleon Quark descriptor routines
+ *
+ * @version 1.3.0
+ * @author Mathieu Faverge
+ * @author Matthieu Kuhn
+ * @author Alycia Lisito
+ * @author Florent Pruvost
+ * @author Matteo Marcos
+ * @date 2025-10-15
+ *
+ */
+#include "chameleon_quark.h"
+
+void RUNTIME_pivot_create( CHAM_desc_pivot_t *pivot )
+{
+    assert( 0 );
+    (void)pivot;
+}
+
+void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
+                                   CHAM_desc_pivot_t  *pivot )
+{
+    assert( 0 );
+    (void)sequence;
+    (void)pivot;
+}
+
+void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot )
+{
+    assert( 0 );
+    (void)pivot;
+}
+
+void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot,
+                               int rank, int k, int h )
+{
+    assert( 0 );
+    (void)pivot;
+    (void)rank;
+    (void)k;
+    (void)h;
+    return NULL;
+}
+
+void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot,
+                               int rank, int k, int h )
+{
+    assert( 0 );
+    (void)pivot;
+    (void)rank;
+    (void)k;
+    (void)h;
+    return NULL;
+}
+
+void RUNTIME_pivot_flushk( RUNTIME_sequence_t *sequence,
+                           const CHAM_desc_pivot_t *pivot, int rank )
+{
+    assert( 0 );
+    (void)sequence;
+    (void)pivot;
+    (void)rank;
+}
+
+void RUNTIME_pivot_flush( RUNTIME_sequence_t      *sequence,
+                          const CHAM_desc_pivot_t *pivot )
+{
+    assert( 0 );
+    (void)pivot;
+    (void)sequence;
+}
+
+void RUNTIME_ipiv_invalidate( CHAM_desc_pivot_t *pivot,
+                              int                k,
+                              int                h,
+                              int                myrank )
+{
+    (void)pivot;
+    (void)k;
+    (void)h;
+    (void)myrank;
+}

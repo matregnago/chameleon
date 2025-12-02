@@ -650,35 +650,35 @@ void RUNTIME_sdisplay_oneprofile (cham_tasktype_t task);
 
 void RUNTIME_pivot_create ( CHAM_desc_pivot_t *pivot );
 void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot );
-void RUNTIME_pivot_destroy_submit( const RUNTIME_sequence_t *sequence,
-                                   CHAM_desc_pivot_t        *pivot );
+void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
+                                   CHAM_desc_pivot_t  *pivot );
 
-void RUNTIME_pivot_flushk( const RUNTIME_sequence_t *sequence,
+void RUNTIME_pivot_flushk( RUNTIME_sequence_t *sequence,
                            const CHAM_desc_pivot_t *pivot, int m );
-void RUNTIME_pivot_flush ( const RUNTIME_sequence_t *sequence,
-                           const CHAM_desc_pivot_t  *pivot );
+void RUNTIME_pivot_flush ( RUNTIME_sequence_t      *sequence,
+                           const CHAM_desc_pivot_t *pivot );
 void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
 void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
 
 void RUNTIME_ipiv_create ( CHAM_ipiv_t *ipiv );
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv );
-void RUNTIME_ipiv_gather( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *desc,
-                          int                      *ipiv,
-                          int                       node );
+void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
+                          const CHAM_ipiv_t  *desc,
+                          int                *ipiv,
+                          int                 node );
 
-void RUNTIME_ipiv_flushk( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *ipiv,
-                          int                       m );
-void RUNTIME_ipiv_flush ( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *ipiv );
+void RUNTIME_ipiv_flushk( RUNTIME_sequence_t *sequence,
+                          const CHAM_ipiv_t  *ipiv,
+                          int                 m );
+void RUNTIME_ipiv_flush ( RUNTIME_sequence_t *sequence,
+                          const CHAM_ipiv_t  *ipiv );
 void RUNTIME_ipiv_invalidate( CHAM_desc_pivot_t *pivot,
                               int                k,
                               int                h,
                               int                myrank );
-void RUNTIME_perm_flushk( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *ipiv,
-                          int                       m );
+void RUNTIME_perm_flushk( RUNTIME_sequence_t *sequence,
+                          const CHAM_ipiv_t  *ipiv,
+                          int                 m );
 
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m );
 void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int m );
@@ -686,7 +686,7 @@ void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int m );
 void  RUNTIME_cpui_create ( CHAM_perm_t *ws );
 void *RUNTIME_cpui_getaddr( const CHAM_perm_t *ws, int m, int n );
 void  RUNTIME_cpui_destroy( CHAM_perm_t *ws );
-void  RUNTIME_cpui_flushk( const RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
+void  RUNTIME_cpui_flushk( RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
 
 static inline void *
 RUNTIME_pivot_getaddr( CHAM_desc_pivot_t *pivot, int rank, int k, int h ) {
