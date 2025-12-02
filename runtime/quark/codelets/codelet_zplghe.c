@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zplghe Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Piotr Luszczek
  * @author Pierre Lemarinier
  * @author Mathieu Faverge

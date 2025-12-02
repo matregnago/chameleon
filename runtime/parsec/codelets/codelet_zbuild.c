@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zbuild PaRSEC codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Reazul Hoque
  * @author Guillaume Sylvand
  * @author Mathieu Faverge

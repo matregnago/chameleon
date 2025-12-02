@@ -11,7 +11,7 @@
  *
  * @brief Chameleon core_zsymm CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Hatem Ltaief
@@ -88,7 +88,7 @@
  *
  * @param[in] LDC
  *          The leading dimension of the array C. ldc >= max(1,m).
- * 
+ *
  */
 void CORE_zsymm(cham_side_t side, cham_uplo_t uplo,
                 int M, int N,

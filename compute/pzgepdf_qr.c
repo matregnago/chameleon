@@ -10,7 +10,7 @@
  *
  * @brief Chameleon zgepdf_qr parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @date 2024-02-18
  * @precisions normal z -> s d c

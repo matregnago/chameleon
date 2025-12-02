@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zgersum StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Romain Peressoni
  * @author Mathieu Faverge
  * @author Antoine Jego

@@ -141,11 +141,11 @@ int CHAMELEON_zpoinv( cham_uplo_t uplo, int N,
  * @ingroup CHAMELEON_Complex64_t_Tile
  *
  * @brief Tile equivalent of CHAMELEON_zpoinv()
- * 
+ *
  *  Computes the inverse of a complex Hermitian
  *  positive definite matrix A using the Cholesky factorization
  *  A = U^H*U or A = L*L^H computed by CHAMELEON_zpotrf().
- * 
+ *
  *  Operates on matrices stored by tiles.
  *  All matrices are passed through descriptors.
  *  All dimensions are taken from the descriptors.

@@ -9,7 +9,7 @@
  *
  * @brief Chameleon blas/lapack and cblas/lapack api functions
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Florent Pruvost
  * @date 2024-02-18

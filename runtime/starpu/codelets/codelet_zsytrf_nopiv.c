@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zsytrf_nopiv StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Hatem Ltaief
  * @author Jakub Kurzak
  * @author Mathieu Faverge

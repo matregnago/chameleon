@@ -11,7 +11,7 @@
  *
  * @brief Chameleon lapacke mangling header
  *
- * @version 1.3.0
+ * @version 1.4.0
  *
  */
 #ifndef _lapacke_mangling_h_

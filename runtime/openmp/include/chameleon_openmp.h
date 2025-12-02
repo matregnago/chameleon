@@ -11,7 +11,7 @@
  *
  * @brief Chameleon OpenMP runtime main header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Philippe Virouleau
  * @author Florent Pruvost
  * @author Mathieu Faverge

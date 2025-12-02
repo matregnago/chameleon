@@ -9,7 +9,7 @@
  *
  * @brief Chameleon CHAMELEON_Complex64_t auxiliary testings header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Mathieu Faverge

@@ -11,7 +11,7 @@
  *
  * @brief Chameleon Fortran77 interface
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Bilel Hadri
  * @author Cedric Castagnede
  * @author Florent Pruvost

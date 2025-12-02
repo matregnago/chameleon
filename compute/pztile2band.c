@@ -11,7 +11,7 @@
  *
  * @brief Chameleon ztile2band parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Azzam Haidar
  * @author Gregoire Pichon
  * @author Mathieu Faverge

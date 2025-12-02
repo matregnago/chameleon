@@ -11,7 +11,7 @@
  *
  * @brief Chameleon ztsmqr_hetra1 Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Hatem Ltaief
  * @author Mathieu Faverge
  * @author Jakub Kurzak

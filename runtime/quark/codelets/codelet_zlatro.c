@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zlatro Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Azzam Haidar
  * @author Mathieu Faverge
  * @date 2024-02-18

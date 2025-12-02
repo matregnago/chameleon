@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zgersum OpenMP codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Romain Peressoni
  * @author Mathieu Faverge
  * @date 2024-02-18

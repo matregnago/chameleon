@@ -11,7 +11,7 @@
  *
  * @brief Chameleon CPU hmat-oss function declaration
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Rocio Carratala-Saez
  * @author Mathieu Faverge
  * @author Abel Calluaud

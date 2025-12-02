@@ -9,7 +9,7 @@
  *
  * @brief Chameleon ztplqt OpenMP codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Philippe Virouleau
  * @author Mathieu Faverge
  * @date 2024-02-18

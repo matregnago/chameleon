@@ -11,7 +11,7 @@
  *
  * @brief Chameleon Quark asynchronous routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Vijay Joshi
  * @author Cedric Castagnede

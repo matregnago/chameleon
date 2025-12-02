@@ -9,7 +9,7 @@
  *
  * @brief Header to describe the Chameleon tile interface in StarPU
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Gwenole Lucas
  * @author Ana Hourcau

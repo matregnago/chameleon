@@ -9,7 +9,7 @@
  *
  * @brief Chameleon zgerst parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @date 2025-01-24
  * @precisions normal z -> d

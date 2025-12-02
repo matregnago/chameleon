@@ -9,7 +9,7 @@
  *
  * @brief Chameleon zcesca parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Pierre Esterie
  * @date 2025-01-24

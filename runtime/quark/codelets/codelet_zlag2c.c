@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zlag2c Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Emmanuel Agullo
  * @author Cedric Castagnede

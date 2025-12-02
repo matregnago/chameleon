@@ -11,7 +11,7 @@
  *
  * @brief Chameleon global variables header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Piotr Luszczek
  * @author Cedric Castagnede

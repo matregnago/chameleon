@@ -11,7 +11,7 @@
  *
  * @brief Chameleon PaRSEC asynchronous routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Reazul Hoque
  * @author Mathieu Faverge
  * @author Florent Pruvost
