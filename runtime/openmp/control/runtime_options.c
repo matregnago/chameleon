@@ -11,12 +11,12 @@
  *
  * @brief Chameleon OpenMP options routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Cedric Augonnet
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Philippe Virouleau
- * @date 2024-10-17
+ * @date 2025-12-19
  *
  */
 #include "chameleon_openmp.h"

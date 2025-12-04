@@ -9,10 +9,10 @@
  *
  * @brief Chameleon core_zgetrf with partial pivoting CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
- * @date 2025-10-15
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

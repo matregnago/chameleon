@@ -9,7 +9,7 @@
  *
  * @brief Chameleon StarPU IPIV descriptor routines. These routines are used by laswp operations.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
  * @author Alycia Lisito
@@ -17,7 +17,7 @@
  * @author Pierre Esterie
  * @author Matteo Marcos
  * @author Samuel Thibault
- * @date 2025-10-15
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

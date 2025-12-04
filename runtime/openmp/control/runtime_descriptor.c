@@ -17,7 +17,8 @@
  * @author Philippe Virouleau
  * @author Mathieu Faverge
  * @author Florent Pruvost
- * @date 2024-03-16
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #include "chameleon_openmp.h"

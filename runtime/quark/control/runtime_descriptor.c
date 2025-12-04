@@ -17,7 +17,8 @@
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @author Samuel Thibault
- * @date 2024-03-16
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #include "chameleon_quark.h"

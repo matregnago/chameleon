@@ -16,7 +16,7 @@
  * @author Cedric Castagnede
  * @author Florent Pruvost
  * @author Philippe Virouleau
- * @date 2024-02-18
+ * @date 2025-12-19
  *
  */
 #include "chameleon_openmp.h"

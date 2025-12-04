@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zsymm Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Hatem Ltaief
  * @author Jakub Kurzak
  * @author Mathieu Faverge
@@ -19,7 +19,7 @@
  * @author Cedric Castagnede
  * @author Florent Pruvost
  * @author Romain Peressoni
- * @date 2024-02-18
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

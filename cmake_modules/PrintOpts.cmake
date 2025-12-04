@@ -17,12 +17,13 @@
 #     Univ. of California Berkeley,
 #     Univ. of Colorado Denver.
 #
-# @version 1.3.0
+# @version 1.4.0
 #  @author Florent Pruvost
 #  @author Mathieu Faverge
 #  @author Loris Lucido
 #  @author Abel Calluaud
-#  @date 2024-03-27
+#  @author Brieuc Nicolas
+#  @date 2025-12-19
 #
 ###
 

@@ -15,7 +15,8 @@
  * @author Mathieu Faverge
  * @author Nathalie Furmento
  * @author Alycia Lisito
- * @date 2024-02-18
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

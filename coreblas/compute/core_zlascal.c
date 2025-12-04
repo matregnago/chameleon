@@ -12,10 +12,10 @@
  *
  * @brief Chameleon core_zlascal CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Dalal Sukkari
  * @author Mathieu Faverge
- * @date 2024-12-17
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

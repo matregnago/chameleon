@@ -9,10 +9,10 @@
 ! @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 !                      Univ. Bordeaux. All rights reserved.
 !
-! @version 1.3.0
+! @version 1.4.0
 ! @author Florent Pruvost
 ! @author Mathieu Faverge
-! @date 2025-07-23
+! @date 2025-12-19
 program fortran_example
     implicit none
     include 'chameleon_fortran.h'

@@ -5,9 +5,9 @@
 #  @copyright 2018-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                       Univ. Bordeaux. All rights reserved.
 #
-#  @version 1.3.0
+#  @version 1.4.0
 #  @author Florent Pruvost
-#  @date 2024-04-30
+#  @date 2025-12-19
 #
 ###
 set -ex

@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zplghe wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file is a copy of zplghe.c
  *          wich has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
@@ -21,7 +21,7 @@
  * @author Mathis Rade
  * @author Florent Pruvost
  * @author Alycia Lisito
- * @date 2025-10-16
+ * @date 2025-12-19
  * @precisions normal z -> c
  *
  */

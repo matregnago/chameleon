@@ -14,9 +14,9 @@
  * timer/testing fot this subroutine of the QDWH/Zolo algorithms. That is why
  * only the Tile version is available.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
- * @date 2024-12-17
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

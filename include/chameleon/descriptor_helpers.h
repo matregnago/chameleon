@@ -11,7 +11,7 @@
  *
  * @brief Set of functions to help the user to declare matrix descriptors (allocation, mapping... )
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Mathieu Faverge
  * @author Cedric Castagnede
@@ -21,7 +21,8 @@
  * @author Samuel Thibault
  * @author Lionel Eyraud-Dubois
  * @author Alycia Lisito
- * @date 2025-01-24
+ * @author Matteo Marcos
+ * @date 2025-12-19
  *
  * @addtogroup chameleon_descriptors
  * @{

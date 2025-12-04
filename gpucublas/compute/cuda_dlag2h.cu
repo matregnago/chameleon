@@ -14,7 +14,9 @@
  * @version 1.3.0
  * @author Mark Gates
  * @author Mathieu Faverge
- * @date 2024-02-18
+ * @author Brieuc Nicolas
+ * @author Florent Pruvost
+ * @date 2025-12-19
  * @precisions normal d -> d s
  *
  * This file is an adaptation of the MAGMA zlag2c.cu, clag2z.cu, hlag2s.cu, and slag2h.cu

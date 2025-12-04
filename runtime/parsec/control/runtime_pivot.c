@@ -9,13 +9,13 @@
  *
  * @brief Chameleon PaRSEC descriptor routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Florent Pruvost
  * @author Matteo Marcos
- * @date 2025-10-15
+ * @date 2025-12-11
  *
  */
 #include "chameleon_parsec.h"

@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zsymm parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Mathieu Faverge
@@ -21,7 +21,7 @@
  * @author Alycia Lisito
  * @author Romain Peressoni
  * @author Pierre Esterie
- * @date 2025-10-23
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

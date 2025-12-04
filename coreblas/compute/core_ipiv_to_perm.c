@@ -9,10 +9,10 @@
  *
  * @brief Chameleon core_ipiv_to_perm CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matteo Marcos
- * @date 2025-03-24
+ * @date 2025-12-19
  */
 #include "coreblas.h"
 

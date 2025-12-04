@@ -9,10 +9,10 @@
  *
  * @brief Chameleon StarPU codelets to apply zlaswp on a panel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

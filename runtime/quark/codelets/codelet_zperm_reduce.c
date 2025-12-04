@@ -9,10 +9,10 @@
  *
  * @brief Chameleon quark codelets to do the reduction
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Matteo Marcox
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

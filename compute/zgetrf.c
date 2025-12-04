@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zgetrf wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Omar Zenati
  * @author Mathieu Faverge
  * @author Emmanuel Agullo
@@ -23,7 +23,7 @@
  * @author Xavier Lacoste
  * @author Pierre Esterie
  * @author Matteo Marcos
- * @date 2025-10-16
+ * @date 2025-12-19
  *
  * @precisions normal z -> s d c
  *

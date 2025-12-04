@@ -16,7 +16,8 @@
  * @author Mathieu Faverge
  * @author Antoine Jego
  * @author Florent Pruvost
- * @date 2025-01-29
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

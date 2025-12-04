@@ -9,9 +9,9 @@
  *
  * @brief Chameleon tcore EZtrace 2.0 module
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
- * @date 2025-07-09
+ * @date 2025-12-19
  *
  */
 #include <eztrace-core/eztrace_config.h>

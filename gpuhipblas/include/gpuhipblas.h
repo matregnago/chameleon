@@ -11,12 +11,12 @@
  *
  * @brief Chameleon GPU kernels main header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @author Nathalie Furmento
  * @author Loris Lucido
- * @date 2024-02-18
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

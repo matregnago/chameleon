@@ -11,10 +11,11 @@
  *
  * @brief Chameleon zpoinv wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Alycia Lisito
  * @author Eyraud-Dubois Lionel
- * @date 2025-10-16
+ * @author Florent Pruvost
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

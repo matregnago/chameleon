@@ -17,7 +17,8 @@
  * @author Guillaume Sylvand
  * @author Samuel Thibault
  * @author Florent Pruvost
- * @date 2024-03-16
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #include "chameleon_parsec.h"

@@ -9,12 +9,12 @@
  *
  * @brief Chameleon StarPU codelets to work with ipiv array
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

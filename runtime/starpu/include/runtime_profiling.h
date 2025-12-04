@@ -11,12 +11,12 @@
  *
  * @brief Chameleon StarPU profiling and kernel locality header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
  * @author Samuel Thibault
- * @date 2024-02-18
+ * @date 2025-12-19
  *
  */
 #ifndef _runtime_profiling_h_

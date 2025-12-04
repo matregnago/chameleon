@@ -5,10 +5,10 @@
 #  @copyright 2023-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                       Univ. Bordeaux. All rights reserved.
 #
-#  @version 1.3.0
+#  @version 1.4.0
 #  @author Florent Pruvost
 #  @author Mathieu Faverge
-#  @date 2025-07-23
+#  @date 2025-12-19
 #
 # Check that linking with the project is ok when using cmake.
 #

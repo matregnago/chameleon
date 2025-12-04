@@ -12,11 +12,11 @@
  * to automatic bcast handled by the runtime system where a data A is
  * broadcasted as A.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-10-23
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

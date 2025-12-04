@@ -11,7 +11,7 @@
  *
  * @brief Chameleon CHAMELEON_complex64_t wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Jakub Kurzak
@@ -25,7 +25,7 @@
  * @author Matthieu Kuhn
  * @author Ana Hourcau
  * @author Matteo Marcos
- * @date 2025-03-24
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

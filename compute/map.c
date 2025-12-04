@@ -9,9 +9,9 @@
  *
  * @brief Chameleon map wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
- * @date 2024-03-14
+ * @date 2025-12-19
  *
  */
 #include "control/common.h"

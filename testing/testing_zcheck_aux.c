@@ -9,14 +9,15 @@
  *
  * @brief Chameleon CHAMELEON_Complex64_t auxiliary testings routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @author Nathalie Furmento
  * @author Alycia Lisito
  * @author Philippe Swartvagher
- * @date 2025-01-29
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

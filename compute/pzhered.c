@@ -11,11 +11,11 @@
  *
  * @brief Chameleon zhered parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Ana Hourcau
  * @author Pierre Esterie
- * @date 2025-10-16
+ * @date 2025-12-19
  * @precisions normal z -> z d
  *
  */

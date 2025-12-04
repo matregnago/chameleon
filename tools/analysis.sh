@@ -5,10 +5,10 @@
 #  @copyright 2013-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                       Univ. Bordeaux. All rights reserved.
 #
-#  @version 1.3.0
+#  @version 1.4.0
 #  @author Florent Pruvost
 #  @author Mathieu Faverge
-#  @date 2025-02-14
+#  @date 2025-12-19
 #
 ###
 
@@ -61,7 +61,7 @@ sonar.links.ci=$CI_PROJECT_URL/pipelines
 sonar.links.issue=$CI_PROJECT_URL/issues
 
 sonar.projectDescription=Dense linear algebra subroutines for heterogeneous and distributed architectures
-sonar.projectVersion=1.4.0
+sonar.projectVersion=1.4.1
 
 sonar.scm.disabled=false
 sonar.scm.provider=git

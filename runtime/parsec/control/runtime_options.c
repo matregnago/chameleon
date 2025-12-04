@@ -11,10 +11,10 @@
  *
  * @brief Chameleon PaRSEC options routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Reazul Hoque
  * @author Mathieu Faverge
- * @date 2024-10-17
+ * @date 2025-12-19
  *
  */
 #include "chameleon_parsec.h"

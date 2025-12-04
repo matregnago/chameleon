@@ -11,7 +11,7 @@
  *
  * @brief Chameleon ztrmm wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Mathieu Faverge
@@ -19,7 +19,7 @@
  * @author Cedric Castagnede
  * @author Florent Pruvost
  * @author Lucas Barros de Assis
- * @date 2025-10-16
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

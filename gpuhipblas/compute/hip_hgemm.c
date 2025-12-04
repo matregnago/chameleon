@@ -9,9 +9,9 @@
  *
  * @brief Chameleon hip_hgemm GPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
- * @date 2024-02-18
+ * @date 2025-12-19
  *
  */
 #include "gpuhipblas.h"

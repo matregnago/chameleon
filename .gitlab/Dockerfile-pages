@@ -4,9 +4,9 @@
 #  @copyright 2024-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                       Univ. Bordeaux. All rights reserved.
 #
-#  @version 1.3.0
+#  @version 1.4.0
 #  @author Florent Pruvost
-#  @date 2025-07-22
+#  @date 2025-12-19
 #
 # This docker image is used to test the package during gitlab-ci pipelines.
 # It should be stored in the gitlab's project container registry:

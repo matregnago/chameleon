@@ -9,13 +9,13 @@
  *
  * @brief Chameleon tile interface for StarPU
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Gwenole Lucas
  * @author Samuel Thibault
  * @author Abel Calluaud
  * @author Ana Hourcau
- * @date 2025-10-16
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

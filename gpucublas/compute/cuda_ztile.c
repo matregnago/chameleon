@@ -7,9 +7,9 @@
  *
  * @brief Chameleon CUDA kernel interface from CHAM_tile_t layout to the real one.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
- * @date 2025-12-17
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

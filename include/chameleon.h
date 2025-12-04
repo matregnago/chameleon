@@ -11,7 +11,7 @@
  *
  * @brief Chameleon main header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Augonnet
  * @author Cedric Castagnede
@@ -20,7 +20,8 @@
  * @author Lionel Eyraud-Dubois
  * @author Alycia Lisito
  * @author Loris Lucido
- * @date 2025-01-28
+ * @author Matteo Marcos
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_h_

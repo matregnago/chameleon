@@ -11,7 +11,7 @@
  *
  * @brief Chameleon CHAMELEON_Complex64_t auxiliary testings routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Lucas Barros de Assis
@@ -23,7 +23,8 @@
  * @author Matthieu Kuhn
  * @author Lionel Eyraud-Dubois
  * @author Matteo Marcos
- * @date 2025-03-24
+ * @author Samuel Thibault
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

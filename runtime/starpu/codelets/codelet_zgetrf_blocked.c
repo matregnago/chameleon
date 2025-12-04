@@ -9,14 +9,14 @@
  *
  * @brief Chameleon zpanel StarPU codelets
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment Codelets to perform panel factorization with partial pivoting
  *
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-10-15
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

@@ -9,11 +9,11 @@
  *
  * @brief Chameleon pivot panel interface for StarPU
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
  * @author Alycia Lisito
- * @date 2025-01-29
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

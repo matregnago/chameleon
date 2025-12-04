@@ -9,10 +9,10 @@
  *
  * @brief Chameleon zsyrk OpenMP codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Philippe Virouleau
  * @author Mathieu Faverge
- * @date 2024-02-18
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

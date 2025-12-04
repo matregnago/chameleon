@@ -11,14 +11,14 @@
  *
  * @brief Chameleon dlag2h StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Emmanuel Agullo
  * @author Cedric Castagnede
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Samuel Thibault
- * @date 2025-07-22
+ * @date 2025-12-19
  * @precisions normal d -> d s
  *
  */

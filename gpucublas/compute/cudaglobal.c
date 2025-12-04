@@ -15,7 +15,8 @@
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Florent Pruvost
- * @date 2024-02-18
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #include "gpucublas.h"

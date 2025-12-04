@@ -9,12 +9,12 @@
  *
  * @brief Chameleon zgesv testing
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Lucas Barros de Assis
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-03-24
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

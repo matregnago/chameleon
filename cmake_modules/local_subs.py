@@ -6,14 +6,14 @@
  @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
                       Univ. Bordeaux. All rights reserved.
 
- @version 1.3.0
+ @version 1.4.0
  @author Mathieu Faverge
  @author Florent Pruvost
  @author Nathalie Furmento
  @author Alycia Lisito
  @author Brieuc Nicolas
  @author Matteo Marcos
- @date 2025-10-23
+ @date 2025-12-19
 
 """
 _extra_blas = [
