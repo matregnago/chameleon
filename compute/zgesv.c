@@ -305,6 +305,7 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
 {
     CHAM_context_t             *chamctxt;
     struct chameleon_pzgetrf_s *ws;
+    struct chameleon_pzlaswp_s *ws_laswp;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -354,15 +355,27 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
 
     chameleon_pzgetrf( ws, A, IPIV, sequence, request );
 
-    CHAMELEON_zgetrs_Tile_Async( ChamNoTrans, A, IPIV, B, ws->laswp, sequence, request );
+    if ( B->n > A->n ) {
+        ws_laswp = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, B );
+    }
+    else {
+        ws_laswp = ws->laswp;
+    }
+    CHAMELEON_zgetrs_Tile_Async( ChamNoTrans, A, IPIV, B, ws_laswp, sequence, request );
 
-    if ( user_ws == NULL ) {
+    /* Need to wait before destroying one the two workspaces */
+    if ( (user_ws == NULL) || (ws_laswp != ws->laswp) ) {
         CHAMELEON_Desc_Flush( A, sequence );
         CHAMELEON_Desc_Flush( B, sequence );
         chameleon_sequence_wait( chamctxt, sequence );
-        CHAMELEON_zgetrf_WS_Free( ws );
     }
 
+    if ( user_ws == NULL ) {
+        CHAMELEON_zgetrf_WS_Free( ws );
+    }
+    if ( ws_laswp != ws->laswp ) {
+        CHAMELEON_zlaswp_WS_Free( ws_laswp );
+    }
     return CHAMELEON_SUCCESS;
 }
 

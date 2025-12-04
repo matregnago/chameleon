@@ -142,7 +142,7 @@ int CHAMELEON_zgetrs( cham_trans_t trans, int N, int NRHS,
     P = chameleon_desc_datadist_get_iparam( &descAt, 0 );
     Q = chameleon_desc_datadist_get_iparam( &descAt, 1 );
 
-    ws = CHAMELEON_zgetrf_WS_Alloc( &descBt );
+    ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, &descBt );
     CHAMELEON_Ipiv_Create( &descIPIV, ChamLeft, descAt.mb, N, P, P*Q, IPIV );
     CHAMELEON_Ipiv_Init( descIPIV );
 
@@ -159,7 +159,7 @@ int CHAMELEON_zgetrs( cham_trans_t trans, int N, int NRHS,
 
     /* Cleanup the temporary data */
     CHAMELEON_Ipiv_Destroy( &descIPIV );
-    CHAMELEON_zgetrf_WS_Free( ws );
+    CHAMELEON_zlaswp_WS_Free( ws );
     chameleon_ztile2lap_cleanup( chamctxt, &descAl, &descAt );
     chameleon_ztile2lap_cleanup( chamctxt, &descBl, &descBt );
 
@@ -238,14 +238,14 @@ int CHAMELEON_zgetrs_Tile( cham_trans_t trans,
     }
     chameleon_sequence_create( chamctxt, &sequence );
 
-    ws = CHAMELEON_zgetrf_WS_Alloc( B );
+    ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, B );
 
     CHAMELEON_zgetrs_Tile_Async( trans, A, IPIV, B, ws, sequence, &request );
 
     CHAMELEON_Desc_Flush( A, sequence );
     CHAMELEON_Desc_Flush( B, sequence );
 
-    CHAMELEON_zgetrf_WS_Free( ws );
+    CHAMELEON_zlaswp_WS_Free( ws );
 
     chameleon_sequence_wait( chamctxt, sequence );
     status = sequence->status;
@@ -365,7 +365,7 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
     }
 
     if ( user_ws == NULL ) {
-        ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, A );
+        ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, B );
     }
     else {
         ws = user_ws;
