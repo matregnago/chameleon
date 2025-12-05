@@ -126,7 +126,6 @@ testing_start( testdata_t *tdata )
 {
     tdata->sequence         = NULL;
     tdata->request.status   = 0;
-    tdata->request.schedopt = NULL;
 
 #if defined(CHAMELEON_TESTINGS_VENDOR)
     /*

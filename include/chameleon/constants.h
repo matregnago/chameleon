@@ -362,11 +362,6 @@ typedef enum chameleon_getrf_allreduce_e {
 #define CHAMELEON_RUNTIME           9
 
 /**
- *  CHAMELEON constants - configuration parameters for a request
- */
-#define CHAMELEON_REQUEST_WORKERID 1
-
-/**
  * @brief QR/LQ factorization trees
  */
 typedef enum chameleon_householder_e {

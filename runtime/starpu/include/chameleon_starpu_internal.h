@@ -47,13 +47,6 @@ typedef struct CHAM_context_starpu_s
 } CHAM_context_starpu_t;
 
 /**
- * @brief StarPU specific request field stored in the schedopt field
- */
-typedef struct RUNTIME_request_starpu_s {
-    int workerid; // to force task execution on a specific workerid
-} RUNTIME_request_starpu_t;
-
-/**
  * @brief Convert the Chameleon access enum to the StarPU one
  */
 static inline int cham_to_starpu_access( cham_access_t accessA ) {

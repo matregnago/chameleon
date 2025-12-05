@@ -312,35 +312,6 @@ module chameleon
          end function CHAMELEON_Sequence_Flush_c
       end interface
 
-      interface
-         function CHAMELEON_Request_Create_c(req) &
-          & bind(c, name='CHAMELEON_Request_Create')
-            use iso_c_binding
-            integer(kind=c_int) :: CHAMELEON_Request_Create_c
-            type(c_ptr) :: req
-         end function CHAMELEON_Request_Create_c
-      end interface
-
-      interface
-         function CHAMELEON_Request_Destroy_c(req) &
-          & bind(c, name='CHAMELEON_Request_Destroy')
-            use iso_c_binding
-            integer(kind=c_int) :: CHAMELEON_Request_Destroy_c
-            type(c_ptr), value :: req
-         end function CHAMELEON_Request_Destroy_c
-      end interface
-
-      interface
-         function CHAMELEON_Request_Set_c(req, param, pval) &
-          & bind(c, name='CHAMELEON_Request_Set')
-            use iso_c_binding
-            integer(kind=c_int) :: CHAMELEON_Request_Set_c
-            type(c_ptr) :: req
-            integer(kind=c_int), value :: param
-            integer(kind=c_int), value :: pval
-         end function CHAMELEON_Request_Set_c
-      end interface
-
       interface chameleon_lapack_to_tile
          module procedure chameleon_lapack_to_tile_s
          module procedure chameleon_lapack_to_tile_d
@@ -621,21 +592,5 @@ module chameleon
       integer(kind=c_int), intent(out) :: info
       info = chameleon_sequence_flush_c(sequence,request)
    end subroutine chameleon_sequence_flush
-
-   subroutine chameleon_request_create(request,info)
-      use iso_c_binding
-      implicit none
-      type(c_ptr), intent(out) :: request
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_request_create_c(request)
-   end subroutine chameleon_request_create
-
-   subroutine chameleon_request_destroy(request,info)
-      use iso_c_binding
-      implicit none
-      type(c_ptr), intent(in) :: request
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_request_destroy_c(request)
-   end subroutine chameleon_request_destroy
 
 end module chameleon
