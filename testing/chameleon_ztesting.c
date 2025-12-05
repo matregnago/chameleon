@@ -249,9 +249,12 @@ int main (int argc, char **argv) {
 #if defined(CHAMELEON_USE_HIP)
         restriction |= RUNTIME_HIP;
 #endif
+#if defined(CHAMELEON_USE_CUDA) || defined(CHAMELEON_USE_HIP)
         if ( restriction != 0 ) {
             RUNTIME_zlocality_allrestrict( restriction );
         }
+#endif
+        (void)restriction;
 #endif
     }
 
