@@ -370,11 +370,11 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
         chameleon_sequence_wait( chamctxt, sequence );
     }
 
-    if ( user_ws == NULL ) {
-        CHAMELEON_zgetrf_WS_Free( ws );
-    }
     if ( ws_laswp != ws->laswp ) {
         CHAMELEON_zlaswp_WS_Free( ws_laswp );
+    }
+    if ( user_ws == NULL ) {
+        CHAMELEON_zgetrf_WS_Free( ws );
     }
     return CHAMELEON_SUCCESS;
 }
