@@ -49,7 +49,7 @@ testing_zlaswp_ipiv_gen( int *IPIV,
 int
 testing_zlaswp_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

@@ -32,7 +32,7 @@
 int
 testing_ztrsm_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */
@@ -106,7 +106,7 @@ testing_ztrsm_desc( run_arg_list_t *args, int check )
 int
 testing_ztrsm_std( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

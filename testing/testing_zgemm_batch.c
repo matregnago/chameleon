@@ -33,7 +33,7 @@ flops_zgemm_batch( int nb, int M, int N, int K )
 int
 testing_zgemm_batch_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

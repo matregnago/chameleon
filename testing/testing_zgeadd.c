@@ -44,7 +44,7 @@ flops_zgeadd( int _M, int _N )
 int
 testing_zgeadd_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */
@@ -120,7 +120,7 @@ testing_zgeadd_desc( run_arg_list_t *args, int check )
 int
 testing_zgeadd_std( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

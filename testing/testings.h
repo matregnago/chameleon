@@ -275,6 +275,9 @@ typedef struct testdata_ {
     RUNTIME_request_t   request;  /**< The request to run the test if splitsub  */
 } testdata_t;
 
+#define TESTINGS_TESTDATA_INITIALIZER { .args = args, .hres = CHAMELEON_ERR_NOT_INITIALIZED, \
+            .texec = 0., .tsub = 0., .sequence = NULL, .request = RUNTIME_REQUEST_INITIALIZER }
+
 /**
  * @brief Structure to store the read parameters for a quicker access
  */
