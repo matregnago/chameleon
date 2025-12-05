@@ -61,7 +61,7 @@ flops_zlansy( cham_normtype_t ntype, int _N )
 int
 testing_zlansy_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */
@@ -116,7 +116,7 @@ testing_zlansy_desc( run_arg_list_t *args, int check )
 int
 testing_zlansy_std( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

@@ -205,11 +205,6 @@ int CHAMELEON_Sequence_Destroy (RUNTIME_sequence_t *sequence);
 int CHAMELEON_Sequence_Wait    (RUNTIME_sequence_t *sequence);
 int CHAMELEON_Sequence_Flush   (RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 
-/* Requests */
-int CHAMELEON_Request_Create  (RUNTIME_request_t **request);
-int CHAMELEON_Request_Destroy (RUNTIME_request_t *request);
-int CHAMELEON_Request_Set     (RUNTIME_request_t *request, int param, int value);
-
 int  CHAMELEON_Recursive_Desc_Create( CHAM_desc_t **descptr, void *mat,
                                       cham_flttype_t dtyp, cham_rec_t rec, int rarg,
                                       int *mb, int *nb, int lm, int ln, int m, int n, int p, int q,

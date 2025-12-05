@@ -33,7 +33,7 @@ flops_ztrsm_batch( int nb, cham_side_t side, int M, int N )
 int
 testing_ztrsm_batch_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

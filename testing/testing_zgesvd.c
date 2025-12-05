@@ -61,7 +61,7 @@ flops_zgesvd( int M, int N, int K, cham_job_t jobu, cham_job_t jobvt )
 int
 testing_zgesvd_desc( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */
@@ -177,7 +177,7 @@ testing_zgesvd_desc( run_arg_list_t *args, int check )
 int
 testing_zgesvd_std( run_arg_list_t *args, int check )
 {
-    testdata_t test_data = { .args = args };
+    testdata_t test_data = TESTINGS_TESTDATA_INITIALIZER;
     int        hres      = 0;
 
     /* Read arguments */

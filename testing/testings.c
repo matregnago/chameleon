@@ -124,10 +124,6 @@ testing_options_init( testing_options_t *options )
 void
 testing_start( testdata_t *tdata )
 {
-    tdata->sequence         = NULL;
-    tdata->request.status   = 0;
-    tdata->request.schedopt = NULL;
-
 #if defined(CHAMELEON_TESTINGS_VENDOR)
     /*
      * If we test the vendor functions, we want to use all the threads of the

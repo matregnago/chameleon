@@ -26,13 +26,12 @@ void RUNTIME_options_init( RUNTIME_option_t     *options,
                            RUNTIME_sequence_t   *sequence,
                            RUNTIME_request_t    *request )
 {
-    RUNTIME_request_starpu_t* schedopt = (RUNTIME_request_starpu_t *)(request->schedopt);
     options->sequence  = sequence;
     options->request   = request;
     options->profiling = CHAMELEON_STATISTICS == CHAMELEON_TRUE;
     options->parallel  = CHAMELEON_PARALLEL == CHAMELEON_TRUE;
     options->priority  = RUNTIME_PRIORITY_MIN;
-    options->workerid  = (schedopt == NULL) ? -1 : schedopt->workerid;
+    options->workerid  = -1;
     options->forcesub  = 0;
     options->withlacpy = !(chamctxt->optlacpy_enabled);
     options->withcuda  = (chamctxt->ncudas > 0);
