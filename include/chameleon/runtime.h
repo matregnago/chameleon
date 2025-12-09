@@ -657,8 +657,7 @@ void RUNTIME_pivot_flushk( RUNTIME_sequence_t *sequence,
                            const CHAM_desc_pivot_t *pivot, int m );
 void RUNTIME_pivot_flush ( RUNTIME_sequence_t      *sequence,
                            const CHAM_desc_pivot_t *pivot );
-void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
-void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
+void *RUNTIME_pivot_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
 
 void RUNTIME_ipiv_create ( CHAM_ipiv_t *ipiv );
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv );
@@ -683,20 +682,11 @@ void RUNTIME_perm_flushk( RUNTIME_sequence_t *sequence,
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m );
 void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int m );
 void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int m );
+
 void  RUNTIME_cpui_create ( CHAM_perm_t *ws );
 void *RUNTIME_cpui_getaddr( const CHAM_perm_t *ws, int m, int n );
 void  RUNTIME_cpui_destroy( CHAM_perm_t *ws );
 void  RUNTIME_cpui_flushk( RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
-
-static inline void *
-RUNTIME_pivot_getaddr( CHAM_desc_pivot_t *pivot, int rank, int k, int h ) {
-    if ( h%2 == 0 ) {
-        return RUNTIME_nextpiv_getaddr( pivot, rank, k, h );
-    }
-    else {
-        return RUNTIME_prevpiv_getaddr( pivot, rank, k, h );
-    }
-}
 
 /**
  * @}

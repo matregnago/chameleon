@@ -40,19 +40,8 @@ void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot )
     (void)pivot;
 }
 
-void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot,
-                               int rank, int k, int h )
-{
-    assert( 0 );
-    (void)pivot;
-    (void)rank;
-    (void)k;
-    (void)h;
-    return NULL;
-}
-
-void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot,
-                               int rank, int k, int h )
+void *RUNTIME_pivot_getaddr( const CHAM_desc_pivot_t *pivot,
+                             int rank, int k, int h )
 {
     assert( 0 );
     (void)pivot;

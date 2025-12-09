@@ -113,49 +113,33 @@ void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot )
     chameleon_starpu_tag_release( pivot->mpitag_nextpiv );
 }
 
-void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h )
+void *
+RUNTIME_pivot_getaddr( CHAM_desc_pivot_t *pivot, int rank, int k, int h )
 {
-    starpu_data_handle_t *nextpiv = (starpu_data_handle_t*)(pivot->nextpiv);
-    int                   Q       = pivot->Q;
+    starpu_data_handle_t *handle;
+    int64_t               tag;
+    int                   Q = pivot->Q;
 
-    nextpiv += rank/Q;
-    assert( nextpiv );
-
-    if ( *nextpiv != NULL ) {
-        return (void*)(*nextpiv);
+    if ( h%2 == 0 ) {
+        handle = (starpu_data_handle_t*)(pivot->nextpiv);
+        tag    = pivot->mpitag_nextpiv;
     }
-    int     owner = rank;
-    int     ncols = pivot->nb;
-    int64_t tag   = pivot->mpitag_nextpiv + owner/Q;
-
-    cppi_register( nextpiv, pivot->dtyp, ncols, tag, owner );
-
-    assert( *nextpiv );
-    (void)h;
-    return (void*)(*nextpiv);
-}
-
-void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h )
-{
-    starpu_data_handle_t *prevpiv = (starpu_data_handle_t*)(pivot->prevpiv);
-    int                   Q       = pivot->Q;
-
-    prevpiv += rank/Q;
-    assert( prevpiv );
-
-    if ( *prevpiv != NULL ) {
-        return (void*)(*prevpiv);
+    else {
+        handle = (starpu_data_handle_t*)(pivot->prevpiv);
+        tag    = pivot->mpitag_prevpiv;
     }
 
-    int     owner = rank;
-    int     ncols = pivot->nb;
-    int64_t tag   = pivot->mpitag_prevpiv + owner/Q;
+    assert( handle );
+    handle += rank / Q;
 
-    cppi_register( prevpiv, pivot->dtyp, ncols, tag, owner );
+    if ( *handle != NULL ) {
+        return (void*)(*handle);
+    }
 
-    assert( *prevpiv );
-    (void)h;
-    return (void*)(*prevpiv);
+    cppi_register( handle, pivot->dtyp, pivot->nb, tag, rank );
+
+    assert( *handle );
+    return (void*)(*handle);
 }
 
 void RUNTIME_pivot_flushk( const RUNTIME_sequence_t *sequence,
