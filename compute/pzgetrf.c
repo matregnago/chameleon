@@ -148,7 +148,7 @@ chameleon_pzgetrf_panel_facto_percol( struct chameleon_pzgetrf_s *ws,
         }
 
         /* Invalidate prevpiv because we don't need anymore */
-        RUNTIME_ipiv_invalidate( pivot, k, h-1, A->myrank );
+        RUNTIME_pivot_invalidate( pivot, A->myrank, k, h-1 );
 
 #if defined(CHAMELEON_USE_MPI)
         /* Reduce globally (between MPI processes) */
@@ -201,7 +201,7 @@ chameleon_pzgetrf_panel_facto_percol_batched( struct chameleon_pzgetrf_s *ws,
         INSERT_TASK_zgetrf_panel_offdiag_batched_flush( options, A, k, clargs, pivot );
 
         /* Invalidate prevpiv because we don't need anymore */
-        RUNTIME_ipiv_invalidate( pivot, k, h-1, A->myrank );
+        RUNTIME_pivot_invalidate( pivot, A->myrank, k, h-1 );
 
 #if defined(CHAMELEON_USE_MPI)
         /* Reduce globally (between MPI processes) */
@@ -280,7 +280,7 @@ chameleon_pzgetrf_panel_facto_blocked( struct chameleon_pzgetrf_s *ws,
             assert( j <= minmn );
 
             /* Invalidate prevpiv because we don't need anymore */
-            RUNTIME_ipiv_invalidate( pivot, k, j-1, A->myrank );
+            RUNTIME_pivot_invalidate( pivot, A->myrank, k, j-1 );
 
 #if defined(CHAMELEON_USE_MPI)
             /* Reduce globally (between MPI processes) */
@@ -368,7 +368,7 @@ chameleon_pzgetrf_panel_facto_blocked_batched( struct chameleon_pzgetrf_s *ws,
             assert( j <= minmn );
 
             /* Invalidate prevpiv because we don't need anymore */
-            RUNTIME_ipiv_invalidate( pivot, k, j-1, A->myrank );
+            RUNTIME_pivot_invalidate( pivot, A->myrank, k, j-1 );
 
 #if defined(CHAMELEON_USE_MPI)
             /* Reduce globally (between MPI processes) */

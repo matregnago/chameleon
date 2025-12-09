@@ -68,10 +68,10 @@ void RUNTIME_pivot_flush( RUNTIME_sequence_t      *sequence,
     (void)sequence;
 }
 
-void RUNTIME_ipiv_invalidate( CHAM_desc_pivot_t *pivot,
-                              int                k,
-                              int                h,
-                              int                myrank )
+void RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot,
+                               int                      myrank,
+                               int                      k,
+                               int                      h )
 {
     (void)pivot;
     (void)k;

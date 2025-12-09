@@ -190,10 +190,10 @@ void RUNTIME_pivot_flush( const RUNTIME_sequence_t *sequence,
     }
 }
 
-void RUNTIME_ipiv_invalidate( CHAM_desc_pivot_t *pivot,
-                              int                k,
-                              int                h,
-                              int                myrank )
+void RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot,
+                               int                      myrank,
+                               int                      k,
+                               int                      h )
 {
     /* Protection against incorrect h values */
     if ( h < 0 ) {
