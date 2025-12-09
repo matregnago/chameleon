@@ -121,10 +121,10 @@ insert_task_zperm_reduce_init( const RUNTIME_option_t *options,
     clargs->mb     = ipiv->mb;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     rt_starpu_insert_task(
@@ -205,10 +205,10 @@ insert_task_zperm_reduce_init( const RUNTIME_option_t *options,
     void *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zperm_reduce_init, zperm_reduce_init, zperm_init, 3 )

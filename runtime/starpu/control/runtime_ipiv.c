@@ -1,6 +1,6 @@
 /**
  *
- * @file starpu/runtime_descriptor_ipiv.c
+ * @file starpu/runtime_ipiv.c
  *
  * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
@@ -30,11 +30,11 @@ void RUNTIME_ipiv_create( CHAM_ipiv_t *ipiv )
     assert( ipiv );
     size_t                nbhandles = 3 * ipiv->mt;
     starpu_data_handle_t *handles   = calloc( nbhandles, sizeof(starpu_data_handle_t) );
-    ipiv->ipiv    = handles;
-    handles += ipiv->mt;
-    ipiv->perm    = handles;
-    handles += ipiv->mt;
-    ipiv->invp    = handles;
+    ipiv->ipiv = handles;
+    handles   += ipiv->mt;
+    ipiv->perm = handles;
+    handles   += ipiv->mt;
+    ipiv->invp = handles;
 #if defined(CHAMELEON_USE_MPI)
     /*
      * Book the number of tags required to describe pivot structure
@@ -47,8 +47,8 @@ void RUNTIME_ipiv_create( CHAM_ipiv_t *ipiv )
             chameleon_fatal_error("RUNTIME_ipiv_create", "Can't pursue computation since no more tags are available for ipiv structure");
             return;
         }
-        ipiv->mpitag_perm    = ipiv->mpitag_ipiv + ipiv->mt;
-        ipiv->mpitag_invp    = ipiv->mpitag_perm + ipiv->mt;
+        ipiv->mpitag_perm = ipiv->mpitag_ipiv + ipiv->mt;
+        ipiv->mpitag_invp = ipiv->mpitag_perm + ipiv->mt;
     }
 #endif
 }
@@ -79,160 +79,106 @@ void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv )
     }
 }
 
+static inline void*
+__runtime_ipiv_getaddr( const CHAM_ipiv_t    *ipiv,
+                        starpu_data_handle_t *handle,
+                        int64_t               tagbase,
+                        int                   m )
+{
+    int     ncols;
+    int64_t mm = m + (ipiv->i / ipiv->mb);
+
+    handle += mm;
+    if ( *handle != NULL ) {
+        return (void*)(*handle);
+    }
+
+    if ( tagbase == ipiv->mpitag_ipiv ) {
+        ncols = (mm == (ipiv->mt-1)) ? ipiv->m - mm * ipiv->mb : ipiv->mb;
+    }
+    else {
+        ncols = ipiv->mb;
+    }
+
+    starpu_vector_data_register( handle, -1, (uintptr_t)NULL, ncols, sizeof(int) );
+
+#if defined(CHAMELEON_USE_MPI)
+    {
+        int                owner = ipiv->get_rankof( ipiv, m, m );
+        int64_t            tag   = tagbase + mm;
+        starpu_mpi_data_register( *handle, tag, owner );
+    }
+#endif /* defined(CHAMELEON_USE_MPI) */
+
+    assert( *handle );
+    return (void*)(*handle);
+}
+
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m )
 {
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(ipiv->ipiv);
-    int64_t mm = m + (ipiv->i / ipiv->mb);
-
-    handle += mm;
-    assert( handle );
-
-    if ( *handle != NULL ) {
-        return (void*)(*handle);
-    }
-
-    int ncols = (mm == (ipiv->mt-1)) ? ipiv->m - mm * ipiv->mb : ipiv->mb;
-
-    starpu_vector_data_register( handle, -1, (uintptr_t)NULL, ncols, sizeof(int) );
-
-#if defined(CHAMELEON_USE_MPI)
-    {
-        int                owner = ipiv->get_rankof( ipiv, m, m );
-        int64_t            tag   = ipiv->mpitag_ipiv + mm;
-        starpu_mpi_data_register( *handle, tag, owner );
-    }
-#endif /* defined(CHAMELEON_USE_MPI) */
-
-    assert( *handle );
-    return (void*)(*handle);
+    return __runtime_ipiv_getaddr( ipiv, ipiv->ipiv, ipiv->mpitag_ipiv, m );
 }
 
-void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int m )
+void *RUNTIME_ipiv_getperm( const CHAM_ipiv_t *ipiv, int m )
 {
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(ipiv->perm);
-    int64_t mm = m + (ipiv->i / ipiv->mb);
-
-    handle += mm;
-    assert( handle );
-
-    if ( *handle != NULL ) {
-        return (void*)(*handle);
-    }
-
-    int ncols = ipiv->mb;
-
-    starpu_vector_data_register( handle, -1, (uintptr_t)NULL, ncols, sizeof(int) );
-
-#if defined(CHAMELEON_USE_MPI)
-    {
-        int                owner = ipiv->get_rankof( ipiv, m, m );
-        int64_t            tag   = ipiv->mpitag_perm + mm;
-        starpu_mpi_data_register( *handle, tag, owner );
-    }
-#endif /* defined(CHAMELEON_USE_MPI) */
-
-    assert( *handle );
-    return (void*)(*handle);
+    return __runtime_ipiv_getaddr( ipiv, ipiv->perm, ipiv->mpitag_perm, m );
 }
 
-void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int m )
+void *RUNTIME_ipiv_getinvp( const CHAM_ipiv_t *ipiv, int m )
 {
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(ipiv->invp);
-    int64_t mm = m + (ipiv->i / ipiv->mb);
-
-    handle += mm;
-    assert( handle );
-
-    if ( *handle != NULL ) {
-        return (void*)(*handle);
-    }
-
-    int ncols = ipiv->mb;
-
-    starpu_vector_data_register( handle, -1, (uintptr_t)NULL, ncols, sizeof(int) );
-
-#if defined(CHAMELEON_USE_MPI)
-    {
-        int                owner = ipiv->get_rankof( ipiv, m, m );
-        int64_t            tag   = ipiv->mpitag_invp + mm;
-        starpu_mpi_data_register( *handle, tag, owner );
-    }
-#endif /* defined(CHAMELEON_USE_MPI) */
-
-    assert( *handle );
-    return (void*)(*handle);
+    return __runtime_ipiv_getaddr( ipiv, ipiv->invp, ipiv->mpitag_invp, m );
 }
 
-void RUNTIME_ipiv_flush( RUNTIME_sequence_t *sequence,
-                         const CHAM_ipiv_t  *ipiv )
+static inline void
+__runtime_ipiv_flushone( RUNTIME_sequence_t   *sequence,
+                         const CHAM_ipiv_t    *ipiv,
+                         starpu_data_handle_t *handle,
+                         int64_t               shift )
+{
+    handle += shift;
+
+    if ( *handle == NULL ) {
+        return;
+    }
+
+#if defined(CHAMELEON_USE_MPI)
+    starpu_mpi_cache_flush( sequence->comm, *handle );
+    if ( starpu_mpi_data_get_rank( *handle ) == ipiv->myrank )
+#endif
+    {
+        chameleon_starpu_data_wont_use( *handle );
+    }
+
+    (void)sequence;
+    (void)ipiv;
+}
+
+void RUNTIME_ipiv_flushone( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e which, const CHAM_ipiv_t *ipiv, int m )
+{
+    int64_t mm = m + ( ipiv->i / ipiv->mb );
+
+    if ( which & CHAMIPIV_IPIV ) {
+        __runtime_ipiv_flushone( sequence, ipiv, ipiv->ipiv, mm );
+    }
+    if ( which & CHAMIPIV_PERM ) {
+        __runtime_ipiv_flushone( sequence, ipiv, ipiv->perm, mm );
+    }
+    if ( which & CHAMIPIV_INVP ) {
+        __runtime_ipiv_flushone( sequence, ipiv, ipiv->invp, mm );
+    }
+}
+
+
+void RUNTIME_ipiv_flushall( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e which, const CHAM_ipiv_t *ipiv )
 {
     int m;
 
     for (m = 0; m < ipiv->mt; m++)
     {
-        RUNTIME_ipiv_flushk( sequence, ipiv, m );
+        RUNTIME_ipiv_flushone( sequence, which, ipiv, m );
     }
-}
-
-void RUNTIME_ipiv_flushk( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t *ipiv, int m )
-{
-    starpu_data_handle_t *handle;
-    int64_t mm = m + ( ipiv->i / ipiv->mb );
-
-    handle = (starpu_data_handle_t*)(ipiv->ipiv);
-    handle += mm;
-
-    if ( *handle != NULL ) {
-#if defined(CHAMELEON_USE_MPI)
-        starpu_mpi_cache_flush( sequence->comm, *handle );
-        if ( starpu_mpi_data_get_rank( *handle ) == ipiv->myrank )
-#endif
-        {
-            chameleon_starpu_data_wont_use( *handle );
-        }
-    }
-
-    (void)sequence;
-    (void)ipiv;
-    (void)m;
-}
-
-void RUNTIME_perm_flushk( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t *ipiv, int m )
-{
-    starpu_data_handle_t *handle;
-    int64_t mm = m + ( ipiv->i / ipiv->mb );
-
-    handle = (starpu_data_handle_t*)(ipiv->perm);
-    handle += mm;
-
-    if ( *handle != NULL ) {
-#if defined(CHAMELEON_USE_MPI)
-        starpu_mpi_cache_flush( sequence->comm, *handle );
-        if ( starpu_mpi_data_get_rank( *handle ) == ipiv->myrank )
-#endif
-        {
-            chameleon_starpu_data_wont_use( *handle );
-        }
-    }
-
-    handle = (starpu_data_handle_t*)(ipiv->invp);
-    handle += mm;
-
-    if ( *handle != NULL ) {
-#if defined(CHAMELEON_USE_MPI)
-        starpu_mpi_cache_flush( sequence->comm, *handle );
-        if ( starpu_mpi_data_get_rank( *handle ) == ipiv->myrank )
-#endif
-        {
-            chameleon_starpu_data_wont_use( *handle );
-        }
-    }
-
-    (void)sequence;
-    (void)ipiv;
-    (void)m;
 }
 
 void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
@@ -273,113 +219,5 @@ void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
     }
 
     chameleon_starpu_tag_release( tag );
-}
-
-void RUNTIME_cpui_create( CHAM_perm_t *ws )
-{
-    size_t                nbhandles = ( ws->side == ChamLeft ) ? ws->nt * ws->NP :
-                                                                 ws->mt * ws->NP;
-    starpu_data_handle_t *handles = calloc( nbhandles, sizeof(starpu_data_handle_t) );
-
-    ws->ws = handles;
-
-#if defined(CHAMELEON_USE_MPI)
-    /*
-     * Book the number of tags required to describe workspace structure
-     * One per handle type
-     */
-    {
-        chameleon_starpu_tag_init();
-        ws->mpitag_ws = chameleon_starpu_tag_book( nbhandles );
-        if ( ws->mpitag_ws == -1 ) {
-            chameleon_fatal_error("RUNTIME_cpui_create", "Can't pursue computation since no more tags are available for workspace structure");
-            return;
-        }
-    }
-#endif
-}
-
-void *
-RUNTIME_cpui_getaddr( const CHAM_perm_t *ws,
-                      int                m,
-                      int                n )
-{
-    starpu_data_handle_t *ptr_ws = (starpu_data_handle_t*)(ws->ws);
-    int                   ws_idx = ( ws->side == ChamLeft) ? m + n * ws->NP :
-                                                             n + m * ws->NP;
-    cham_side_t           side   = ws->side;
-    int                   ncols, mrows;
-
-    ptr_ws += ws_idx;
-    assert( ptr_ws );
-
-    if ( *ptr_ws != NULL ) {
-        return (void*)(*ptr_ws);
-    }
-
-    int owner = ( side == ChamLeft ) ? m : n;
-
-    if ( side == ChamLeft ) {
-        ncols = ( n == ws->nt - 1 ) ? ws->n - n * ws->nb : ws->nb ;
-        mrows = ws->mb;
-    }
-    else {
-        ncols = ( m == ws->mt - 1 ) ? ws->m - m * ws->mb : ws->mb ;
-        mrows = ws->nb;
-    }
-
-    int64_t tag   = ws->mpitag_ws + ws_idx;
-
-    cpui_register( ptr_ws, side, ws->dtyp, mrows, ncols, tag, owner );
-
-    assert( *ptr_ws );
-    return (void*)(*ptr_ws);
-}
-
-/**
- *  Destroy workspace runtime structures
- */
-void RUNTIME_cpui_destroy( CHAM_perm_t *ws )
-{
-    size_t                i;
-    starpu_data_handle_t *handle    = (starpu_data_handle_t*)(ws->ws);
-    size_t                nbhandles = ( ws->side == ChamLeft ) ? ws->nt * ws->NP :
-                                                                 ws->mt * ws->NP;
-
-    for( i = 0; i < nbhandles; i++ ) {
-        if ( *handle != NULL ) {
-            starpu_data_unregister_submit( *handle );
-            *handle = NULL;
-        }
-        handle++;
-    }
-
-    free( ws->ws );
-    ws->ws = NULL;
-    chameleon_starpu_tag_release( ws->mpitag_ws );
-}
-
-void RUNTIME_cpui_flushk( RUNTIME_sequence_t *sequence,
-                          int                 rank,
-                          const CHAM_perm_t  *ws,
-                          int                 m,
-                          int                 n )
-{
-    starpu_data_handle_t *handle;
-    int                   ws_idx = ( ws->side == ChamLeft) ? m + n * ws->NP :
-                                                             n + m * ws->NP;
-
-    handle = (starpu_data_handle_t*)(ws->ws);
-    handle += ws_idx;
-
-    if ( *handle != NULL ) {
-#if defined(CHAMELEON_USE_MPI)
-        starpu_mpi_cache_flush( sequence->comm, *handle );
-        if ( starpu_mpi_data_get_rank( *handle ) == rank )
-#endif
-        {
-            chameleon_starpu_data_wont_use( *handle );
-        }
-    }
 }
 

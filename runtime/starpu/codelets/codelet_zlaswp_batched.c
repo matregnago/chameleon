@@ -122,12 +122,12 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
     }
 
     if ( dir == ChamDirForward ){
-        ipiv_handle_get = RUNTIME_perm_getaddr( ipiv, ipivk );
-        ipiv_handle_set = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle_get = RUNTIME_ipiv_getperm( ipiv, ipivk );
+        ipiv_handle_set = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
     else {
-        ipiv_handle_get = RUNTIME_invp_getaddr( ipiv, ipivk );
-        ipiv_handle_set = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle_get = RUNTIME_ipiv_getinvp( ipiv, ipivk );
+        ipiv_handle_set = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
 
     nhandles = clargs->tasks_nbr;
@@ -167,12 +167,12 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
     }
 
     if ( dir == ChamDirForward ){
-        ipiv_handle_get = RUNTIME_perm_getaddr( ipiv, ipivk );
-        ipiv_handle_set = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle_get = RUNTIME_ipiv_getperm( ipiv, ipivk );
+        ipiv_handle_set = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
     else {
-        ipiv_handle_get = RUNTIME_invp_getaddr( ipiv, ipivk );
-        ipiv_handle_set = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle_get = RUNTIME_ipiv_getinvp( ipiv, ipivk );
+        ipiv_handle_set = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
 
     INSERT_TASK_COMMON_PARAMETERS( zlaswp_batched, myclargs->tasks_nbr + 4 );

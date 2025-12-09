@@ -195,6 +195,15 @@ typedef int (*blkdim_ipiv_fct_t)    ( const CHAM_ipiv_t*, int );
 typedef int (*blkrankof_ipiv_fct_t) ( const CHAM_ipiv_t*, int, int );
 
 /**
+ * Bitwise enum to manage the three vectors stored in the CHAM_ipiv_t structure
+ */
+typedef enum cham_ipiv_ {
+    CHAMIPIV_IPIV = (1 << 0),
+    CHAMIPIV_PERM = (1 << 1),
+    CHAMIPIV_INVP = (1 << 2),
+} CHAM_ipiv_e;
+
+/**
  *  CHAMELEON structure to hold pivot informations for the LU factorization with partial pivoting
  */
 struct chameleon_ipiv_s {

@@ -671,6 +671,16 @@ void  RUNTIME_pivot_flushall  ( RUNTIME_sequence_t      *sequence,
 void *RUNTIME_pivot_getaddr   ( const CHAM_desc_pivot_t *pivot, int rank, int h );
 void  RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot, int rank, int h );
 
+/**
+ * @}
+ *
+ * @name RUNTIME ipiv structure management
+ * @{
+ *
+ *  The ipiv structure is used to manage the ipiv, perm and invp vectors used in
+ *  pivoting and permutation operations. This holds the permutation information,
+ *  bt is not used to apply the permutation (see perm stucture).
+ */
 void RUNTIME_ipiv_create ( CHAM_ipiv_t *ipiv );
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv );
 void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
@@ -678,18 +688,17 @@ void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
                           int                *ipiv,
                           int                 node );
 
-void RUNTIME_ipiv_flushk( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t  *ipiv,
-                          int                 m );
-void RUNTIME_ipiv_flush ( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t  *ipiv );
-void RUNTIME_perm_flushk( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t  *ipiv,
-                          int                 m );
+void RUNTIME_ipiv_flushone( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e         which,
+                            const CHAM_ipiv_t  *ipiv,
+                            int                 m );
+void RUNTIME_ipiv_flushall( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e         which,
+                            const CHAM_ipiv_t  *ipiv );
 
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m );
-void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int m );
-void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int m );
+void *RUNTIME_ipiv_getperm( const CHAM_ipiv_t *ipiv, int m );
+void *RUNTIME_ipiv_getinvp( const CHAM_ipiv_t *ipiv, int m );
 
 void  RUNTIME_cpui_create ( CHAM_perm_t *ws );
 void *RUNTIME_cpui_getaddr( const CHAM_perm_t *ws, int m, int n );

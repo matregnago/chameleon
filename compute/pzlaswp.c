@@ -245,7 +245,7 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
 
                 chameleon_pzlaswp_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, k, n, &options, sequence );
             }
-            RUNTIME_perm_flushk( sequence, IPIV, k );
+            RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
     }
     else {
@@ -254,7 +254,7 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
                 options.priority = A->nt-n;
                 chameleon_pzlaswp_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, k, n, &options, sequence );
             }
-            RUNTIME_perm_flushk( sequence, IPIV, k );
+            RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
     }
     RUNTIME_options_finalize( &options, chamctxt );

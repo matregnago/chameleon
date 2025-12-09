@@ -73,10 +73,10 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
     clargs->k    = k;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
     //void (*callback)(void*) = options->profiling ? cl_zlaswp_get_callback : NULL;
 
@@ -110,10 +110,10 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
     }
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zlaswp_get, zlaswp_get, zlaswp, 3);
@@ -206,10 +206,10 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
     clargs->k    = k;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
 
     //void (*callback)(void*) = options->profiling ? cl_zlaswp_set_callback : NULL;
@@ -244,10 +244,10 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
     }
 
     if( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
 
     INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zlaswp_set, zlaswp_set, zlaswp, 3);

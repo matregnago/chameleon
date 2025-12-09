@@ -675,7 +675,7 @@ void chameleon_pzgetrf( struct chameleon_pzgetrf_s *ws,
                 }
                 chameleon_data_flush( sequence, Wu(A->myrank, n), request->flush );
             }
-            RUNTIME_perm_flushk( sequence, IPIV, k );
+            RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
     }
     CHAMELEON_Desc_Flush( ws->laswp->Wu, sequence );

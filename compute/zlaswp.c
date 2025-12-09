@@ -559,9 +559,9 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
                 if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
                     continue;
                 }
-                INSERT_TASK_ipiv_to_perm( &options, m0, tempkm, tempkm, K1 - 1, K2 - 1,
-                                          IPIV, k );
-                RUNTIME_ipiv_flushk( sequence, IPIV, k);
+                INSERT_TASK_ipiv_to_perm( &options, m0, tempkm, tempkm,
+                                          K1 - 1, K2 - 1, IPIV, k );
+                RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
             }
         }
         else {
@@ -573,9 +573,9 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
                 if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
                     continue;
                 }
-                INSERT_TASK_ipiv_to_perm( &options, n0, tempkn, tempkn, K1 - 1, K2 - 1,
-                                          IPIV, k );
-                RUNTIME_ipiv_flushk( sequence, IPIV, k);
+                INSERT_TASK_ipiv_to_perm( &options, n0, tempkn, tempkn,
+                                          K1 - 1, K2 - 1, IPIV, k );
+                RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
             }
         }
     }

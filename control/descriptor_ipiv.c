@@ -280,10 +280,10 @@ int CHAMELEON_Ipiv_Destroy( CHAM_ipiv_t **ipivptr )
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t        *ipiv,
-                          const RUNTIME_sequence_t *sequence )
+int CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t  *ipiv,
+                          RUNTIME_sequence_t *sequence )
 {
-    RUNTIME_ipiv_flush( sequence, ipiv );
+    RUNTIME_ipiv_flushall( sequence, -1, ipiv );
     return CHAMELEON_SUCCESS;
 }
 

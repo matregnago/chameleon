@@ -1,6 +1,6 @@
 /**
  *
- * @file quark/runtime_descriptor_ipiv.c
+ * @file quark/runtime_ipiv.c
  *
  * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
@@ -40,7 +40,7 @@ void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m )
     return NULL;
 }
 
-void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int k )
+void *RUNTIME_ipiv_getperm( const CHAM_ipiv_t *ipiv, int k )
 {
     assert( 0 );
     (void)ipiv;
@@ -48,7 +48,7 @@ void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int k )
     return NULL;
 }
 
-void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int k )
+void *RUNTIME_ipiv_getinvp( const CHAM_ipiv_t *ipiv, int k )
 {
     assert( 0 );
     (void)ipiv;
@@ -56,30 +56,26 @@ void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int k )
     return NULL;
 }
 
-void RUNTIME_ipiv_flushk( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t *ipiv, int m )
+void RUNTIME_ipiv_flushone( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e         which,
+                            const CHAM_ipiv_t  *ipiv,
+                            int                 m )
 {
     assert( 0 );
     (void)sequence;
+    (void)which;
     (void)ipiv;
     (void)m;
 }
 
-void RUNTIME_ipiv_flush( RUNTIME_sequence_t *sequence,
-                         const CHAM_ipiv_t  *ipiv )
-{
-    assert( 0 );
-    (void)ipiv;
-    (void)sequence;
-}
-
-void RUNTIME_perm_flushk( RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t *ipiv, int m )
+void RUNTIME_ipiv_flushall( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e         which,
+                            const CHAM_ipiv_t  *ipiv )
 {
     assert( 0 );
     (void)sequence;
+    (void)which;
     (void)ipiv;
-    (void)m;
 }
 
 void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
