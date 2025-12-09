@@ -114,7 +114,7 @@ void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot )
 }
 
 void *
-RUNTIME_pivot_getaddr( CHAM_desc_pivot_t *pivot, int rank, int k, int h )
+RUNTIME_pivot_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int h )
 {
     starpu_data_handle_t *handle;
     int64_t               tag;
@@ -136,14 +136,15 @@ RUNTIME_pivot_getaddr( CHAM_desc_pivot_t *pivot, int rank, int k, int h )
         return (void*)(*handle);
     }
 
+    tag += rank / Q;
     cppi_register( handle, pivot->dtyp, pivot->nb, tag, rank );
 
     assert( *handle );
     return (void*)(*handle);
 }
 
-void RUNTIME_pivot_flushk( const RUNTIME_sequence_t *sequence,
-                           const CHAM_desc_pivot_t *pivot, int rank )
+void RUNTIME_pivot_flushone( RUNTIME_sequence_t      *sequence,
+                             const CHAM_desc_pivot_t *pivot, int rank )
 {
     starpu_data_handle_t *handle;
     int                   Q = pivot->Q;
@@ -179,25 +180,24 @@ void RUNTIME_pivot_flushk( const RUNTIME_sequence_t *sequence,
     (void)rank;
 }
 
-void RUNTIME_pivot_flush( const RUNTIME_sequence_t *sequence,
-                          const CHAM_desc_pivot_t  *pivot )
+void RUNTIME_pivot_flushall( RUNTIME_sequence_t      *sequence,
+                             const CHAM_desc_pivot_t *pivot )
 {
     int m;
 
     for (m = 0; m < pivot->Q; m++)
     {
-        RUNTIME_pivot_flushk( sequence, pivot, m );
+        RUNTIME_pivot_flushone( sequence, pivot, m );
     }
 }
 
 void RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot,
-                               int                      myrank,
-                               int                      k,
+                               int                      rank,
                                int                      h )
 {
     /* Protection against incorrect h values */
     if ( h < 0 ) {
         return;
     }
-    starpu_data_invalidate_submit( RUNTIME_pivot_getaddr( pivot, myrank, k, h ) );
+    starpu_data_invalidate_submit( RUNTIME_pivot_getaddr( pivot, rank, h ) );
 }

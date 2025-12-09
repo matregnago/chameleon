@@ -94,7 +94,7 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
         &cl_zgetrf_cpy_pivrow_in_Up,
         STARPU_CL_ARGS,           clargs, sizeof(struct cl_zgetrf_cpy_args_s),
         accessUp,                 RTBLKADDR(Up, CHAMELEON_Complex64_t, Upm, 0),
-        STARPU_R,                 RUNTIME_pivot_getaddr( pivot, Up->myrank, k, h ),
+        STARPU_R,                 RUNTIME_pivot_getaddr( pivot, Up->myrank, h ),
         STARPU_EXECUTE_ON_NODE,   Up->myrank,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_PRIORITY,          options->priority,
@@ -123,7 +123,7 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
 
     starpu_cham_exchange_init_params( options, &params, rankUp );
     starpu_cham_register_descr( &nbdata, descrs, RTBLKADDR( Up, ChamComplexDouble, Upm, 0 ),     accessUp );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, Up->myrank, k, h ), STARPU_R );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, Up->myrank, h ), STARPU_R );
 
     task = starpu_task_create();
     task->cl = cl;
@@ -243,7 +243,7 @@ void INSERT_TASK_zgetrf_blocked_trsm( const RUNTIME_option_t *options,
 
         /* Task handles */
         STARPU_RW,                RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un),
-        STARPU_R,                 RUNTIME_pivot_getaddr( pivot, rankU, Un, h-1 ),
+        STARPU_R,                 RUNTIME_pivot_getaddr( pivot, rankU, h-1 ),
 
         /* Common task arguments */
         STARPU_PRIORITY,          options->priority,
@@ -280,7 +280,7 @@ void INSERT_TASK_zgetrf_blocked_trsm( const RUNTIME_option_t *options,
      */
     starpu_cham_exchange_init_params( options, &params, rankU );
     starpu_cham_register_descr( &nbdata, descrs, RTBLKADDR( U, ChamComplexDouble, Um, Un ),      STARPU_RW );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankU, Un, h-1 ), STARPU_R  );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankU, h-1 ), STARPU_R  );
 
     task = starpu_task_create();
     task->cl = cl;

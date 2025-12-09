@@ -133,8 +133,8 @@ void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
         /* Task handles */
         STARPU_RW,                RTBLKADDR(A, CHAMELEON_Complex64_t, Am, An),
         access_ipiv,              RUNTIME_ipiv_getaddr( ipiv, An ),
-        access_npiv,              RUNTIME_pivot_getaddr( pivot, rankA, An, h   ),
-        access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, An, h-1 ),
+        access_npiv,              RUNTIME_pivot_getaddr( pivot, rankA, h   ),
+        access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, h-1 ),
 
         /* Common task arguments */
         STARPU_PRIORITY,          options->priority,
@@ -172,8 +172,8 @@ void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
     starpu_cham_exchange_init_params( options, &params, rankA );
     starpu_cham_register_descr( &nbdata, descrs, RTBLKADDR( A, ChamComplexDouble, Am, An ),     STARPU_RW );
     starpu_cham_register_descr( &nbdata, descrs, RUNTIME_ipiv_getaddr( ipiv, An),               access_ipiv );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, An, h ),   access_npiv );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, An, h-1 ), access_ppiv );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, h ),   access_npiv );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, h-1 ), access_ppiv );
 
     task = starpu_task_create();
     task->cl = cl;
@@ -286,8 +286,8 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
 
         /* Task handles */
         STARPU_RW,                RTBLKADDR(A, CHAMELEON_Complex64_t, Am, An),
-        access_npiv,              RUNTIME_pivot_getaddr( pivot, rankA, An, h   ),
-        access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, An, h-1 ),
+        access_npiv,              RUNTIME_pivot_getaddr( pivot, rankA, h   ),
+        access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, h-1 ),
 
         /* Common task arguments */
         STARPU_PRIORITY,          options->priority,
@@ -322,8 +322,8 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
      */
     starpu_cham_exchange_init_params( options, &params, rankA );
     starpu_cham_register_descr( &nbdata, descrs, RTBLKADDR( A, ChamComplexDouble, Am, An ),     STARPU_RW );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, An, h ),   access_npiv );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, An, h-1 ), access_ppiv );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, h ),   access_npiv );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_pivot_getaddr( pivot, rankA, h-1 ), access_ppiv );
 
     task = starpu_task_create();
     task->cl = cl;

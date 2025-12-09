@@ -648,17 +648,28 @@ void RUNTIME_ddisplay_oneprofile (cham_tasktype_t task);
 void RUNTIME_sdisplay_allprofile ();
 void RUNTIME_sdisplay_oneprofile (cham_tasktype_t task);
 
+/**
+ * @}
+ *
+ * @name RUNTIME pivot structure management
+ * @{
+ *
+ *  The pivot structure is used to compute perform the permutation that occurs
+ *  in algorithms such as the LU factorization, this stucture handles the
+ *  selection of the pivot in a column and the exchange of the line that must be
+ *  swaped by this operation.
+ */
 void RUNTIME_pivot_create ( CHAM_desc_pivot_t *pivot );
 void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot );
 void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
                                    CHAM_desc_pivot_t  *pivot );
 
-void  RUNTIME_pivot_flushk( RUNTIME_sequence_t *sequence,
-                            const CHAM_desc_pivot_t *pivot, int m );
-void  RUNTIME_pivot_flush ( RUNTIME_sequence_t      *sequence,
-                            const CHAM_desc_pivot_t *pivot );
-void *RUNTIME_pivot_getaddr   ( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
-void  RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
+void  RUNTIME_pivot_flushone  ( RUNTIME_sequence_t      *sequence,
+                                const CHAM_desc_pivot_t *pivot, int m );
+void  RUNTIME_pivot_flushall  ( RUNTIME_sequence_t      *sequence,
+                                const CHAM_desc_pivot_t *pivot );
+void *RUNTIME_pivot_getaddr   ( const CHAM_desc_pivot_t *pivot, int rank, int h );
+void  RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot, int rank, int h );
 
 void RUNTIME_ipiv_create ( CHAM_ipiv_t *ipiv );
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv );
