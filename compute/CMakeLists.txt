@@ -43,6 +43,7 @@ set(CHAMELEON_CONTROL
     ../control/descriptor.c
     ../control/descriptor_helpers.c
     ../control/descriptor_ipiv.c
+    ../control/descriptor_pivot.c
     ../control/descriptor_rec.c
     ../control/lamch.c
     ../control/tile.c

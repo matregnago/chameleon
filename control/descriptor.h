@@ -181,8 +181,8 @@ void chameleon_ipiv_destroy( CHAM_ipiv_t *ipiv );
 int chameleon_pivot_init( CHAM_desc_pivot_t *pivot,
                           const CHAM_desc_t *desc );
 int chameleon_pivot_destroy( CHAM_desc_pivot_t *pivot );
-int chameleon_pivot_destroy_submit( CHAM_desc_pivot_t        *pivot,
-                                    const RUNTIME_sequence_t *sequence );
+int chameleon_pivot_destroy_submit( CHAM_desc_pivot_t  *pivot,
+                                    RUNTIME_sequence_t *sequence );
 
 /**
  *  Internal function to return address of block (m,n) with m,n = block indices
