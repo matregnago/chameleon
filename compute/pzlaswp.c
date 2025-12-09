@@ -198,7 +198,7 @@ chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws,
                  * Let's copy the final version of A to its final position
                  */
                 INSERT_TASK_zlaswp_ret( options, Ws(A->myrank, n), A(k, n) );
-                RUNTIME_cpui_flushk( sequence, A->myrank, Ws(A->myrank, n) );
+                RUNTIME_perm_flush( sequence, A->myrank, Ws(A->myrank, n) );
             }
         }
 #endif
@@ -210,7 +210,7 @@ chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws,
             if ( reduce->alg_allreduce == ChamStarPUTasks ) {
                 INSERT_TASK_zlaswp_ret( options, Ws(A->myrank, n), Wu(A->myrank, n) );
             }
-            RUNTIME_cpui_flushk( sequence, A->myrank, Ws(A->myrank, n) );
+            RUNTIME_perm_flush( sequence, A->myrank, Ws(A->myrank, n) );
         }
     }
 #endif

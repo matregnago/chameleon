@@ -700,10 +700,20 @@ void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m );
 void *RUNTIME_ipiv_getperm( const CHAM_ipiv_t *ipiv, int m );
 void *RUNTIME_ipiv_getinvp( const CHAM_ipiv_t *ipiv, int m );
 
-void  RUNTIME_cpui_create ( CHAM_perm_t *ws );
-void *RUNTIME_cpui_getaddr( const CHAM_perm_t *ws, int m, int n );
-void  RUNTIME_cpui_destroy( CHAM_perm_t *ws );
-void  RUNTIME_cpui_flushk( RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
+/**
+ * @}
+ *
+ * @name RUNTIME perm structure management
+ * @{
+ *
+ *  The perm structure is used to perform the permutation within a column or row
+ *  of tiles.  It temporary stres the information that must be exchanged when
+ *  applying a permutation stored in the ipiv structure to a CHAM_desc_t data..
+ */
+void  RUNTIME_perm_create ( CHAM_perm_t *ws );
+void *RUNTIME_perm_getaddr( const CHAM_perm_t *ws, int m, int n );
+void  RUNTIME_perm_destroy( CHAM_perm_t *ws );
+void  RUNTIME_perm_flush( RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
 
 /**
  * @}

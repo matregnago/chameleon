@@ -348,7 +348,7 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
     rt_starpu_insert_task(
         codelet,
         STARPU_W,                   RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_R,                   RUNTIME_cpui_getaddr( ws, Wm, Wn ),
+        STARPU_R,                   RUNTIME_perm_getaddr( ws, Wm, Wn ),
         STARPU_PRIORITY,            options->priority,
         //STARPU_CALLBACK,            callback,
         STARPU_EXECUTE_ON_WORKER,   options->workerid,
@@ -375,7 +375,7 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
     starpu_cham_exchange_init_params( options, &params, rank );
 
     starpu_cham_register_descr( &nbdata, descrs, RTBLKADDR( A, ChamComplexDouble, Am, An ), STARPU_W );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_cpui_getaddr( ws, Wm, Wn ),
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_perm_getaddr( ws, Wm, Wn ),
                                 STARPU_R );
 
     task = starpu_task_create();

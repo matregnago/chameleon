@@ -7,7 +7,7 @@
  *
  ***
  *
- * @brief Chameleon pivot panel interface for StarPU
+ * @brief Chameleon panel permutation update interface for StarPU
  *
  * @version 1.3.0
  * @author Matteo Marcos

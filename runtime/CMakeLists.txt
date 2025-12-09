@@ -150,8 +150,9 @@ set(CONTROL_SRC
   control/runtime_control.c
   control/runtime_descriptor.c
   control/runtime_ipiv.c
-  control/runtime_pivot.c
   control/runtime_options.c
+  control/runtime_perm.c
+  control/runtime_pivot.c
   control/runtime_profiling.c
 )
 

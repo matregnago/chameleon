@@ -140,7 +140,7 @@ CHAMELEON_zlaswp_WS_Alloc( cham_side_t side, const CHAM_desc_t *A )
 
 #if defined(CHAMELEON_USE_MPI)
     if ( reduce->alg_allreduce == ChamStarPUTasks ) {
-        RUNTIME_cpui_create( &(ws->ws) );
+        RUNTIME_perm_create( &(ws->ws) );
     }
 #endif
 
@@ -183,7 +183,7 @@ CHAMELEON_zlaswp_WS_Free( void *user_ws )
     }
 #if defined(CHAMELEON_USE_MPI)
     if ( ws->reduce.alg_allreduce == ChamStarPUTasks ) {
-        RUNTIME_cpui_destroy( &(ws->ws) );
+        RUNTIME_perm_destroy( &(ws->ws) );
     }
 #endif
 

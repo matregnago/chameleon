@@ -143,7 +143,7 @@ insert_task_zperm_allreduce_init( const RUNTIME_option_t *options,
         STARPU_CL_ARGS,             clargs, sizeof(struct cl_zperm_init_args_s),
         STARPU_R,                   ipiv_handle,
         STARPU_R,                   RTBLKADDR( Wu, ChamComplexDouble, Wum, Wun ),
-        STARPU_W,                   RUNTIME_cpui_getaddr( ws, Wm, Wn ),
+        STARPU_W,                   RUNTIME_perm_getaddr( ws, Wm, Wn ),
         STARPU_EXECUTE_ON_NODE,     me,
         STARPU_EXECUTE_ON_WORKER,   options->workerid,
         STARPU_PRIORITY,            options->priority,
@@ -164,7 +164,7 @@ insert_task_zperm_allreduce_send( const RUNTIME_option_t *options,
     rt_starpu_insert_task(
         NULL,
         STARPU_EXECUTE_ON_NODE, dst,
-        STARPU_R,               RUNTIME_cpui_getaddr( ws, m, n ),
+        STARPU_R,               RUNTIME_perm_getaddr( ws, m, n ),
         STARPU_PRIORITY,        options->priority,
         0 );
 }
@@ -181,12 +181,12 @@ insert_task_zperm_allreduce_recv( const RUNTIME_option_t *options,
                                   int                     n )
 {
 
-    void *cpui_handle = ( ws->side == ChamLeft ) ? RUNTIME_cpui_getaddr( ws, src, n ) :
-                                                   RUNTIME_cpui_getaddr( ws, m, src );
+    void *cpui_handle = ( ws->side == ChamLeft ) ? RUNTIME_perm_getaddr( ws, src, n ) :
+                                                   RUNTIME_perm_getaddr( ws, m, src );
 
     rt_starpu_insert_task(
         &cl_zperm_allreduce,
-        STARPU_RW,                RUNTIME_cpui_getaddr( ws, m, n ),
+        STARPU_RW,                RUNTIME_perm_getaddr( ws, m, n ),
         STARPU_R,                 cpui_handle,
         STARPU_EXECUTE_ON_NODE,   me,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
@@ -234,7 +234,7 @@ insert_task_zperm_allreduce_init( const RUNTIME_option_t *options,
                                                   ipiv_handle, STARPU_R );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
                                                   RTBLKADDR( Wu, ChamComplexDouble, Wum, Wun ), STARPU_R );
-    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_cpui_getaddr( ws, Wm, Wn ), STARPU_W );
+    starpu_cham_register_descr( &nbdata, descrs, RUNTIME_perm_getaddr( ws, Wm, Wn ), STARPU_W );
 
     task = starpu_task_create();
     task->cl = cl;
@@ -287,7 +287,7 @@ insert_task_zperm_allreduce_send( const RUNTIME_option_t *options,
 
     starpu_cham_exchange_init_params( options, &params, dst );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
-                                                  RUNTIME_cpui_getaddr( ws, m, n ),
+                                                  RUNTIME_perm_getaddr( ws, m, n ),
                                                   STARPU_R );
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
     (void)cl;
@@ -307,14 +307,14 @@ insert_task_zperm_allreduce_recv( const RUNTIME_option_t *options,
 {
     int                 ret;
     struct starpu_task *task;
-    void               *cpui_handle = ( ws->side == ChamLeft ) ? RUNTIME_cpui_getaddr( ws, src, n ) :
-                                                                 RUNTIME_cpui_getaddr( ws, m, src );
+    void               *cpui_handle = ( ws->side == ChamLeft ) ? RUNTIME_perm_getaddr( ws, src, n ) :
+                                                                 RUNTIME_perm_getaddr( ws, m, src );
 
     INSERT_TASK_COMMON_PARAMETERS( zperm_allreduce, 2 );
 
     starpu_cham_exchange_init_params( options, &params, me );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
-                                                  RUNTIME_cpui_getaddr( ws, m, n ),
+                                                  RUNTIME_perm_getaddr( ws, m, n ),
                                                   STARPU_RW );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
                                                   cpui_handle,
