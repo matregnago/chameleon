@@ -1,6 +1,6 @@
 /**
  *
- * @file starpu/runtime_descriptor_ipiv.c
+ * @file starpu/runtime_pivot.c
  *
  * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.

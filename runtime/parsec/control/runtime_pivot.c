@@ -1,13 +1,13 @@
 /**
  *
- * @file quark/runtime_descriptor_ipiv.c
+ * @file parsec/runtime_pivot.c
  *
  * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
  *
- * @brief Chameleon Quark descriptor routines
+ * @brief Chameleon PaRSEC descriptor routines
  *
  * @version 1.3.0
  * @author Mathieu Faverge
@@ -18,7 +18,7 @@
  * @date 2025-10-15
  *
  */
-#include "chameleon_quark.h"
+#include "chameleon_parsec.h"
 
 void RUNTIME_pivot_create( CHAM_desc_pivot_t *pivot )
 {
@@ -45,14 +45,12 @@ void *RUNTIME_pivot_getaddr( const CHAM_desc_pivot_t *pivot,
 {
     assert( 0 );
     (void)pivot;
-    (void)rank;
     (void)h;
     return NULL;
 }
 
 void RUNTIME_pivot_flushone( RUNTIME_sequence_t      *sequence,
-                             const CHAM_desc_pivot_t *pivot,
-                             int                      rank )
+                             const CHAM_desc_pivot_t *pivot, int rank )
 {
     assert( 0 );
     (void)sequence;

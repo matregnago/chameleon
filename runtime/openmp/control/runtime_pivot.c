@@ -1,13 +1,13 @@
 /**
  *
- * @file parsec/runtime_descriptor_ipiv.c
+ * @file openmp/runtime_pivot.c
  *
  * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
  *
- * @brief Chameleon PaRSEC descriptor routines
+ * @brief Chameleon OpenMP descriptor routines
  *
  * @version 1.3.0
  * @author Mathieu Faverge
@@ -18,7 +18,7 @@
  * @date 2025-10-15
  *
  */
-#include "chameleon_parsec.h"
+#include "chameleon_openmp.h"
 
 void RUNTIME_pivot_create( CHAM_desc_pivot_t *pivot )
 {
@@ -45,6 +45,7 @@ void *RUNTIME_pivot_getaddr( const CHAM_desc_pivot_t *pivot,
 {
     assert( 0 );
     (void)pivot;
+    (void)rank;
     (void)h;
     return NULL;
 }
