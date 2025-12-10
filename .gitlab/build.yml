@@ -84,7 +84,8 @@ build_starpu_cuda:
                     -DCHAMELEON_USE_EZTRACE=ON
                     -DBLA_VENDOR=Intel10_64lp_seq"
 
-build_starpu_hip:
+# rocm is broken for now in guix
+.build_starpu_hip:
   extends: .build_script_guix
   variables:
     VERSION: starpu_hip
