@@ -306,6 +306,7 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
     CHAM_context_t             *chamctxt;
     struct chameleon_pzgetrf_s *ws;
     struct chameleon_pzlaswp_s *ws_laswp;
+    CHAMELEON_Complex64_t       zone = (CHAMELEON_Complex64_t)1.;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -350,9 +351,6 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
         ws = user_ws;
     }
 
-    // TODO: What the fuck !!!!!!
-    IPIV->get_rankof = chameleon_getrankof_ipiv_2d_diag;
-
     chameleon_pzgetrf( ws, A, IPIV, sequence, request );
 
     if ( B->n > A->n ) {
@@ -361,7 +359,13 @@ int CHAMELEON_zgesv_Tile_Async( CHAM_desc_t        *A,
     else {
         ws_laswp = ws->laswp;
     }
-    CHAMELEON_zgetrs_Tile_Async( ChamNoTrans, A, IPIV, B, ws_laswp, sequence, request );
+    chameleon_pzlaswp( ws_laswp, ChamDirForward,
+                       B, IPIV, sequence, request );
+
+    chameleon_pztrsm( ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
+                      zone, A, B, sequence, request );
+    chameleon_pztrsm( ChamLeft, ChamUpper, ChamNoTrans, ChamNonUnit,
+                      zone, A, B, sequence, request );
 
     /* Need to wait before destroying one the two workspaces */
     if ( (user_ws == NULL) || (ws_laswp != ws->laswp) ) {

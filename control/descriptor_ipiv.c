@@ -88,8 +88,7 @@ int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
         ipiv->get_rankof = get_rankof;
     }
     else {
-        ipiv->get_rankof = ( side == ChamLeft ) ? chameleon_getrankof_ipiv_2d_row :
-                                                  chameleon_getrankof_ipiv_2d_col;
+        ipiv->get_rankof = chameleon_getrankof_ipiv_2d_diag;
     }
 
     ipiv->get_blkdim = chameleon_getblkdim_ipiv;
