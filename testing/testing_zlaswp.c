@@ -94,7 +94,7 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
 
     /* IPIV is initialized with random values that are propagated to the descriptor (should be changed in the future) */
     testing_zlaswp_ipiv_gen( IPIV, K );
-    CHAMELEON_Ipiv_Init( descIPIV );
+    CHAMELEON_Ipiv_Initialize( descIPIV );
 
     if ( async ) {
         ws = CHAMELEON_zlaswp_WS_Alloc( side, descA );

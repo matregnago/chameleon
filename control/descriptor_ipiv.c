@@ -199,7 +199,7 @@ int CHAMELEON_Ipiv_Create( CHAM_ipiv_t **ipivptr, cham_side_t side, int mb, int 
  *
  *
  */
-void CHAMELEON_Ipiv_Init( CHAM_ipiv_t *descIPIV )
+void CHAMELEON_Ipiv_Initialize( CHAM_ipiv_t *descIPIV )
 {
 
     RUNTIME_option_t    options;

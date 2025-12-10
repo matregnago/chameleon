@@ -311,7 +311,7 @@ int CHAMELEON_zlaswp( cham_side_t            side,
                          A, NB, NB, LDA, N, M, N, sequence, &request );
 
     chameleon_ipiv_init( &descIPIV, side, descAt.mb, K2, 1, 1, IPIV, NULL );
-    CHAMELEON_Ipiv_Init( &descIPIV );
+    CHAMELEON_Ipiv_Initialize( &descIPIV );
 
     /* Call the tile interface */
     ws = CHAMELEON_zlaswp_WS_Alloc( side, &descAt );
