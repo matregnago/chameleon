@@ -91,9 +91,9 @@ and [[sec:ug:brew][Brew]] on macOS.
     # Install StarPU (with MPI and FxT enabled)
     mkdir -p $HOME/install
     cd $HOME/install
-    wget https://files.inria.fr/starpu/starpu-1.4.7/starpu-1.4.7.tar.gz
-    tar xvf starpu-1.4.7.tar.gz
-    cd starpu-1.4.7
+    wget https://files.inria.fr/starpu/starpu-1.4.12/starpu-1.4.12.tar.gz
+    tar xvf starpu-1.4.12.tar.gz
+    cd starpu-1.4.12
     ./configure --prefix=/usr/local --with-fxt=/usr/lib/x86_64-linux-gnu/
     make -j5
     sudo make install
