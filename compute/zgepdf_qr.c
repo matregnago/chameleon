@@ -118,8 +118,8 @@ int CHAMELEON_zgepdf_qr_Tile( int doqr, int optid,
     CHAMELEON_Desc_Flush( Q2, sequence );
 
     if ( D1ptr != NULL ) {
-        chameleon_desc_destroy_submit( D1ptr, sequence );
-        chameleon_desc_destroy_submit( D2ptr, sequence );
+        CHAMELEON_Desc_Flush( D1ptr, sequence );
+        CHAMELEON_Desc_Flush( D2ptr, sequence );
     }
     chameleon_sequence_wait( chamctxt, sequence );
     status = sequence->status;
