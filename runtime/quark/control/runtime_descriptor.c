@@ -94,6 +94,16 @@ RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
     return;
 }
 
+void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
+                              const CHAM_desc_t *A, int Am, int An )
+{
+    (void)sequence;
+    (void)A;
+    (void)Am;
+    (void)An;
+    return;
+}
+
 #if defined(CHAMELEON_USE_MIGRATE)
 void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
                            const CHAM_desc_t *A, int Am, int An, int new_rank )

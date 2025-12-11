@@ -371,6 +371,36 @@ void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
     (void)sequence;
 }
 
+void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
+                              const CHAM_desc_t *A, int Am, int An )
+{
+    int     i, imax = 1;
+    int64_t mm      = Am + (A->i / A->mb);
+    int64_t nn      = An + (A->j / A->nb);
+    int64_t shift   = ((int64_t)(A->lmt)) * nn + mm;
+    int64_t nbtiles = ((int64_t)(A->lmt)) * ((int64_t)(A->lnt));
+    starpu_data_handle_t *handle = A->schedopt;
+    handle += shift;
+
+    if ( cham_is_mixed( A->dtyp ) ) {
+        imax = 3;
+    }
+
+    for( i=0; i<imax; i++ ) {
+        starpu_data_handle_t *handlebis;
+
+        handlebis = handle + i * nbtiles;
+
+        if ( *handlebis == NULL ) {
+            continue;
+        }
+
+        starpu_data_unregister_submit( *handlebis );
+        *handlebis = NULL;
+    }
+    (void)sequence;
+}
+
 #if defined(CHAMELEON_USE_MIGRATE)
 void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
                            const CHAM_desc_t *A, int Am, int An, int new_rank )

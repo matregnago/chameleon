@@ -455,6 +455,32 @@ RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
                     const CHAM_desc_t *A, int Am, int An );
 
 /**
+ * @brief Unregister a single piece of data.
+ *
+ * This function marks a piece of data for destruction in the future to:
+ *   - cleanup the data from the distributed cache if present.
+ *   - mark for eviction from the GPU if space is needed
+ *   - free the assciated memory if allocated by the runtime
+ * WARNING: In distributed, the data should not be re-registered before a wait
+ * to avoid tags communication conflicts.
+ *
+ * @param[in] sequence
+ *            The sequence in which the data is used.
+ *
+ * @param[in] A
+ *            The descriptor to which the piece of data belongs.
+ *
+ * @param[in] Am
+ *            The row coordinate of the piece of data in the matrix
+ *
+ * @param[in] An
+ *            The column coordinate of the piece of data in the matrix
+ */
+void
+RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
+                         const CHAM_desc_t *A, int Am, int An );
+
+/**
  * @brief Migrate a single piece of data.
  *
  * This function migrate a piece of data from its original rank to the new_rank
