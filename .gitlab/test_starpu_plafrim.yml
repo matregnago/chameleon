@@ -9,7 +9,7 @@
     - guix shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
                  --preserve=LOGNAME --preserve=BUILD_OPTIONS
                  --preserve=TESTS_RESTRICTION --preserve=SLURM_CONSTRAINTS
-                 -D chameleon-${GPU_BACKEND} ${BLAS} slurm@23 coreutils inetutils bash-minimal --
+                 -D chameleon-${VARIANT} slurm@23 coreutils inetutils bash-minimal --
                  bash .gitlab/sbatch.sh ${LOGNAME} | tee ${LOGNAME}.log
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
@@ -26,8 +26,7 @@
   needs: [build_starpu_cuda]
   variables:
     VERSION: starpu_cuda
-    GPU_BACKEND: cuda
-    BLAS: "--with-input=openblas=intel-oneapi-mkl"
+    VARIANT: "cuda-mkl"
     LOGNAME: "chameleon-${SYSTEM}-${VERSION}"
     BUILD_OPTIONS: "-DCHAMELEON_USE_CUDA=ON
                     -DCHAMELEON_USE_MPI=OFF

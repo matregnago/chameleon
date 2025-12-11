@@ -69,15 +69,14 @@ build_starpu:
     - guix shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
                  --preserve=LOGNAME --preserve=BUILD_OPTIONS
                  --preserve=CMAKE_BUILD_PARALLEL_LEVEL
-                 -D chameleon-${GPU_BACKEND} ${BLAS} eztrace coreutils bash-minimal --
+                 -D chameleon-${VARIANT} eztrace coreutils bash-minimal --
                  bash .gitlab/build.sh | tee ${LOGNAME}.log
 
 build_starpu_cuda:
   extends: .build_script_guix
   variables:
     VERSION: starpu_cuda
-    GPU_BACKEND: cuda
-    BLAS: "--with-input=openblas=intel-oneapi-mkl"
+    VARIANT: "cuda-mkl"
     LOGNAME: "chameleon-build-${SYSTEM}-${VERSION}"
     BUILD_OPTIONS: "-DCHAMELEON_USE_CUDA=ON
                     -DCHAMELEON_USE_MPI=OFF
@@ -89,7 +88,7 @@ build_starpu_cuda:
   extends: .build_script_guix
   variables:
     VERSION: starpu_hip
-    GPU_BACKEND: hip
+    VARIANT: hip
     LOGNAME: "chameleon-build-${SYSTEM}-${VERSION}"
     BUILD_OPTIONS: "-DCHAMELEON_USE_HIP_ROC=ON
                     -DCHAMELEON_USE_MPI=OFF
