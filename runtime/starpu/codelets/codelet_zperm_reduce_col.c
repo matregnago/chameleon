@@ -98,10 +98,10 @@ INSERT_TASK_zperm_reduce_col_recv( const RUNTIME_option_t *options,
     void                   *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     clargs = malloc( sizeof( struct cl_redux_col_args_s ) );
@@ -163,10 +163,10 @@ INSERT_TASK_zperm_reduce_col_recv( const RUNTIME_option_t *options,
     void               *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zperm_reduce_col_send, zperm_reduce_col, redux_col, 3 );

@@ -293,10 +293,7 @@ install(
 # Generate the Chameleon common for all possible precisions
 # ---------------------------------------------------------
 set(RUNTIME_COMMON_GENERATED "")
-set(ZSRC
-  control/runtime_zprofiling.c
-  control/runtime_zlocality.c
-  )
+set(ZSRC ${CONTROL_ZSRC} )
 
 precisions_rules_py(
   RUNTIME_COMMON_GENERATED "${ZSRC}"
@@ -304,14 +301,8 @@ precisions_rules_py(
   TARGETDIR "control")
 
 set(RUNTIME_COMMON
-  control/runtime_async.c
-  control/runtime_context.c
-  control/runtime_control.c
-  control/runtime_descriptor.c
-  control/runtime_descriptor_ipiv.c
+  ${CONTROL_SRC}
   control/runtime_tags.c
-  control/runtime_options.c
-  control/runtime_profiling.c
   control/runtime_workspace.c
   interface/cham_tile_interface.c
   interface/cppi_interface.c

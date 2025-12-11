@@ -137,6 +137,25 @@ set(CODELETS_SRC
   codelets/codelet_ipiv.c
 )
 
+# List of the control files required by all runtimes
+# --------------------------------------------------
+set(CONTROL_ZSRC
+  control/runtime_zprofiling.c
+  control/runtime_zlocality.c
+)
+
+set(CONTROL_SRC
+  control/runtime_async.c
+  control/runtime_context.c
+  control/runtime_control.c
+  control/runtime_descriptor.c
+  control/runtime_ipiv.c
+  control/runtime_options.c
+  control/runtime_perm.c
+  control/runtime_pivot.c
+  control/runtime_profiling.c
+)
+
 # Check for the subdirectories
 # ----------------------------
 if( CHAMELEON_SCHED_QUARK )

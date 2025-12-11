@@ -112,10 +112,10 @@ INSERT_TASK_zperm_allreduce_recv_col( const RUNTIME_option_t *options,
     void                       *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     clargs = malloc( sizeof( struct cl_redux_col_args_s ) );
@@ -183,10 +183,10 @@ INSERT_TASK_zperm_allreduce_recv_col( const RUNTIME_option_t *options,
     void               *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
 
     INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zperm_allreduce_send_col, zperm_allreduce_col, redux_col, 3 );
@@ -323,10 +323,10 @@ INSERT_TASK_zperm_allreduce_send_invp_col( const RUNTIME_option_t *options,
     void *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
-        ipiv_handle = RUNTIME_invp_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
     else {
-        ipiv_handle = RUNTIME_perm_getaddr( ipiv, ipivk );
+        ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
 
     for ( b = k+1; (b < A->nt) && ((b-(k+1)) < chameleon_desc_datadist_get_iparam(A, 1)); b ++ ) {

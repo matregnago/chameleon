@@ -88,8 +88,7 @@ int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
         ipiv->get_rankof = get_rankof;
     }
     else {
-        ipiv->get_rankof = ( side == ChamLeft ) ? chameleon_getrankof_ipiv_2d_row :
-                                                  chameleon_getrankof_ipiv_2d_col;
+        ipiv->get_rankof = chameleon_getrankof_ipiv_2d_diag;
     }
 
     ipiv->get_blkdim = chameleon_getblkdim_ipiv;
@@ -105,51 +104,6 @@ int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
 
     /* Create runtime specific structure like registering data */
     RUNTIME_ipiv_create( ipiv );
-
-    return rc;
-}
-
-/**
- ******************************************************************************
- *
- * @ingroup Descriptor
- *
- * @brief Internal function to create tiled descriptor associated to a pivot.
- *
- ******************************************************************************
- *
- * @param[in,out] pivot
- *          The pointer to the pivot descriptor to initialize.
- *
- * @param[in] desc
- *          The tile descriptor for which an associated pivot descriptor must be generated.
- *
- ******************************************************************************
- *
- * @return CHAMELEON_SUCCESS on success, CHAMELEON_ERR_NOT_INITIALIZED otherwise.
- *
- */
-int chameleon_pivot_init( CHAM_desc_pivot_t *pivot, const CHAM_desc_t *desc )
-{
-    CHAM_context_t *chamctxt;
-    int rc = CHAMELEON_SUCCESS;
-
-    memset( pivot, 0, sizeof(CHAM_desc_pivot_t) );
-
-    chamctxt = chameleon_context_self();
-    if (chamctxt == NULL) {
-        chameleon_error("CHAMELEON_Desc_Create", "CHAMELEON not initialized");
-        return CHAMELEON_ERR_NOT_INITIALIZED;
-    }
-
-    pivot->P       = chameleon_desc_datadist_get_iparam( desc, 0 );
-    pivot->Q       = chameleon_desc_datadist_get_iparam( desc, 1 );
-    pivot->n       = chameleon_min(desc->mb, desc->nb);
-    pivot->nb      = desc->mb;
-    pivot->dtyp    = desc->dtyp;
-
-    /* Create runtime specific structure like registering data */
-    RUNTIME_pivot_create( pivot );
 
     return rc;
 }
@@ -229,50 +183,6 @@ int CHAMELEON_Ipiv_Create( CHAM_ipiv_t **ipivptr, cham_side_t side, int mb, int 
 }
 
 /**
- ******************************************************************************
- *
- * @ingroup Descriptor
- *
- * @brief Asynchronously destroy a tiled descriptor associated to a pivot array.
- *
- ******************************************************************************
- *
- * @param[in,out] pivot
- *          The pointer to the pivot descriptor to destroy.
- *
- * @param[in] desc
- *          The tile descriptor for which an associated pivot descriptor must be generated.
- *
- */
-int chameleon_pivot_destroy_submit( CHAM_desc_pivot_t *pivot, const RUNTIME_sequence_t *sequence )
-{
-    RUNTIME_pivot_destroy_submit( sequence, pivot );
-    return CHAMELEON_SUCCESS;
-}
-
-/**
- ******************************************************************************
- *
- * @ingroup Descriptor
- *
- * @brief Destroy a tiled descriptor associated to a pivot array.
- *
- ******************************************************************************
- *
- * @param[in,out] pivot
- *          The pointer to the pivot descriptor to destroy.
- *
- * @param[in] desc
- *          The tile descriptor for which an associated pivot descriptor must be generated.
- *
- */
-int chameleon_pivot_destroy( CHAM_desc_pivot_t *pivot )
-{
-    RUNTIME_pivot_destroy( pivot );
-    return CHAMELEON_SUCCESS;
-}
-
-/**
  ********************************************************************************
  *
  * @ingroup CHAMELEON_Complex64_t
@@ -289,7 +199,7 @@ int chameleon_pivot_destroy( CHAM_desc_pivot_t *pivot )
  *
  *
  */
-void CHAMELEON_Ipiv_Init( CHAM_ipiv_t *descIPIV )
+void CHAMELEON_Ipiv_Initialize( CHAM_ipiv_t *descIPIV )
 {
 
     RUNTIME_option_t    options;
@@ -369,10 +279,10 @@ int CHAMELEON_Ipiv_Destroy( CHAM_ipiv_t **ipivptr )
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t        *ipiv,
-                          const RUNTIME_sequence_t *sequence )
+int CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t  *ipiv,
+                          RUNTIME_sequence_t *sequence )
 {
-    RUNTIME_ipiv_flush( sequence, ipiv );
+    RUNTIME_ipiv_flushall( sequence, -1, ipiv );
     return CHAMELEON_SUCCESS;
 }
 

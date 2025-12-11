@@ -76,8 +76,8 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         sizeof(int),         &m,            VALUE,
         sizeof(int),         &k,            VALUE,
         PASSED_BY_REF, RUNTIME_ipiv_getaddr( ipivdesc, ipivk ), chameleon_parsec_get_arena_index_ipiv( ipivdesc ) | INPUT,
-        PASSED_BY_REF, RUNTIME_perm_getaddr( ipivdesc, ipivk ), chameleon_parsec_get_arena_index_perm( ipivdesc ) | OUTPUT,
-        PASSED_BY_REF, RUNTIME_invp_getaddr( ipivdesc, ipivk ), chameleon_parsec_get_arena_index_invp( ipivdesc ) | OUTPUT,
+        PASSED_BY_REF, RUNTIME_ipiv_getperm( ipivdesc, ipivk ), chameleon_parsec_get_arena_index_perm( ipivdesc ) | OUTPUT,
+        PASSED_BY_REF, RUNTIME_ipiv_getinvp( ipivdesc, ipivk ), chameleon_parsec_get_arena_index_invp( ipivdesc ) | OUTPUT,
         PARSEC_DTD_ARG_END );
 
     (void)K1;

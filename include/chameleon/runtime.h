@@ -648,55 +648,72 @@ void RUNTIME_ddisplay_oneprofile (cham_tasktype_t task);
 void RUNTIME_sdisplay_allprofile ();
 void RUNTIME_sdisplay_oneprofile (cham_tasktype_t task);
 
+/**
+ * @}
+ *
+ * @name RUNTIME pivot structure management
+ * @{
+ *
+ *  The pivot structure is used to compute perform the permutation that occurs
+ *  in algorithms such as the LU factorization, this stucture handles the
+ *  selection of the pivot in a column and the exchange of the line that must be
+ *  swaped by this operation.
+ */
 void RUNTIME_pivot_create ( CHAM_desc_pivot_t *pivot );
 void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot );
-void RUNTIME_pivot_destroy_submit( const RUNTIME_sequence_t *sequence,
-                                   CHAM_desc_pivot_t        *pivot );
+void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
+                                   CHAM_desc_pivot_t  *pivot );
 
-void RUNTIME_pivot_flushk( const RUNTIME_sequence_t *sequence,
-                           const CHAM_desc_pivot_t *pivot, int m );
-void RUNTIME_pivot_flush ( const RUNTIME_sequence_t *sequence,
-                           const CHAM_desc_pivot_t  *pivot );
-void *RUNTIME_nextpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
-void *RUNTIME_prevpiv_getaddr( const CHAM_desc_pivot_t *pivot, int rank, int k, int h );
+void  RUNTIME_pivot_flushone  ( RUNTIME_sequence_t      *sequence,
+                                const CHAM_desc_pivot_t *pivot, int m );
+void  RUNTIME_pivot_flushall  ( RUNTIME_sequence_t      *sequence,
+                                const CHAM_desc_pivot_t *pivot );
+void *RUNTIME_pivot_getaddr   ( const CHAM_desc_pivot_t *pivot, int rank, int h );
+void  RUNTIME_pivot_invalidate( const CHAM_desc_pivot_t *pivot, int rank, int h );
 
+/**
+ * @}
+ *
+ * @name RUNTIME ipiv structure management
+ * @{
+ *
+ *  The ipiv structure is used to manage the ipiv, perm and invp vectors used in
+ *  pivoting and permutation operations. This holds the permutation information,
+ *  bt is not used to apply the permutation (see perm stucture).
+ */
 void RUNTIME_ipiv_create ( CHAM_ipiv_t *ipiv );
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv );
-void RUNTIME_ipiv_gather( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *desc,
-                          int                      *ipiv,
-                          int                       node );
+void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
+                          const CHAM_ipiv_t  *desc,
+                          int                *ipiv,
+                          int                 node );
 
-void RUNTIME_ipiv_flushk( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *ipiv,
-                          int                       m );
-void RUNTIME_ipiv_flush ( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *ipiv );
-void RUNTIME_ipiv_invalidate( CHAM_desc_pivot_t *pivot,
-                              int                k,
-                              int                h,
-                              int                myrank );
-void RUNTIME_perm_flushk( const RUNTIME_sequence_t *sequence,
-                          const CHAM_ipiv_t        *ipiv,
-                          int                       m );
+void RUNTIME_ipiv_flushone( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e         which,
+                            const CHAM_ipiv_t  *ipiv,
+                            int                 m );
+void RUNTIME_ipiv_flushall( RUNTIME_sequence_t *sequence,
+                            CHAM_ipiv_e         which,
+                            const CHAM_ipiv_t  *ipiv );
 
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m );
-void *RUNTIME_perm_getaddr( const CHAM_ipiv_t *ipiv, int m );
-void *RUNTIME_invp_getaddr( const CHAM_ipiv_t *ipiv, int m );
-void  RUNTIME_cpui_create ( CHAM_perm_t *ws );
-void *RUNTIME_cpui_getaddr( const CHAM_perm_t *ws, int m, int n );
-void  RUNTIME_cpui_destroy( CHAM_perm_t *ws );
-void  RUNTIME_cpui_flushk( const RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
+void *RUNTIME_ipiv_getperm( const CHAM_ipiv_t *ipiv, int m );
+void *RUNTIME_ipiv_getinvp( const CHAM_ipiv_t *ipiv, int m );
 
-static inline void *
-RUNTIME_pivot_getaddr( CHAM_desc_pivot_t *pivot, int rank, int k, int h ) {
-    if ( h%2 == 0 ) {
-        return RUNTIME_nextpiv_getaddr( pivot, rank, k, h );
-    }
-    else {
-        return RUNTIME_prevpiv_getaddr( pivot, rank, k, h );
-    }
-}
+/**
+ * @}
+ *
+ * @name RUNTIME perm structure management
+ * @{
+ *
+ *  The perm structure is used to perform the permutation within a column or row
+ *  of tiles.  It temporary stres the information that must be exchanged when
+ *  applying a permutation stored in the ipiv structure to a CHAM_desc_t data..
+ */
+void  RUNTIME_perm_create ( CHAM_perm_t *ws );
+void *RUNTIME_perm_getaddr( const CHAM_perm_t *ws, int m, int n );
+void  RUNTIME_perm_destroy( CHAM_perm_t *ws );
+void  RUNTIME_perm_flush( RUNTIME_sequence_t *sequence, int rank, const CHAM_perm_t *ws, int m, int n );
 
 /**
  * @}

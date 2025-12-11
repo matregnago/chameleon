@@ -130,11 +130,11 @@ void INSERT_TASK_ipiv_init_data( const RUNTIME_option_t *options,
 void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
                                CHAM_desc_pivot_t *pivot, int k, int h, int rank )
 {
-    starpu_data_handle_t prevpiv = RUNTIME_pivot_getaddr( pivot, rank, k, h-1 );
+    starpu_data_handle_t prevpiv = RUNTIME_pivot_getaddr( pivot, rank, h-1 );
 
 #if defined(HAVE_STARPU_MPI_REDUX) && defined(CHAMELEON_USE_MPI)
 #if !defined(HAVE_STARPU_MPI_REDUX_WRAPUP)
-    starpu_data_handle_t nextpiv = RUNTIME_pivot_getaddr( pivot, rank, k, h );
+    starpu_data_handle_t nextpiv = RUNTIME_pivot_getaddr( pivot, rank, h );
     if ( h < pivot->n ) {
         starpu_mpi_redux_data_prio_tree( options->sequence->comm, nextpiv,
                                          options->priority, 2 /* Binary tree */ );
@@ -195,8 +195,8 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         STARPU_VALUE,             &K1,  sizeof(int),
         STARPU_VALUE,             &K2,  sizeof(int),
         STARPU_R,                 RUNTIME_ipiv_getaddr( ipivdesc, ipivk ),
-        STARPU_W,                 RUNTIME_perm_getaddr( ipivdesc, ipivk ),
-        STARPU_W,                 RUNTIME_invp_getaddr( ipivdesc, ipivk ),
+        STARPU_W,                 RUNTIME_ipiv_getperm( ipivdesc, ipivk ),
+        STARPU_W,                 RUNTIME_ipiv_getinvp( ipivdesc, ipivk ),
         STARPU_PRIORITY,          options->priority,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );

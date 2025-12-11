@@ -71,8 +71,8 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         sizeof(int),  &m,   VALUE,
         sizeof(int),  &k,   VALUE,
         sizeof(int*), RUNTIME_ipiv_getaddr( ipivdesc, ipivk ), INPUT,
-        sizeof(int*), RUNTIME_perm_getaddr( ipivdesc, ipivk ), OUTPUT,
-        sizeof(int*), RUNTIME_invp_getaddr( ipivdesc, ipivk ), OUTPUT,
+        sizeof(int*), RUNTIME_ipiv_getperm( ipivdesc, ipivk ), OUTPUT,
+        sizeof(int*), RUNTIME_ipiv_getinvp( ipivdesc, ipivk ), OUTPUT,
         0 );
 
     (void)K1;

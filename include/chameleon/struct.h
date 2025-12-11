@@ -195,48 +195,56 @@ typedef int (*blkdim_ipiv_fct_t)    ( const CHAM_ipiv_t*, int );
 typedef int (*blkrankof_ipiv_fct_t) ( const CHAM_ipiv_t*, int, int );
 
 /**
+ * Bitwise enum to manage the three vectors stored in the CHAM_ipiv_t structure
+ */
+typedef enum cham_ipiv_ {
+    CHAMIPIV_IPIV = (1 << 0),
+    CHAMIPIV_PERM = (1 << 1),
+    CHAMIPIV_INVP = (1 << 2),
+} CHAM_ipiv_e;
+
+/**
  *  CHAMELEON structure to hold pivot informations for the LU factorization with partial pivoting
  */
 struct chameleon_ipiv_s {
-    blkdim_ipiv_fct_t    get_blkdim; /**> function to get chameleon tiles dimension within algorithms                                 */
-    blkrankof_ipiv_fct_t get_rankof; /**> function to get chameleon tiles MPI rank                                                    */
-
-    int         *data;               /**> Pointer to the data                                                                         */
-    void        *ipiv;               /**> Opaque array of pointers for the runtimes to handle the ipiv array                          */
-    void        *perm;               /**> Opaque array of pointers for the runtimes to handle the temporary permutation array         */
-    void        *invp;               /**> Opaque array of pointers for the runtimes to handle the temporary inverse permutation array */
-    int64_t      mpitag_ipiv;        /**> Initial mpi tag values for the ipiv handles                                                 */
-    int64_t      mpitag_perm;        /**> Initial mpi tag values for the nextpiv handles                                              */
-    int64_t      mpitag_invp;        /**> Initial mpi tag values for the prevpiv handles                                              */
-
-    int          myrank;             /**> MPI rank of the descriptor */
-    int          i;                  /**> row index to the beginning of the submatrix                                                 */
-    int          m;                  /**> The number of row in the vector ipiv                                                        */
-    int          mb;                 /**> The number of row per block                                                                 */
-    int          mt;                 /**> The number of tiles                                                                         */
-    int          P;                  /**> The number of processes per column on a tiled matrix                                        */
-    int          NP;                 /**> The total number of processes                                                               */
+    blkdim_ipiv_fct_t    get_blkdim;  /**> function to get chameleon tiles dimension within algorithms                                 */
+    blkrankof_ipiv_fct_t get_rankof;  /**> function to get chameleon tiles MPI rank                                                    */
+    int                 *data;        /**> Pointer to the data                                                                         */
+    void                *ipiv;        /**> Opaque array of pointers for the runtimes to handle the ipiv array                          */
+    void                *perm;        /**> Opaque array of pointers for the runtimes to handle the temporary permutation array         */
+    void                *invp;        /**> Opaque array of pointers for the runtimes to handle the temporary inverse permutation array */
+    int64_t              mpitag_ipiv; /**> Initial mpi tag values for the ipiv handles                                                 */
+    int64_t              mpitag_perm; /**> Initial mpi tag values for the nextpiv handles                                              */
+    int64_t              mpitag_invp; /**> Initial mpi tag values for the prevpiv handles                                              */
+    int                  myrank;      /**> MPI rank of the descriptor                                                                  */
+    int                  i;           /**> row index to the beginning of the submatrix                                                 */
+    int                  m;           /**> The number of row in the vector ipiv                                                        */
+    int                  mb;          /**> The number of row per block                                                                 */
+    int                  mt;          /**> The number of tiles                                                                         */
+    int                  P;           /**> The number of processes per column on a tiled matrix                                        */
+    int                  NP;          /**> The total number of processes                                                               */
 };
 
 /**
- * @brief CHAMELEON structure used for the permutation in LASWP and GETRF
+ * @brief CHAMELEON workspace structure used to apply permutations in kernels such as LASWP or GETRF
  */
 typedef struct chameleon_perm_s {
-    void              *ws;        /**< Workspace handle used for the row/column permutation */
-    cham_side_t        side;      /**< Specifies the side of the permutation                */
-    int64_t            mpitag_ws; /**< Initial MPI tag for the workspace handle             */
-    int                NP;        /**< Total number of processes                            */
-    int                m;         /**< Total number of rows of the matrix                   */
-    int                n;         /**< Total number of columns of the matrix                */
-    int                mb;        /**< Number of rows per tile                              */
-    int                nb;        /**< Number of columns per tile                           */
-    int                mt;        /**< Number of rows tile                                  */
-    int                nt;        /**< Number of columns tile                               */
-    cham_flttype_t     dtyp;      /**> Arithmetic used to store the rows/columns to swap    */
+    void           *ws;        /**< Workspace handle used for the row/column permutation */
+    cham_side_t     side;      /**< Specifies the side of the permutation                */
+    int64_t         mpitag_ws; /**< Initial MPI tag for the workspace handle             */
+    int             NP;        /**< Total number of processes                            */
+    int             m;         /**< Total number of rows of the matrix                   */
+    int             n;         /**< Total number of columns of the matrix                */
+    int             mb;        /**< Number of rows per tile                              */
+    int             nb;        /**< Number of columns per tile                           */
+    int             mt;        /**< Number of rows tile                                  */
+    int             nt;        /**< Number of columns tile                               */
+    cham_flttype_t  dtyp;      /**> Arithmetic used to store the rows/columns to swap    */
 } CHAM_perm_t;
 
 /**
- *  CHAMELEON structure to hold pivot informations for the LU factorization with partial pivoting
+ * Chameleon structure to hold pivot informations for the LU factorization with partial pivoting within a full panel
+ * It includes two CHAM_pivot_t structures to manage the data dependencies between the columns.
  */
 typedef struct chameleon_desc_pivot_s {
     void          *nextpiv;        /**> Opaque array of pointers for the runtimes to handle the pivot computation structure */

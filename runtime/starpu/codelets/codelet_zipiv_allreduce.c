@@ -95,7 +95,7 @@ INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
     rt_starpu_insert_task(
         NULL,
         STARPU_EXECUTE_ON_NODE, dst,
-        STARPU_R,               RUNTIME_pivot_getaddr( pivot, me, k, h ),
+        STARPU_R,               RUNTIME_pivot_getaddr( pivot, me, h ),
         STARPU_PRIORITY,        options->priority,
         0 );
 }
@@ -117,13 +117,13 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
     rt_starpu_insert_task(
         &cl_zipiv_allreduce,
         STARPU_CL_ARGS,           clargs, sizeof(struct cl_redux_args_s),
-        STARPU_RW,                RUNTIME_pivot_getaddr( pivot, me,  k, h ),
-        STARPU_R,                 RUNTIME_pivot_getaddr( pivot, src, k, h ),
+        STARPU_RW,                RUNTIME_pivot_getaddr( pivot, me, h ),
+        STARPU_R,                 RUNTIME_pivot_getaddr( pivot, src, h ),
         STARPU_EXECUTE_ON_NODE,   me,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_PRIORITY,          options->priority,
         0 );
-    starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, k, h ) );
+    starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, h ) );
 }
 
 #else /* defined(CHAMELEON_STARPU_USE_INSERT) */
@@ -140,7 +140,7 @@ INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
 
     starpu_cham_exchange_init_params( options, &params, dst );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
-                                                  RUNTIME_pivot_getaddr( pivot, me, k, h ),
+                                                  RUNTIME_pivot_getaddr( pivot, me, h ),
                                                   STARPU_R );
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
     (void)cl;
@@ -162,10 +162,10 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
 
     starpu_cham_exchange_init_params( options, &params, me );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
-                                                  RUNTIME_pivot_getaddr( pivot, me,  k, h ),
+                                                  RUNTIME_pivot_getaddr( pivot, me, h ),
                                                   STARPU_RW );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
-                                                  RUNTIME_pivot_getaddr( pivot, src, k, h ),
+                                                  RUNTIME_pivot_getaddr( pivot, src, h ),
                                                   STARPU_R );
 
     task = starpu_task_create();
@@ -198,7 +198,7 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
     }
 
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
-    starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, k, h ) );
+    starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, h ) );
 }
 
 #endif /* defined(CHAMELEON_STARPU_USE_INSERT) */

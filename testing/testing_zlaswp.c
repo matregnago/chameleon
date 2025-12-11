@@ -68,7 +68,7 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
 
     int  K    = ( side == ChamLeft ) ? M : N;
     int  kb   = nb;
-    int *IPIV = malloc( sizeof(int) * K );
+    int *IPIV;
 
     /* Descriptors */
     CHAM_desc_t *descA;
@@ -85,6 +85,8 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
                  "SKIPPED: zlaswp kernel only supports 2DBC data distributions\n" );
         return -1;
     }
+
+    IPIV = malloc( sizeof(int) * K );
     CHAMELEON_Ipiv_Create( &descIPIV, side, kb, K, P, P*Q, IPIV );
 
     /* Fill the matrices with random values */
@@ -92,7 +94,7 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
 
     /* IPIV is initialized with random values that are propagated to the descriptor (should be changed in the future) */
     testing_zlaswp_ipiv_gen( IPIV, K );
-    CHAMELEON_Ipiv_Init( descIPIV );
+    CHAMELEON_Ipiv_Initialize( descIPIV );
 
     if ( async ) {
         ws = CHAMELEON_zlaswp_WS_Alloc( side, descA );

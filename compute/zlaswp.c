@@ -140,7 +140,7 @@ CHAMELEON_zlaswp_WS_Alloc( cham_side_t side, const CHAM_desc_t *A )
 
 #if defined(CHAMELEON_USE_MPI)
     if ( reduce->alg_allreduce == ChamStarPUTasks ) {
-        RUNTIME_cpui_create( &(ws->ws) );
+        RUNTIME_perm_create( &(ws->ws) );
     }
 #endif
 
@@ -183,7 +183,7 @@ CHAMELEON_zlaswp_WS_Free( void *user_ws )
     }
 #if defined(CHAMELEON_USE_MPI)
     if ( ws->reduce.alg_allreduce == ChamStarPUTasks ) {
-        RUNTIME_cpui_destroy( &(ws->ws) );
+        RUNTIME_perm_destroy( &(ws->ws) );
     }
 #endif
 
@@ -311,7 +311,7 @@ int CHAMELEON_zlaswp( cham_side_t            side,
                          A, NB, NB, LDA, N, M, N, sequence, &request );
 
     chameleon_ipiv_init( &descIPIV, side, descAt.mb, K2, 1, 1, IPIV, NULL );
-    CHAMELEON_Ipiv_Init( &descIPIV );
+    CHAMELEON_Ipiv_Initialize( &descIPIV );
 
     /* Call the tile interface */
     ws = CHAMELEON_zlaswp_WS_Alloc( side, &descAt );
@@ -559,9 +559,9 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
                 if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
                     continue;
                 }
-                INSERT_TASK_ipiv_to_perm( &options, m0, tempkm, tempkm, K1 - 1, K2 - 1,
-                                          IPIV, k );
-                RUNTIME_ipiv_flushk( sequence, IPIV, k);
+                INSERT_TASK_ipiv_to_perm( &options, m0, tempkm, tempkm,
+                                          K1 - 1, K2 - 1, IPIV, k );
+                RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
             }
         }
         else {
@@ -573,9 +573,9 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
                 if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
                     continue;
                 }
-                INSERT_TASK_ipiv_to_perm( &options, n0, tempkn, tempkn, K1 - 1, K2 - 1,
-                                          IPIV, k );
-                RUNTIME_ipiv_flushk( sequence, IPIV, k);
+                INSERT_TASK_ipiv_to_perm( &options, n0, tempkn, tempkn,
+                                          K1 - 1, K2 - 1, IPIV, k );
+                RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
             }
         }
     }

@@ -522,8 +522,6 @@ CHAMELEON_zgetrf_Tile_Async( CHAM_desc_t        *A,
         ws = user_ws;
     }
 
-    IPIV->get_rankof = chameleon_getrankof_ipiv_2d_diag;
-
     chameleon_pzgetrf( ws, A, IPIV, sequence, request );
 
     if ( user_ws == NULL ) {

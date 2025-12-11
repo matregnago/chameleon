@@ -148,7 +148,7 @@ chameleon_pzgetrf_panel_facto_percol( struct chameleon_pzgetrf_s *ws,
         }
 
         /* Invalidate prevpiv because we don't need anymore */
-        RUNTIME_ipiv_invalidate( pivot, k, h-1, A->myrank );
+        RUNTIME_pivot_invalidate( pivot, A->myrank, h-1 );
 
 #if defined(CHAMELEON_USE_MPI)
         /* Reduce globally (between MPI processes) */
@@ -158,7 +158,7 @@ chameleon_pzgetrf_panel_facto_percol( struct chameleon_pzgetrf_s *ws,
 
     /* Flush temporary data used for the pivoting */
     INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
-    RUNTIME_pivot_flushk( options->sequence, pivot, A->myrank );
+    RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
 /*
@@ -201,7 +201,7 @@ chameleon_pzgetrf_panel_facto_percol_batched( struct chameleon_pzgetrf_s *ws,
         INSERT_TASK_zgetrf_panel_offdiag_batched_flush( options, A, k, clargs, pivot );
 
         /* Invalidate prevpiv because we don't need anymore */
-        RUNTIME_ipiv_invalidate( pivot, k, h-1, A->myrank );
+        RUNTIME_pivot_invalidate( pivot, A->myrank, h-1 );
 
 #if defined(CHAMELEON_USE_MPI)
         /* Reduce globally (between MPI processes) */
@@ -213,7 +213,7 @@ chameleon_pzgetrf_panel_facto_percol_batched( struct chameleon_pzgetrf_s *ws,
 
     /* Flush temporary data used for the pivoting */
     INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
-    RUNTIME_pivot_flushk( options->sequence, pivot, A->myrank );
+    RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
 static inline void
@@ -280,7 +280,7 @@ chameleon_pzgetrf_panel_facto_blocked( struct chameleon_pzgetrf_s *ws,
             assert( j <= minmn );
 
             /* Invalidate prevpiv because we don't need anymore */
-            RUNTIME_ipiv_invalidate( pivot, k, j-1, A->myrank );
+            RUNTIME_pivot_invalidate( pivot, A->myrank, j-1 );
 
 #if defined(CHAMELEON_USE_MPI)
             /* Reduce globally (between MPI processes) */
@@ -303,7 +303,7 @@ chameleon_pzgetrf_panel_facto_blocked( struct chameleon_pzgetrf_s *ws,
 
     /* Flush temporary data used for the pivoting */
     INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
-    RUNTIME_pivot_flushk( options->sequence, pivot, A->myrank );
+    RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
 /*
@@ -368,7 +368,7 @@ chameleon_pzgetrf_panel_facto_blocked_batched( struct chameleon_pzgetrf_s *ws,
             assert( j <= minmn );
 
             /* Invalidate prevpiv because we don't need anymore */
-            RUNTIME_ipiv_invalidate( pivot, k, j-1, A->myrank );
+            RUNTIME_pivot_invalidate( pivot, A->myrank, j-1 );
 
 #if defined(CHAMELEON_USE_MPI)
             /* Reduce globally (between MPI processes) */
@@ -393,7 +393,7 @@ chameleon_pzgetrf_panel_facto_blocked_batched( struct chameleon_pzgetrf_s *ws,
 
     /* Flush temporary data used for the pivoting */
     INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
-    RUNTIME_pivot_flushk( options->sequence, pivot, A->myrank );
+    RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
 static inline void
@@ -675,7 +675,7 @@ void chameleon_pzgetrf( struct chameleon_pzgetrf_s *ws,
                 }
                 chameleon_data_flush( sequence, Wu(A->myrank, n), request->flush );
             }
-            RUNTIME_perm_flushk( sequence, IPIV, k );
+            RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
     }
     CHAMELEON_Desc_Flush( ws->laswp->Wu, sequence );
