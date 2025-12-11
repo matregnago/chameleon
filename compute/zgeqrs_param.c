@@ -327,11 +327,16 @@ int CHAMELEON_zgeqrs_param_Tile_Async( const libhqr_tree_t *qrtree,
     free(subB);
 
     if (Dptr != NULL) {
+        /* Free data associated to D */
+        chameleon_desc_destroy_submit( Dptr, sequence );
+
+        /* Flush data to be able to sync with runtimes such as PaRSEC */
         CHAMELEON_Desc_Flush( A, sequence );
         CHAMELEON_Desc_Flush( B, sequence );
         CHAMELEON_Desc_Flush( TS, sequence );
         CHAMELEON_Desc_Flush( TT, sequence );
-        CHAMELEON_Desc_Flush( Dptr, sequence );
+
+        /* Wait and cleanup */
         chameleon_sequence_wait( chamctxt, sequence );
         chameleon_desc_destroy( Dptr );
     }

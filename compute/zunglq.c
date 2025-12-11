@@ -335,10 +335,15 @@ CHAMELEON_zunglq_Tile_Async( CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *Q,
     }
 
     if ( Dptr != NULL ) {
+        /* Free data associated to D */
+        chameleon_desc_destroy_submit( Dptr, sequence );
+
+        /* Flush data to be able to sync with runtimes such as PaRSEC */
         CHAMELEON_Desc_Flush( A, sequence );
         CHAMELEON_Desc_Flush( Q, sequence );
         CHAMELEON_Desc_Flush( T, sequence );
-        CHAMELEON_Desc_Flush( Dptr, sequence );
+
+        /* Wait and cleanup */
         chameleon_sequence_wait( chamctxt, sequence );
         chameleon_desc_destroy( Dptr );
     }
