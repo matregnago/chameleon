@@ -45,14 +45,14 @@ int CUDA_hgemm( cham_trans_t transa, cham_trans_t transb,
                 CHAMELEON_Real16_t *C, int ldc,
                 cublasHandle_t handle ) {
     FUNCTION_ENTRY;
-    int ret = CUDA_hgemm( transa, transb,
-                 m, n, k,
-                 alpha,
-                 A, lda,
-                 B, ldb,
-                 beta,
-                 C, ldc,
-                 handle );
+    int ret = libCUDA_hgemm( transa, transb,
+                             m, n, k,
+                             alpha,
+                             A, lda,
+                             B, ldb,
+                             beta,
+                             C, ldc,
+                             handle );
     FUNCTION_EXIT;
     return ret;
 }
@@ -72,14 +72,14 @@ int CUDA_gemmex( cham_trans_t transa, cham_trans_t transb,
                  void *C, int ldc, cham_flttype_t Ctype,
                  cublasHandle_t handle ) {
     FUNCTION_ENTRY;
-    int ret = CUDA_gemmex( transa, transb,
-                  m, n, k,
-                  alpha,
-                  A, lda, Atype,
-                  B, ldb, Btype,
-                  beta,
-                  C, ldc, Ctype,
-                  handle );
+    int ret = libCUDA_gemmex( transa, transb,
+                              m, n, k,
+                              alpha,
+                              A, lda, Atype,
+                              B, ldb, Btype,
+                              beta,
+                              C, ldc, Ctype,
+                              handle );
     FUNCTION_EXIT;
     return ret;
 }

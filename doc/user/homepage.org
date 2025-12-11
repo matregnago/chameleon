@@ -155,27 +155,38 @@
      # install Homebrew if not already available
      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-     # install compiler and tools
-     brew install htop tmux gcc llvm automake autoconf libtool doxygen emacs zlib bzip2 bison hwloc pkgconfig openblas openmpi
+     brew update
+     brew upgrade
 
-     # gcc and g++ are missing (avoid to use clang version in /usr/bin or use the clang from brew, see package llvm, e.g. clang-17)
-     ln -sf /usr/local/bin/gcc-11 /usr/local/bin/gcc
-     ln -sf /usr/local/bin/g++-11 /usr/local/bin/g++
+     # install compiler and tools
+     brew install autoconf automake bison bzip2 doxygen emacs htop hwloc libomp libtool openblas openmpi pkgconfig tmux zlib
 
      # use pkg-config .pc files to detect some dependencies
      export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/opt/openblas/lib/pkgconfig
 
      # cmake checks blas.pc not openblas.pc
      sudo cp /usr/local/opt/openblas/lib/pkgconfig/openblas.pc /usr/local/opt/openblas/lib/pkgconfig/blas.pc
+
+     pkg-config --libs blas
+     # -L/usr/local/Cellar/openblas/0.3.30/lib -lopenblas
      #+end_src
      - CBLAS/LAPACKE is required (OpenBLAS or Intel MKL or Reference Lapack)
      - we recommend to install StarPU as runtime system with MPI enabled
+
+     You can use the Homebrew packages available in [[https://gitlab.inria.fr/solverstack/brew-repo][brew-repo]]
+     #+begin_src sh :eval never-export
+     git clone https://gitlab.inria.fr/solverstack/brew-repo.git
+     brew tap homebrew/solverstack ./brew-repo
+     brew install starpu chameleon
+     #+end_src
+
+     Or install manually StarPU and Chameleon
      #+begin_src sh :eval never-export
      # install last starpu release
      cd $HOME
-     wget https://files.inria.fr/starpu/starpu-1.4.7/starpu-1.4.7.tar.gz
-     tar xvf starpu-1.4.7.tar.gz
-     cd starpu-1.4.7
+     wget https://files.inria.fr/starpu/starpu-1.4.12/starpu-1.4.12.tar.gz
+     tar xvf starpu-1.4.12.tar.gz
+     cd starpu-1.4.12/
      ./configure
      make -j5
      sudo make install

@@ -26,15 +26,7 @@ case $SYSTEM in
     DEP_INSTALLED=`brew ls --versions starpu | cut -d " " -f 2`
     if [[ -z "${DEP_INSTALLED}" ]]; then
       # dep is not installed, we have to install it
-      brew install --build-from-source ./tools/homebrew/starpu.rb
-    else
-      # dep is already installed, check the version with our requirement
-      DEP_REQUIRED=`brew info --json ./tools/homebrew/starpu.rb |jq -r '.[0].versions.stable'`
-      if [[ "${DEP_INSTALLED}" != "${DEP_REQUIRED}" ]]; then
-        # if the installed version is not the required one, re-install
-        brew remove --force --ignore-dependencies starpu
-        brew install --build-from-source ./tools/homebrew/starpu.rb
-      fi
+      brew install starpu
     fi
     # clang is used on macosx and it is not compatible with MORSE_ENABLE_COVERAGE=ON
     # to avoid the Accelerate framework and get Openblas we use BLA_PREFER_PKGCONFIG
