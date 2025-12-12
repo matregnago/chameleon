@@ -65,12 +65,13 @@ build_starpu:
     SYSTEM: guix
     CMAKE_BUILD_PARALLEL_LEVEL: 20
   script:
-    - guix describe -f channels
-    - guix shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
-                 --preserve=LOGNAME --preserve=BUILD_OPTIONS
-                 --preserve=CMAKE_BUILD_PARALLEL_LEVEL
-                 -D chameleon-${VARIANT} eztrace coreutils bash-minimal --
-                 bash .gitlab/build.sh | tee ${LOGNAME}.log
+    - guix time-machine
+      --url=https://codeberg.org/guix/guix-mirror.git
+      --channels=./tools/bench/guix-channels.scm
+      -- shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
+      --preserve=LOGNAME --preserve=BUILD_OPTIONS --preserve=CMAKE_BUILD_PARALLEL_LEVEL
+      -D chameleon-${VARIANT} eztrace coreutils bash-minimal
+      -- bash .gitlab/build.sh | tee ${LOGNAME}.log
 
 build_starpu_cuda:
   extends: .build_script_guix

@@ -5,12 +5,14 @@
   variables:
     SYSTEM: guix
   script:
-    - guix describe -f channels | tee guix-channels.scm
-    - guix shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
-                 --preserve=LOGNAME --preserve=BUILD_OPTIONS
-                 --preserve=TESTS_RESTRICTION --preserve=SLURM_CONSTRAINTS
-                 -D chameleon-${VARIANT} slurm@23 coreutils inetutils bash-minimal --
-                 bash .gitlab/sbatch.sh ${LOGNAME} | tee ${LOGNAME}.log
+    - guix time-machine
+      --url=https://codeberg.org/guix/guix-mirror.git
+      --channels=./tools/bench/guix-channels.scm
+      -- shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
+      --preserve=LOGNAME --preserve=BUILD_OPTIONS
+      --preserve=TESTS_RESTRICTION --preserve=SLURM_CONSTRAINTS
+      -D chameleon-${VARIANT} slurm@23 coreutils inetutils bash-minimal
+      -- bash .gitlab/sbatch.sh ${LOGNAME} | tee ${LOGNAME}.log
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
     expire_in: 1 week
@@ -28,9 +30,6 @@
     VERSION: starpu_cuda
     VARIANT: "cuda-mkl"
     LOGNAME: "chameleon-${SYSTEM}-${VERSION}"
-    BUILD_OPTIONS: "-DCHAMELEON_USE_CUDA=ON
-                    -DCHAMELEON_USE_MPI=OFF
-                    -DBLA_VENDOR=Intel10_64lp_seq"
     SLURM_CONSTRAINTS: "sirocco"
 
 test_starpu_cuda_master:
