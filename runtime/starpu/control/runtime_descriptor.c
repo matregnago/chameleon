@@ -165,6 +165,43 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
 }
 
 /**
+ *  Submit unregistration of the handles of a descriptor
+ */
+void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
+                                  const RUNTIME_sequence_t *sequence )
+{
+    /*
+     * If this is the last descriptor using the matrix, we release the handle
+     */
+    starpu_data_handle_t *handle = (starpu_data_handle_t*)(desc->schedopt);
+    int64_t lmt     = desc->lmt;
+    int64_t lnt     = desc->lnt;
+    int64_t nbtiles = lmt * lnt;
+    int64_t m;
+
+    if ( cham_is_mixed( desc->dtyp ) ) {
+        nbtiles *= 3;
+    }
+
+    for (m = 0; m < nbtiles; m++, handle++)
+    {
+        if ( *handle != NULL ) {
+            starpu_data_unregister_submit(*handle);
+            /* StarPU has marked the handle for unregistering,
+             * We don't need it anymore, put to NULL for later destroy
+             */
+            *handle = NULL;
+        }
+    }
+
+
+    /*
+     * WARNING: tags are not released in submit as they may always been used by
+     * the runtime it can only be done by the synchronous destroy
+     */
+}
+
+/**
  *  Destroy data descriptor
  */
 void RUNTIME_desc_destroy( CHAM_desc_t *desc )
@@ -195,6 +232,11 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
         }
     }
 
+    /*
+     * WARNING: tags and global memory are released here and not in the submit
+     * as they may been used after the unregistration submission. It can only be
+     * done by the synchronous destroy.
+     */
 #if !defined(CHAMELEON_SIMULATION)
 #if defined(CHAMELEON_USE_CUDA) || defined(CHAMELEON_USE_HIP)
     if ( (desc->use_mat == 1) && (desc->register_mat == 1) )
@@ -325,6 +367,36 @@ void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
         if ( local ) {
             chameleon_starpu_data_wont_use( *handlebis );
         }
+    }
+    (void)sequence;
+}
+
+void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
+                              const CHAM_desc_t *A, int Am, int An )
+{
+    int     i, imax = 1;
+    int64_t mm      = Am + (A->i / A->mb);
+    int64_t nn      = An + (A->j / A->nb);
+    int64_t shift   = ((int64_t)(A->lmt)) * nn + mm;
+    int64_t nbtiles = ((int64_t)(A->lmt)) * ((int64_t)(A->lnt));
+    starpu_data_handle_t *handle = A->schedopt;
+    handle += shift;
+
+    if ( cham_is_mixed( A->dtyp ) ) {
+        imax = 3;
+    }
+
+    for( i=0; i<imax; i++ ) {
+        starpu_data_handle_t *handlebis;
+
+        handlebis = handle + i * nbtiles;
+
+        if ( *handlebis == NULL ) {
+            continue;
+        }
+
+        starpu_data_unregister_submit( *handlebis );
+        *handlebis = NULL;
     }
     (void)sequence;
 }

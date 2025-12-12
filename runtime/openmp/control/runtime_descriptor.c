@@ -41,6 +41,13 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
     return;
 }
 
+void RUNTIME_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence )
+{
+    (void)desc;
+    (void)sequence;
+    return;
+}
+
 void RUNTIME_desc_destroy( CHAM_desc_t *desc )
 {
     (void)desc;
@@ -79,6 +86,16 @@ RUNTIME_flush( CHAM_context_t *chamctxt )
 void
 RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
                     const CHAM_desc_t *A, int Am, int An )
+{
+    (void)sequence;
+    (void)A;
+    (void)Am;
+    (void)An;
+    return;
+}
+
+void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
+                              const CHAM_desc_t *A, int Am, int An )
 {
     (void)sequence;
     (void)A;

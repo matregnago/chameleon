@@ -292,6 +292,13 @@ void RUNTIME_desc_create( CHAM_desc_t *mdesc )
     return;
 }
 
+void RUNTIME_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence )
+{
+    (void)desc;
+    (void)sequence;
+    return;
+}
+
 /**
  *  Destroy data descriptor
  */
@@ -372,6 +379,16 @@ void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
     /* parsec_dtd_data_flush( PARSEC_dtd_taskpool, RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ) ); */
 
     (void)sequence; (void)A; (void)Am; (void)An;
+    return;
+}
+
+void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
+                              const CHAM_desc_t *A, int Am, int An )
+{
+    (void)sequence;
+    (void)A;
+    (void)Am;
+    (void)An;
     return;
 }
 

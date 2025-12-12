@@ -170,8 +170,9 @@ chameleon_desc_init_local( const CHAM_context_t *chamctxt,
 }
 
 CHAM_desc_t* chameleon_desc_submatrix( CHAM_desc_t *descA, int i, int j, int m, int n );
-void         chameleon_desc_destroy  ( CHAM_desc_t *desc );
 int          chameleon_desc_check    ( const CHAM_desc_t *desc );
+void         chameleon_desc_destroy  ( CHAM_desc_t *desc );
+void         chameleon_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence );
 
 int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
                          int p, int np, void *data,

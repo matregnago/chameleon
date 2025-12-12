@@ -177,8 +177,8 @@ struct chameleon_desc_s {
     int llnt;                    /**> local number of tile columns of the full matrix - derived parameter */
 
     int id;           /**> identification number of the descriptor                            */
-    int occurences;   /**> identify main matrix desc (occurances=1) or                        */
-                      /**> submatrix desc (occurances>1) to avoid unregistering               */
+    int occurences;   /**> identify main matrix desc (occurences=1) or                        */
+                      /**> submatrix desc (occurences>1) to avoid unregistering               */
                       /**> GPU data twice                                                     */
     int use_mat;      /**> 1 if we have a pointer to the overall data mat - else 0            */
     int alloc_mat;    /**> 1 if we handle the allocation of mat - else 0                      */
