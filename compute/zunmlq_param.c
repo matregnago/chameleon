@@ -374,14 +374,12 @@ int CHAMELEON_zunmlq_param_Tile_Async( const libhqr_tree_t *qrtree, cham_side_t 
     chameleon_pzunmlq_param( 1, qrtree, side, trans, A, C, TS, TT, Dptr, sequence, request );
 
     if ( Dptr != NULL ) {
-        /* Free data associated to D */
-        chameleon_desc_destroy_submit( Dptr, sequence );
-
         /* Flush data to be able to sync with runtimes such as PaRSEC */
         CHAMELEON_Desc_Flush( A, sequence );
         CHAMELEON_Desc_Flush( C, sequence );
         CHAMELEON_Desc_Flush( TS, sequence );
         CHAMELEON_Desc_Flush( TT, sequence );
+        CHAMELEON_Desc_Flush( Dptr, sequence );
 
         /* Wait and cleanup */
         chameleon_sequence_wait( chamctxt, sequence );
