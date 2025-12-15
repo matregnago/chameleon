@@ -192,9 +192,10 @@ void INSERT_TASK_zgemm_Astat( const RUNTIME_option_t *options,
                                       B->get_blktile( B, Bm, Bn ),
                                       C->get_blktile( C, Cm, Cn ) );
 
-    /* WARNING: CUDA 12.3 has an issue when k=1 in complex, thus we disable gemm on gpu in these cases */
-#if defined(PRECISION_z) || defined(PRECISION_c)
-    if ( k == 1 ) {
+    /* WARNING: CUDA 12.3 has an issue when m or n or k=1 in double complex,
+       thus we disable gemm on gpu in these cases */
+#if defined(PRECISION_z)
+    if ( (k == 1) || (n == 1) || (m == 1) ) {
         where = STARPU_CPU;
     }
 #endif
@@ -271,9 +272,10 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
                                       B->get_blktile( B, Bm, Bn ),
                                       C->get_blktile( C, Cm, Cn ) );
 
-    /* WARNING: CUDA 12.3 has an issue when k=1 in complex, thus we disable gemm on gpu in these cases */
-#if defined(PRECISION_z) || defined(PRECISION_c)
-    if ( k == 1 ) {
+    /* WARNING: CUDA 12.3 has an issue when m or n or k=1 in double complex,
+       thus we disable gemm on gpu in these cases */
+#if defined(PRECISION_z)
+    if ( (k == 1) || (n == 1) || (m == 1) ) {
         where = STARPU_CPU;
     }
 #endif
@@ -341,9 +343,10 @@ void __INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         struct starpu_task *task = starpu_task_create();
         task->cl = cl;
 
-        /* WARNING: CUDA 12.3 has an issue when k=1 in complex, thus we disable gemm on gpu in these cases */
-#if defined(PRECISION_z) || defined(PRECISION_c)
-        if ( k == 1 ) {
+    /* WARNING: CUDA 12.3 has an issue when m or n or k=1 in double complex,
+       thus we disable gemm on gpu in these cases */
+#if defined(PRECISION_z)
+        if ( (k == 1) || (n == 1) || (m == 1) ) {
             task->where = STARPU_CPU;
         }
 #endif

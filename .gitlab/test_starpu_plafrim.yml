@@ -47,4 +47,4 @@ test_starpu_cuda_mr:
     - if: ($CI_PIPELINE_SOURCE == "merge_request_event" &&
            $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME !~ /^notest-.*$/)
   variables:
-    TESTS_RESTRICTION: "-R test_shm_gpu_d|test_shm_gpu_c"
+    TESTS_RESTRICTION: "-R test_shm_gpu"
