@@ -83,13 +83,12 @@ int CHAMELEON_zgetrs( cham_trans_t trans, int N, int NRHS,
     int                         NB;
     int                         status;
     CHAM_context_t             *chamctxt;
-    CHAM_ipiv_t                *descIPIV;
+    CHAM_ipiv_t                 descIPIV;
     RUNTIME_sequence_t         *sequence = NULL;
     RUNTIME_request_t           request  = RUNTIME_REQUEST_INITIALIZER;
     CHAM_desc_t                 descAl, descAt;
     CHAM_desc_t                 descBl, descBt;
     struct chameleon_pzgetrf_s *ws;
-    int                         P, Q;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -139,15 +138,11 @@ int CHAMELEON_zgetrs( cham_trans_t trans, int N, int NRHS,
     chameleon_zlap2tile( chamctxt, "B", &descBl, &descBt, ChamDescInout, ChamUpperLower,
                          B, NB, NB, LDB, NRHS, N, NRHS, sequence, &request );
 
-    P = chameleon_desc_datadist_get_iparam( &descAt, 0 );
-    Q = chameleon_desc_datadist_get_iparam( &descAt, 1 );
-
     ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, &descBt );
-    CHAMELEON_Ipiv_Create( &descIPIV, ChamLeft, descAt.mb, N, P, P*Q, IPIV );
-    CHAMELEON_Ipiv_Initialize( descIPIV );
+    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N, 1, 1, IPIV, NULL );
 
     /* Call the tile interface */
-    CHAMELEON_zgetrs_Tile_Async( trans, &descAt, descIPIV, &descBt, ws, sequence, &request );
+    CHAMELEON_zgetrs_Tile_Async( trans, &descAt, &descIPIV, &descBt, ws, sequence, &request );
 
     /* Submit the matrix conversion back */
     chameleon_ztile2lap( chamctxt, &descAl, &descAt,
@@ -158,7 +153,7 @@ int CHAMELEON_zgetrs( cham_trans_t trans, int N, int NRHS,
     chameleon_sequence_wait( chamctxt, sequence );
 
     /* Cleanup the temporary data */
-    CHAMELEON_Ipiv_Destroy( &descIPIV );
+    chameleon_ipiv_destroy( &descIPIV );
     CHAMELEON_zlaswp_WS_Free( ws );
     chameleon_ztile2lap_cleanup( chamctxt, &descAl, &descAt );
     chameleon_ztile2lap_cleanup( chamctxt, &descBl, &descBt );

@@ -85,7 +85,6 @@ int CHAMELEON_zgesv( int N, int NRHS,
     CHAM_desc_t                 descAl, descAt;
     CHAM_desc_t                 descBl, descBt;
     struct chameleon_pzgetrf_s *ws;
-    int                         P, Q;
 
     chamctxt = chameleon_context_self();
     if ( chamctxt == NULL ) {
@@ -132,13 +131,10 @@ int CHAMELEON_zgesv( int N, int NRHS,
     chameleon_zlap2tile( chamctxt, "B", &descBl, &descBt, ChamDescInout, ChamUpperLower,
                          B, NB, NB, LDB, NRHS, N, NRHS, sequence, &request );
 
-    P = chameleon_desc_datadist_get_iparam( &descAt, 0 );
-    Q = chameleon_desc_datadist_get_iparam( &descAt, 1 );
-
     /* Allocate workspace for partial pivoting */
     ws = CHAMELEON_zgetrf_WS_Alloc( &descAt );
 
-    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N, P, P*Q, IPIV, chameleon_getrankof_ipiv_2d_diag );
+    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N, 1, 1, IPIV, NULL );
 
     /* Call the tile interface */
     CHAMELEON_zgesv_Tile_Async( &descAt, &descIPIV, &descBt, ws, sequence, &request );

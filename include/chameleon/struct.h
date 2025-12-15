@@ -204,7 +204,7 @@ typedef enum cham_ipiv_ {
 } CHAM_ipiv_e;
 
 /**
- *  CHAMELEON structure to hold pivot informations for the LU factorization with partial pivoting
+ *  CHAMELEON structure to hold ipiv/permutation informations for operation such as lapmt or laswp
  */
 struct chameleon_ipiv_s {
     blkdim_ipiv_fct_t    get_blkdim;  /**> function to get chameleon tiles dimension within algorithms                                 */

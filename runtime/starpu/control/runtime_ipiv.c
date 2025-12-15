@@ -83,9 +83,10 @@ static inline void*
 __runtime_ipiv_getaddr( const CHAM_ipiv_t    *ipiv,
                         starpu_data_handle_t *handle,
                         int64_t               tagbase,
-                        int                   m )
+                        int                   m,
+                        int                  *data )
 {
-    int     ncols;
+    int     ncols, home_node = -1;
     int64_t mm = m + (ipiv->i / ipiv->mb);
 
     handle += mm;
@@ -100,7 +101,11 @@ __runtime_ipiv_getaddr( const CHAM_ipiv_t    *ipiv,
         ncols = ipiv->mb;
     }
 
-    starpu_vector_data_register( handle, -1, (uintptr_t)NULL, ncols, sizeof(int) );
+    if ( data ) {
+        data += ipiv->i + m * ipiv->mb;
+        home_node = STARPU_MAIN_RAM;
+    }
+    starpu_vector_data_register( handle, home_node, (uintptr_t)data, ncols, sizeof(int) );
 
 #if defined(CHAMELEON_USE_MPI)
     {
@@ -116,17 +121,17 @@ __runtime_ipiv_getaddr( const CHAM_ipiv_t    *ipiv,
 
 void *RUNTIME_ipiv_getaddr( const CHAM_ipiv_t *ipiv, int m )
 {
-    return __runtime_ipiv_getaddr( ipiv, ipiv->ipiv, ipiv->mpitag_ipiv, m );
+    return __runtime_ipiv_getaddr( ipiv, ipiv->ipiv, ipiv->mpitag_ipiv, m, ipiv->data );
 }
 
 void *RUNTIME_ipiv_getperm( const CHAM_ipiv_t *ipiv, int m )
 {
-    return __runtime_ipiv_getaddr( ipiv, ipiv->perm, ipiv->mpitag_perm, m );
+    return __runtime_ipiv_getaddr( ipiv, ipiv->perm, ipiv->mpitag_perm, m, NULL );
 }
 
 void *RUNTIME_ipiv_getinvp( const CHAM_ipiv_t *ipiv, int m )
 {
-    return __runtime_ipiv_getaddr( ipiv, ipiv->invp, ipiv->mpitag_invp, m );
+    return __runtime_ipiv_getaddr( ipiv, ipiv->invp, ipiv->mpitag_invp, m, NULL );
 }
 
 static inline void

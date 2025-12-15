@@ -177,8 +177,6 @@ void INSERT_TASK_hgemm( const RUNTIME_option_t *options,
 
 void INSERT_TASK_ipiv_init( const RUNTIME_option_t *options,
                             CHAM_ipiv_t *ipiv );
-void INSERT_TASK_ipiv_init_data( const RUNTIME_option_t *options,
-                                 CHAM_ipiv_t *ipiv );
 void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
                                CHAM_desc_pivot_t *pivot, int k, int h, int rank );
 void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,

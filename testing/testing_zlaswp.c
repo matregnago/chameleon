@@ -87,14 +87,13 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
     }
 
     IPIV = malloc( sizeof(int) * K );
+    testing_zlaswp_ipiv_gen( IPIV, K );
     CHAMELEON_Ipiv_Create( &descIPIV, side, kb, K, P, P*Q, IPIV );
 
     /* Fill the matrices with random values */
     CHAMELEON_zplrnt_Tile( descA, seedA );
 
     /* IPIV is initialized with random values that are propagated to the descriptor (should be changed in the future) */
-    testing_zlaswp_ipiv_gen( IPIV, K );
-    CHAMELEON_Ipiv_Initialize( descIPIV );
 
     if ( async ) {
         ws = CHAMELEON_zlaswp_WS_Alloc( side, descA );

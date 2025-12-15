@@ -67,66 +67,6 @@ void INSERT_TASK_ipiv_init( const RUNTIME_option_t *options,
     }
 }
 
-static void cl_ipiv_init_data_cpu_func( void *descr[], void *cl_arg )
-{
-#if !defined(CHAMELEON_SIMULATION)
-    struct cl_laswp_args_s *clargs = (struct cl_laswp_args_s *) cl_arg;
-
-    int *ipiv = (int *)STARPU_VECTOR_GET_PTR( descr[0] );
-    int  n    = clargs->n;
-    int  i;
-
-    for( i = 0; i < n; i++ ) {
-        ipiv[i] = clargs->data[i];
-    }
-#endif
-}
-
-struct starpu_codelet cl_ipiv_init_data = {
-    .where     = STARPU_CPU,
-    .cpu_func  = cl_ipiv_init_data_cpu_func,
-    .nbuffers  = 1,
-};
-
-void INSERT_TASK_ipiv_init_data( const RUNTIME_option_t *options,
-                                 CHAM_ipiv_t            *ipiv )
-{
-
-    int64_t mt   = ipiv->mt;
-    int64_t mb   = ipiv->mb;
-    int     m;
-
-    if ( ipiv->data == NULL ) {
-        return;
-    }
-
-    for ( m = 0; m < mt; m++ ) {
-        starpu_data_handle_t    ipiv_src = RUNTIME_ipiv_getaddr( ipiv, m );
-        struct cl_laswp_args_s *cl_args;
-        int                     m0, n;
-
-        if ( ipiv->get_rankof( ipiv, m, m ) != ipiv->myrank ) {
-            continue;
-        }
-
-        m0 = m * mb;
-        n = ( m == ( mt-1 ) ) ? ipiv->m - m0 : mb;
-
-        cl_args     = malloc( sizeof(struct cl_laswp_args_s) );
-        cl_args->m0 = m0;
-        cl_args->n  = n;
-        cl_args->m  = ipiv->m;
-
-        cl_args->data = ipiv->data + m0;
-
-        rt_starpu_insert_task(
-            &cl_ipiv_init_data,
-            STARPU_CL_ARGS, cl_args, sizeof(struct cl_laswp_args_s),
-            STARPU_W,       ipiv_src,
-            0);
-    }
-}
-
 void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
                                CHAM_desc_pivot_t *pivot, int k, int h, int rank )
 {

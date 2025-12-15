@@ -221,7 +221,6 @@ int CHAMELEON_Ipiv_Create( CHAM_ipiv_t **ipivptr,
                            void         *data );
 int CHAMELEON_Ipiv_Destroy( CHAM_ipiv_t **ipivptr );
 
-void CHAMELEON_Ipiv_Initialize( CHAM_ipiv_t *descIPIV );
 int  CHAMELEON_Ipiv_Flush( const CHAM_ipiv_t        *ipiv,
                            RUNTIME_sequence_t *sequence );
 int  CHAMELEON_Ipiv_Gather( const CHAM_ipiv_t *ipivdesc,
