@@ -124,9 +124,26 @@ chameleon_cublas_dtype( cham_flttype_t flttype ) {
 END_C_DECLS
 
 /**
- * Coreblas Error
+ * Gpucublas Error
  */
 #define gpucublas_error(k, str) fprintf(stderr, "%s: Parameter %d / %s\n", __func__, k, str)
+
+/**
+ * Gpucublas kernel tracing
+ */
+#if defined(CHAMELEON_KERNELS_TRACE)
+
+void __gpucublas_kernel_trace( const char *func, ... );
+#define gpucublas_kernel_trace( ... )                                    \
+    do {                                                                \
+        __gpucublas_kernel_trace( __chameleon_func__, ##__VA_ARGS__, NULL );  \
+    } while(0)
+
+#else
+
+#define gpucublas_kernel_trace( ... ) do {} while(0)
+
+#endif
 
 /**
  *  LAPACK Constants
