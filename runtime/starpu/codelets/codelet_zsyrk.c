@@ -68,13 +68,8 @@ cl_zsyrk_cuda_func(void *descr[], void *cl_arg)
     tileA = cti_interface_get(descr[0]);
     tileC = cti_interface_get(descr[1]);
 
-    CUDA_zsyrk(
-        clargs->uplo, clargs->trans, clargs->n, clargs->k,
-        (cuDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        (cuDoubleComplex*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    TCUDA_zsyrk( clargs->uplo, clargs->trans, clargs->n, clargs->k,
+                 (cuDoubleComplex *)&(clargs->alpha), tileA, (cuDoubleComplex *)&(clargs->beta), tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 

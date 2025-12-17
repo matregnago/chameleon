@@ -63,11 +63,7 @@ static void cl_zherfb_cuda_func(void *descr[], void *cl_arg)
 
     starpu_codelet_unpack_args( cl_arg, &uplo, &n, &k, &ib, &nb, &ldW );
 
-    CUDA_zherfb( uplo, n, k, ib, nb,
-                 tileA->mat, tileA->ld,
-                 tileT->mat, tileT->ld,
-                 tileC->mat, tileC->ld,
-                 tileW->mat, ldW, handle );
+    TCUDA_zherfb( uplo, n, k, ib, nb, tileA, tileT, tileC, tileW, ldW, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

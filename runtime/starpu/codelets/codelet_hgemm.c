@@ -36,19 +36,11 @@ cl_hgemm_cuda_func( void *descr[], void *cl_arg )
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileC->format & CHAMELEON_TILE_FULLRANK );
-
-    CUDA_hgemm(
-        clargs->transA, clargs->transB,
-        clargs->m, clargs->n, clargs->k,
-        (CHAMELEON_Real16_t*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        (CHAMELEON_Real16_t*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    TCUDA_hgemm( clargs->transA, clargs->transB,
+                 clargs->m, clargs->n, clargs->k,
+                 (CHAMELEON_Real16_t*)&(clargs->alpha), tileA, tileB,
+                 (CHAMELEON_Real16_t*)&(clargs->beta),  tileC,
+                 handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 

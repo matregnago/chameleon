@@ -69,19 +69,10 @@ cl_zgemm_cuda_func( void *descr[], void *cl_arg )
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileC->format & CHAMELEON_TILE_FULLRANK );
-
-    CUDA_zgemm(
-        clargs->transA, clargs->transB,
-        clargs->m, clargs->n, clargs->k,
-        (cuDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        (cuDoubleComplex*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    TCUDA_zgemm( clargs->transA, clargs->transB,
+                 clargs->m, clargs->n, clargs->k,
+                 (cuDoubleComplex *)&(clargs->alpha), tileA, tileB,
+                 (cuDoubleComplex *)&(clargs->beta),  tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 

@@ -54,19 +54,12 @@ cl_zlag2c_cuda_func( void *descr[], void *cl_arg )
     tileA = cti_interface_get(descr[0]);
     tileB = cti_interface_get(descr[1]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-
     starpu_codelet_unpack_args( cl_arg, &m, &n );
 
-    int rc = CUDA_zlag2c(
-        m, n,
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        handle );
+    int rc = TCUDA_zlag2c( m, n, tileA, tileB, handle );
 
     if ( rc != 0 ) {
-        fprintf( stderr, "core_zlag2c failed with info(%d)\n", rc );
+        fprintf( stderr, "tcuda_zlag2c failed with info(%d)\n", rc );
     }
 }
 #endif /* defined(CHAMELEON_USE_CUDA) && defined(GPUCUBLAS_HAVE_CUDA_TOOLKIT) */
@@ -139,18 +132,11 @@ cl_clag2z_cuda_func( void *descr[], void *cl_arg )
     tileA = cti_interface_get(descr[0]);
     tileB = cti_interface_get(descr[1]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-
     starpu_codelet_unpack_args( cl_arg, &m, &n );
 
-    int rc = CUDA_clag2z(
-        m, n,
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        handle );
+    int rc = TCUDA_clag2z( m, n, tileA, tileB, handle );
     if ( rc != 0 ) {
-        fprintf( stderr, "core_clag2z failed with info(%d)\n", rc );
+        fprintf( stderr, "tcuda_clag2z failed with info(%d)\n", rc );
     }
 }
 #endif /* defined(CHAMELEON_USE_CUDA) && defined(GPUCUBLAS_HAVE_CUDA_TOOLKIT) */

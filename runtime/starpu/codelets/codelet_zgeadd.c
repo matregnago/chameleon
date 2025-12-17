@@ -62,10 +62,8 @@ cl_zgeadd_cuda_func( void *descr[], void *cl_arg )
     tileA = cti_interface_get( descr[0] );
     tileB = cti_interface_get( descr[1] );
 
-    CUDA_zgeadd( clargs->trans, clargs->m, clargs->n,
-                 (cuDoubleComplex*)&(clargs->alpha), tileA->mat, tileA->ld,
-                 (cuDoubleComplex*)&(clargs->beta),  tileB->mat, tileB->ld,
-                 handle );
+    TCUDA_zgeadd( clargs->trans, clargs->m, clargs->n,
+                  (cuDoubleComplex *)&(clargs->alpha), tileA, (cuDoubleComplex *)&(clargs->beta), tileB, handle );
 
     return;
 }

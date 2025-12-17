@@ -67,13 +67,8 @@ cl_zherk_cuda_func(void *descr[], void *cl_arg)
     tileA = cti_interface_get(descr[0]);
     tileC = cti_interface_get(descr[1]);
 
-    CUDA_zherk(
-        clargs->uplo, clargs->trans, clargs->n, clargs->k,
-        &(clargs->alpha),
-        tileA->mat, tileA->ld,
-        &(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    TCUDA_zherk( clargs->uplo, clargs->trans, clargs->n, clargs->k,
+                 &(clargs->alpha), tileA, &(clargs->beta), tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 
