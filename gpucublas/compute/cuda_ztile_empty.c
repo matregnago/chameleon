@@ -224,6 +224,20 @@ TCUDA_zparfb( __attribute__((unused)) cham_side_t        side,
 }
 
 int
+TCUDA_zplrnt( __attribute__((unused)) int                    m,
+              __attribute__((unused)) int                    n,
+              CHAM_tile_t *A,
+              __attribute__((unused)) int                    bigM,
+              __attribute__((unused)) int                    m0,
+              __attribute__((unused)) int                    n0,
+              __attribute__((unused)) unsigned long long int seed,
+              __attribute__((unused)) cublasHandle_t         handle )
+{
+    gpucublas_kernel_trace( A );
+    return 0;
+}
+
+int
 TCUDA_zpotrf( __attribute__((unused)) cham_uplo_t        uplo,
               __attribute__((unused)) int                n,
               CHAM_tile_t                               *A,
