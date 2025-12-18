@@ -21,14 +21,6 @@
 #include "chameleon/tasks.h"
 #include "coreblas.h"
 
-void INSERT_TASK_ipiv_init( const RUNTIME_option_t *options,
-                            CHAM_ipiv_t *ipiv )
-{
-    assert( 0 );
-    (void)options;
-    (void)ipiv;
-}
-
 void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
                                CHAM_desc_pivot_t *pivot, int k, int h, int rank )
 {

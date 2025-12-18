@@ -19,54 +19,6 @@
  */
 #include "chameleon_starpu_internal.h"
 
-struct cl_laswp_args_s {
-    int   m0;
-    int   n;
-    int   m;
-    int  *data;
-};
-
-static void cl_ipiv_init_cpu_func( void *descr[], void *cl_arg )
-{
-#if !defined(CHAMELEON_SIMULATION)
-    int *ipiv = (int *)STARPU_VECTOR_GET_PTR( descr[0] );
-    int i, m0, n;
-
-    starpu_codelet_unpack_args( cl_arg, &m0, &n );
-
-    for( i = 0; i < n; i++ ) {
-        ipiv[i] = m0 + i + 1;
-    }
-#endif
-}
-
-struct starpu_codelet cl_ipiv_init = {
-    .where     = STARPU_CPU,
-    .cpu_func  = cl_ipiv_init_cpu_func,
-    .nbuffers  = 1,
-};
-
-void INSERT_TASK_ipiv_init( const RUNTIME_option_t *options,
-                            CHAM_ipiv_t            *ipiv )
-{
-    int64_t mt = ipiv->mt;
-    int64_t mb = ipiv->mb;
-    int     m;
-
-    for ( m = 0; m < mt; m++ ) {
-        starpu_data_handle_t ipiv_src = RUNTIME_ipiv_getaddr( ipiv, m );
-        int m0 = m * mb;
-        int n  = ( m == ( mt - 1 ) ) ? ipiv->m - m0 : mb;
-
-        rt_starpu_insert_task(
-            &cl_ipiv_init,
-            STARPU_VALUE, &m0, sizeof(int),
-            STARPU_VALUE, &n,  sizeof(int),
-            STARPU_W, ipiv_src,
-            0);
-    }
-}
-
 void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
                                CHAM_desc_pivot_t *pivot, int k, int h, int rank )
 {
