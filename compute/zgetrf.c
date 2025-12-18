@@ -322,7 +322,7 @@ CHAMELEON_zgetrf( int M, int N, CHAMELEON_Complex64_t *A, int LDA, int *IPIV )
     ws = CHAMELEON_zgetrf_WS_Alloc( &descAt );
 
     chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, chameleon_min( M, N ),
-                         1, 1, IPIV, chameleon_getrankof_ipiv_2d_diag );
+                         1, 1, IPIV, NULL );
 
     /* Call the tile interface */
     CHAMELEON_zgetrf_Tile_Async( &descAt, &descIPIV, ws, sequence, &request );

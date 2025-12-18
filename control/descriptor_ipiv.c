@@ -183,41 +183,6 @@ int CHAMELEON_Ipiv_Create( CHAM_ipiv_t **ipivptr, cham_side_t side, int mb, int 
 }
 
 /**
- ********************************************************************************
- *
- * @ingroup CHAMELEON_Complex64_t
- *
- *  @brief initialize the IPIV descriptor.
- *
- *******************************************************************************
- *
- * @param[in,out] descIPIV
- *          Descriptor of the pivot array. Should be initialized using
- *          CHAMELEON_Ipiv_Create() with data filled with the vector of pivot.
- *
- *******************************************************************************
- *
- *
- */
-void CHAMELEON_Ipiv_Initialize( CHAM_ipiv_t *descIPIV )
-{
-
-    RUNTIME_option_t    options;
-    RUNTIME_request_t   request  = RUNTIME_REQUEST_INITIALIZER;
-    RUNTIME_sequence_t *sequence = NULL;
-    CHAM_context_t     *chamctxt;
-
-    chamctxt = chameleon_context_self();
-    chameleon_sequence_create( chamctxt, &sequence );
-    RUNTIME_options_init( &options, chamctxt, sequence, &request );
-
-    INSERT_TASK_ipiv_init_data( &options, descIPIV );
-
-    chameleon_sequence_wait( chamctxt, sequence );
-    chameleon_sequence_destroy( chamctxt, sequence );
-}
-
-/**
  *****************************************************************************
  *
  * @ingroup Descriptor
