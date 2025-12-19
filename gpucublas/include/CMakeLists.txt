@@ -30,6 +30,8 @@ set(GPUCUBLAS_HDRS_GENERATED "")
 set(ZHDR
     gpucublas/gpucublas_z.h
     gpucublas/gpucublas_zc.h
+    gpucublas/gpucublas_ztile.h
+    gpucublas/gpucublas_zctile.h
 )
 precisions_rules_py(
   GPUCUBLAS_HDRS_GENERATED "${ZHDR}"

@@ -64,13 +64,8 @@ cl_ztrmm_cuda_func(void *descr[], void *cl_arg)
     tileA = cti_interface_get(descr[0]);
     tileB = cti_interface_get(descr[1]);
 
-    CUDA_ztrmm(
-        clargs->side, clargs->uplo, clargs->transA, clargs->diag,
-        clargs->m, clargs->n,
-        (cuDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        handle );
+    TCUDA_ztrmm( clargs->side, clargs->uplo, clargs->transA, clargs->diag,
+                 clargs->m, clargs->n, (cuDoubleComplex *)&(clargs->alpha), tileA, tileB, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 

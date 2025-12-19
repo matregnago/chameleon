@@ -30,8 +30,8 @@ void
 TCORE_dlag2z( __attribute__((unused)) cham_uplo_t uplo,
               __attribute__((unused)) int M,
               __attribute__((unused)) int N,
-              __attribute__((unused)) const CHAM_tile_t *A,
-              __attribute__((unused)) CHAM_tile_t       *B )
+              const CHAM_tile_t *A,
+              CHAM_tile_t       *B )
 {
     coreblas_kernel_trace( A, B );
     assert( A->format & CHAMELEON_TILE_FULLRANK );
@@ -41,12 +41,12 @@ TCORE_dlag2z( __attribute__((unused)) cham_uplo_t uplo,
 #endif
 
 void
-TCORE_dzasum( __attribute__((unused)) cham_store_t       storev,
-              __attribute__((unused)) cham_uplo_t        uplo,
-              __attribute__((unused)) int                M,
-              __attribute__((unused)) int                N,
-              __attribute__((unused)) const CHAM_tile_t *A,
-              __attribute__((unused)) double *           work )
+TCORE_dzasum( cham_store_t       storev,
+              cham_uplo_t        uplo,
+              int                M,
+              int                N,
+              const CHAM_tile_t *A,
+              double *           work )
 {
     coreblas_kernel_trace( A );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
@@ -281,12 +281,12 @@ TCORE_zlacpyx( cham_uplo_t uplo, int M, int N, int displA, const CHAM_tile_t *A,
 }
 
 void
-TCORE_zlange( cham_normtype_t    norm,
-              int                M,
-              int                N,
+TCORE_zlange( __attribute__((unused)) cham_normtype_t    norm,
+              __attribute__((unused)) int                M,
+              __attribute__((unused)) int                N,
               const CHAM_tile_t *A,
-              double *           work,
-              double *           normA )
+              __attribute__((unused)) double *           work,
+              __attribute__((unused)) double *           normA )
 {
     coreblas_kernel_trace( A );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
@@ -294,12 +294,12 @@ TCORE_zlange( cham_normtype_t    norm,
 
 #if defined( PRECISION_z ) || defined( PRECISION_c )
 void
-TCORE_zlanhe( cham_normtype_t    norm,
-              cham_uplo_t        uplo,
-              int                N,
+TCORE_zlanhe( __attribute__((unused)) cham_normtype_t    norm,
+              __attribute__((unused)) cham_uplo_t        uplo,
+              __attribute__((unused)) int                N,
               const CHAM_tile_t *A,
-              double *           work,
-              double *           normA )
+              __attribute__((unused)) double *           work,
+              __attribute__((unused)) double *           normA )
 {
     coreblas_kernel_trace( A );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
@@ -307,26 +307,26 @@ TCORE_zlanhe( cham_normtype_t    norm,
 #endif
 
 void
-TCORE_zlansy( cham_normtype_t    norm,
-              cham_uplo_t        uplo,
-              int                N,
+TCORE_zlansy( __attribute__((unused)) cham_normtype_t    norm,
+              __attribute__((unused)) cham_uplo_t        uplo,
+              __attribute__((unused)) int                N,
               const CHAM_tile_t *A,
-              double *           work,
-              double *           normA )
+              __attribute__((unused)) double *           work,
+              __attribute__((unused)) double *           normA )
 {
     coreblas_kernel_trace( A );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
 }
 
 void
-TCORE_zlantr( cham_normtype_t    norm,
-              cham_uplo_t        uplo,
-              cham_diag_t        diag,
-              int                M,
-              int                N,
+TCORE_zlantr( __attribute__((unused)) cham_normtype_t    norm,
+              __attribute__((unused)) cham_uplo_t        uplo,
+              __attribute__((unused)) cham_diag_t        diag,
+              __attribute__((unused)) int                M,
+              __attribute__((unused)) int                N,
               const CHAM_tile_t *A,
-              double *           work,
-              double *           normA )
+              __attribute__((unused)) double *           work,
+              __attribute__((unused)) double *           normA )
 {
     coreblas_kernel_trace( A );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
@@ -633,13 +633,13 @@ TCORE_ztradd( cham_uplo_t           uplo,
 }
 
 void
-TCORE_ztrasm( cham_store_t       storev,
-              cham_uplo_t        uplo,
-              cham_diag_t        diag,
-              int                M,
-              int                N,
+TCORE_ztrasm( __attribute__((unused)) cham_store_t       storev,
+              __attribute__((unused)) cham_uplo_t        uplo,
+              __attribute__((unused)) cham_diag_t        diag,
+              __attribute__((unused)) int                M,
+              __attribute__((unused)) int                N,
               const CHAM_tile_t *A,
-              double *           work )
+              __attribute__((unused)) double *           work )
 {
     coreblas_kernel_trace( A );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
@@ -855,9 +855,14 @@ TCORE_zgram( cham_uplo_t        uplo,
 }
 
 void
-TCORE_zprint( FILE *file, const char *header,
-              cham_uplo_t uplo, int M, int N,
-              int Am, int An, const CHAM_tile_t *A )
+TCORE_zprint( __attribute__((unused)) FILE *file,
+              __attribute__((unused)) const char *header,
+              __attribute__((unused)) cham_uplo_t uplo,
+              __attribute__((unused)) int M,
+              __attribute__((unused)) int N,
+              __attribute__((unused)) int Am,
+              __attribute__((unused)) int An,
+              const CHAM_tile_t *A )
 {
     coreblas_kernel_trace( A );
     assert( A->format & CHAMELEON_TILE_FULLRANK );

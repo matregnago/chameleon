@@ -79,12 +79,8 @@ static void cl_zunmlq_cuda_func(void *descr[], void *cl_arg)
 
     starpu_codelet_unpack_args( cl_arg, &side, &trans, &m, &n, &k, &ib, &ldW );
 
-    CUDA_zunmlqt(
-            side, trans, m, n, k, ib,
-            tileA->mat, tileA->ld,
-            tileT->mat, tileT->ld,
-            tileC->mat, tileC->ld,
-            tileW->mat, ldW, handle );
+    TCUDA_zunmlqt( side, trans, m, n, k, ib,
+                   tileA, tileT, tileC, tileW, ldW, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

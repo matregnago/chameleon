@@ -74,13 +74,8 @@ static void cl_ztpmqrt_cuda_func(void *descr[], void *cl_arg)
 
     starpu_codelet_unpack_args( cl_arg, &side, &trans, &M, &N, &K, &L, &ib, &lwork );
 
-    CUDA_ztpmqrt(
-            side, trans, M, N, K, L, ib,
-            tileV->mat, tileV->ld,
-            tileT->mat, tileT->ld,
-            tileA->mat, tileA->ld,
-            tileB->mat, tileB->ld,
-            tileW->mat, lwork, handle );
+    TCUDA_ztpmqrt( side, trans, M, N, K, L, ib,
+                   tileV, tileT, tileA, tileB, tileW, lwork, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

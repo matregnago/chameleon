@@ -61,10 +61,7 @@ cl_zgersum_redux_cuda_func( void *descr[], void *cl_arg )
     assert( tileA->m == tileB->m );
     assert( tileA->n == tileB->n );
 
-    CUDA_zgeadd( ChamNoTrans, tileA->m, tileA->n,
-                 &zone, tileB->mat, tileB->ld,
-                 &zone, tileA->mat, tileA->ld,
-                 handle );
+    TCUDA_zgeadd( ChamNoTrans, tileA->m, tileA->n, &zone, tileB, &zone, tileA, handle );
 
     (void)cl_arg;
     return;

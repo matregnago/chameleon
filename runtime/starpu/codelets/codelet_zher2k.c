@@ -66,12 +66,9 @@ static void cl_zher2k_cuda_func(void *descr[], void *cl_arg)
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    CUDA_zher2k( clargs->uplo, clargs->trans,
-                 clargs->n, clargs->k,
-                 (cuDoubleComplex*)&(clargs->alpha), tileA->mat, tileA->ld,
-                                                     tileB->mat, tileB->ld,
-                 &(clargs->beta),                    tileC->mat, tileC->ld,
-                 handle );
+    TCUDA_zher2k( clargs->uplo, clargs->trans,
+                  clargs->n, clargs->k, (cuDoubleComplex *)&(clargs->alpha),
+                  tileA, tileB, &(clargs->beta), tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 

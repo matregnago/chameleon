@@ -59,10 +59,6 @@ cl_gemmex_cuda_func( void *descr[], void *cl_arg )
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileC->format & CHAMELEON_TILE_FULLRANK );
-
     switch( tileC->flttype ) {
     case ChamRealHalf:
     {
@@ -99,15 +95,10 @@ cl_gemmex_cuda_func( void *descr[], void *cl_arg )
         return;
     }
 
-    CUDA_gemmex(
-        clargs->transA, clargs->transB,
-        clargs->m, clargs->n, clargs->k,
-        ptrAlpha,
-        tileA->mat, tileA->ld, tileA->flttype,
-        tileB->mat, tileB->ld, tileB->flttype,
-        ptrBeta,
-        tileC->mat, tileC->ld, tileC->flttype,
-        handle );
+    TCUDA_gemmex( clargs->transA, clargs->transB,
+                  clargs->m, clargs->n, clargs->k,
+                  ptrAlpha, tileA, tileB, ptrBeta, tileC,
+                  handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

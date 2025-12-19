@@ -56,6 +56,18 @@ set(ZSRC
     cuda_zunmqrt.c
     )
 
+if ( CHAMELEON_NO_KERNELS )
+  list( APPEND ZSRC
+    cuda_ztile_empty.c
+    cuda_zctile_empty.c
+    )
+else()
+  list( APPEND ZSRC
+    cuda_ztile.c
+    cuda_zctile.c
+    )
+endif()
+
 if ( GPUCUBLAS_HAVE_CUDA_TOOLKIT )
   set(ZSRC
     ${ZSRC}
@@ -110,6 +122,18 @@ if (GPUCUBLAS_HAVE_CUBLASGEMMEX)
     ${GPUCUBLAS_SRCS}
     cuda_gemmex.c
   )
+endif()
+
+if ( GPUCUBLAS_HAVE_CUBLASHGEMM OR GPUCUBLAS_HAVE_CUBLASGEMMEX )
+  if ( CHAMELEON_NO_KERNELS )
+    list( APPEND GPUCUBLAS_SRCS
+      cuda_htile_empty.c
+      )
+  else()
+    list( APPEND GPUCUBLAS_SRCS
+      cuda_htile.c
+      )
+  endif()
 endif()
 
 # Force generation of sources
