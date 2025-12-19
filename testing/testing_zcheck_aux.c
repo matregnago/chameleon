@@ -83,15 +83,13 @@ int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, C
     double Anorm, Rnorm, result;
     cham_fixdbl_t eps = testing_getaccuracy();
 
-    double *work = (double *)malloc( sizeof(double) * LDA * N );
-
     /* Computes the norms */
     if ( uplo == ChamUpperLower ) {
-        Anorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'M', M, N, A, LDA, work );
+        Anorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'M', M, N, A, LDA, NULL );
     }
     else {
         Anorm = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, 'M', chameleon_lapack_const(uplo), 'N',
-                                     M, N, A, LDA, work );
+                                     M, N, A, LDA, NULL );
     }
 
     /* Computes the difference with the core function */
@@ -99,11 +97,11 @@ int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, C
 
     /* Computes the residual's norm */
     if ( uplo == ChamUpperLower ) {
-        Rnorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'M', M, N, B, LDB, work );
+        Rnorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'M', M, N, B, LDB, NULL );
     }
     else {
         Rnorm = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, 'M', chameleon_lapack_const(uplo), 'N',
-                                     M, N, B, LDB, work );
+                                     M, N, B, LDB, NULL );
     }
     if ( Anorm != 0. ) {
         result = Rnorm / (Anorm * eps);
@@ -122,8 +120,6 @@ int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, C
 
     run_arg_add_double( args, "||A||", Anorm );
     run_arg_add_double( args, "||B||", Rnorm );
-
-    free(work);
 
     (void)args;
     return info_solution;
@@ -163,8 +159,8 @@ int check_zmatrices( run_arg_list_t *args, cham_uplo_t uplo, CHAM_desc_t *descA,
     CHAMELEON_Complex64_t *B = NULL;
 
     if ( rank == 0 ) {
-        A = (CHAMELEON_Complex64_t *)malloc( (size_t)(LDA) * (size_t)(N) * sizeof(CHAMELEON_Complex64_t) );
-        B = (CHAMELEON_Complex64_t *)malloc( (size_t)(LDB) * (size_t)(N) * sizeof(CHAMELEON_Complex64_t) );
+        A = (CHAMELEON_Complex64_t *)malloc( sizeof(CHAMELEON_Complex64_t) * LDA * N );
+        B = (CHAMELEON_Complex64_t *)malloc( sizeof(CHAMELEON_Complex64_t) * LDB * N );
         if ( (A == NULL) || (B == NULL) ) {
             free( A );
             free( B );
@@ -233,31 +229,29 @@ int check_zmatrices( run_arg_list_t *args, cham_uplo_t uplo, CHAM_desc_t *descA,
 int check_znorm_std( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_normtype_t norm_type, cham_uplo_t uplo,
                      cham_diag_t diag, double norm_cham, int M, int N, CHAMELEON_Complex64_t *A, int LDA )
 {
-    int info_solution  = 0;
-    double *work       = (double*) malloc( sizeof(double) * chameleon_max(M, N) );
-    double norm_lapack;
-    double result;
+    int           info_solution  = 0;
+    double        norm_lapack;
+    double        result;
     cham_fixdbl_t eps = testing_getaccuracy();
 
     /* Computes the norm with the LAPACK function */
     switch (matrix_type) {
     case ChamGeneral:
-        norm_lapack = LAPACKE_zlange_work( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), M, N, A, LDA, work );
+        norm_lapack = LAPACKE_zlange( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), M, N, A, LDA );
         break;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     case ChamHermitian:
-        norm_lapack = LAPACKE_zlanhe_work( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), chameleon_lapack_const(uplo), M, A, LDA, work );
+        norm_lapack = LAPACKE_zlanhe( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), chameleon_lapack_const(uplo), M, A, LDA );
         break;
 #endif
     case ChamSymmetric:
-        norm_lapack = LAPACKE_zlansy_work( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), chameleon_lapack_const(uplo), M, A, LDA, work );
+        norm_lapack = LAPACKE_zlansy( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), chameleon_lapack_const(uplo), M, A, LDA );
         break;
     case ChamTriangular:
-        norm_lapack = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), chameleon_lapack_const(uplo), chameleon_lapack_const(diag), M, N, A, LDA, work );
+        norm_lapack = LAPACKE_zlantr( LAPACK_COL_MAJOR, chameleon_lapack_const(norm_type), chameleon_lapack_const(uplo), chameleon_lapack_const(diag), M, N, A, LDA );
         break;
     default:
         fprintf(stderr, "check_znorm: matrix_type(%d) unsupported\n", matrix_type );
-        free( work );
         return 1;
     }
 
@@ -293,8 +287,6 @@ int check_znorm_std( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_norm
 
     run_arg_add_double( args, "||R||", result );
     info_solution = ( result < 1 ) ? 0 : 1;
-
-    free(work);
 
     return info_solution;
 }
@@ -348,6 +340,7 @@ int check_znorm( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_normtype
     CHAMELEON_zDesc2Lap( uplo, descA, A, LDA );
     if ( rank == 0 ) {
         info_solution = check_znorm_std( args, matrix_type, norm_type, uplo, diag, norm_cham, M, N, A, LDA );
+        free( A );
     }
 
     /* Broadcasts the result from the main processus */
@@ -428,7 +421,6 @@ int check_zsum_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, 
     }
 
     cham_fixdbl_t eps = testing_getaccuracy();
-    double *work = malloc( sizeof(double) * chameleon_max(M, N) );
 
     /* Makes the sum with the core function */
     if ( uplo == ChamUpperLower ) {
@@ -441,11 +433,11 @@ int check_zsum_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, 
 
     /* Calculates the norm from the core function's result */
     if ( uplo == ChamUpperLower ) {
-        Rnorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'M', M, N, Bref, LDB, work );
+        Rnorm = LAPACKE_zlange( LAPACK_COL_MAJOR, 'M', M, N, Bref, LDB );
     }
     else {
-        Rnorm = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, 'M', chameleon_lapack_const(uplo), 'N',
-                                        M, N, Bref, LDB, work );
+        Rnorm = LAPACKE_zlantr( LAPACK_COL_MAJOR, 'M', chameleon_lapack_const(uplo), 'N',
+                                M, N, Bref, LDB );
     }
     result = Rnorm / (max(Anorm, Binitnorm) * eps);
 
@@ -470,7 +462,6 @@ int check_zsum_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, 
         info_solution = 0;
     }
 
-    free(work);
     (void)args;
     return info_solution;
 }
