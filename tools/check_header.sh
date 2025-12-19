@@ -182,6 +182,7 @@ files=$( git ls-files                     |
              grep -v LICENCE              |
              grep -v ".*\.cmake"          |
              grep -v "testing/lin"        |
+             grep -v "testing/input/dist_3.txt"        |
              grep -v doc/                 |
              grep -v CTest                |
              grep -v cblas.h              |
