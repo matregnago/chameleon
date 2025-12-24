@@ -168,6 +168,9 @@ cti_allocate_data_on_node( void *data_interface, unsigned node )
     }
 
     /* update the data properly */
+#if defined(CHAMELEON_KERNELS_TRACE)
+    cham_tile_interface->tile.name  = NULL;
+#endif
     cham_tile_interface->tile.mat   = (void*)addr;
     cham_tile_interface->tile.ld    = ld;
     cham_tile_interface->dev_handle = handle;
@@ -209,6 +212,9 @@ cti_reuse_data_on_node( void *dst_data_interface, const void *cached_interface, 
         (starpu_cham_tile_interface_t *) cached_interface;
 
     /* update the data properly */
+#if defined(CHAMELEON_KERNELS_TRACE)
+    dst_cham_tile->tile.name  = NULL;
+#endif
     dst_cham_tile->tile.mat   = cached_cham_tile->tile.mat;
     dst_cham_tile->tile.ld    = dst_cham_tile->tile.m;
     dst_cham_tile->dev_handle = cached_cham_tile->dev_handle;
