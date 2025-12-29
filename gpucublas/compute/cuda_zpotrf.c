@@ -20,20 +20,31 @@
  */
 #include "gpucublas.h"
 
-#if defined(CHAMELEON_USE_MAGMA)
-int CUDA_zpotrf(
-        magma_uplo_t uplo,  magma_int_t n,
-        magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
+int CUDA_zpotrf( cham_uplo_t uplo, int n,
+                 cuDoubleComplex *dA, int lda,
+                 cuDoubleComplex *dW, int lwork,
+                 int *d_info,
+                 cusolverDnHandle_t handle )
 {
-    int ret;
-    ret = magma_zpotrf_gpu(
-        uplo,
-        n, dA, ldda, info);
-/*  hA, stream );*/
-     if (ret != MAGMA_SUCCESS) {
-        fprintf(stderr, "Error in MAGMA: %d\n", ret);
-        exit(-1);
+    cusolverStatus_t rc;
+
+#if !defined(NDEBUG)
+    {
+        int query;
+        rc = cusolverDnZpotrf_bufferSize( handle,
+                                          chameleon_cublas_const(uplo),
+                                          n, dA, lda, &query );
+        assert( rc == CUSOLVER_STATUS_SUCCESS );
+        assert( query <= lwork );
     }
-     return CHAMELEON_SUCCESS;
-}
 #endif
+
+    rc = cusolverDnZpotrf( handle,
+                           chameleon_cublas_const(uplo),
+                           n, dA, lda, dW, lwork,
+                           d_info );
+
+    assert( rc == CUSOLVER_STATUS_SUCCESS );
+
+    return (rc == CUSOLVER_STATUS_SUCCESS) ? CHAMELEON_SUCCESS : CHAMELEON_ERR_UNEXPECTED;
+}

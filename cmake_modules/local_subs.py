@@ -139,6 +139,7 @@ subs = {
         # ----- Vendors Prefixes
         ('vendor_p',             'vendor_s',             'vendor_d',             'vendor_c',             'vendor_z'            ),
         ('',                     'cublasS',              'cublasD',              'cublasC',              'cublasZ'             ),
+        ('',                     'cusolverDnS',          'cusolverDnD',          'cusolverDnC',          'cusolverDnZ'         ),
       # ('',                     'starpu_s',             'starpu_d',             'starpu_c',             'starpu_z'            ),
       # ('',                     'STARPU_S',             'STARPU_D',             'STARPU_C',             'STARPU_Z'            ),
       # ('',                     's_',                   'd_',                   'c_',                   'z_'                  ),

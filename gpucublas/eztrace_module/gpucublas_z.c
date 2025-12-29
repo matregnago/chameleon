@@ -52,6 +52,7 @@ int (*libCUDA_zherk)(cham_uplo_t uplo, cham_trans_t trans, int n, int k, const d
 int (*libCUDA_zherfb)(cham_uplo_t uplo, int n, int k, int ib, int nb, const cuDoubleComplex * A, int lda, const cuDoubleComplex * T, int ldt, cuDoubleComplex * C, int ldc, cuDoubleComplex * WORK, int ldwork, cublasHandle_t handle) = NULL;
 int (*libCUDA_zlarfb)(cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M, int N, int K, const cuDoubleComplex * V, int LDV, const cuDoubleComplex * T, int LDT, cuDoubleComplex * C, int LDC, cuDoubleComplex * WORK, int LDWORK, cublasHandle_t handle) = NULL;
 int (*libCUDA_zparfb)(cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M1, int N1, int M2, int N2, int K, int L, cuDoubleComplex * A1, int LDA1, cuDoubleComplex * A2, int LDA2, const cuDoubleComplex * V, int LDV, const cuDoubleComplex * T, int LDT, cuDoubleComplex * WORK, int LWORK, cublasHandle_t handle) = NULL;
+int (*libCUDA_zpotrf)(cham_uplo_t uplo, int n, cuDoubleComplex * A, int lda, cuDoubleComplex * WORK, int LWORK, int *d_info, cusolverDnHandle_t handle) = NULL;
 int (*libCUDA_zsymm)(cham_side_t side, cham_uplo_t uplo, int m, int n, const cuDoubleComplex * alpha, const cuDoubleComplex * A, int lda, const cuDoubleComplex * B, int ldb, const cuDoubleComplex * beta, cuDoubleComplex * C, int ldc, cublasHandle_t handle) = NULL;
 int (*libCUDA_zsyr2k)(cham_uplo_t uplo, cham_trans_t trans, int n, int k, const cuDoubleComplex * alpha, const cuDoubleComplex * A, int lda, const cuDoubleComplex * B, int ldb, const cuDoubleComplex * beta, cuDoubleComplex * C, int ldc, cublasHandle_t handle) = NULL;
 int (*libCUDA_zsyrk)(cham_uplo_t uplo, cham_trans_t trans, int n, int k, const cuDoubleComplex * alpha, const cuDoubleComplex * A, int lda, const cuDoubleComplex * beta, cuDoubleComplex * C, int ldc, cublasHandle_t handle) = NULL;
@@ -150,6 +151,13 @@ int CUDA_zlarfb(cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_st
 int CUDA_zparfb(cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M1, int N1, int M2, int N2, int K, int L, cuDoubleComplex * A1, int LDA1, cuDoubleComplex * A2, int LDA2, const cuDoubleComplex * V, int LDV, const cuDoubleComplex * T, int LDT, cuDoubleComplex * WORK, int LWORK, cublasHandle_t handle) {
     FUNCTION_ENTRY;
     int ret = libCUDA_zparfb(side, trans, direct, storev, M1, N1, M2, N2, K, L, A1, LDA1, A2, LDA2, V, LDV, T, LDT, WORK, LWORK, handle);
+    FUNCTION_EXIT;
+    return ret;
+}
+
+int CUDA_zpotrf(cham_uplo_t uplo, int n, cuDoubleComplex *A, int lda, cuDoubleComplex *WORK, int lwork, int *d_info, cusolverDnHandle_t handle) {
+    FUNCTION_ENTRY;
+    int ret = libCUDA_zpotrf(uplo, n, A, lda, WORK, lwork, d_info, handle);
     FUNCTION_EXIT;
     return ret;
 }

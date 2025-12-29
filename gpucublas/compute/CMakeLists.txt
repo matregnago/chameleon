@@ -42,6 +42,7 @@ set(ZSRC
     cuda_zherk.c
     cuda_zlarfb.c
     cuda_zparfb.c
+    cuda_zpotrf.c
     cuda_zsymm.c
     cuda_zsyr2k.c
     cuda_zsyrk.c

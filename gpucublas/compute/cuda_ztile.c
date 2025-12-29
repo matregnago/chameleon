@@ -211,6 +211,20 @@ TCUDA_zparfb( cham_side_t        side,
 }
 
 int
+TCUDA_zpotrf( cham_uplo_t        uplo,
+              int                n,
+              CHAM_tile_t       *A,
+              cuDoubleComplex   *dW,
+              int                lwork,
+              int               *d_info,
+              cusolverDnHandle_t handle )
+{
+    gpucublas_kernel_trace( A, WORK );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return CUDA_zpotrf( uplo, n, (cuDoubleComplex *)A->mat, A->ld, dW, lwork, d_info, handle );
+}
+
+int
 TCUDA_zsymm( cham_side_t           side,
              cham_uplo_t           uplo,
              int                   m,
