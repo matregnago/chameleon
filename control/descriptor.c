@@ -11,7 +11,7 @@
  *
  * @brief Chameleon descriptors routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
@@ -21,7 +21,8 @@
  * @author Lionel Eyraud-Dubois
  * @author Pierre Esterie
  * @author Atte Torri
- * @date 2025-10-16
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  ***
  *

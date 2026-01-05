@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zunmlqrh parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Hatem Ltaief
@@ -23,7 +23,7 @@
  * @author Florent Pruvost
  * @author Samuel Thibault
  * @author Alycia Lisito
- * @date 2025-01-24
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

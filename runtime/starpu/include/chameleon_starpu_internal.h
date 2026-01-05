@@ -11,7 +11,7 @@
  *
  * @brief Chameleon StarPU runtime header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
@@ -22,7 +22,7 @@
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_starpu_internal_h_

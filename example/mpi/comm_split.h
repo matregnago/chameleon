@@ -9,7 +9,7 @@
  *
  * @brief Chameleon comm_split example header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @date 2024-05-06

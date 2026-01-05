@@ -11,7 +11,7 @@
  *
  * @brief Chameleon Quark control routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Vijay Joshi
  * @author Cedric Castagnede
  * @author Florent Pruvost
@@ -19,7 +19,7 @@
  * @author Samuel Thibault
  * @author Philippe Swartvagher
  * @author Matthieu Kuhn
- * @date 2024-02-18
+ * @date 2025-12-19
  *
  */
 #include "chameleon_quark.h"

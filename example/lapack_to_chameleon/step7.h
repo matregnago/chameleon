@@ -11,7 +11,7 @@
  *
  * @brief Chameleon step7 example header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Guillaume Sylvand
  * @author Mathieu Faverge

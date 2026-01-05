@@ -11,13 +11,14 @@
  *
  * @brief Chameleon OpenMP descriptor routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Vijay Joshi
  * @author Cedric Castagnede
  * @author Philippe Virouleau
  * @author Mathieu Faverge
  * @author Florent Pruvost
- * @date 2024-03-16
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #include "chameleon_openmp.h"

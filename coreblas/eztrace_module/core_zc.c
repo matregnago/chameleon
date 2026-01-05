@@ -9,9 +9,9 @@
  *
  * @brief Eztrace module file generated from core_zc.h
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
- * @date 2025-07-09
+ * @date 2025-12-19
  * @precisions mixed zc -> zc ds
  *
  */

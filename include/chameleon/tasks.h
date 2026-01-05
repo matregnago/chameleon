@@ -11,14 +11,14 @@
  *
  * @brief Chameleon elementary tasks main header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Augonnet
  * @author Florent Pruvost
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-07-23
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_tasks_h_

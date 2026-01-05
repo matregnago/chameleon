@@ -11,10 +11,12 @@
  *
  * @brief Chameleon cuda_zlag2c GPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mark Gates
  * @author Mathieu Faverge
- * @date 2024-02-18
+ * @author Brieuc Nicolas
+ * @author Florent Pruvost
+ * @date 2025-12-19
  * @precisions mixed zc -> ds
  *
  * This file is an adaptation of the MAGMA zlag2c.cu and clag2z files.

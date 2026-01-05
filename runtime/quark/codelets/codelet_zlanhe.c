@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zlanhe Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Julien Langou
  * @author Henricus Bouwmeester
  * @author Mathieu Faverge

@@ -10,12 +10,12 @@
  * @brief Chameleon StarPU pivot descriptor routines. These routines are used
  * exclusively by the LU partial pivoting panel kernel.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-10-15
+ * @date 2025-12-11
  *
  */
 #include "chameleon_starpu_internal.h"

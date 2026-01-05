@@ -9,7 +9,7 @@
  *
  * @brief Chameleon zgetrf_nopiv_percol Parsec codelets
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment Codelets to perform panel factorization with partial pivoting
  *
  * @author Mathieu Faverge

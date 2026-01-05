@@ -9,7 +9,7 @@
  *
  * @brief Chameleon zcesca OpenMP codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @date 2024-02-18
  * @precisions normal z -> s d c z

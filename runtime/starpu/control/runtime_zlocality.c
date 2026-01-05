@@ -11,12 +11,13 @@
  *
  * @brief Chameleon StarPU CHAMELEON_Complex64_t kernel locality management
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Cedric Augonnet
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
- * @date 2024-09-17
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

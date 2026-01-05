@@ -11,7 +11,7 @@
  *
  * @brief Chameleon global hipblas variables and functions
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Loris Lucido
  * @author Florent Pruvost

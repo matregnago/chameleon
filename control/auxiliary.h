@@ -11,7 +11,7 @@
  *
  * @brief Chameleon auxiliary header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Piotr Luszczek
  * @author Emmanuel Agullo
@@ -19,7 +19,7 @@
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @author Loris Lucido
- * @date 2024-02-18
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_auxiliary_h_

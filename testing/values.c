@@ -8,14 +8,14 @@
  *
  * @brief Chameleon testing values toutine to read/print the parameters
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Lucas Barros de Assis
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Florent Pruvost
  * @author Philippe Swartvagher
  * @author Matteo Marcos
- * @date 2025-03-24
+ * @date 2025-12-19
  *
  */
 #include "testings.h"

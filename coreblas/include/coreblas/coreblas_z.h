@@ -11,7 +11,7 @@
  *
  * @brief Chameleon CPU CHAMELEON_Complex64_t kernels header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Jakub Kurzak
@@ -24,7 +24,7 @@
  * @author Matthieu Kuhn
  * @author Brieuc Nicolas
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

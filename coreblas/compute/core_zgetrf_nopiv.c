@@ -11,7 +11,7 @@
  *
  * @brief Chameleon core_zgetrf_nopiv CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Omar Zenati
  * @author Mathieu Faverge
  * @author Emmanuel Agullo

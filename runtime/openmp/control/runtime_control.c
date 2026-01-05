@@ -11,7 +11,7 @@
  *
  * @brief Chameleon OpenMP control routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Augonnet
  * @author Cedric Castagnede
@@ -19,7 +19,7 @@
  * @author Philippe Virouleau
  * @author Philippe Swartvagher
  * @author Matthieu Kuhn
- * @date 2024-02-18
+ * @date 2025-12-19
  *
  */
 #include "chameleon_openmp.h"

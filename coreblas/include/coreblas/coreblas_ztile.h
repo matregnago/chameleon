@@ -7,12 +7,12 @@
  *
  * @brief Chameleon CPU kernel CHAM_tile_t interface
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Florent Pruvost
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

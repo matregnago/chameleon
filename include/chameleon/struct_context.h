@@ -11,10 +11,11 @@
  *
  * @brief Chameleon context structure
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Florent Pruvost
- * @date 2024-10-17
+ * @author Xavier Lacoste
+ * @date 2025-12-19
  *
  */
 #ifndef _struct_context_h_

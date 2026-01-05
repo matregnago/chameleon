@@ -11,12 +11,12 @@
  *
  * @brief Chameleon StarPU asynchronous routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
  * @author Samuel Thibault
- * @date 2024-09-17
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

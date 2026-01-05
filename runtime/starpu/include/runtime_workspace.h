@@ -11,7 +11,7 @@
  *
  * @brief Chameleon StarPU workspace header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Cedric Augonnet
  * @author Florent Pruvost
  * @author Mathieu Faverge

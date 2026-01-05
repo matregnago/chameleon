@@ -11,7 +11,7 @@
  *
  * @brief Chameleon auxiliary routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Piotr Luszczek
  * @author Emmanuel Agullo
@@ -19,7 +19,7 @@
  * @author Florent Pruvost
  * @author Guillaume Sylvand
  * @author Mathieu Faverge
- * @date 2025-01-28
+ * @date 2025-12-19
  *
  ***
  *

@@ -9,11 +9,12 @@
  *
  * @brief Chameleon ztpmqrt StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
- * @date 2024-10-21
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

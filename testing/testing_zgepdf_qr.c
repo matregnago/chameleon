@@ -10,12 +10,12 @@
  *
  * @brief Chameleon zgepdf_qr testing
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Hatem Ltaief
  * @author Alycia Lisito
  * @author Pierre Esterie
- * @date 2024-11-13
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

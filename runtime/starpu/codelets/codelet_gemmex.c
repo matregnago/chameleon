@@ -11,10 +11,12 @@
  *
  * @brief Chameleon gemmex StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Philippe Swartvagher
- * @date 2024-10-18
+ * @author Brieuc Nicolas
+ * @author Florent Pruvost
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

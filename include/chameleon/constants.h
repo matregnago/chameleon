@@ -11,7 +11,7 @@
  *
  * @brief Chameleon global constants
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Cedric Augonnet
  * @author Mathieu Faverge
  * @author Cedric Castagnede
@@ -20,7 +20,7 @@
  * @author Terry Cojean
  * @author Matthieu Kuhn
  * @author Brieuc Nicolas
- * @date 2025-10-23
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_constants_h_

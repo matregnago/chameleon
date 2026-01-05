@@ -9,7 +9,7 @@
  *
  * @brief Chameleon blas and cblas api for syrk
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Florent Pruvost
  * @date 2024-11-14

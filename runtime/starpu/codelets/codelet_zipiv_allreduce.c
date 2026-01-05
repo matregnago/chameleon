@@ -9,11 +9,12 @@
  *
  * @brief Chameleon StarPU codelets to do the reduction
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Alycia Lisito
  * @author Pierre Esterie
  * @author Matteo Marcos
- * @date 2025-10-15
+ * @author Florent Pruvost
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

@@ -7,9 +7,9 @@
  *
  * @brief Chameleon CUDA mixed-precision kernel empty interface from CHAM_tile_t layout.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
- * @date 2025-12-17
+ * @date 2025-12-19
  * @precisions mixed zc -> ds
  *
  */

@@ -11,10 +11,10 @@
  *
  * @brief Chameleon zgelqs_param wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Raphael Boucherie
  * @author Mathieu Faverge
- * @date 2025-10-16
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

@@ -11,10 +11,10 @@
  *
  * @brief Chameleon step0 example
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Mathieu Faverge
- * @date 2025-01-29
+ * @date 2025-12-19
  *
  */
 #include "step0.h"

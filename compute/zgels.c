@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zgels wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Mathieu Faverge
  * @author Emmanuel Agullo
@@ -19,7 +19,7 @@
  * @author Florent Pruvost
  * @author Raphael Boucherie
  * @author Alycia Lisito
- * @date 2025-10-16
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

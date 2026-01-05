@@ -11,7 +11,7 @@
  *
  * @brief Chameleon core_ztrmm CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Julien Langou
@@ -103,7 +103,7 @@
  *
  * @param[in] LDB
  *          The leading dimension of the array B. ldb >= max(1,m).
- * 
+ *
  */
 void CORE_ztrmm(cham_side_t side, cham_uplo_t uplo,
                 cham_trans_t transA, cham_diag_t diag,

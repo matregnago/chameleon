@@ -7,9 +7,9 @@
  *
  * @brief Chameleon CUDA tile-based kernel interface header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
- * @date 2025-12-17
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

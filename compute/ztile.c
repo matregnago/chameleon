@@ -11,13 +11,13 @@
  *
  * @brief Chameleon auxiliary routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
  * @author Lionel Eyraud-Dubois
- * @date 2025-10-16
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

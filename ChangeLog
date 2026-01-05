@@ -1,14 +1,31 @@
 chameleon-1.4.0
 ------------------------------------------------------------------------
  - cmake: Ugrade minimum requirement to 3.12
+ - cmake: Use official hip and hipblas find_package method and targets
+ - cmake: Prevent double precision examples from being built if CHAMELEON_PREC_D is set to OFF
+ - cmake: Switch BUILD_SHARED_LIBS to ON by default
+ - cmake: Update find_package(STARPU) which checks that starpu compiles and use COMPONENTS to check required features are available (MPI, CUDA, HIP, SIMGRID)
+ - cmake: Change the way Eztrace is handled as a cmake option
+ - getenv: Add a function to read a double in the environment variables
  - map: Add an option to dynamically change from synchronous to asynchronous when calling map function, to serialize print for example.
  - Add the laswp driver and testing. Be careful, the interface does not follow the lapack API to propose the op(P) \times A, or A \times op(P) operation with op(P) equal to P or P^{-1}
  - Add the gesv driver to perform LU factorization and solve with its associated testing.
+ - getrf: Don't use workspace in shared memory
+ - getrf: Add dynamic batch size
+ - gpucublas: Add TCUDA interface similar to TCORE to trace kernels and filter tile formats
  - StarPU: Update the minimum requirement from 1.3 to 1.4
  - StarPU: When using starpu > 1.4.8, use the new distributed submit interface in the codelets instead of the classical insert task interface.
- - ci: use -Werror to prevent from adding warning to the code
- - Fix: all warning reported by the switch to -Werror
- - testing: Set tiles allocation by default.
+ - EZTrace: update the eztrace module and add a ci job to check compilation
+ - testing: Set tiles allocation by default (i.e. --mtxfmt 1).
+ - ci: Use GIT_CLONE_PATH to clone in a fixed directory and thus be able to use any of the instance runners
+ - ci: In preliminary_checks, use new minimalist docker image
+ - ci: Separate guix env. used to run jube benchmarks and the env. to publish csv on elasticsearch server (stuck in version 7 on the server, while in guix python-elasticsearch is 9)
+ - ci: Add a test to check link to chameleon from a C++ program
+ - ci: Add tests about custom mpi distribution of tiles
+ - ci: Use -Werror to prevent from adding warning to the code
+ - Fix: All warning reported by the switch to -Werror
+ - Fix: Segfault in testings when no CPU and without MPI
+ - Fix: chameleon_zdesc_copy_and_restrict should not use descIn->get_blkaddr, descIn->get_blkldd
 
 chameleon-1.3.0
 ------------------------------------------------------------------------

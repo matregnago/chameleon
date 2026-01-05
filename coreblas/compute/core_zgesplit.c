@@ -11,7 +11,7 @@
  *
  * @brief Chameleon core_zgesplit CPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @comment This file has been automatically generated
  *          from Plasma 2.5.0 for CHAMELEON 0.9.2
  * @author Mathieu Faverge

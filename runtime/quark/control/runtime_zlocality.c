@@ -11,7 +11,7 @@
  *
  * @brief Chameleon Quark CHAMELEON_Complex64_t kernel locality management
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Vijay Joshi
  * @author Florent Pruvost
  * @author Mathieu Faverge

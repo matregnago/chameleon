@@ -11,13 +11,13 @@
  *
  * @brief Chameleon zlascal Quark codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Julien Langou
  * @author Henricus Bouwmeester
  * @author Mathieu Faverge
  * @author Emmanuel Agullo
  * @author Cedric Castagnede
- * @date 2024-02-18
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

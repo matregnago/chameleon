@@ -9,13 +9,13 @@
  *
  * @brief Chameleon zlantr testing
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Lucas Barros de Assis
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Philippe Swartvagher
  * @author Florent Pruvost
- * @date 2025-01-29
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

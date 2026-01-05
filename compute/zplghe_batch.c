@@ -9,9 +9,9 @@
  *
  * @brief Chameleon batch zplghe wrappers
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
- * @date 2025-01-24
+ * @date 2025-12-19
  * @precisions normal z -> s d c
  *
  */

@@ -9,7 +9,7 @@
  *
  * @brief Chameleon lapack and lapacke api for getrf
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Florent Pruvost
  * @date 2025-01-22

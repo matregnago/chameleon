@@ -11,7 +11,7 @@
  *
  * @brief Chameleon structures
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Cedric Augonnet
  * @author Mathieu Faverge
  * @author Cedric Castagnede
@@ -21,7 +21,8 @@
  * @author Lionel Eyraud-Dubois
  * @author Pierre Esterie
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_struct_h_

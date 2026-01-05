@@ -9,7 +9,7 @@
  *
  * @brief Chameleon cuda_gemmex GPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @date 2024-07-15
  *

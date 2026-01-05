@@ -11,12 +11,14 @@
  *
  * @brief Chameleon StarPU codelet profiling header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Cedric Augonnet
  * @author Mathieu Faverge
  * @author Cedric Castagnede
  * @author Florent Pruvost
- * @date 2024-02-18
+ * @author Brieuc Nicolas
+ * @author Nathalie Furmento
+ * @date 2025-12-19
  *
  */
 #ifndef _runtime_codelet_profile_h_

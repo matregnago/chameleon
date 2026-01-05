@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zsymm StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Hatem Ltaief
  * @author Jakub Kurzak
  * @author Mathieu Faverge
@@ -21,7 +21,9 @@
  * @author Florent Pruvost
  * @author Romain Peressoni
  * @author Loris Lucido
- * @date 2024-10-18
+ * @author Alycia Lisito
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

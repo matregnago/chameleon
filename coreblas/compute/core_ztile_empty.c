@@ -9,12 +9,13 @@
  *
  * @brief Chameleon CPU kernel interface from CHAM_tile_t layout to the real one.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Abel Calluaud
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

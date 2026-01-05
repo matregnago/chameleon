@@ -11,7 +11,7 @@
  *
  * @brief Chameleon zsytrf parallel algorithm
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Hatem Ltaief
  * @author Mathieu Faverge
@@ -20,7 +20,7 @@
  * @author Florent Pruvost
  * @author Marc Sergent
  * @author Samuel Thibault
- * @date 2025-01-24
+ * @date 2025-12-19
  * @precisions normal z -> c
  *
  */

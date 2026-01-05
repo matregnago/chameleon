@@ -11,7 +11,7 @@
  *
  * @brief Chameleon context management routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Mathieu Faverge
  * @author Cedric Castagnede
@@ -21,7 +21,8 @@
  * @author Matthieu Kuhn
  * @author Loris Lucido
  * @author Terry Cojean
- * @date 2025-10-15
+ * @author Xavier Lacoste
+ * @date 2025-12-19
  *
  ***
  *

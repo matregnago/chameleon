@@ -10,11 +10,11 @@
  * @brief Chameleon Quark panel permutation update routines. These routines are used by
  * laswp/lapmt operations.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-10-15
+ * @date 2025-12-11
  *
  */
 #include "chameleon_quark.h"

@@ -11,11 +11,11 @@
  *
  * @brief Chameleon zlag2c PaRSEC codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Reazul Hoque
  * @author Florent Pruvost
  * @author Mathieu Faverge
- * @date 2024-02-18
+ * @date 2025-12-19
  * @precisions mixed zc -> ds
  *
  */

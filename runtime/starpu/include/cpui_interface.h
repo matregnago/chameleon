@@ -9,9 +9,9 @@
  *
  * @brief Header to describe the Chameleon permutation interface with StarPU used in laswp
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Matteo Marcos
- * @date 2025-07-15
+ * @date 2025-12-19
  *
  */
 #ifndef _cpui_interface_h_

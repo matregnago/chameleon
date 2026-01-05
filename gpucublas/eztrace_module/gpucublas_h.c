@@ -9,10 +9,11 @@
  *
  * @brief Chameleon CPU CHAMELEON_Complex64_t kernels header
  *
- * @version 1.3.0
+ * @version 1.4.0
  *
  * @author Brieuc Nicolas
- * @date 2025-07-22
+ * @author Florent Pruvost
+ * @date 2025-12-19
  *
  */
 /* -*- c-file-style: "GNU" -*- */

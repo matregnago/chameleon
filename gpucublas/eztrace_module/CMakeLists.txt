@@ -17,11 +17,11 @@
 #     Univ. of California Berkeley,
 #     Univ. of Colorado Denver.
 #
-# @version 1.3.0
+# @version 1.4.0
 #  @author Florent Pruvost
 #  @author Mathieu Faverge
 #  @author Brieuc Nicolas
-#  @date 2025-07-09
+#  @date 2025-12-19
 #
 ###
 if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)

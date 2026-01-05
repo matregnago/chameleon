@@ -11,7 +11,7 @@
  *
  * @brief Chameleon StarPU control routines
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Cedric Augonnet
  * @author Cedric Castagnede
@@ -21,7 +21,8 @@
  * @author Matthieu Kuhn
  * @author Loris Lucido
  * @author Terry Cojean
- * @date 2024-09-17
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #include "chameleon_starpu_internal.h"

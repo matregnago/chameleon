@@ -11,7 +11,7 @@
  *
  * @brief Chameleon ztpqrt StarPU codelet
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Mathieu Faverge
  * @author Florent Pruvost
  * @author Lucas Barros de Assis

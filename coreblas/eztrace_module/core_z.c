@@ -9,10 +9,10 @@
  *
  * @brief Eztrace module file generated from core_z.h
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
  * @author Florent Pruvost
- * @date 2025-07-22
+ * @date 2025-12-19
  * @precisions normal z -> z c d s
  *
  */

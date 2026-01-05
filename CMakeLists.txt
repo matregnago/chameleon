@@ -17,7 +17,7 @@
 #     Univ. of California Berkeley,
 #     Univ. of Colorado Denver.
 #
-# @version 1.3.0
+# @version 1.4.0
 #  @author Cedric Castagnede
 #  @author Emmanuel Agullo
 #  @author Mathieu Faverge
@@ -31,7 +31,8 @@
 #  @author Loris Lucido
 #  @author Nathan Précigout
 #  @author Abel Calluaud
-#  @date 2024-12-06
+#  @author Brieuc Nicolas
+#  @date 2025-12-19
 #
 ###
 cmake_minimum_required(VERSION 3.12)
@@ -46,7 +47,7 @@ endif()
 
 # set project version number
 set(CHAMELEON_VERSION_MAJOR 1)
-set(CHAMELEON_VERSION_MINOR 3)
+set(CHAMELEON_VERSION_MINOR 4)
 set(CHAMELEON_VERSION_MICRO 0)
 set(CHAMELEON_VERSION "${CHAMELEON_VERSION_MAJOR}.${CHAMELEON_VERSION_MINOR}.${CHAMELEON_VERSION_MICRO}")
 

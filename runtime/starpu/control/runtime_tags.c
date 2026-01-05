@@ -5,11 +5,11 @@
  * @copyright 2017-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Pierre Ramet
  * @author Mathieu Faverge
  * @author Florent Pruvost
- * @date 2024-09-17
+ * @date 2025-12-19
  *
  * Functions to manage the MPI data tags with StarPU (originated from PaStiX).
  *

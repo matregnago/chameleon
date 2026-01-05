@@ -4,7 +4,7 @@
 #  @copyright 2016-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                       Univ. Bordeaux. All rights reserved.
 #
-#  @version 1.3.0
+#  @version 1.4.0
 #  @author Florent Pruvost
 #  @author Mathieu Faverge
 #  @date 2024-09-17
@@ -182,6 +182,7 @@ files=$( git ls-files                     |
              grep -v LICENCE              |
              grep -v ".*\.cmake"          |
              grep -v "testing/lin"        |
+             grep -v "testing/input/dist_3.txt"        |
              grep -v doc/                 |
              grep -v CTest                |
              grep -v cblas.h              |

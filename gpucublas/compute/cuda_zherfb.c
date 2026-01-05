@@ -11,10 +11,11 @@
  *
  * @brief Chameleon cuda_zherfb GPU kernel
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Mathieu Faverge
- * @date 2024-02-18
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  * @precisions normal z -> c d s
  *
  */

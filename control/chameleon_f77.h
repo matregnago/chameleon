@@ -11,7 +11,7 @@
  *
  * @brief Chameleon Fortran77 naming macros
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @author Philippe Virouleau

@@ -11,7 +11,7 @@
  *
  * @brief Chameleon CPU complex mixed precision kernels header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Hatem Ltaief
  * @author Mathieu Faverge

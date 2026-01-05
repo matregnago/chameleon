@@ -11,14 +11,14 @@
  *
  * @brief Chameleon global coreblas variables and functions
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Piotr Luszczek
  * @author Florent Pruvost
  * @author Guillaume Sylvand
  * @author Mathieu Faverge
  * @author Alycia Lisito
- * @date 2024-07-17
+ * @date 2025-12-19
  *
  */
 #include "coreblas.h"

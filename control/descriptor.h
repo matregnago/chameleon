@@ -11,7 +11,7 @@
  *
  * @brief Chameleon descriptor header
  *
- * @version 1.3.0
+ * @version 1.4.0
  * @author Jakub Kurzak
  * @author Mathieu Faverge
  * @author Cedric Castagnede
@@ -23,7 +23,8 @@
  * @author Alycia Lisito
  * @author Pierre Esterie
  * @author Matteo Marcos
- * @date 2025-10-16
+ * @author Brieuc Nicolas
+ * @date 2025-12-19
  *
  */
 #ifndef _chameleon_descriptor_h_
