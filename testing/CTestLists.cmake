@@ -40,9 +40,9 @@ if (NOT CHAMELEON_SIMULATION)
     # Create the list of test based on precision and runtime
     #
     # Norms
-    set( TESTS print lacpy laset latro plrnt lange lantr lansy plrnk )
+    set( TESTS print lacpy laset latro plrnt plgsy lange lantr lansy plrnk )
     if ( ${prec} STREQUAL c OR ${prec} STREQUAL z )
-      set( TESTS ${TESTS} lanhe )
+      set( TESTS ${TESTS} plghe lanhe )
     endif()
     # BLAS
     set( TESTS ${TESTS} geadd tradd lascal gemm symm syrk syr2k trmm trsm )
