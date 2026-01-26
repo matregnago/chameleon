@@ -102,6 +102,10 @@ void RUNTIME_zlocality_allrestrict( uint32_t where )
 
     /* plrnt */
     cl_zplrnt_restrict_where( where );
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    cl_zplghe_restrict_where( where );
+#endif
+    cl_zplgsy_restrict_where( where );
 
     /* auxiliary */
     cl_zlaset_restrict_where( where );
@@ -163,6 +167,10 @@ void RUNTIME_zlocality_onerestrict( cham_tasktype_t kernel, uint32_t where )
 
     /* plrnt */
     case TASK_PLRNT: cl_zplrnt_restrict_where( where ); break;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case TASK_PLGHE: cl_zplghe_restrict_where( where ); break;
+#endif
+    case TASK_PLGSY: cl_zplgsy_restrict_where( where ); break;
 
     /* auxiliary */
     case TASK_LASET: cl_zlaset_restrict_where( where ); break;
@@ -223,6 +231,10 @@ void RUNTIME_zlocality_allrestore( )
 
     /* plrnt */
     cl_zplrnt_restore_where();
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    cl_zplghe_restore_where();
+#endif
+    cl_zplgsy_restore_where();
 
     /* auxiliary */
     cl_zlaset_restore_where();
@@ -281,6 +293,10 @@ void RUNTIME_zlocality_onerestore( cham_tasktype_t kernel )
 
     /* plrnt */
     case TASK_PLRNT: cl_zplrnt_restore_where(); break;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case TASK_PLGHE: cl_zplghe_restore_where(); break;
+#endif
+    case TASK_PLGSY: cl_zplgsy_restore_where(); break;
 
     /* auxiliary */
     case TASK_LASET: cl_zlaset_restore_where(); break;

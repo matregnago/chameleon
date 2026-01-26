@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -18,6 +18,7 @@
  * @author Florent Pruvost
  * @author Alycia Lisito
  * @author Loris Lucido
+ * @author Brieuc Nicolas
  * @date 2024-09-06
  * @precisions normal z -> c d s
  *
@@ -118,9 +119,13 @@ CODELETS_HEADER(dlag2z);
 CODELETS_HEADER(dzasum);
 
 /*
- * CPU only functions
+ * Matrix generation
  */
 CODELETS_HEADER(zplrnt);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+CODELETS_HEADER(zplghe);
+#endif
+CODELETS_HEADER(zplgsy);
 
 /*
  * centered-scaled and gram functions
@@ -132,10 +137,8 @@ CODELETS_HEADER(zgram);
 #if defined(PRECISION_z) || defined(PRECISION_c)
 CODELETS_HEADER(zhessq);
 CODELETS_HEADER(zlanhe);
-CODELETS_HEADER(zplghe);
 CODELETS_HEADER(zsytrf_nopiv);
 #endif
-CODELETS_HEADER(zplgsy);
 
 #if defined(PRECISION_d) || defined(PRECISION_s)
 CODELETS_HEADER(dlag2h);

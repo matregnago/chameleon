@@ -21,6 +21,7 @@
  * @author Florent Pruvost
  * @author Samuel Thibault
  * @author Gwenole Lucas
+ * @author Brieuc Nicolas
  * @date 2024-10-18
  * @precisions normal z -> c d s
  *
@@ -58,7 +59,8 @@ cl_zplgsy_rectask_func( struct starpu_task *t, void *_args )
 #endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
-static void cl_zplgsy_cpu_func(void *descr[], void *cl_arg)
+static void
+cl_zplgsy_cpu_func(void *descr[], void *cl_arg)
 {
     struct cl_zplgsy_args_s *clargs = (struct cl_zplgsy_args_s *)cl_arg;
     CHAM_tile_t *tileA;
@@ -68,12 +70,28 @@ static void cl_zplgsy_cpu_func(void *descr[], void *cl_arg)
     TCORE_zplgsy( clargs->bump, clargs->m, clargs->n, tileA,
                   clargs->bigM, clargs->m0, clargs->n0, clargs->seed );
 }
+
+#if defined(CHAMELEON_USE_CUDA)
+static void
+cl_zplgsy_cuda_func(void *descr[], void *cl_arg)
+{
+    struct cl_zplgsy_args_s *clargs = (struct cl_zplgsy_args_s *)cl_arg;
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
+    CHAM_tile_t *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+
+    TCUDA_zplgsy( (cuDoubleComplex*)&(clargs->bump), clargs->m, clargs->n, tileA,
+                  clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
+                  handle );
+}
+#endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
-CODELETS_CPU( zplgsy, cl_zplgsy_cpu_func )
+CODELETS( zplgsy, cl_zplgsy_cpu_func, cl_zplgsy_cuda_func, STARPU_CUDA_ASYNC )
 
 void INSERT_TASK_zplgsy( const RUNTIME_option_t *options,
                          CHAMELEON_Complex64_t bump, int m, int n, const CHAM_desc_t *A, int Am, int An,
