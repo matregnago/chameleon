@@ -49,7 +49,7 @@ int  chameleon_tune         (cham_tasktype_t func, int M, int N, int NRHS);
 
 #ifdef CHAMELEON_VERBOSE
 
-static inline void
+extern void
 __chameleon_log_debug( const char *fmt, ... ) __attribute__((format(printf,1,2)));
 
 #define CHAMELEON_DEBUG( module, fmt, ... )                             \
