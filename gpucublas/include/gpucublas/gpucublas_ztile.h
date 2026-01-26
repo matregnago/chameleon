@@ -40,8 +40,12 @@ int TCUDA_zlacpyx( cham_uplo_t uplo, int M, int N, int displA, const CHAM_tile_t
 int TCUDA_zlaset( cham_uplo_t uplo, int n1, int n2, const cuDoubleComplex *alpha, const cuDoubleComplex *beta, CHAM_tile_t *A, cublasHandle_t handle );
 int TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans, int M, int N, const CHAM_tile_t *A, CHAM_tile_t *B, cublasHandle_t handle );
 int TCUDA_zparfb( cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M1, int N1, int M2, int N2, int K, int L, CHAM_tile_t *A1, CHAM_tile_t *A2, const CHAM_tile_t *V, const CHAM_tile_t *T, CHAM_tile_t *WORK, int lwork, cublasHandle_t handle );
-int TCUDA_zpotrf( cham_uplo_t uplo, int n, CHAM_tile_t *A, cuDoubleComplex *WORK, int lwork, int *d_info, cusolverDnHandle_t handle );
+#if defined( PRECISION_z ) || defined( PRECISION_c )
+int TCUDA_zplghe( const double *bump, int m, int n, CHAM_tile_t *A, int bigM, int m0, int n0, unsigned long long int seed, cublasHandle_t handle );
+#endif
+int TCUDA_zplgsy( const cuDoubleComplex *bump, int m, int n, CHAM_tile_t *A, int bigM, int m0, int n0, unsigned long long int seed, cublasHandle_t handle );
 int TCUDA_zplrnt( int m, int n, CHAM_tile_t *A, int bigM, int m0, int n0, unsigned long long int seed, cublasHandle_t handle );
+int TCUDA_zpotrf( cham_uplo_t uplo, int n, CHAM_tile_t *A, cuDoubleComplex *WORK, int lwork, int *d_info, cusolverDnHandle_t handle );
 int TCUDA_zsymm( cham_side_t side, cham_uplo_t uplo, int m, int n, const cuDoubleComplex *alpha, const CHAM_tile_t *A, const CHAM_tile_t *B, const cuDoubleComplex *beta, CHAM_tile_t *C, cublasHandle_t handle );
 int TCUDA_zsyr2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const cuDoubleComplex *alpha, const CHAM_tile_t *A, const CHAM_tile_t *B, const cuDoubleComplex *beta, CHAM_tile_t *C, cublasHandle_t handle );
 int TCUDA_zsyrk( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const cuDoubleComplex *alpha, const CHAM_tile_t *A, const cuDoubleComplex *beta, CHAM_tile_t *C, cublasHandle_t handle );

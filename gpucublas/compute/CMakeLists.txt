@@ -77,6 +77,8 @@ if ( GPUCUBLAS_HAVE_CUDA_TOOLKIT )
     cuda_zlatro.cu
     cuda_zlacpy.cu
     cuda_zlaset.cu
+    cuda_zplghe.cu
+    cuda_zplgsy.cu
     cuda_zplrnt.cu
   )
 endif()

@@ -46,7 +46,12 @@ int CUDA_zlaset( cham_uplo_t uplo, int n1, int n2, const cuDoubleComplex *alpha,
 int CUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans, int m, int n, const cuDoubleComplex *A, int lda, cuDoubleComplex *B, int ldb, cublasHandle_t handle );
 int CUDA_zparfb( cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M1, int N1, int M2, int N2, int K, int L, cuDoubleComplex *A1, int LDA1, cuDoubleComplex *A2, int LDA2, const cuDoubleComplex *V, int LDV, const cuDoubleComplex *T, int LDT, cuDoubleComplex *WORK, int LWORK, cublasHandle_t handle );
 int CUDA_zpotrf( cham_uplo_t uplo, int n, cuDoubleComplex *A, int lda, cuDoubleComplex *WORK, int lwork, int *d_info, cusolverDnHandle_t handle);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+int CUDA_zplghe( const double *bump, int m, int n, cuDoubleComplex *A, int lda, int bigM, int m0, int n0, unsigned long long int seed, cublasHandle_t handle );
+#endif
+int CUDA_zplgsy( const cuDoubleComplex *bump, int m, int n, cuDoubleComplex *A, int lda, int bigM, int m0, int n0, unsigned long long int seed, cublasHandle_t handle );
 int CUDA_zplrnt( int m, int n, cuDoubleComplex *A, int lda, int bigM, int m0, int n0, unsigned long long int seed, cublasHandle_t handle );
+int CUDA_zpotrf( cham_uplo_t uplo, int n, cuDoubleComplex *A, int lda, cuDoubleComplex *WORK, int lwork, int *d_info, cusolverDnHandle_t handle);
 int CUDA_zsymm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const cuDoubleComplex *alpha, const cuDoubleComplex *A, int lda, const cuDoubleComplex *B, int ldb, const cuDoubleComplex *beta, cuDoubleComplex *C, int ldc, cublasHandle_t handle );
 int CUDA_zsyr2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const cuDoubleComplex *alpha, const cuDoubleComplex *A, int lda, const cuDoubleComplex *B, int ldb, const cuDoubleComplex *beta, cuDoubleComplex *C, int ldc, cublasHandle_t handle );
 int CUDA_zsyrk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const cuDoubleComplex *alpha, const cuDoubleComplex *A, int lda, const cuDoubleComplex *beta, cuDoubleComplex *C, int ldc, cublasHandle_t handle );
