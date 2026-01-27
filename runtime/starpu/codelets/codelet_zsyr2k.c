@@ -171,6 +171,7 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
+        STARPU_FLOPS,             flops_zsyr2k( k, n ),
         0 );
 
     (void)nb;

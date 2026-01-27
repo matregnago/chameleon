@@ -155,6 +155,7 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
         STARPU_CALLBACK,          callback,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
+        STARPU_FLOPS,             flops_ztrmm( side, m, n ),
         0 );
 
     (void)nb;

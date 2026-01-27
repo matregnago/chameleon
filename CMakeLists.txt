@@ -293,10 +293,6 @@ cmake_dependent_option( CHAMELEON_USE_RECURSIVE_TASKS
   "Enable recursive tasks to be inserted through the recursive tasks mechanism of StarPU" OFF
   "CHAMELEON_SCHED_STARPU" OFF )
 
-cmake_dependent_option( CHAMELEON_RECURSIVE_TASKS_PARALLEL_INSERT
-  "Enable parallel recursive tasks insertion" ON
-  "CHAMELEON_USE_RECURSIVE_TASKS;NOT CHAMELEON_RUNTIME_SYNC" OFF )
-
 if ( CHAMELEON_USE_RECURSIVE_TASKS )
   if ( BUILD_SHARED_LIBS )
     message( WARNING "Shared libraries are not available when compiling with recursive tasks (Force static libraries)" )

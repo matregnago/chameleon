@@ -197,6 +197,7 @@ void INSERT_TASK_zhemm_Astat( const RUNTIME_option_t *options,
         STARPU_CALLBACK,          callback,
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
+        STARPU_FLOPS,             flops_zhemm( side, m, n ),
         0 );
 }
 
@@ -265,6 +266,7 @@ void INSERT_TASK_zhemm( const RUNTIME_option_t *options,
         STARPU_CALLBACK,          callback,
         STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
+        STARPU_FLOPS,             flops_zhemm( side, m, n ),
         0 );
 }
 
