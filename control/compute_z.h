@@ -216,6 +216,8 @@ void chameleon_pzlaswpc( struct chameleon_pzlaswp_s *ws, cham_dir_t dir, CHAM_de
                          RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 void chameleon_pzlatms( cham_dist_t idist, unsigned long long int seed, cham_sym_t sym, double *D, int mode, double cond, double dmax, CHAM_desc_t *A,
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
+void chameleon_pzlatro( cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *A, CHAM_desc_t *B,
+                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzlauum(cham_uplo_t uplo, CHAM_desc_t *A,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzplghe(double bump, cham_uplo_t uplo, CHAM_desc_t *A, int bigM, int m0, int n0, unsigned long long int seed,

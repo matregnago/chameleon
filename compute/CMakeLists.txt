@@ -109,6 +109,7 @@ set(ZSRC
     pzgetrf_nopiv.c
     pzgetrf.c
     pzlacpy.c
+    pzlatro.c
     pzlange.c
     pzlansy.c
     pzlaset2.c
@@ -163,6 +164,7 @@ set(ZSRC
     zgetrs_nopiv.c
     zgetrs.c
     zlacpy.c
+    zlatro.c
     zlange.c
     zlanhe.c
     zlansy.c
