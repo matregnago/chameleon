@@ -73,6 +73,7 @@ if ( GPUCUBLAS_HAVE_CUDA_TOOLKIT )
   set(ZSRC
     ${ZSRC}
     cuda_zlag2c.cu
+    cuda_zlatro.cu
   )
 endif()
 if ( GPUCUBLAS_HAVE_CUDA_HALF )
