@@ -79,6 +79,7 @@ int CHAMELEON_zlascal(cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t alph
 int CHAMELEON_zlaset(cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAMELEON_Complex64_t *A, int LDA);
 int CHAMELEON_zlaswp( cham_side_t side, cham_dir_t dir, int M, int N, CHAMELEON_Complex64_t *A, int LDA, int K1, int K2, int *IPIV );
 int CHAMELEON_zlatms( int M, int N, cham_dist_t idist, unsigned long long int seed, cham_sym_t sym, double *D, int mode, double cond, double dmax, CHAMELEON_Complex64_t *A, int LDA );
+int CHAMELEON_zlatro( cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LDB );
 int CHAMELEON_zlauum(cham_uplo_t uplo, int N, CHAMELEON_Complex64_t *A, int LDA);
 int CHAMELEON_zplghe( double bump, cham_uplo_t uplo, int N, CHAMELEON_Complex64_t *A, int LDA, unsigned long long int seed );
 int CHAMELEON_zplgsy( CHAMELEON_Complex64_t bump, cham_uplo_t uplo, int N, CHAMELEON_Complex64_t *A, int LDA, unsigned long long int seed );
@@ -159,6 +160,7 @@ int CHAMELEON_zlascal_Tile(cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_d
 int CHAMELEON_zlaset_Tile(cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAM_desc_t *A);
 int CHAMELEON_zlaswp_Tile( cham_side_t side, cham_dir_t dir, CHAM_desc_t *A, int K1, int K2, CHAM_ipiv_t *IPIV );
 int CHAMELEON_zlatms_Tile( cham_dist_t idist, unsigned long long int seed, cham_sym_t sym, double *D, int mode, double cond, double dmax, CHAM_desc_t *A );
+int CHAMELEON_zlatro_Tile( cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *A, CHAM_desc_t *B );
 int CHAMELEON_zlauum_Tile(cham_uplo_t uplo, CHAM_desc_t *A);
 int CHAMELEON_zplghe_Tile(double bump, cham_uplo_t uplo, CHAM_desc_t *A, unsigned long long int seed );
 int CHAMELEON_zplgsy_Tile(CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_t *A, unsigned long long int seed );
@@ -238,6 +240,7 @@ int CHAMELEON_zlascal_Tile_Async(cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, 
 int CHAMELEON_zlaset_Tile_Async(cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAM_desc_t *A, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 int CHAMELEON_zlaswp_Tile_Async( cham_side_t side, cham_dir_t dir, CHAM_desc_t *A, int K1, int K2, CHAM_ipiv_t *IPIV, void *ws, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 int CHAMELEON_zlatms_Tile_Async( cham_dist_t idist, unsigned long long int seed, cham_sym_t sym, double *D, int mode, double cond, double dmax, CHAM_desc_t *A, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
+int CHAMELEON_zlatro_Tile_Async( cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *A, CHAM_desc_t *B, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 int CHAMELEON_zlauum_Tile_Async(cham_uplo_t uplo, CHAM_desc_t *A, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 int CHAMELEON_zplghe_Tile_Async(double bump, cham_uplo_t uplo, CHAM_desc_t *A, unsigned long long int seed, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 int CHAMELEON_zplgsy_Tile_Async(CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_t *A, unsigned long long int seed, RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );

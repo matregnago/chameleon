@@ -74,6 +74,7 @@ set(ZSRC_W_STDAPI
 set(ZSRC_WO_STDAPI
   #testing_zlaset.c
   testing_zlacpy.c
+  testing_zlatro.c
   testing_zgeadd.c
   testing_ztradd.c
   testing_zlascal.c

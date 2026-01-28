@@ -60,6 +60,7 @@ void RUNTIME_zdisplay_allprofile()
     profiling_display_zunmqr_info();
 
     profiling_display_zlange_info();
+    profiling_display_zlatro_info();
 }
 
 void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
@@ -101,6 +102,7 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
     case TASK_UNMQR:        profiling_display_zunmqr_info();        break;
 
     case TASK_LANGE:        profiling_display_zlange_info();        break;
+    case TASK_LATRO:        profiling_display_zlatro_info();        break;
 
     default:
         return;

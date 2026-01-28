@@ -786,4 +786,130 @@ int check_zrankk( run_arg_list_t *args, int K, CHAM_desc_t *descA )
     return info_solution;
 }
 
+/**
+ ********************************************************************************
+ *
+ * @ingroup testing
+ *
+ * @brief Checks matrix transposition correctness.
+ *
+ *******************************************************************************
+ *
+ * @param[in] uplo
+ *          Whether it is a upper triangular matrix, a lower triangular matrix or a general matrix.
+ *
+ * @param[in] trans
+ *          Whether the first matrix is transposed, conjugate transposed or not transposed.
+ *
+ * @param[in] M
+ *          The number of rows of the matrix A.
+ *
+ * @param[in] N
+ *          The number of columns of the matrix A.
+ *
+ * @param[in] A
+ *          The matrix A.
+ *
+ * @param[in] LDA
+ *          The leading dimension of the matrix A.
+ *
+ * @param[in] B
+ *          The matrix B = A^T.
+ *
+ * @param[in] LDB
+ *          The leading dimension of the matrix B.
+ *
+ * @retval 0 successfull transposition
+ *
+ *******************************************************************************
+ */
+int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LDB )
+{
+    int  info_solution;
+
+    cham_uplo_t uploB = uplo == ChamUpperLower ? ChamUpperLower :
+                        ( uplo == ChamUpper ? ChamLower : ChamUpper );
+
+    CHAMELEON_Complex64_t *C = NULL;
+    C = malloc( sizeof(CHAMELEON_Complex64_t) * LDB * M );
+    memset( C, 0., sizeof( CHAMELEON_Complex64_t) * LDB * M );
+
+    /* transposes using core function */
+    CORE_zlatro( uplo, trans, M, N, A, LDA, C, LDB );
+
+    /* Compares the two matrices */
+    info_solution = check_zmatrices_std( args, uploB, N, M, B, LDB, C, LDB );
+
+    free( C );
+
+    return info_solution;
+}
+
+/**
+ ********************************************************************************
+ *
+ * @ingroup testing
+ *
+ * @brief Checks matrix transposition correctness.
+ *
+ ********************************************************************************
+ *
+ * @param[in] uplo
+ *          Whether it is a upper triangular matrix, a lower triangular matrix or a general matrix.
+ *
+ * @param[in] trans
+ *          Whether the first matrix is transposed, conjugate transposed or not transposed.
+ *
+ * @param[in] descA
+ *          The descriptor of the matrix A.
+ *
+ * @param[in] descB
+ *          The descriptor of the matrix B.
+ *
+ * @retval 0 successfull transposition
+ *
+ ********************************************************************************
+ */
+int check_ztranspose( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB )
+{
+    int info_solution        = 0;
+    int M                    = descA->m;
+    int N                    = descA->n;
+    int LDA                  = M;
+    int LDB                  = N;
+    int rank                 = CHAMELEON_Comm_rank();
+    CHAMELEON_Complex64_t *A = NULL;
+    CHAMELEON_Complex64_t *B = NULL;
+
+    if ( rank == 0 ) {
+        A = (CHAMELEON_Complex64_t *)malloc( sizeof( CHAMELEON_Complex64_t) * LDA * N );
+        memset( A, 0., sizeof( CHAMELEON_Complex64_t) * LDA * N );
+        B = (CHAMELEON_Complex64_t *)malloc( sizeof( CHAMELEON_Complex64_t) * LDB * M );
+        memset( B, 0., sizeof( CHAMELEON_Complex64_t) * LDB * M );
+    }
+
+    cham_uplo_t uploB = uplo == ChamUpperLower ? ChamUpperLower :
+                        ( uplo == ChamUpper ? ChamLower : ChamUpper );
+
+    CHAMELEON_zDesc2Lap( uplo, descA, A, LDA );
+    CHAMELEON_zDesc2Lap( uploB, descB, B, LDB );
+
+    /* Compares the two matrices */
+    if ( rank == 0 ) {
+        info_solution = check_ztranspose_std( args, uplo, trans, M, N, A, LDA, B, LDB );
+    }
+
+    /* Broadcasts the result from the main processus */
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &info_solution, 1, MPI_INT, 0, MPI_COMM_WORLD );
+#endif
+
+    if ( rank == 0 ) {
+        free( A );
+        free( B );
+    }
+
+    return info_solution;
+}
+
 #endif /* defined(CHAMELEON_SIMULATION) */

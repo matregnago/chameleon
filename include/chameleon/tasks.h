@@ -82,6 +82,7 @@ typedef enum chameleon_tasktype_e {
   TASK_GEADD,
   TASK_LASCAL,
   TASK_LACPY,
+  TASK_LATRO,
   TASK_LAG2C,
   TASK_LAG2Z,
   TASK_LANGE,

@@ -169,6 +169,20 @@ TCUDA_zlarfb( cham_side_t        side,
 }
 
 int
+TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
+              int M, int N,
+              const CHAM_tile_t *A,
+              CHAM_tile_t *B,
+              cublasHandle_t handle )
+{
+    gpucublas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+
+    return CUDA_zlatro( uplo, trans, M, N, (cuDoubleComplex *)A->mat, A->ld, (cuDoubleComplex *)B->mat, B->ld, handle );
+}
+
+int
 TCUDA_zparfb( cham_side_t        side,
               cham_trans_t       trans,
               cham_dir_t         direct,

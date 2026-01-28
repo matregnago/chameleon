@@ -52,6 +52,8 @@ static inline int check_zscale_std    ( run_arg_list_t *args, cham_uplo_t uplo, 
 static inline int check_zscale        ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc_t *descAinit, CHAM_desc_t *descA ) { return 0; }
 static inline int check_zrankk_std    ( run_arg_list_t *args, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA ) { return 0; }
 static inline int check_zrankk        ( run_arg_list_t *args, int K, CHAM_desc_t *descA ) { return 0; }
+static inline int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LBD ) { return 0; }
+static inline int check_ztranspose    ( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB ) { return 0; }
 
 /* Blas check */
 static inline int check_zgemm_std     ( run_arg_list_t *args, cham_trans_t transA, cham_trans_t transB, CHAMELEON_Complex64_t alpha, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA,
@@ -131,6 +133,8 @@ int check_zscale_std    ( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, 
 int check_zscale        ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc_t *descAinit, CHAM_desc_t *descA );
 int check_zrankk_std    ( run_arg_list_t *args, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA );
 int check_zrankk        ( run_arg_list_t *args, int K, CHAM_desc_t *descA );
+int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LBD );
+int check_ztranspose    ( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB );
 
 /* Blas check */
 int check_zgemm_std     ( run_arg_list_t *args, cham_trans_t transA, cham_trans_t transB, CHAMELEON_Complex64_t alpha, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA,
