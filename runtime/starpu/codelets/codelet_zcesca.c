@@ -68,8 +68,7 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
                          CHAM_desc_t *A, int Am, int An )
 {
     struct cl_zcesca_args_s *clargs = NULL;
-    struct starpu_codelet *codelet = &cl_zcesca;
-    void (*callback)(void*) = options->profiling ? cl_zcesca_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zcesca_callback : NULL;
     int exec = 0;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -94,7 +93,7 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
     }
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zcesca,
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zcesca_args_s),
         STARPU_R,        RTBLKADDR(Gi, ChamComplexDouble, Gim, Gin),
         STARPU_R,        RTBLKADDR(Gj, ChamComplexDouble, Gjm, Gjn),
@@ -102,8 +101,9 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
         STARPU_R,        RTBLKADDR(Di, ChamRealDouble, Dim, Din),
         STARPU_R,        RTBLKADDR(Dj, ChamRealDouble, Djm, Djn),
         STARPU_RW,       RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

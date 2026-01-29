@@ -52,8 +52,7 @@ void INSERT_TASK_zhe2ge( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     (void)mb;
-    struct starpu_codelet *codelet = &cl_zhe2ge;
-    void (*callback)(void*) = options->profiling ? cl_zhe2ge_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zhe2ge_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -61,14 +60,15 @@ void INSERT_TASK_zhe2ge( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zhe2ge,
         STARPU_VALUE,  &uplo,                sizeof(int),
         STARPU_VALUE,     &m,                        sizeof(int),
         STARPU_VALUE,     &n,                        sizeof(int),
         STARPU_R,             RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_W,             RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

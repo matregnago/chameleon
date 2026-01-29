@@ -134,7 +134,7 @@ void INSERT_TASK_zgemm_Astat( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zgemm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zgemm_Astat";
@@ -204,7 +204,7 @@ void INSERT_TASK_zgemm_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
@@ -226,7 +226,7 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zgemm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zgemm";
@@ -285,10 +285,8 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zgemm( m, n, k ),
         STARPU_EXECUTE_WHERE,     where,

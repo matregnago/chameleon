@@ -53,22 +53,22 @@ void INSERT_TASK_zsytrf_nopiv( const RUNTIME_option_t *options,
                                int iinfo )
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_zsytrf_nopiv;
-    void (*callback)(void*) = options->profiling ? cl_zsytrf_nopiv_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zsytrf_nopiv_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zsytrf_nopiv,
         STARPU_VALUE,    &uplo,                      sizeof(int),
         STARPU_VALUE,    &n,                         sizeof(int),
         STARPU_RW,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_VALUE,    &iinfo,                     sizeof(int),
         /* STARPU_SCRATCH,   options->ws_worker, */
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

@@ -53,8 +53,7 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
                         const CHAM_desc_t *D, int Dm, int Dn,
                         CHAM_desc_t *A, int Am, int An )
 {
-    struct starpu_codelet *codelet = &cl_zgram;
-    void (*callback)(void*) = options->profiling ? cl_zgram_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgram_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(Di, Dim, Din);
@@ -64,7 +63,7 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zgram,
         STARPU_VALUE,    &uplo,                      sizeof(int),
         STARPU_VALUE,    &m,                         sizeof(int),
         STARPU_VALUE,    &n,                         sizeof(int),
@@ -74,8 +73,9 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
         STARPU_R,        RTBLKADDR(Dj, ChamRealDouble, Djm, Djn),
         STARPU_R,        RTBLKADDR(D, ChamRealDouble, Dm, Dn),
         STARPU_RW,       RTBLKADDR(A, ChamRealDouble, Am, An),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

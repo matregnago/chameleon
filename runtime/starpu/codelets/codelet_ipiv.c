@@ -77,10 +77,9 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
                                int m0, int m, int k, int K1, int K2,
                                const CHAM_ipiv_t *ipivdesc, int ipivk )
 {
-    struct starpu_codelet *codelet = &cl_ipiv_to_perm;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_ipiv_to_perm,
         STARPU_VALUE,             &m0,  sizeof(int),
         STARPU_VALUE,             &m,   sizeof(int),
         STARPU_VALUE,             &k,   sizeof(int),
@@ -89,8 +88,9 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         STARPU_R,                 RUNTIME_ipiv_getaddr( ipivdesc, ipivk ),
         STARPU_W,                 RUNTIME_ipiv_getperm( ipivdesc, ipivk ),
         STARPU_W,                 RUNTIME_ipiv_getinvp( ipivdesc, ipivk ),
-        STARPU_PRIORITY,          options->priority,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 }
 

@@ -56,8 +56,7 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *IN,  int INm,  int INn,
                          const CHAM_desc_t *OUT, int OUTm, int OUTn )
 {
-    struct starpu_codelet *codelet = &cl_zplssq;
-    void (*callback)(void*) = options->profiling ? cl_zplssq_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zplssq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(  IN,  INm,  INn  );
@@ -65,15 +64,16 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zplssq,
         STARPU_VALUE,    &storev,            sizeof(int),
         STARPU_VALUE,    &M,                 sizeof(int),
         STARPU_VALUE,    &N,                 sizeof(int),
         STARPU_R,  RTBLKADDR( IN,  ChamRealDouble, INm,  INn  ),
         STARPU_RW, RTBLKADDR( OUT, ChamRealDouble, OUTm, OUTn ),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }
 
@@ -102,19 +102,19 @@ CODELETS_CPU(zplssq2, cl_zplssq2_cpu_func)
 void INSERT_TASK_zplssq2( const RUNTIME_option_t *options, int N,
                           const CHAM_desc_t *RESULT, int RESULTm, int RESULTn )
 {
-    struct starpu_codelet *codelet = &cl_zplssq2;
-    void (*callback)(void*) = options->profiling ? cl_zplssq2_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zplssq2_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW( RESULT, RESULTm, RESULTn );
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zplssq2,
         STARPU_VALUE,    &N,                 sizeof(int),
         STARPU_RW, RTBLKADDR(RESULT, ChamRealDouble, RESULTm, RESULTn),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

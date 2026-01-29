@@ -63,15 +63,14 @@ void INSERT_TASK_zgetrf( const RUNTIME_option_t *options,
                          cham_bool_t check_info, int iinfo )
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_zgetrf;
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zgetrf,
         STARPU_VALUE,             &m,                        sizeof(int),
         STARPU_VALUE,             &n,                        sizeof(int),
         STARPU_RW,                     RTBLKADDR(A, ChamComplexDouble, Am, An),
@@ -80,8 +79,9 @@ void INSERT_TASK_zgetrf( const RUNTIME_option_t *options,
         STARPU_VALUE,         &iinfo,                        sizeof(int),
         STARPU_VALUE,    &(options->sequence),       sizeof(RUNTIME_sequence_t*),
         STARPU_VALUE,    &(options->request),        sizeof(RUNTIME_request_t*),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

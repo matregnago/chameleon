@@ -104,7 +104,7 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
-    void (*callback)(void*)          = NULL;
+    callback_fct_t callback          = NULL;
     struct cl_zlatro_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zlatro";
@@ -136,9 +136,10 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
         STARPU_CL_ARGS,           clargs, sizeof(struct cl_zlatro_args_s),
         STARPU_R,                 RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_W,                 RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zlatro( uplo, m, n ),
         0 );

@@ -155,7 +155,7 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
     fprintf( stderr, "INSERT_TASK_zgetrf_percol_offdiag_batched: STARPU_NONE can not be equal to 0\n" );
     assert( 0 );
 #endif
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
     struct cl_zgetrf_batched_args_s *clargs = *clargs_ptr;
     int rankA = A->myrank;
 
@@ -172,9 +172,10 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY,   clargs->handle_mode, clargs->tasks_nbr,
         access_npiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h   ),
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h-1 ),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              clargs->cl_name,
         0 );
 
@@ -384,7 +385,7 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
     assert( 0 );
 #endif
     int accessU, access_npiv, access_ipiv, access_ppiv;
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
     struct cl_zgetrf_batched_args_s *clargs = *clargs_ptr;
     int rankA = A->myrank;
     assert( rankA == Um );
@@ -412,9 +413,10 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h - 1 ),
         access_ipiv,              RUNTIME_ipiv_getaddr( ipiv, An ),
         accessU,                  RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un ),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              clargs->cl_name,
         0 );
 

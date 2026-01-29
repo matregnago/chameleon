@@ -40,7 +40,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
                   double beta,  const CHAM_desc_t *C, int Cm, int Cn )
 {
     struct starpu_codelet *codelet = NULL;
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
 
     /* if ( alpha == 0. ) { */
     /*     INSERT_TASK_zlascal( options, ChamUpperLower, m, n, nb, */
@@ -194,10 +194,8 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
         accessC,  RUNTIME_data_getaddr_withconversion( options, accessC,  Cflttype, C, Cm, Cn ),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         0 );
 

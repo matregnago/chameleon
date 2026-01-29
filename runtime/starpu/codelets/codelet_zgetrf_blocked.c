@@ -106,7 +106,7 @@ void INSERT_TASK_zgetrf_blocked_diag( const RUNTIME_option_t *options,
     fprintf( stderr, "INSERT_TASK_zgetrf_blocked_diag: STARPU_NONE can not be equal to 0\n" );
     assert( 0 );
 #endif
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_blocked_diag_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_blocked_diag_callback : NULL;
     const char *cl_name = "zgetrf_blocked_diag";
     int access_ipiv = ( h == 0 )        ? STARPU_W    : STARPU_RW;
     int access_npiv = ( h == pivot->n ) ? STARPU_R    : STARPU_REDUX;
@@ -154,9 +154,8 @@ void INSERT_TASK_zgetrf_blocked_diag( const RUNTIME_option_t *options,
         accessU,                  RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         0 );
 }
@@ -329,7 +328,7 @@ void INSERT_TASK_zgetrf_blocked_offdiag( const RUNTIME_option_t *options,
     clargs->sequence = options->sequence;
     clargs->request  = options->request;
 
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_blocked_offdiag_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_blocked_offdiag_callback : NULL;
     const char *cl_name = "zgetrf_blocked_offdiag";
 
     /* Refine name */
@@ -348,9 +347,8 @@ void INSERT_TASK_zgetrf_blocked_offdiag( const RUNTIME_option_t *options,
         accessU,                  RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         0 );
 }

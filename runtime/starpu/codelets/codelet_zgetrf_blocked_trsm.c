@@ -96,8 +96,9 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
         accessUp,                 RTBLKADDR(Up, CHAMELEON_Complex64_t, Upm, 0),
         STARPU_R,                 RUNTIME_pivot_getaddr( pivot, Up->myrank, h ),
         STARPU_EXECUTE_ON_NODE,   Up->myrank,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 }
 
@@ -211,7 +212,7 @@ void INSERT_TASK_zgetrf_blocked_trsm( const RUNTIME_option_t *options,
                                       int                     Un,
                                       CHAM_desc_pivot_t      *pivot )
 {
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_blocked_trsm_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_blocked_trsm_callback : NULL;
     const char *cl_name = "zgetrf_blocked_trsm";
     int rankU = U->get_rankof(U, Um, Un);
 
@@ -246,9 +247,8 @@ void INSERT_TASK_zgetrf_blocked_trsm( const RUNTIME_option_t *options,
         STARPU_R,                 RUNTIME_pivot_getaddr( pivot, rankU, h-1 ),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         0 );
 }

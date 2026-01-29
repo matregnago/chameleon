@@ -67,7 +67,7 @@ void INSERT_TASK_zlascal( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zlascal_args_s *clargs  = NULL;
     int                       exec    = 0;
     const char               *cl_name = "zlascal";
@@ -97,9 +97,8 @@ void INSERT_TASK_zlascal( const RUNTIME_option_t *options,
         STARPU_RW,     RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         0 );
 

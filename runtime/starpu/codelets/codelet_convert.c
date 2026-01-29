@@ -46,7 +46,7 @@ insert_task_convert( const RUNTIME_option_t *options,
                      starpu_data_handle_t totile )
 {
     struct starpu_codelet *codelet = NULL;
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
 
     int conversion = ChamConvert( fromtype, totype );
 
@@ -124,9 +124,10 @@ insert_task_convert( const RUNTIME_option_t *options,
         STARPU_VALUE,    &n,                 sizeof(int),
         STARPU_R,         fromtile,
         STARPU_W,         totile,
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  options->profiling ? callback : NULL,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0);
 
     return;

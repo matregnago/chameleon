@@ -52,8 +52,7 @@ void INSERT_TASK_zgessq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *SCALESUMSQ, int SCALESUMSQm, int SCALESUMSQn )
 {
-    struct starpu_codelet *codelet = &cl_zgessq;
-    void (*callback)(void*) = options->profiling ? cl_zgessq_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgessq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -61,14 +60,15 @@ void INSERT_TASK_zgessq( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zgessq,
         STARPU_VALUE,    &storev,                     sizeof(cham_store_t),
         STARPU_VALUE,    &m,                          sizeof(int),
         STARPU_VALUE,    &n,                          sizeof(int),
         STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW,       RTBLKADDR(SCALESUMSQ, ChamRealDouble, SCALESUMSQm, SCALESUMSQn),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

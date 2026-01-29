@@ -97,8 +97,7 @@ void INSERT_TASK_zunmqr( const RUNTIME_option_t *options,
                          const CHAM_desc_t *T, int Tm, int Tn,
                          const CHAM_desc_t *C, int Cm, int Cn )
 {
-    struct starpu_codelet *codelet = &cl_zunmqr;
-    void (*callback)(void*) = options->profiling ? cl_zunmqr_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zunmqr_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -107,7 +106,7 @@ void INSERT_TASK_zunmqr( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zunmqr,
         STARPU_VALUE,    &side,              sizeof(int),
         STARPU_VALUE,    &trans,             sizeof(int),
         STARPU_VALUE,    &m,                 sizeof(int),
@@ -120,8 +119,9 @@ void INSERT_TASK_zunmqr( const RUNTIME_option_t *options,
         /* ib * nb */
         STARPU_SCRATCH,   options->ws_worker,
         STARPU_VALUE,    &nb,                sizeof(int),
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

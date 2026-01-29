@@ -57,8 +57,7 @@ void INSERT_TASK_zlange( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     (void)NB;
-    struct starpu_codelet *codelet = &cl_zlange;
-    void (*callback)(void*) = options->profiling ? cl_zlange_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zlange_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -66,16 +65,19 @@ void INSERT_TASK_zlange( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_VALUE,    &norm,              sizeof(cham_normtype_t),
-        STARPU_VALUE,    &M,                 sizeof(int),
-        STARPU_VALUE,    &N,                 sizeof(int),
-        STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_SCRATCH,  options->ws_worker,
-        STARPU_W,        RTBLKADDR(B, ChamRealDouble, Bm, Bn),
-        STARPU_PRIORITY, options->priority,
+        &cl_zlange,
+        STARPU_VALUE, &norm, sizeof(cham_normtype_t),
+        STARPU_VALUE, &M,    sizeof(int),
+        STARPU_VALUE, &N,    sizeof(int),
+
+        /* Task handles */
+        STARPU_R,       RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_SCRATCH, options->ws_worker,
+        STARPU_W,       RTBLKADDR(B, ChamRealDouble, Bm, Bn),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }
 
@@ -104,25 +106,23 @@ static void cl_zlange_max_cpu_func(void *descr[], void *cl_arg)
  */
 CODELETS_CPU(zlange_max, cl_zlange_max_cpu_func)
 
-void INSERT_TASK_zlange_max(const RUNTIME_option_t *options,
-                           const CHAM_desc_t *A, int Am, int An,
-                           const CHAM_desc_t *B, int Bm, int Bn)
+void INSERT_TASK_zlange_max( const RUNTIME_option_t *options,
+                             const CHAM_desc_t *A, int Am, int An,
+                             const CHAM_desc_t *B, int Bm, int Bn )
 {
-    struct starpu_codelet *codelet = &cl_zlange_max;
-    void (*callback)(void*) = options->profiling ? cl_zlange_callback : NULL;
-
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(  A, Am, An );
     CHAMELEON_ACCESS_RW( B, Bm, Bn );
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_R,        RTBLKADDR(A, ChamRealDouble, Am, An),
-        STARPU_RW,       RTBLKADDR(B, ChamRealDouble, Bm, Bn),
-        STARPU_PRIORITY, options->priority,
-        STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        0 );
+        &cl_zlange_max,
 
+        /* Task handles */
+        STARPU_R,  RTBLKADDR(A, ChamRealDouble, Am, An),
+        STARPU_RW, RTBLKADDR(B, ChamRealDouble, Bm, Bn),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
+        0 );
 }

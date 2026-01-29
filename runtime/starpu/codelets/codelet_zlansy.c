@@ -57,8 +57,7 @@ void INSERT_TASK_zlansy( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     (void)NB;
-    struct starpu_codelet *codelet = &cl_zlansy;
-    void (*callback)(void*) = options->profiling ? cl_zlange_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zlange_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -66,15 +65,16 @@ void INSERT_TASK_zlansy( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zlansy,
         STARPU_VALUE,    &norm,              sizeof(int),
         STARPU_VALUE,    &uplo,              sizeof(int),
         STARPU_VALUE,    &N,                 sizeof(int),
         STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_SCRATCH,  options->ws_worker,
         STARPU_W,        RTBLKADDR(B, ChamRealDouble, Bm, Bn),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

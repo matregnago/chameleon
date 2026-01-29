@@ -61,8 +61,7 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
                          void *user_data, void* user_build_callback )
 {
 
-    struct starpu_codelet *codelet = &cl_zbuild;
-    void (*callback)(void*) = options->profiling ? cl_zbuild_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zbuild_callback : NULL;
     int row_min, row_max, col_min, col_max;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -74,7 +73,7 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
     col_min = An*A->nb ;
     col_max = An == A->nt-1 ? A->n-1 : col_min+A->nb-1 ;
     rt_starpu_insert_task(
-        codelet,
+        &cl_zbuild,
         STARPU_VALUE,    &row_min,                      sizeof(int),
         STARPU_VALUE,    &row_max,                      sizeof(int),
         STARPU_VALUE,    &col_min,                      sizeof(int),
@@ -82,8 +81,9 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
         STARPU_W,         RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_VALUE,    &user_data,                    sizeof(void*),
         STARPU_VALUE,    &user_build_callback,          sizeof(void*),
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0);
 }

@@ -120,7 +120,7 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zherk_args_s *clargs  = NULL;
     int                     exec    = 0;
     const char             *cl_name = "zherk";
@@ -163,10 +163,8 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
         accessC,       RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zherk( k, n ),
         0 );

@@ -94,9 +94,8 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
                           const CHAM_desc_t *A, int Am, int An,
                           const CHAM_desc_t *B, int Bm, int Bn )
 {
-    struct starpu_codelet *codelet = &cl_ztpmlqt;
     const char            *cl_name;
-    void (*callback)(void*);
+    callback_fct_t callback;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(V, Vm, Vn);
@@ -112,7 +111,7 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
     cl_name = (L == 0) ? "ztsmlqt" : "zttmlqt";
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_ztpmlqt,
         /* Task codelet arguments */
         STARPU_VALUE, &side,  sizeof(int),
         STARPU_VALUE, &trans, sizeof(int),
@@ -131,9 +130,8 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
         STARPU_SCRATCH,   options->ws_worker,
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_EXECUTE_ON_NODE,   B->get_rankof(B, Bm, Bn),
         STARPU_NAME,              cl_name,
         0 );

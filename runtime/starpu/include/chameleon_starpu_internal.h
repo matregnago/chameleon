@@ -46,6 +46,8 @@ typedef struct CHAM_context_starpu_s
     struct starpu_parallel_worker_config *pw_config;   /**< StarPU parallel workers configuration */
 } CHAM_context_starpu_t;
 
+typedef void (*callback_fct_t)(void *);
+
 /**
  * @brief Convert the Chameleon access enum to the StarPU one
  */
@@ -97,6 +99,11 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
 #define rt_shm_starpu_insert_task( _codelet_, ... )                         \
     starpu_insert_task( (_codelet_), ##__VA_ARGS__ )
 #endif
+
+#define INSERT_TASK_COMMON_TASK_PARAMS                  \
+    STARPU_PRIORITY,          options->priority,        \
+    STARPU_EXECUTE_ON_WORKER, options->workerid,        \
+    STARPU_POSSIBLY_PARALLEL, options->parallel
 
 /*
  * Enable codelets names
@@ -524,8 +531,6 @@ starpu_cham_task_exchange_data_after_execution( const RUNTIME_option_t          
 }
 
 #endif
-
-typedef void (*callback_fct_t)(void *);
 
 /**
  * @brief Internal function to initialize the task common parts.

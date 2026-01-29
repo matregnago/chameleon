@@ -53,8 +53,7 @@ void INSERT_TASK_ztrasm( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
-    struct starpu_codelet *codelet = &cl_ztrasm;
-    void (*callback)(void*) = options->profiling ? cl_ztrasm_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_ztrasm_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -62,7 +61,7 @@ void INSERT_TASK_ztrasm( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_ztrasm,
         STARPU_VALUE,    &storev,                    sizeof(int),
         STARPU_VALUE,    &uplo,                      sizeof(int),
         STARPU_VALUE,    &diag,                      sizeof(int),
@@ -70,8 +69,9 @@ void INSERT_TASK_ztrasm( const RUNTIME_option_t *options,
         STARPU_VALUE,    &N,                         sizeof(int),
         STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW,       RTBLKADDR(B, ChamRealDouble, Bm, Bn),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

@@ -80,8 +80,7 @@ void INSERT_TASK_zgetrf_nopiv_percol_diag( const RUNTIME_option_t *options,
                                                  const CHAM_desc_t *U, int Um, int Un,
                                                  int iinfo )
 {
-    struct starpu_codelet *codelet = &cl_zgetrf_nopiv_percol_diag;
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_nopiv_percol_diag_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_nopiv_percol_diag_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW( A, Am, An );
@@ -89,18 +88,21 @@ void INSERT_TASK_zgetrf_nopiv_percol_diag( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_VALUE,             &m,                   sizeof(int),
-        STARPU_VALUE,             &n,                   sizeof(int),
-        STARPU_VALUE,             &k,                   sizeof(int),
-        STARPU_RW,                RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_W,                 RTBLKADDR(U, ChamComplexDouble, Um, Un),
-        STARPU_VALUE,             &iinfo,               sizeof(int),
-        STARPU_VALUE,             &(options->sequence), sizeof(RUNTIME_sequence_t*),
-        STARPU_VALUE,             &(options->request),  sizeof(RUNTIME_request_t*),
-        STARPU_PRIORITY,          options->priority,
+        &cl_zgetrf_nopiv_percol_diag,
+        STARPU_VALUE, &m,                   sizeof(int),
+        STARPU_VALUE, &n,                   sizeof(int),
+        STARPU_VALUE, &k,                   sizeof(int),
+        STARPU_VALUE, &iinfo,               sizeof(int),
+        STARPU_VALUE, &(options->sequence), sizeof(RUNTIME_sequence_t*),
+        STARPU_VALUE, &(options->request),  sizeof(RUNTIME_request_t*),
+
+        /* Task handles */
+        STARPU_RW, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_W,  RTBLKADDR(U, ChamComplexDouble, Um, Un),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }
 
@@ -148,8 +150,7 @@ void INSERT_TASK_zgetrf_nopiv_percol_trsm( const RUNTIME_option_t *options,
                                                  const CHAM_desc_t *A, int Am, int An,
                                                  const CHAM_desc_t *U, int Um, int Un )
 {
-    struct starpu_codelet *codelet = &cl_zgetrf_nopiv_percol_trsm;
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_nopiv_percol_trsm_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_nopiv_percol_trsm_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);
@@ -157,14 +158,17 @@ void INSERT_TASK_zgetrf_nopiv_percol_trsm( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_VALUE,             &m, sizeof(int),
-        STARPU_VALUE,             &n, sizeof(int),
-        STARPU_VALUE,             &k, sizeof(int),
-        STARPU_RW,                RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_R,                 RTBLKADDR(U, ChamComplexDouble, Um, Un),
-        STARPU_PRIORITY,          options->priority,
+        &cl_zgetrf_nopiv_percol_trsm,
+        STARPU_VALUE, &m, sizeof(int),
+        STARPU_VALUE, &n, sizeof(int),
+        STARPU_VALUE, &k, sizeof(int),
+
+        /* Task handles */
+        STARPU_RW, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_R,  RTBLKADDR(U, ChamComplexDouble, Um, Un),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

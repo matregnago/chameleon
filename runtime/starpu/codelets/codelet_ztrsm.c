@@ -118,7 +118,7 @@ void INSERT_TASK_ztrsm( const RUNTIME_option_t *options,
                         CHAMELEON_Complex64_t alpha, const CHAM_desc_t *A, int Am, int An,
                         const CHAM_desc_t *B, int Bm, int Bn )
 {
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_ztrsm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "ztrsm";
@@ -158,10 +158,8 @@ void INSERT_TASK_ztrsm( const RUNTIME_option_t *options,
         STARPU_RW,     RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_ztrsm( side, m, n ),
         0 );
