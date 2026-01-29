@@ -70,6 +70,7 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
     struct cl_zcesca_args_s *clargs = NULL;
     int exec = 0;
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(Gi, Gim, Gin);
     CHAMELEON_ACCESS_R(Gj, Gjm, Gjn);
@@ -91,15 +92,20 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
         clargs->nt     = nt;
     }
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_zcesca,
+
+        /* Task codelet arguments */
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zcesca_args_s),
-        STARPU_R,        RTBLKADDR(Gi, ChamComplexDouble, Gim, Gin),
-        STARPU_R,        RTBLKADDR(Gj, ChamComplexDouble, Gjm, Gjn),
-        STARPU_R,        RTBLKADDR(G, ChamComplexDouble, Gm, Gn),
-        STARPU_R,        RTBLKADDR(Di, ChamRealDouble, Dim, Din),
-        STARPU_R,        RTBLKADDR(Dj, ChamRealDouble, Djm, Djn),
-        STARPU_RW,       RTBLKADDR(A, ChamComplexDouble, Am, An),
+
+        /* Task handles */
+        STARPU_R,  RTBLKADDR(Gi, ChamComplexDouble, Gim, Gin),
+        STARPU_R,  RTBLKADDR(Gj, ChamComplexDouble, Gjm, Gjn),
+        STARPU_R,  RTBLKADDR(G,  ChamComplexDouble, Gm,  Gn ),
+        STARPU_R,  RTBLKADDR(Di, ChamRealDouble,    Dim, Din),
+        STARPU_R,  RTBLKADDR(Dj, ChamRealDouble,    Djm, Djn),
+        STARPU_RW, RTBLKADDR(A,  ChamComplexDouble, Am,  An ),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zcesca ),

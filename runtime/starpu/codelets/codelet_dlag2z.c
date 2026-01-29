@@ -53,18 +53,24 @@ void INSERT_TASK_dlag2z( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_W(B, Bm, Bn);
     CHAMELEON_END_ACCESS_DECLARATION;
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_dlag2z,
-        STARPU_VALUE,    &uplo,              sizeof(uplo),
-        STARPU_VALUE,    &m,                 sizeof(int),
-        STARPU_VALUE,    &n,                 sizeof(int),
-        STARPU_R,         RTBLKADDR(A, ChamRealDouble, Am, An),
-        STARPU_W,         RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+
+        /* Task codelet arguments */
+        STARPU_VALUE, &uplo, sizeof(cham_uplo_t),
+        STARPU_VALUE, &m,    sizeof(int),
+        STARPU_VALUE, &n,    sizeof(int),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamRealDouble, Am, An),
+        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( dlag2z ),

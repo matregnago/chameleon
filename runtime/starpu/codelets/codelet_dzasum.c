@@ -12,8 +12,6 @@
  * @brief Chameleon dzasum StarPU codelet
  *
  * @version 1.4.0
- * @comment This file has been automatically generated
- *          from Plasma 2.6.0 for CHAMELEON 0.9.2
  * @author Mathieu Faverge
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
@@ -54,17 +52,23 @@ void INSERT_TASK_dzasum( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_RW(B, Bm, Bn);
     CHAMELEON_END_ACCESS_DECLARATION;
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_dzasum,
-        STARPU_VALUE,    &storev,              sizeof(cham_store_t),
-        STARPU_VALUE,    &uplo,                sizeof(cham_uplo_t),
-        STARPU_VALUE,    &M,                   sizeof(int),
-        STARPU_VALUE,    &N,                   sizeof(int),
+
+        /* Task codelet arguments */
+        STARPU_VALUE, &storev, sizeof(cham_store_t),
+        STARPU_VALUE, &uplo,   sizeof(cham_uplo_t),
+        STARPU_VALUE, &M,      sizeof(int),
+        STARPU_VALUE, &N,      sizeof(int),
+
+        /* Task handles */
         STARPU_R,         RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW,        RTBLKADDR(B, ChamRealDouble, Bm, Bn),
 

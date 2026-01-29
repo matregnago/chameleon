@@ -95,6 +95,7 @@ void INSERT_TASK_zgeadd( const RUNTIME_option_t *options,
     const char              *cl_name = "zgeadd";
     int                      accessB;
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_RW(B, Bm, Bn);
@@ -113,12 +114,16 @@ void INSERT_TASK_zgeadd( const RUNTIME_option_t *options,
     /* Reduce the B access if needed */
     accessB = ( beta == 0. ) ? STARPU_W : STARPU_RW;
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_zgeadd,
+
         /* Task codelet arguments */
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zgeadd_args_s),
-        STARPU_R,      RTBLKADDR(A, ChamComplexDouble, Am, An),
-        accessB,       RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        accessB,  RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zgeadd ),

@@ -54,21 +54,27 @@ void INSERT_TASK_zaxpy( const RUNTIME_option_t *options,
         return;
     }
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_RW(B, Bm, Bn);
     CHAMELEON_END_ACCESS_DECLARATION;
 
+    /* Insert the task */
     rt_starpu_insert_task(
-            &cl_zaxpy,
-            STARPU_VALUE,    &M,                           sizeof(int),
-            STARPU_VALUE,    &alpha,                       sizeof(CHAMELEON_Complex64_t),
-            STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
-            STARPU_VALUE,    &incA,                        sizeof(int),
-            STARPU_RW,       RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-            STARPU_VALUE,    &incB,                        sizeof(int),
+        &cl_zaxpy,
 
-            /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS( zaxpy ),
-            0);
+        /* Task codelet arguments */
+        STARPU_VALUE, &M,     sizeof(int),
+        STARPU_VALUE, &alpha, sizeof(CHAMELEON_Complex64_t),
+        STARPU_VALUE, &incA,  sizeof(int),
+        STARPU_VALUE, &incB,  sizeof(int),
+
+        /* Task handles */
+        STARPU_R,  RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_RW, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS( zaxpy ),
+        0 );
 }
