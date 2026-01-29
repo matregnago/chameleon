@@ -86,7 +86,6 @@ void INSERT_TASK_zherfb(const RUNTIME_option_t *options,
                        const CHAM_desc_t *T, int Tm, int Tn,
                        const CHAM_desc_t *C, int Cm, int Cn)
 {
-    struct starpu_codelet *codelet = &cl_zherfb;
     callback_fct_t callback = options->profiling ? cl_zherfb_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -96,7 +95,7 @@ void INSERT_TASK_zherfb(const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zherfb,
         STARPU_VALUE,    &uplo,              sizeof(int),
         STARPU_VALUE,    &n,                 sizeof(int),
         STARPU_VALUE,    &k,                 sizeof(int),

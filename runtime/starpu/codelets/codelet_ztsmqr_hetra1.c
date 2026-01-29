@@ -73,7 +73,6 @@ void INSERT_TASK_ztsmqr_hetra1( const RUNTIME_option_t *options,
                                 const CHAM_desc_t *V,  int Vm,  int Vn,
                                 const CHAM_desc_t *T,  int Tm,  int Tn )
 {
-    struct starpu_codelet *codelet = &cl_ztsmqr_hetra1;
     callback_fct_t callback = options->profiling ? cl_ztsmqr_hetra1_callback : NULL;
 
     int ldWORK = side == ChamLeft ? ib : nb;
@@ -86,7 +85,7 @@ void INSERT_TASK_ztsmqr_hetra1( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_ztsmqr_hetra1,
         STARPU_VALUE,    &side,              sizeof(int),
         STARPU_VALUE,    &trans,             sizeof(int),
         STARPU_VALUE,    &m1,                sizeof(int),

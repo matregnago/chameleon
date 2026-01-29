@@ -67,7 +67,6 @@ void INSERT_TASK_zssssm( const RUNTIME_option_t *options,
                          const int *IPIV )
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_zssssm;
     callback_fct_t callback = options->profiling ? cl_zssssm_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -78,7 +77,7 @@ void INSERT_TASK_zssssm( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zssssm,
         STARPU_VALUE,    &m1,                        sizeof(int),
         STARPU_VALUE,    &n1,                        sizeof(int),
         STARPU_VALUE,    &m2,                        sizeof(int),

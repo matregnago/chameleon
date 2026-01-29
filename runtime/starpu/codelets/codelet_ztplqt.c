@@ -57,7 +57,6 @@ void INSERT_TASK_ztplqt( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn,
                          const CHAM_desc_t *T, int Tm, int Tn )
 {
-    struct starpu_codelet *codelet = &cl_ztplqt;
     const char            *cl_name;
     callback_fct_t callback;
 
@@ -74,7 +73,7 @@ void INSERT_TASK_ztplqt( const RUNTIME_option_t *options,
     cl_name = (L == 0) ? "ztslqt" : "zttlqt";
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_ztplqt,
         /* Task codelet arguments */
         STARPU_VALUE, &M,     sizeof(int),
         STARPU_VALUE, &N,     sizeof(int),

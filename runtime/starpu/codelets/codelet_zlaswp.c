@@ -58,8 +58,8 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
                              const CHAM_desc_t *A, int Am, int An,
                              const CHAM_desc_t *U, int Um, int Un )
 {
-    void                  *ipiv_handle;
-    struct starpu_codelet *codelet = &cl_zlaswp_get;
+    void *ipiv_handle;
+
     if ( A->get_rankof( A, Am, An ) != A->myrank ) {
         return;
     }
@@ -81,8 +81,10 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
     //callback_fct_t callback = options->profiling ? cl_zlaswp_get_callback : NULL;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zlaswp_get,
         STARPU_CL_ARGS,             clargs, sizeof(struct cl_zlaswp_args_s),
+
+        /* Task handles */
         STARPU_R,                   ipiv_handle,
         STARPU_R,                   RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW | STARPU_COMMUTE, RTBLKADDR(U, ChamComplexDouble, Um, Un),
@@ -192,8 +194,8 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
                              const CHAM_desc_t *A, int Am, int An,
                              const CHAM_desc_t *B, int Bm, int Bn )
 {
-    void                  *ipiv_handle;
-    struct starpu_codelet *codelet = &cl_zlaswp_set;
+    void *ipiv_handle;
+
     if ( B->get_rankof( B, Bm, Bn) != A->myrank ) {
         return;
     }
@@ -216,11 +218,13 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
     //callback_fct_t callback = options->profiling ? cl_zlaswp_set_callback : NULL;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_CL_ARGS,           clargs, sizeof(struct cl_zlaswp_args_s),
-        STARPU_R,                 ipiv_handle,
-        STARPU_R,                 RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_RW,                RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+        &cl_zlaswp_set,
+        STARPU_CL_ARGS, clargs, sizeof(struct cl_zlaswp_args_s),
+
+        /* Task handles */
+        STARPU_R,  ipiv_handle,
+        STARPU_R,  RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_RW, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS,
@@ -341,16 +345,17 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
                              CHAM_perm_t       *ws, int Wm, int Wn,
                              const CHAM_desc_t *A,  int Am, int An)
 {
-    struct starpu_codelet *codelet = &cl_zlaswp_ret;
     if ( A->get_rankof( A, Am, An) != A->myrank ) {
         return;
     }
     //callback_fct_t callback = options->profiling ? cl_zlaswp_get_callback : NULL;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_W,                   RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_R,                   RUNTIME_perm_getaddr( ws, Wm, Wn ),
+        &cl_zlaswp_ret,
+
+        /* Task handles */
+        STARPU_W, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_R, RUNTIME_perm_getaddr( ws, Wm, Wn ),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS,

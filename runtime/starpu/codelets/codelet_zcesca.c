@@ -68,7 +68,6 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
                          CHAM_desc_t *A, int Am, int An )
 {
     struct cl_zcesca_args_s *clargs = NULL;
-    struct starpu_codelet *codelet = &cl_zcesca;
     callback_fct_t callback = options->profiling ? cl_zcesca_callback : NULL;
     int exec = 0;
 
@@ -94,7 +93,7 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
     }
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zcesca,
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zcesca_args_s),
         STARPU_R,        RTBLKADDR(Gi, ChamComplexDouble, Gim, Gin),
         STARPU_R,        RTBLKADDR(Gj, ChamComplexDouble, Gjm, Gjn),

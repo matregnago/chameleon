@@ -66,7 +66,6 @@ void INSERT_TASK_zgelqt(const RUNTIME_option_t *options,
                        const CHAM_desc_t *T, int Tm, int Tn)
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_zgelqt;
     callback_fct_t callback = options->profiling ? cl_zgelqt_callback : NULL;
     CHAMELEON_starpu_ws_t *h_work = (CHAMELEON_starpu_ws_t*)(options->ws_host);
 
@@ -76,7 +75,7 @@ void INSERT_TASK_zgelqt(const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zgelqt,
         STARPU_VALUE,    &m,                 sizeof(int),
         STARPU_VALUE,    &n,                 sizeof(int),
         STARPU_VALUE,    &ib,                sizeof(int),

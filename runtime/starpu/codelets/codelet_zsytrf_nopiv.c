@@ -53,7 +53,6 @@ void INSERT_TASK_zsytrf_nopiv( const RUNTIME_option_t *options,
                                int iinfo )
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_zsytrf_nopiv;
     callback_fct_t callback = options->profiling ? cl_zsytrf_nopiv_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -61,7 +60,7 @@ void INSERT_TASK_zsytrf_nopiv( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zsytrf_nopiv,
         STARPU_VALUE,    &uplo,                      sizeof(int),
         STARPU_VALUE,    &n,                         sizeof(int),
         STARPU_RW,        RTBLKADDR(A, ChamComplexDouble, Am, An),

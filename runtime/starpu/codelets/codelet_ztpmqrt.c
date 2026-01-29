@@ -94,7 +94,6 @@ void INSERT_TASK_ztpmqrt( const RUNTIME_option_t *options,
                           const CHAM_desc_t *A, int Am, int An,
                           const CHAM_desc_t *B, int Bm, int Bn )
 {
-    struct starpu_codelet *codelet = &cl_ztpmqrt;
     const char            *cl_name;
     callback_fct_t callback;
 
@@ -112,7 +111,7 @@ void INSERT_TASK_ztpmqrt( const RUNTIME_option_t *options,
     cl_name = (L == 0) ? "ztsmqrt" : "zttmqrt";
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_ztpmqrt,
         /* Task codelet arguments */
         STARPU_VALUE, &side,  sizeof(int),
         STARPU_VALUE, &trans, sizeof(int),

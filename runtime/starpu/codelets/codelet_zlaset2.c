@@ -53,7 +53,6 @@ void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
                        CHAMELEON_Complex64_t alpha, const CHAM_desc_t *A, int Am, int An)
 {
 
-    struct starpu_codelet *codelet = &cl_zlaset2;
     callback_fct_t callback = options->profiling ? cl_zlaset2_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -61,7 +60,7 @@ void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zlaset2,
         STARPU_VALUE,  &uplo,                sizeof(int),
         STARPU_VALUE,     &M,                        sizeof(int),
         STARPU_VALUE,     &N,                        sizeof(int),

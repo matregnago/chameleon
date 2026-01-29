@@ -49,7 +49,6 @@ void INSERT_TASK_zgesum( const RUNTIME_option_t *options,
                          const CHAM_desc_t *SUMS, int SUMSm, int SUMSn )
 {
     struct cl_zgesum_args_s *clargs = NULL;
-    struct starpu_codelet *codelet = &cl_zgesum;
     callback_fct_t callback = options->profiling ? cl_zgesum_callback : NULL;
     int exec = 0;
 
@@ -67,7 +66,7 @@ void INSERT_TASK_zgesum( const RUNTIME_option_t *options,
     }
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zgesum,
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zgesum_args_s),
         STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW,       RTBLKADDR(SUMS, ChamComplexDouble, SUMSm, SUMSn),

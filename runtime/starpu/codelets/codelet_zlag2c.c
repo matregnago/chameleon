@@ -86,7 +86,6 @@ void INSERT_TASK_zlag2c(const RUNTIME_option_t *options,
                        const CHAM_desc_t *B, int Bm, int Bn)
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_zlag2c;
     callback_fct_t callback = options->profiling ? cl_zlag2c_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -95,11 +94,13 @@ void INSERT_TASK_zlag2c(const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_VALUE,    &m,                 sizeof(int),
-        STARPU_VALUE,    &n,                 sizeof(int),
-        STARPU_R,         RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_W,         RTBLKADDR(B, ChamComplexFloat, Bm, Bn),
+        &cl_zlag2c,
+        STARPU_VALUE, &m, sizeof(int),
+        STARPU_VALUE, &n, sizeof(int),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_W, RTBLKADDR(B, ChamComplexFloat, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS,
@@ -159,7 +160,6 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     (void)nb;
-    struct starpu_codelet *codelet = &cl_clag2z;
     callback_fct_t callback = options->profiling ? cl_clag2z_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -168,11 +168,13 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
-        STARPU_VALUE,    &m,                 sizeof(int),
-        STARPU_VALUE,    &n,                 sizeof(int),
-        STARPU_R,         RTBLKADDR(A, ChamComplexFloat, Am, An),
-        STARPU_W,         RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+        &cl_clag2z,
+        STARPU_VALUE, &m, sizeof(int),
+        STARPU_VALUE, &n, sizeof(int),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamComplexFloat, Am, An),
+        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS,

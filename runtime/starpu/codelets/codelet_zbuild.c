@@ -61,7 +61,6 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
                          void *user_data, void* user_build_callback )
 {
 
-    struct starpu_codelet *codelet = &cl_zbuild;
     callback_fct_t callback = options->profiling ? cl_zbuild_callback : NULL;
     int row_min, row_max, col_min, col_max;
 
@@ -74,7 +73,7 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
     col_min = An*A->nb ;
     col_max = An == A->nt-1 ? A->n-1 : col_min+A->nb-1 ;
     rt_starpu_insert_task(
-        codelet,
+        &cl_zbuild,
         STARPU_VALUE,    &row_min,                      sizeof(int),
         STARPU_VALUE,    &row_max,                      sizeof(int),
         STARPU_VALUE,    &col_min,                      sizeof(int),

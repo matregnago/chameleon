@@ -49,7 +49,6 @@ void INSERT_TASK_zaxpy( const RUNTIME_option_t *options,
                         const CHAM_desc_t *A, int Am, int An, int incA,
                         const CHAM_desc_t *B, int Bm, int Bn, int incB )
 {
-    struct starpu_codelet *codelet = &cl_zaxpy;
     callback_fct_t callback = options->profiling ? cl_zaxpy_callback : NULL;
 
     if ( alpha == 0. ) {
@@ -62,7 +61,7 @@ void INSERT_TASK_zaxpy( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-            codelet,
+            &cl_zaxpy,
             STARPU_VALUE,    &M,                           sizeof(int),
             STARPU_VALUE,    &alpha,                       sizeof(CHAMELEON_Complex64_t),
             STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),

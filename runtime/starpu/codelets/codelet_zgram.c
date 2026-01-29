@@ -53,7 +53,6 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
                         const CHAM_desc_t *D, int Dm, int Dn,
                         CHAM_desc_t *A, int Am, int An )
 {
-    struct starpu_codelet *codelet = &cl_zgram;
     callback_fct_t callback = options->profiling ? cl_zgram_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -64,7 +63,7 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zgram,
         STARPU_VALUE,    &uplo,                      sizeof(int),
         STARPU_VALUE,    &m,                         sizeof(int),
         STARPU_VALUE,    &n,                         sizeof(int),

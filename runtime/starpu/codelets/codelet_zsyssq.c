@@ -50,7 +50,6 @@ void INSERT_TASK_zsyssq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *SCALESUMSQ, int SCALESUMSQm, int SCALESUMSQn )
 {
-    struct starpu_codelet *codelet = &cl_zsyssq;
     callback_fct_t callback = options->profiling ? cl_zgessq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -59,7 +58,7 @@ void INSERT_TASK_zsyssq( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     rt_starpu_insert_task(
-        codelet,
+        &cl_zsyssq,
         STARPU_VALUE,    &storev,                     sizeof(cham_store_t),
         STARPU_VALUE,    &uplo,                       sizeof(int),
         STARPU_VALUE,    &n,                          sizeof(int),
