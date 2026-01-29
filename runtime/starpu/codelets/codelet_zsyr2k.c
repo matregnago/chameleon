@@ -122,7 +122,7 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zsyr2k_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zsyr2k";

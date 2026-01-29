@@ -96,7 +96,7 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
 {
     struct starpu_codelet *codelet = &cl_ztpmlqt;
     const char            *cl_name;
-    void (*callback)(void*);
+    callback_fct_t callback;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(V, Vm, Vn);

@@ -53,7 +53,7 @@ void INSERT_TASK_zgessq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *SCALESUMSQ, int SCALESUMSQm, int SCALESUMSQn )
 {
     struct starpu_codelet *codelet = &cl_zgessq;
-    void (*callback)(void*) = options->profiling ? cl_zgessq_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgessq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);

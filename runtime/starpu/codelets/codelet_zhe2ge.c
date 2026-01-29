@@ -53,7 +53,7 @@ void INSERT_TASK_zhe2ge( const RUNTIME_option_t *options,
 {
     (void)mb;
     struct starpu_codelet *codelet = &cl_zhe2ge;
-    void (*callback)(void*) = options->profiling ? cl_zhe2ge_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zhe2ge_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);

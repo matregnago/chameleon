@@ -57,7 +57,7 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *OUT, int OUTm, int OUTn )
 {
     struct starpu_codelet *codelet = &cl_zplssq;
-    void (*callback)(void*) = options->profiling ? cl_zplssq_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zplssq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(  IN,  INm,  INn  );
@@ -104,7 +104,7 @@ void INSERT_TASK_zplssq2( const RUNTIME_option_t *options, int N,
                           const CHAM_desc_t *RESULT, int RESULTm, int RESULTn )
 {
     struct starpu_codelet *codelet = &cl_zplssq2;
-    void (*callback)(void*) = options->profiling ? cl_zplssq2_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zplssq2_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW( RESULT, RESULTm, RESULTn );

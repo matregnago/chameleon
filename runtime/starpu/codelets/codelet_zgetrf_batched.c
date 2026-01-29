@@ -155,7 +155,7 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
     fprintf( stderr, "INSERT_TASK_zgetrf_percol_offdiag_batched: STARPU_NONE can not be equal to 0\n" );
     assert( 0 );
 #endif
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
     struct cl_zgetrf_batched_args_s *clargs = *clargs_ptr;
     int rankA = A->myrank;
 
@@ -385,7 +385,7 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
     assert( 0 );
 #endif
     int accessU, access_npiv, access_ipiv, access_ppiv;
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
     struct cl_zgetrf_batched_args_s *clargs = *clargs_ptr;
     int rankA = A->myrank;
     assert( rankA == Um );

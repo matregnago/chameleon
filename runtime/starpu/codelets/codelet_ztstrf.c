@@ -81,7 +81,7 @@ void INSERT_TASK_ztstrf( const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_ztstrf;
-    void (*callback)(void*) = options->profiling ? cl_ztstrf_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_ztstrf_callback : NULL;
     CHAMELEON_starpu_ws_t *d_work = (CHAMELEON_starpu_ws_t*)(options->ws_host);
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;

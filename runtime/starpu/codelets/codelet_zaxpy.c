@@ -50,7 +50,7 @@ void INSERT_TASK_zaxpy( const RUNTIME_option_t *options,
                         const CHAM_desc_t *B, int Bm, int Bn, int incB )
 {
     struct starpu_codelet *codelet = &cl_zaxpy;
-    void (*callback)(void*) = options->profiling ? cl_zaxpy_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zaxpy_callback : NULL;
 
     if ( alpha == 0. ) {
         return;

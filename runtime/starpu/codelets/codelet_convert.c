@@ -46,7 +46,7 @@ insert_task_convert( const RUNTIME_option_t *options,
                      starpu_data_handle_t totile )
 {
     struct starpu_codelet *codelet = NULL;
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
 
     int conversion = ChamConvert( fromtype, totype );
 

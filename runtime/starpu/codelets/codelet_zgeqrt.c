@@ -68,7 +68,7 @@ void INSERT_TASK_zgeqrt(const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_zgeqrt;
-    void (*callback)(void*) = options->profiling ? cl_zgeqrt_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgeqrt_callback : NULL;
     CHAMELEON_starpu_ws_t *h_work = (CHAMELEON_starpu_ws_t*)(options->ws_host);
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;

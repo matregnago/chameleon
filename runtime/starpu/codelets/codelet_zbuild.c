@@ -62,7 +62,7 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
 {
 
     struct starpu_codelet *codelet = &cl_zbuild;
-    void (*callback)(void*) = options->profiling ? cl_zbuild_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zbuild_callback : NULL;
     int row_min, row_max, col_min, col_max;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;

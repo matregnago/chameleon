@@ -59,7 +59,7 @@ void INSERT_TASK_ztplqt( const RUNTIME_option_t *options,
 {
     struct starpu_codelet *codelet = &cl_ztplqt;
     const char            *cl_name;
-    void (*callback)(void*);
+    callback_fct_t callback;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);

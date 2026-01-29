@@ -231,7 +231,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     int                   i, readonly = 1;
     size_t                clargs_size = 0;
     uint32_t              where       = 0;
-    void (*callback)(void*);
+    callback_fct_t callback;
 
     if ( ( ndata < 0 ) || ( ndata > 3 ) ) {
         fprintf( stderr, "INSERT_TASK_map() can handle only 1 to 3 parameters\n" );

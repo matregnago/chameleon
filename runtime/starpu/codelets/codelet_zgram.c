@@ -54,7 +54,7 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
                         CHAM_desc_t *A, int Am, int An )
 {
     struct starpu_codelet *codelet = &cl_zgram;
-    void (*callback)(void*) = options->profiling ? cl_zgram_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgram_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(Di, Dim, Din);

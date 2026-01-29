@@ -78,7 +78,7 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
     else {
         ipiv_handle = RUNTIME_ipiv_getinvp( ipiv, ipivk );
     }
-    //void (*callback)(void*) = options->profiling ? cl_zlaswp_get_callback : NULL;
+    //callback_fct_t callback = options->profiling ? cl_zlaswp_get_callback : NULL;
 
     rt_starpu_insert_task(
         codelet,
@@ -213,7 +213,7 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
         ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
     }
 
-    //void (*callback)(void*) = options->profiling ? cl_zlaswp_set_callback : NULL;
+    //callback_fct_t callback = options->profiling ? cl_zlaswp_set_callback : NULL;
 
     rt_starpu_insert_task(
         codelet,
@@ -345,7 +345,7 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
     if ( A->get_rankof( A, Am, An) != A->myrank ) {
         return;
     }
-    //void (*callback)(void*) = options->profiling ? cl_zlaswp_get_callback : NULL;
+    //callback_fct_t callback = options->profiling ? cl_zlaswp_get_callback : NULL;
 
     rt_starpu_insert_task(
         codelet,
@@ -374,7 +374,7 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
 
     INSERT_TASK_COMMON_PARAMETERS( zlaswp_ret, 2);
 
-    //void (*callback)(void*) = options->profiling ? cl_zlaswp_get_callback : NULL;
+    //callback_fct_t callback = options->profiling ? cl_zlaswp_get_callback : NULL;
     starpu_cham_exchange_init_params( options, &params, rank );
 
     starpu_cham_register_descr( &nbdata, descrs, RTBLKADDR( A, ChamComplexDouble, Am, An ), STARPU_W );

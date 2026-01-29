@@ -67,7 +67,7 @@ void INSERT_TASK_zlascal( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zlascal_args_s *clargs  = NULL;
     int                       exec    = 0;
     const char               *cl_name = "zlascal";

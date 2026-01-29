@@ -65,7 +65,7 @@ void INSERT_TASK_ztrtri( const RUNTIME_option_t *options,
                          int iinfo )
 {
     struct cl_ztrtri_args_s *clargs = NULL;
-    void (*callback)(void*);
+    callback_fct_t callback;
     int                      exec = 0;
     const char              *cl_name = "ztrtri";
 

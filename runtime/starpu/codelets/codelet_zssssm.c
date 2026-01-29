@@ -68,7 +68,7 @@ void INSERT_TASK_zssssm( const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_zssssm;
-    void (*callback)(void*) = options->profiling ? cl_zssssm_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zssssm_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A1, A1m, A1n);

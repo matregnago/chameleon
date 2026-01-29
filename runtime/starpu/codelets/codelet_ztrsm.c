@@ -118,7 +118,7 @@ void INSERT_TASK_ztrsm( const RUNTIME_option_t *options,
                         CHAMELEON_Complex64_t alpha, const CHAM_desc_t *A, int Am, int An,
                         const CHAM_desc_t *B, int Bm, int Bn )
 {
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_ztrsm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "ztrsm";

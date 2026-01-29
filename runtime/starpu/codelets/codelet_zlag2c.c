@@ -87,7 +87,7 @@ void INSERT_TASK_zlag2c(const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_zlag2c;
-    void (*callback)(void*) = options->profiling ? cl_zlag2c_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zlag2c_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -160,7 +160,7 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_clag2z;
-    void (*callback)(void*) = options->profiling ? cl_clag2z_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_clag2z_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R( A, Am, An );

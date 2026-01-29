@@ -54,7 +54,7 @@ void INSERT_TASK_zsytrf_nopiv( const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_zsytrf_nopiv;
-    void (*callback)(void*) = options->profiling ? cl_zsytrf_nopiv_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zsytrf_nopiv_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);

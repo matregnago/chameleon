@@ -73,7 +73,7 @@ void INSERT_TASK_zpotrf( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          int iinfo )
 {
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zpotrf_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zpotrf";

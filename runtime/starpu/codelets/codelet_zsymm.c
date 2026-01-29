@@ -134,7 +134,7 @@ void INSERT_TASK_zsymm_Astat( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zsymm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zsymm_Astat";
@@ -215,7 +215,7 @@ void INSERT_TASK_zsymm( const RUNTIME_option_t *options,
         return;
     }
 
-    void (*callback)(void*);
+    callback_fct_t callback;
     struct cl_zsymm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zsymm";

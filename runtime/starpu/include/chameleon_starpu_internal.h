@@ -46,6 +46,8 @@ typedef struct CHAM_context_starpu_s
     struct starpu_parallel_worker_config *pw_config;   /**< StarPU parallel workers configuration */
 } CHAM_context_starpu_t;
 
+typedef void (*callback_fct_t)(void *);
+
 /**
  * @brief Convert the Chameleon access enum to the StarPU one
  */
@@ -529,8 +531,6 @@ starpu_cham_task_exchange_data_after_execution( const RUNTIME_option_t          
 }
 
 #endif
-
-typedef void (*callback_fct_t)(void *);
 
 /**
  * @brief Internal function to initialize the task common parts.

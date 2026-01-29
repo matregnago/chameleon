@@ -69,7 +69,7 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
 {
     struct cl_zcesca_args_s *clargs = NULL;
     struct starpu_codelet *codelet = &cl_zcesca;
-    void (*callback)(void*) = options->profiling ? cl_zcesca_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zcesca_callback : NULL;
     int exec = 0;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;

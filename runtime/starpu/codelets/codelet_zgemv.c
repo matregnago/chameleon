@@ -94,7 +94,7 @@ void INSERT_TASK_zgemv( const RUNTIME_option_t *options,
                         CHAMELEON_Complex64_t beta,  const CHAM_desc_t *Y, int Ym, int Yn, int incY )
 {
     struct starpu_codelet *codelet = &cl_zgemv;
-    void (*callback)(void*) = options->profiling ? cl_zgemv_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgemv_callback : NULL;
     int accessY = ( beta == 0. ) ? STARPU_W : STARPU_RW;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;

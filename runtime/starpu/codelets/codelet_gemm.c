@@ -40,7 +40,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
                   double beta,  const CHAM_desc_t *C, int Cm, int Cn )
 {
     struct starpu_codelet *codelet = NULL;
-    void (*callback)(void*) = NULL;
+    callback_fct_t callback = NULL;
 
     /* if ( alpha == 0. ) { */
     /*     INSERT_TASK_zlascal( options, ChamUpperLower, m, n, nb, */

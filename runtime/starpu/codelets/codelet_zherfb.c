@@ -87,7 +87,7 @@ void INSERT_TASK_zherfb(const RUNTIME_option_t *options,
                        const CHAM_desc_t *C, int Cm, int Cn)
 {
     struct starpu_codelet *codelet = &cl_zherfb;
-    void (*callback)(void*) = options->profiling ? cl_zherfb_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zherfb_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);

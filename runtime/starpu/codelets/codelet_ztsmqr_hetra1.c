@@ -74,7 +74,7 @@ void INSERT_TASK_ztsmqr_hetra1( const RUNTIME_option_t *options,
                                 const CHAM_desc_t *T,  int Tm,  int Tn )
 {
     struct starpu_codelet *codelet = &cl_ztsmqr_hetra1;
-    void (*callback)(void*) = options->profiling ? cl_ztsmqr_hetra1_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_ztsmqr_hetra1_callback : NULL;
 
     int ldWORK = side == ChamLeft ? ib : nb;
 

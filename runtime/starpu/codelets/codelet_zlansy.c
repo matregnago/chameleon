@@ -58,7 +58,7 @@ void INSERT_TASK_zlansy( const RUNTIME_option_t *options,
 {
     (void)NB;
     struct starpu_codelet *codelet = &cl_zlansy;
-    void (*callback)(void*) = options->profiling ? cl_zlange_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zlange_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);

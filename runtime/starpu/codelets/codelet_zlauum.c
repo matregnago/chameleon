@@ -55,7 +55,7 @@ void INSERT_TASK_zlauum( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An )
 {
     struct cl_zlauum_args_s *clargs = NULL;
-    void (*callback)(void*);
+    callback_fct_t callback;
     int                      exec = 0;
     const char              *cl_name = "zlauum";
 

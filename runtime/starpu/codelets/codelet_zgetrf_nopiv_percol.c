@@ -81,7 +81,7 @@ void INSERT_TASK_zgetrf_nopiv_percol_diag( const RUNTIME_option_t *options,
                                                  int iinfo )
 {
     struct starpu_codelet *codelet = &cl_zgetrf_nopiv_percol_diag;
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_nopiv_percol_diag_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_nopiv_percol_diag_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW( A, Am, An );
@@ -150,7 +150,7 @@ void INSERT_TASK_zgetrf_nopiv_percol_trsm( const RUNTIME_option_t *options,
                                                  const CHAM_desc_t *U, int Um, int Un )
 {
     struct starpu_codelet *codelet = &cl_zgetrf_nopiv_percol_trsm;
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_nopiv_percol_trsm_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_nopiv_percol_trsm_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);

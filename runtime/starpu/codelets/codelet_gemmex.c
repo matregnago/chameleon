@@ -124,7 +124,7 @@ void INSERT_TASK_gemmex_Astat( const RUNTIME_option_t *options,
     /* } */
 
     struct cl_gemmex_args_s  *clargs = NULL;
-    void (*callback)(void*);
+    callback_fct_t callback;
     int                      accessC;
     int                      exec    = 0;
     const char              *cl_name = "gemmex_Astat";
@@ -205,7 +205,7 @@ void INSERT_TASK_gemmex( const RUNTIME_option_t *options,
     /* } */
 
     struct cl_gemmex_args_s  *clargs = NULL;
-    void (*callback)(void*);
+    callback_fct_t callback;
     int                      accessC;
     int                      exec = 0;
     const char              *cl_name = "gemmex";

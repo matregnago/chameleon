@@ -60,7 +60,7 @@ void INSERT_TASK_zplgsy( const RUNTIME_option_t *options,
                          int bigM, int m0, int n0, unsigned long long int seed )
 {
     struct cl_zplgsy_args_s *clargs = NULL;
-    void (*callback)(void*);
+    callback_fct_t callback;
     int                      exec = 0;
     const char              *cl_name = "zplgsy";
 

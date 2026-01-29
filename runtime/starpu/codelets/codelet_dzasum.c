@@ -54,7 +54,7 @@ void INSERT_TASK_dzasum( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     struct starpu_codelet *codelet = &cl_dzasum;
-    void (*callback)(void*) = options->profiling ? cl_dzasum_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_dzasum_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);

@@ -69,7 +69,7 @@ void INSERT_TASK_zgetrf_incpiv(const RUNTIME_option_t *options,
 {
     (void)nb;
     struct starpu_codelet *codelet = &cl_zgetrf_incpiv;
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_incpiv_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_incpiv_callback : NULL;
 
     CHAMELEON_starpu_ws_t *h_work = (CHAMELEON_starpu_ws_t*)(options->ws_host);
 

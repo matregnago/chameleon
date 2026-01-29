@@ -90,7 +90,7 @@ void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
                                      CHAM_ipiv_t *ipiv,
                                      CHAM_desc_pivot_t *pivot )
 {
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_percol_diag_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_percol_diag_callback : NULL;
     const char *cl_name = "zgetrf_percol_diag";
     int rankA           = A->get_rankof(A, Am, An);
 
@@ -246,7 +246,7 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
                                         CHAM_desc_t *A, int Am, int An,
                                         CHAM_desc_pivot_t *pivot )
 {
-    void (*callback)(void*) = options->profiling ? cl_zgetrf_percol_offdiag_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zgetrf_percol_offdiag_callback : NULL;
     const char *cl_name = "zgetrf_percol_offdiag";
     int access_npiv = ( h == pivot->n ) ? STARPU_R    : STARPU_REDUX;
     int access_ppiv = ( h == 0 )       ? STARPU_NONE : STARPU_R;

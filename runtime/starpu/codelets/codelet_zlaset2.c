@@ -54,7 +54,7 @@ void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
 {
 
     struct starpu_codelet *codelet = &cl_zlaset2;
-    void (*callback)(void*) = options->profiling ? cl_zlaset2_callback : NULL;
+    callback_fct_t callback = options->profiling ? cl_zlaset2_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_W(A, Am, An);
