@@ -211,36 +211,37 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
                                           RTBLKADDR(A, ChamComplexDouble, Am, An),
                                           RTBLKADDR(B, ChamComplexDouble, Bm, Bn) );
 #endif
+        return;
     }
-    else
 #endif
-    {
-        struct cl_zlacpy_args_s *clargs = NULL;
 
-        if ( exec ) {
-            clargs = malloc( sizeof( struct cl_zlacpy_args_s ) );
-            clargs->uplo   = uplo;
-            clargs->m      = m;
-            clargs->n      = n;
-            clargs->displA = displA;
-            clargs->displB = displB;
-            clargs->lda    = lda;
-            clargs->ldb    = ldb;
-        }
+    struct cl_zlacpy_args_s *clargs = NULL;
 
-        /* Insert the task */
-        rt_starpu_insert_task(
-            &cl_zlacpyx,
-            /* Task codelet arguments */
-            STARPU_CL_ARGS, clargs, sizeof(struct cl_zlacpy_args_s),
-            STARPU_R,      RTBLKADDR(A, ChamComplexDouble, Am, An),
-            STARPU_W,      RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-
-            /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS( zlacpyx ),
-            STARPU_NAME,              cl_name,
-            0 );
+    if ( exec ) {
+        clargs = malloc( sizeof( struct cl_zlacpy_args_s ) );
+        clargs->uplo   = uplo;
+        clargs->m      = m;
+        clargs->n      = n;
+        clargs->displA = displA;
+        clargs->displB = displB;
+        clargs->lda    = lda;
+        clargs->ldb    = ldb;
     }
+
+    /* Insert the task */
+    rt_starpu_insert_task(
+        &cl_zlacpyx,
+        /* Task codelet arguments */
+        STARPU_CL_ARGS, clargs, sizeof(struct cl_zlacpy_args_s),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS( zlacpyx ),
+        STARPU_NAME, cl_name,
+        0 );
 
     (void)tileA;
     (void)tileB;
@@ -256,7 +257,7 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
     CHAM_tile_t *tileA   = A->get_blktile( A, Am, An );
     CHAM_tile_t *tileB   = B->get_blktile( B, Bm, Bn );
 
-        /* Handle cache */
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_W(B, Bm, Bn);
@@ -279,33 +280,34 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
                                           RTBLKADDR(A, ChamComplexDouble, Am, An),
                                           RTBLKADDR(B, ChamComplexDouble, Bm, Bn) );
 #endif
+        return;
     }
-    else
 #endif
-    {
-        struct cl_zlacpy_args_s *clargs = NULL;
 
-        if ( exec ) {
-            clargs = malloc( sizeof( struct cl_zlacpy_args_s ) );
-            clargs->uplo   = uplo;
-            clargs->m      = m;
-            clargs->n      = n;
-            clargs->displA = 0;
-            clargs->displB = 0;
-            clargs->lda    = tileA->ld;
-            clargs->ldb    = tileB->ld;
-        }
+    struct cl_zlacpy_args_s *clargs = NULL;
 
-        rt_starpu_insert_task(
-            &cl_zlacpy,
-            /* Task codelet arguments */
-            STARPU_CL_ARGS, clargs, sizeof(struct cl_zlacpy_args_s),
-            STARPU_R,      RTBLKADDR(A, ChamComplexDouble, Am, An),
-            STARPU_W,      RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-
-            /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS( zlacpy ),
-            STARPU_NAME,              cl_name,
-            0 );
+    if ( exec ) {
+        clargs = malloc( sizeof( struct cl_zlacpy_args_s ) );
+        clargs->uplo   = uplo;
+        clargs->m      = m;
+        clargs->n      = n;
+        clargs->displA = 0;
+        clargs->displB = 0;
+        clargs->lda    = tileA->ld;
+        clargs->ldb    = tileB->ld;
     }
+
+    rt_starpu_insert_task(
+        &cl_zlacpy,
+        /* Task codelet arguments */
+        STARPU_CL_ARGS, clargs, sizeof(struct cl_zlacpy_args_s),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS( zlacpy ),
+        STARPU_NAME, cl_name,
+        0 );
 }
