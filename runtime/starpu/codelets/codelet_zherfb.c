@@ -107,8 +107,9 @@ void INSERT_TASK_zherfb(const RUNTIME_option_t *options,
         STARPU_R,         RTBLKADDR(T, ChamComplexDouble, Tm, Tn),
         STARPU_RW,        RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
         STARPU_SCRATCH,   options->ws_worker,
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

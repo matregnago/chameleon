@@ -74,8 +74,9 @@ void INSERT_TASK_zgram( const RUNTIME_option_t *options,
         STARPU_R,        RTBLKADDR(Dj, ChamRealDouble, Djm, Djn),
         STARPU_R,        RTBLKADDR(D, ChamRealDouble, Dm, Dn),
         STARPU_RW,       RTBLKADDR(A, ChamRealDouble, Am, An),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

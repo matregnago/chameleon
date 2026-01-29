@@ -71,9 +71,10 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
         STARPU_VALUE,    &N,                 sizeof(int),
         STARPU_R,  RTBLKADDR( IN,  ChamRealDouble, INm,  INn  ),
         STARPU_RW, RTBLKADDR( OUT, ChamRealDouble, OUTm, OUTn ),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }
 
@@ -113,8 +114,9 @@ void INSERT_TASK_zplssq2( const RUNTIME_option_t *options, int N,
         codelet,
         STARPU_VALUE,    &N,                 sizeof(int),
         STARPU_RW, RTBLKADDR(RESULT, ChamRealDouble, RESULTm, RESULTn),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

@@ -302,9 +302,8 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             cham_to_starpu_access( data[0].access ), RTBLKADDR( data[0].desc, ChamByte, m, n ),
 
             /* Common task arguments */
-            STARPU_PRIORITY,          options->priority,
+            INSERT_TASK_COMMON_TASK_PARAMS,
             STARPU_CALLBACK,          callback,
-            STARPU_EXECUTE_ON_WORKER, options->workerid,
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
             0 );
@@ -322,9 +321,8 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             cham_to_starpu_access( data[1].access ), RTBLKADDR( data[1].desc, ChamByte, m, n ),
 
             /* Common task arguments */
-            STARPU_PRIORITY,          options->priority,
+            INSERT_TASK_COMMON_TASK_PARAMS,
             STARPU_CALLBACK,          callback,
-            STARPU_EXECUTE_ON_WORKER, options->workerid,
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
             0 );
@@ -343,9 +341,8 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             cham_to_starpu_access( data[2].access ), RTBLKADDR( data[2].desc, ChamByte, m, n ),
 
             /* Common task arguments */
-            STARPU_PRIORITY,          options->priority,
+            INSERT_TASK_COMMON_TASK_PARAMS,
             STARPU_CALLBACK,          callback,
-            STARPU_EXECUTE_ON_WORKER, options->workerid,
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
             0 );

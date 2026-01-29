@@ -80,8 +80,9 @@ void INSERT_TASK_zgetrf( const RUNTIME_option_t *options,
         STARPU_VALUE,         &iinfo,                        sizeof(int),
         STARPU_VALUE,    &(options->sequence),       sizeof(RUNTIME_sequence_t*),
         STARPU_VALUE,    &(options->request),        sizeof(RUNTIME_request_t*),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

@@ -158,10 +158,8 @@ void INSERT_TASK_ztrsm( const RUNTIME_option_t *options,
         STARPU_RW,     RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_ztrsm( side, m, n ),
         0 );

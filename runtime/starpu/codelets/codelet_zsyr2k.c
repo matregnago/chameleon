@@ -166,10 +166,8 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         accessC,       RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zsyr2k( k, n ),
         0 );

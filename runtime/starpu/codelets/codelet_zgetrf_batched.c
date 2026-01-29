@@ -172,9 +172,10 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY,   clargs->handle_mode, clargs->tasks_nbr,
         access_npiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h   ),
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h-1 ),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              clargs->cl_name,
         0 );
 
@@ -412,9 +413,10 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h - 1 ),
         access_ipiv,              RUNTIME_ipiv_getaddr( ipiv, An ),
         accessU,                  RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un ),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              clargs->cl_name,
         0 );
 

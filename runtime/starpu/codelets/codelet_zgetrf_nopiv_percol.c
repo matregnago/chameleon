@@ -98,9 +98,10 @@ void INSERT_TASK_zgetrf_nopiv_percol_diag( const RUNTIME_option_t *options,
         STARPU_VALUE,             &iinfo,               sizeof(int),
         STARPU_VALUE,             &(options->sequence), sizeof(RUNTIME_sequence_t*),
         STARPU_VALUE,             &(options->request),  sizeof(RUNTIME_request_t*),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }
 
@@ -163,8 +164,9 @@ void INSERT_TASK_zgetrf_nopiv_percol_trsm( const RUNTIME_option_t *options,
         STARPU_VALUE,             &k, sizeof(int),
         STARPU_RW,                RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_R,                 RTBLKADDR(U, ChamComplexDouble, Um, Un),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

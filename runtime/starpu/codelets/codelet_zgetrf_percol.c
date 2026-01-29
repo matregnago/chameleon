@@ -138,9 +138,8 @@ void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, h-1 ),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         0 );
 }
@@ -291,9 +290,8 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, h-1 ),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         0 );
 }

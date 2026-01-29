@@ -86,9 +86,10 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
         STARPU_R,                   ipiv_handle,
         STARPU_R,                   RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW | STARPU_COMMUTE, RTBLKADDR(U, ChamComplexDouble, Um, Un),
-        STARPU_PRIORITY,            options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         //STARPU_CALLBACK,            callback,
-        STARPU_EXECUTE_ON_WORKER,   options->workerid,
         0 );
 }
 
@@ -220,9 +221,10 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
         STARPU_R,                 ipiv_handle,
         STARPU_R,                 RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW,                RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         //STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }
 
@@ -349,9 +351,10 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
         codelet,
         STARPU_W,                   RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_R,                   RUNTIME_perm_getaddr( ws, Wm, Wn ),
-        STARPU_PRIORITY,            options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         //STARPU_CALLBACK,            callback,
-        STARPU_EXECUTE_ON_WORKER,   options->workerid,
         0 );
 }
 

@@ -87,8 +87,9 @@ void INSERT_TASK_zgeqrt(const RUNTIME_option_t *options,
         STARPU_SCRATCH,   options->ws_worker,
         /* ib * (m+3*ib) + max(m,n) */
         STARPU_VALUE,    &h_work,            sizeof(CHAMELEON_starpu_ws_t *),
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

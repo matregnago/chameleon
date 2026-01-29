@@ -71,8 +71,9 @@ void INSERT_TASK_zgesum( const RUNTIME_option_t *options,
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zgesum_args_s),
         STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_RW,       RTBLKADDR(SUMS, ChamComplexDouble, SUMSm, SUMSn),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

@@ -139,8 +139,9 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
         STARPU_RW | STARPU_COMMUTE, RTBLKADDR(U, ChamComplexDouble, Um, Un),
         STARPU_R,                   RTBLKADDR(Ak, ChamComplexDouble, Akm, Akn),
         STARPU_DATA_MODE_ARRAY,     clargs->handle_mode, nhandles,
-        STARPU_PRIORITY,            options->priority,
-        STARPU_EXECUTE_ON_WORKER,   options->workerid,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 
     /* clargs is freed by starpu. */

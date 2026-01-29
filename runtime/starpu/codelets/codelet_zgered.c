@@ -100,8 +100,9 @@ void INSERT_TASK_zgered( const RUNTIME_option_t *options,
                     STARPU_VALUE,            &n, sizeof(int),
                     STARPU_R,                *handleAin,
                     STARPU_W,                 handleAout,
-                    STARPU_PRIORITY,          options->priority,
-                    STARPU_EXECUTE_ON_WORKER, options->workerid,
+
+                    /* Common task arguments */
+                    INSERT_TASK_COMMON_TASK_PARAMS,
                     0 );
 
                 starpu_data_unregister_no_coherency( *handleAin );
@@ -145,8 +146,9 @@ void INSERT_TASK_zgered( const RUNTIME_option_t *options,
                 STARPU_VALUE,            &n, sizeof(int),
                 STARPU_R,                *handleAin,
                 STARPU_W,                 handleAout,
-                STARPU_PRIORITY,          options->priority,
-                STARPU_EXECUTE_ON_WORKER, options->workerid,
+
+                /* Common task arguments */
+                INSERT_TASK_COMMON_TASK_PARAMS,
                 0 );
 
             starpu_data_unregister_no_coherency( *handleAin );

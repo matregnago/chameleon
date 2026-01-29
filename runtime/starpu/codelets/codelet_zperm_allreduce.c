@@ -145,8 +145,9 @@ insert_task_zperm_allreduce_init( const RUNTIME_option_t *options,
         STARPU_R,                   RTBLKADDR( Wu, ChamComplexDouble, Wum, Wun ),
         STARPU_W,                   RUNTIME_perm_getaddr( ws, Wm, Wn ),
         STARPU_EXECUTE_ON_NODE,     me,
-        STARPU_EXECUTE_ON_WORKER,   options->workerid,
-        STARPU_PRIORITY,            options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 }
 
@@ -165,7 +166,9 @@ insert_task_zperm_allreduce_send( const RUNTIME_option_t *options,
         NULL,
         STARPU_EXECUTE_ON_NODE, dst,
         STARPU_R,               RUNTIME_perm_getaddr( ws, m, n ),
-        STARPU_PRIORITY,        options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 }
 
@@ -189,8 +192,9 @@ insert_task_zperm_allreduce_recv( const RUNTIME_option_t *options,
         STARPU_RW,                RUNTIME_perm_getaddr( ws, m, n ),
         STARPU_R,                 cpui_handle,
         STARPU_EXECUTE_ON_NODE,   me,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, cpui_handle );
 }

@@ -90,8 +90,9 @@ void INSERT_TASK_zssssm( const RUNTIME_option_t *options,
         STARPU_R,             RTBLKADDR(L1, ChamComplexDouble, L1m, L1n),
         STARPU_R,             RTBLKADDR(L2, ChamComplexDouble, L2m, L2n),
         STARPU_VALUE,          &IPIV,                      sizeof(int*),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

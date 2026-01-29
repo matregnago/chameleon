@@ -67,8 +67,9 @@ void INSERT_TASK_zhe2ge( const RUNTIME_option_t *options,
         STARPU_VALUE,     &n,                        sizeof(int),
         STARPU_R,             RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_W,             RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

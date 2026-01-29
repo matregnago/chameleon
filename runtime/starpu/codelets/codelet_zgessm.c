@@ -80,8 +80,9 @@ void INSERT_TASK_zgessm( const RUNTIME_option_t *options,
         STARPU_R,             RTBLKADDR(L, ChamComplexDouble, Lm, Ln),
         STARPU_R,             RTBLKADDR(D, ChamComplexDouble, Dm, Dn),
         STARPU_RW,            RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_PRIORITY,    options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,    callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

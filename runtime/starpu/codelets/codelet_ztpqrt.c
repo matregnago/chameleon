@@ -89,9 +89,8 @@ void INSERT_TASK_ztpqrt( const RUNTIME_option_t *options,
         STARPU_SCRATCH, options->ws_worker,
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_EXECUTE_ON_NODE,   B->get_rankof(B, Bm, Bn),
         STARPU_NAME,              cl_name,
         0 );

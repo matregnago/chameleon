@@ -73,8 +73,9 @@ void INSERT_TASK_zlansy( const RUNTIME_option_t *options,
         STARPU_R,        RTBLKADDR(A, ChamComplexDouble, Am, An),
         STARPU_SCRATCH,  options->ws_worker,
         STARPU_W,        RTBLKADDR(B, ChamRealDouble, Bm, Bn),
-        STARPU_PRIORITY, options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK, callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

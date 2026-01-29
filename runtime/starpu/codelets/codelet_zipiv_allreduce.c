@@ -97,7 +97,9 @@ INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
         NULL,
         STARPU_EXECUTE_ON_NODE, dst,
         STARPU_R,               RUNTIME_pivot_getaddr( pivot, me, h ),
-        STARPU_PRIORITY,        options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 }
 
@@ -121,8 +123,9 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
         STARPU_RW,                RUNTIME_pivot_getaddr( pivot, me, h ),
         STARPU_R,                 RUNTIME_pivot_getaddr( pivot, src, h ),
         STARPU_EXECUTE_ON_NODE,   me,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, h ) );
 }

@@ -88,7 +88,9 @@ INSERT_TASK_zperm_allreduce_send_col( const RUNTIME_option_t *options,
         NULL,
         STARPU_EXECUTE_ON_NODE, dst,
         STARPU_R,               RTBLKADDR(U, CHAMELEON_Complex64_t, m, me),
-        STARPU_PRIORITY,        options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
 }
 
@@ -136,8 +138,9 @@ INSERT_TASK_zperm_allreduce_recv_col( const RUNTIME_option_t *options,
         STARPU_R,                 RTBLKADDR(U, CHAMELEON_Complex64_t, m,  src),
         STARPU_R,                 ipiv_handle,
         STARPU_EXECUTE_ON_NODE,   me,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_PRIORITY,          options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, RTBLKADDR(U, CHAMELEON_Complex64_t, m, src) );
 }

@@ -101,8 +101,9 @@ void INSERT_TASK_ztsmqr_hetra1( const RUNTIME_option_t *options,
         STARPU_R,         RTBLKADDR(V, ChamComplexDouble, Vm, Vn),
         STARPU_R,         RTBLKADDR(T, ChamComplexDouble, Tm, Tn),
         STARPU_SCRATCH,   options->ws_worker,
-        STARPU_PRIORITY,  options->priority,
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,  callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         0 );
 }

@@ -193,7 +193,7 @@ void INSERT_TASK_zhemm_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
@@ -262,9 +262,8 @@ void INSERT_TASK_zhemm( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zhemm( side, m, n ),
         0 );

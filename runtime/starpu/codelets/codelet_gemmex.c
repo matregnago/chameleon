@@ -184,7 +184,7 @@ void INSERT_TASK_gemmex_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamRealHalf, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
@@ -260,10 +260,8 @@ void INSERT_TASK_gemmex( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamRealHalf, Cm, Cn),
 
         /* Common task arguments */
-        STARPU_PRIORITY,          options->priority,
+        INSERT_TASK_COMMON_TASK_PARAMS,
         STARPU_CALLBACK,          callback,
-        STARPU_EXECUTE_ON_WORKER, options->workerid,
-        STARPU_POSSIBLY_PARALLEL, options->parallel,
         STARPU_NAME,              cl_name,
         0 );
 }
