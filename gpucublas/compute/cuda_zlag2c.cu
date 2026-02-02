@@ -172,7 +172,7 @@ CUDA_zlag2c( int m, int n,
 
     /* quick return */
     if ( m == 0 || n == 0 ) {
-        return 0;
+        return CHAMELEON_SUCCESS;
     }
 
     dim3 threads( BLK_X, 1 );
@@ -190,7 +190,7 @@ CUDA_zlag2c( int m, int n,
         return CHAMELEON_ERR_UNEXPECTED;
     }
 
-    return 0;
+    return CHAMELEON_SUCCESS;
 }
 
 /*
@@ -302,7 +302,7 @@ CUDA_clag2z( int m, int n,
 
     /* quick return */
     if ( (m == 0) || (n == 0) ) {
-        return 0;
+        return CHAMELEON_SUCCESS;
     }
 
     dim3 threads( BLK_X, 1 );
@@ -318,5 +318,5 @@ CUDA_clag2z( int m, int n,
         return CHAMELEON_ERR_UNEXPECTED;
     }
 
-    return 0;
+    return CHAMELEON_SUCCESS;
 }

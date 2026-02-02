@@ -84,5 +84,5 @@ CUDA_zherfb( cham_uplo_t uplo, int n,
                       A, lda, T, ldt, C, ldc, WORK, ldwork,
                       handle );
     }
-    return 0;
+    return CHAMELEON_SUCCESS;
 }
