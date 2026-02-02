@@ -67,7 +67,6 @@ void INSERT_TASK_zgeqrt(const RUNTIME_option_t *options,
                        const CHAM_desc_t *T, int Tm, int Tn)
 {
     (void)nb;
-    callback_fct_t callback = options->profiling ? cl_zgeqrt_callback : NULL;
     CHAMELEON_starpu_ws_t *h_work = (CHAMELEON_starpu_ws_t*)(options->ws_host);
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -88,7 +87,6 @@ void INSERT_TASK_zgeqrt(const RUNTIME_option_t *options,
         STARPU_VALUE,    &h_work,            sizeof(CHAMELEON_starpu_ws_t *),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgeqrt ),
         0 );
 }

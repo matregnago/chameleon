@@ -60,7 +60,6 @@ void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
                          int bigM, int m0, int n0, unsigned long long int seed )
 {
     struct cl_zplghe_args_s *clargs = NULL;
-    callback_fct_t callback;
     int                      exec = 0;
     const char              *cl_name = "zplghe";
 
@@ -81,9 +80,6 @@ void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
         clargs->seed  = seed;
     }
 
-    /* Callback fro profiling information */
-    callback = options->profiling ? cl_zplghe_callback : NULL;
-
     /* Insert the task */
     rt_starpu_insert_task(
         &cl_zplghe,
@@ -92,8 +88,7 @@ void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
         STARPU_W,      RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zplghe ),
         STARPU_NAME,              cl_name,
         0 );
 

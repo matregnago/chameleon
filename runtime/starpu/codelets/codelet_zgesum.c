@@ -49,7 +49,6 @@ void INSERT_TASK_zgesum( const RUNTIME_option_t *options,
                          const CHAM_desc_t *SUMS, int SUMSm, int SUMSn )
 {
     struct cl_zgesum_args_s *clargs = NULL;
-    callback_fct_t callback = options->profiling ? cl_zgesum_callback : NULL;
     int exec = 0;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -72,7 +71,6 @@ void INSERT_TASK_zgesum( const RUNTIME_option_t *options,
         STARPU_RW,       RTBLKADDR(SUMS, ChamComplexDouble, SUMSm, SUMSn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK, callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgesum ),
         0 );
 }

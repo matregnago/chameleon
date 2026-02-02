@@ -46,7 +46,7 @@ insert_task_convert( const RUNTIME_option_t *options,
                      starpu_data_handle_t totile )
 {
     struct starpu_codelet *codelet = NULL;
-    callback_fct_t callback = NULL;
+    callback_fct_t cl_convert_callback = NULL;
 
     int conversion = ChamConvert( fromtype, totype );
 
@@ -54,48 +54,48 @@ insert_task_convert( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_PREC_ZC)
     case ChamConvertComplexDoubleToSingle:
         codelet = &cl_zlag2c;
-        callback = cl_zlag2c_callback;
+        cl_convert_callback = cl_zlag2c_callback;
         break;
 
     case ChamConvertComplexSingleToDouble:
         codelet = &cl_clag2z;
-        callback = cl_clag2z_callback;
+        cl_convert_callback = cl_clag2z_callback;
         break;
 #endif
 
 #if defined(CHAMELEON_PREC_DS)
     case ChamConvertRealDoubleToSingle:
         codelet = &cl_dlag2s;
-        callback = cl_dlag2s_callback;
+        cl_convert_callback = cl_dlag2s_callback;
         break;
 
     case ChamConvertRealSingleToDouble:
         codelet = &cl_slag2d;
-        callback = cl_slag2d_callback;
+        cl_convert_callback = cl_slag2d_callback;
         break;
 #endif
 
 #if defined(CHAMELEON_PREC_D) && defined(GPUCUBLAS_HAVE_CUDA_HALF)
     case ChamConvertRealDoubleToHalf:
         codelet = &cl_dlag2h;
-        callback = cl_dlag2h_callback;
+        cl_convert_callback = cl_dlag2h_callback;
         break;
 
     case ChamConvertRealHalfToDouble:
         codelet = &cl_hlag2d;
-        callback = cl_hlag2d_callback;
+        cl_convert_callback = cl_hlag2d_callback;
         break;
 #endif
 
 #if defined(CHAMELEON_PREC_S) && defined(GPUCUBLAS_HAVE_CUDA_HALF)
     case ChamConvertRealSingleToHalf:
         codelet = &cl_slag2h;
-        callback = cl_slag2h_callback;
+        cl_convert_callback = cl_slag2h_callback;
         break;
 
     case ChamConvertRealHalfToSingle:
         codelet = &cl_hlag2s;
-        callback = cl_hlag2s_callback;
+        cl_convert_callback = cl_hlag2s_callback;
         break;
 #endif
 
@@ -126,8 +126,7 @@ insert_task_convert( const RUNTIME_option_t *options,
         STARPU_W,         totile,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  options->profiling ? callback : NULL,
+        INSERT_TASK_COMMON_TASK_PARAMS( convert ),
         0);
 
     return;

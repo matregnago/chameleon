@@ -93,7 +93,6 @@ void INSERT_TASK_zgemv( const RUNTIME_option_t *options,
                                                      const CHAM_desc_t *X, int Xm, int Xn, int incX,
                         CHAMELEON_Complex64_t beta,  const CHAM_desc_t *Y, int Ym, int Yn, int incY )
 {
-    callback_fct_t callback = options->profiling ? cl_zgemv_callback : NULL;
     int accessY = ( beta == 0. ) ? STARPU_W : STARPU_RW;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -116,7 +115,6 @@ void INSERT_TASK_zgemv( const RUNTIME_option_t *options,
         STARPU_VALUE,    &incY,              sizeof(int),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgemv ),
         0);
 }

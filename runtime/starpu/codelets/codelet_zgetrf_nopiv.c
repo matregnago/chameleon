@@ -68,7 +68,6 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
                               const CHAM_desc_t *A, int Am, int An,
                               int iinfo)
 {
-    callback_fct_t callback;
     struct cl_zgetrf_nopiv_args_s *clargs  = NULL;
     int                            exec    = 0;
     const char                    *cl_name = "zgetrf_nopiv";
@@ -91,7 +90,6 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
     }
 
     /* Callback for profiling information */
-    callback = options->profiling ? cl_zgetrf_nopiv_callback : NULL;
 
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 1,
@@ -104,8 +102,7 @@ void INSERT_TASK_zgetrf_nopiv(const RUNTIME_option_t *options,
         STARPU_RW,                RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgetrf_nopiv ),
         STARPU_NAME,              cl_name,
         0 );
 

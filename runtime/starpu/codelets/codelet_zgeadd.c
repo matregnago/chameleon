@@ -90,7 +90,6 @@ void INSERT_TASK_zgeadd( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zgeadd_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zgeadd";
@@ -111,9 +110,6 @@ void INSERT_TASK_zgeadd( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Callback fro profiling information */
-    callback = options->profiling ? cl_zgeadd_callback : NULL;
-
     /* Reduce the B access if needed */
     accessB = ( beta == 0. ) ? STARPU_W : STARPU_RW;
 
@@ -125,8 +121,7 @@ void INSERT_TASK_zgeadd( const RUNTIME_option_t *options,
         accessB,       RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgeadd ),
         STARPU_NAME,              cl_name,
         0 );
 

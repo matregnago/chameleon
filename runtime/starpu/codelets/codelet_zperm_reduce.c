@@ -107,9 +107,9 @@ insert_task_zperm_reduce_init( const RUNTIME_option_t *options,
                                const CHAM_desc_t      *Wu, int Wum, int Wun,
                                CHAM_perm_t            *ws, int Wm,  int Wn )
 {
-    void *ipiv_handle;
-
     struct cl_zperm_init_args_s *clargs;
+    void                        *ipiv_handle;
+
     clargs         = malloc( sizeof( struct cl_zperm_init_args_s ) );
     clargs->side   = ws->side;
     clargs->Am     = Am;
@@ -136,7 +136,7 @@ insert_task_zperm_reduce_init( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
 }
 
@@ -157,7 +157,7 @@ insert_task_zperm_reduce_send( const RUNTIME_option_t *options,
         STARPU_R,               RUNTIME_perm_getaddr( ws, m, n ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
 }
 
@@ -181,7 +181,7 @@ insert_task_zperm_reduce_recv( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, cpui_handle );
 }

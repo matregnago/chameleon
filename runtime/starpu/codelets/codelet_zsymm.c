@@ -134,7 +134,6 @@ void INSERT_TASK_zsymm_Astat( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zsymm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zsymm_Astat";
@@ -161,7 +160,6 @@ void INSERT_TASK_zsymm_Astat( const RUNTIME_option_t *options,
     }
 
     /* Callback for profiling information */
-    callback = options->profiling ? cl_zsymm_callback : NULL;
 
     /* Reduce the C access if needed */
     if ( beta == 0. ) {
@@ -194,8 +192,7 @@ void INSERT_TASK_zsymm_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zsymm ),
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zsymm( side, m, n ),
@@ -215,7 +212,6 @@ void INSERT_TASK_zsymm( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zsymm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zsymm";
@@ -240,7 +236,6 @@ void INSERT_TASK_zsymm( const RUNTIME_option_t *options,
     }
 
     /* Callback for profiling information */
-    callback = options->profiling ? cl_zsymm_callback : NULL;
 
     /* Reduce the C access if needed */
     accessC = ( beta == 0. ) ? STARPU_W : (STARPU_RW | ((beta == 1.) ? STARPU_COMMUTE : 0));
@@ -263,8 +258,7 @@ void INSERT_TASK_zsymm( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zsymm ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zsymm( side, m, n ),
         0 );

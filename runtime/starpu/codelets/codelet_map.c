@@ -231,7 +231,6 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     int                   i, readonly = 1;
     size_t                clargs_size = 0;
     uint32_t              where       = 0;
-    callback_fct_t callback;
 
     if ( ( ndata < 0 ) || ( ndata > 3 ) ) {
         fprintf( stderr, "INSERT_TASK_map() can handle only 1 to 3 parameters\n" );
@@ -292,7 +291,6 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     /* Insert the task */
     switch( ndata ) {
     case 1:
-        callback = options->profiling ? cl_map_one_callback : NULL;
         rt_starpu_insert_task(
             &cl_map_one,
             /* Task codelet arguments */
@@ -302,15 +300,13 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             cham_to_starpu_access( data[0].access ), RTBLKADDR( data[0].desc, ChamByte, m, n ),
 
             /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS,
-            STARPU_CALLBACK,          callback,
+            INSERT_TASK_COMMON_TASK_PARAMS( map_one ),
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
             0 );
         break;
 
     case 2:
-        callback = options->profiling ? cl_map_two_callback : NULL;
         rt_starpu_insert_task(
             &cl_map_two,
             /* Task codelet arguments */
@@ -321,15 +317,13 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             cham_to_starpu_access( data[1].access ), RTBLKADDR( data[1].desc, ChamByte, m, n ),
 
             /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS,
-            STARPU_CALLBACK,          callback,
+            INSERT_TASK_COMMON_TASK_PARAMS( map_two ),
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
             0 );
         break;
 
     case 3:
-        callback = options->profiling ? cl_map_three_callback : NULL;
         rt_starpu_insert_task(
             &cl_map_three,
             /* Task codelet arguments */
@@ -341,8 +335,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             cham_to_starpu_access( data[2].access ), RTBLKADDR( data[2].desc, ChamByte, m, n ),
 
             /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS,
-            STARPU_CALLBACK,          callback,
+            INSERT_TASK_COMMON_TASK_PARAMS( map_three ),
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
             0 );

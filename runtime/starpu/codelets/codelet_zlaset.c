@@ -58,7 +58,6 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An )
 {
     struct cl_zlaset_args_s *clargs = NULL;
-    callback_fct_t callback;
     int                      exec = 0;
     const char              *cl_name = "zlaset";
 
@@ -77,9 +76,6 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Callback fro profiling information */
-    callback = options->profiling ? cl_zlaset_callback : NULL;
-
     /* Insert the task */
     rt_starpu_insert_task(
         &cl_zlaset,
@@ -88,8 +84,7 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
         STARPU_W,      RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zlaset ),
         STARPU_NAME,              cl_name,
         0 );
 }

@@ -155,7 +155,6 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
     fprintf( stderr, "INSERT_TASK_zgetrf_percol_offdiag_batched: STARPU_NONE can not be equal to 0\n" );
     assert( 0 );
 #endif
-    callback_fct_t callback = NULL;
     struct cl_zgetrf_batched_args_s *clargs = *clargs_ptr;
     int rankA = A->myrank;
 
@@ -174,8 +173,7 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h-1 ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         STARPU_NAME,              clargs->cl_name,
         0 );
 
@@ -385,7 +383,6 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
     assert( 0 );
 #endif
     int accessU, access_npiv, access_ipiv, access_ppiv;
-    callback_fct_t callback = NULL;
     struct cl_zgetrf_batched_args_s *clargs = *clargs_ptr;
     int rankA = A->myrank;
     assert( rankA == Um );
@@ -415,8 +412,7 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
         accessU,                  RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         STARPU_NAME,              clargs->cl_name,
         0 );
 

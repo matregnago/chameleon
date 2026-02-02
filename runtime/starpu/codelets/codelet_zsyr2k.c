@@ -122,7 +122,6 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zsyr2k_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zsyr2k";
@@ -145,9 +144,6 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Callback fro profiling information */
-    callback = options->profiling ? cl_zsyr2k_callback : NULL;
-
     /* Reduce the C access if needed */
     accessC = ( beta == 0. ) ? STARPU_W : STARPU_RW;
 
@@ -166,8 +162,7 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         accessC,       RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zsyr2k ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zsyr2k( k, n ),
         0 );

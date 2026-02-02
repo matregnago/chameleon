@@ -134,7 +134,6 @@ void INSERT_TASK_zgemm_Astat( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zgemm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zgemm_Astat";
@@ -161,9 +160,6 @@ void INSERT_TASK_zgemm_Astat( const RUNTIME_option_t *options,
         clargs->alpha  = alpha;
         clargs->beta   = beta;
     }
-
-    /* Callback for profiling information */
-    callback = options->profiling ? cl_zgemm_callback : NULL;
 
     /* Reduce the C access if needed */
     if ( beta == 0. ) {
@@ -204,8 +200,7 @@ void INSERT_TASK_zgemm_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgemm ),
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zgemm( m, n, k ),
@@ -226,7 +221,6 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zgemm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zgemm";
@@ -251,9 +245,6 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         clargs->alpha  = alpha;
         clargs->beta   = beta;
     }
-
-    /* Callback for profiling information */
-    callback = options->profiling ? cl_zgemm_callback : NULL;
 
     /* Reduce the C access if needed */
     accessC = ( beta == (CHAMELEON_Complex64_t)0. ) ? STARPU_W :
@@ -285,8 +276,7 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgemm ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zgemm( m, n, k ),
         STARPU_EXECUTE_WHERE,     where,

@@ -61,7 +61,6 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
                          void *user_data, void* user_build_callback )
 {
 
-    callback_fct_t callback = options->profiling ? cl_zbuild_callback : NULL;
     int row_min, row_max, col_min, col_max;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -83,7 +82,6 @@ void INSERT_TASK_zbuild( const RUNTIME_option_t *options,
         STARPU_VALUE,    &user_build_callback,          sizeof(void*),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zbuild ),
         0);
 }

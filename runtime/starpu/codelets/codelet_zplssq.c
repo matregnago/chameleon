@@ -56,7 +56,6 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *IN,  int INm,  int INn,
                          const CHAM_desc_t *OUT, int OUTm, int OUTn )
 {
-    callback_fct_t callback = options->profiling ? cl_zplssq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(  IN,  INm,  INn  );
@@ -72,8 +71,7 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
         STARPU_RW, RTBLKADDR( OUT, ChamRealDouble, OUTm, OUTn ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,    callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zplssq ),
         0 );
 }
 
@@ -102,7 +100,6 @@ CODELETS_CPU(zplssq2, cl_zplssq2_cpu_func)
 void INSERT_TASK_zplssq2( const RUNTIME_option_t *options, int N,
                           const CHAM_desc_t *RESULT, int RESULTm, int RESULTn )
 {
-    callback_fct_t callback = options->profiling ? cl_zplssq2_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW( RESULT, RESULTm, RESULTn );
@@ -114,7 +111,6 @@ void INSERT_TASK_zplssq2( const RUNTIME_option_t *options, int N,
         STARPU_RW, RTBLKADDR(RESULT, ChamRealDouble, RESULTm, RESULTn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,    callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zplssq2 ),
         0 );
 }

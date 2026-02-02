@@ -124,7 +124,6 @@ void INSERT_TASK_gemmex_Astat( const RUNTIME_option_t *options,
     /* } */
 
     struct cl_gemmex_args_s  *clargs = NULL;
-    callback_fct_t callback;
     int                      accessC;
     int                      exec    = 0;
     const char              *cl_name = "gemmex_Astat";
@@ -149,9 +148,6 @@ void INSERT_TASK_gemmex_Astat( const RUNTIME_option_t *options,
         clargs->alpha  = alpha;
         clargs->beta   = beta;
     }
-
-    /* Callback for profiling information */
-    callback = options->profiling ? cl_gemmex_callback : NULL;
 
     /* Reduce the C access if needed */
     if ( beta == 0. ) {
@@ -184,8 +180,7 @@ void INSERT_TASK_gemmex_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamRealHalf, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( gemmex ),
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
         0 );
@@ -205,7 +200,6 @@ void INSERT_TASK_gemmex( const RUNTIME_option_t *options,
     /* } */
 
     struct cl_gemmex_args_s  *clargs = NULL;
-    callback_fct_t callback;
     int                      accessC;
     int                      exec = 0;
     const char              *cl_name = "gemmex";
@@ -236,9 +230,6 @@ void INSERT_TASK_gemmex( const RUNTIME_option_t *options,
         clargs->beta   = beta;
     }
 
-    /* Callback for profiling information */
-    callback = options->profiling ? cl_gemmex_callback : NULL;
-
     /* Reduce the C access if needed */
     accessC = ( beta == 0. ) ? STARPU_W : (STARPU_RW | ((beta == 1.) ? STARPU_COMMUTE : 0));
 
@@ -260,8 +251,7 @@ void INSERT_TASK_gemmex( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamRealHalf, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( gemmex ),
         STARPU_NAME,              cl_name,
         0 );
 }

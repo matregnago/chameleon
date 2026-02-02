@@ -90,7 +90,7 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         STARPU_W,                 RUNTIME_ipiv_getinvp( ipivdesc, ipivk ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
 }
 

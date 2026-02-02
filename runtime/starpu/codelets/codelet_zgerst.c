@@ -98,7 +98,7 @@ void INSERT_TASK_zgerst( const RUNTIME_option_t *options,
             STARPU_W,                 handleAout,
 
             /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS,
+            INSERT_TASK_COMMON_TASK_PARAMS( hlag2d ),
             0 );
         break;
 #endif
@@ -119,7 +119,7 @@ void INSERT_TASK_zgerst( const RUNTIME_option_t *options,
             STARPU_W,                 handleAout,
 
             /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS,
+            INSERT_TASK_COMMON_TASK_PARAMS( clag2z ),
             0 );
         break;
 

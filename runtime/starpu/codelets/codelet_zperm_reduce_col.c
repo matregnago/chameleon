@@ -79,7 +79,7 @@ INSERT_TASK_zperm_reduce_col_send( const RUNTIME_option_t *options,
         STARPU_R,               RTBLKADDR(U, CHAMELEON_Complex64_t, m, me),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
 }
 
@@ -97,7 +97,7 @@ INSERT_TASK_zperm_reduce_col_recv( const RUNTIME_option_t *options,
                                    int                     q )
 {
     struct cl_redux_col_args_s *clargs;
-    void                   *ipiv_handle;
+    void                       *ipiv_handle;
 
     if ( dir == ChamDirForward ) {
         ipiv_handle = RUNTIME_ipiv_getperm( ipiv, ipivk );
@@ -123,7 +123,7 @@ INSERT_TASK_zperm_reduce_col_recv( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, RTBLKADDR(U, CHAMELEON_Complex64_t, m, src) );
 }

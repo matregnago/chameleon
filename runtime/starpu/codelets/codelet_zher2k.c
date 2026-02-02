@@ -121,7 +121,6 @@ void INSERT_TASK_zher2k( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zher2k_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zher2k";
@@ -145,7 +144,6 @@ void INSERT_TASK_zher2k( const RUNTIME_option_t *options,
     }
 
     /* Callback fro profiling information */
-    callback = options->profiling ? cl_zher2k_callback : NULL;
 
     /* Reduce the C access if needed */
     accessC = ( beta == 0. ) ? STARPU_W : STARPU_RW;
@@ -165,8 +163,7 @@ void INSERT_TASK_zher2k( const RUNTIME_option_t *options,
         accessC,       RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zher2k ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zher2k( k, n ),
         0 );

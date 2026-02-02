@@ -111,7 +111,6 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
                         CHAMELEON_Complex64_t alpha, const CHAM_desc_t *A, int Am, int An,
                         const CHAM_desc_t *B, int Bm, int Bn )
 {
-    callback_fct_t callback;
     struct cl_ztrmm_args_s *clargs   = NULL;
     int                      exec    = 0;
     const char              *cl_name = "ztrmm";
@@ -135,7 +134,6 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
     }
 
     /* Callback fro profiling information */
-    callback = options->profiling ? cl_ztrmm_callback : NULL;
 
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 2,
@@ -151,8 +149,7 @@ void INSERT_TASK_ztrmm( const RUNTIME_option_t *options,
         STARPU_RW,     RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( ztrmm ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_ztrmm( side, m, n ),
         0 );
