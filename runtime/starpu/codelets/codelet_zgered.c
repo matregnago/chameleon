@@ -102,7 +102,7 @@ void INSERT_TASK_zgered( const RUNTIME_option_t *options,
                     STARPU_W,                 handleAout,
 
                     /* Common task arguments */
-                    INSERT_TASK_COMMON_TASK_PARAMS,
+                    INSERT_TASK_COMMON_TASK_PARAMS( dlag2h ),
                     0 );
 
                 starpu_data_unregister_no_coherency( *handleAin );
@@ -148,7 +148,7 @@ void INSERT_TASK_zgered( const RUNTIME_option_t *options,
                 STARPU_W,                 handleAout,
 
                 /* Common task arguments */
-                INSERT_TASK_COMMON_TASK_PARAMS,
+                INSERT_TASK_COMMON_TASK_PARAMS( zlag2c ),
                 0 );
 
             starpu_data_unregister_no_coherency( *handleAin );

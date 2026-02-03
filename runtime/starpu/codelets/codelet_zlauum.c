@@ -55,7 +55,6 @@ void INSERT_TASK_zlauum( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An )
 {
     struct cl_zlauum_args_s *clargs = NULL;
-    callback_fct_t callback;
     int                      exec = 0;
     const char              *cl_name = "zlauum";
 
@@ -71,9 +70,6 @@ void INSERT_TASK_zlauum( const RUNTIME_option_t *options,
         clargs->n     = n;
     }
 
-    /* Callback fro profiling information */
-    callback = options->profiling ? cl_zlauum_callback : NULL;
-
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 1,
                                       A->get_blktile( A, Am, An ) );
@@ -86,8 +82,7 @@ void INSERT_TASK_zlauum( const RUNTIME_option_t *options,
         STARPU_RW,     RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zlauum ),
         STARPU_NAME,              cl_name,
         0 );
 

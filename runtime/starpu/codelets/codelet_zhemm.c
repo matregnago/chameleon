@@ -133,7 +133,6 @@ void INSERT_TASK_zhemm_Astat( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_zhemm_args_s  *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zhemm_Astat";
@@ -158,9 +157,6 @@ void INSERT_TASK_zhemm_Astat( const RUNTIME_option_t *options,
         clargs->alpha = alpha;
         clargs->beta  = beta;
     }
-
-    /* Callback for profiling information */
-    callback = options->profiling ? cl_zhemm_callback : NULL;
 
     /* Reduce the C access if needed */
     if ( beta == 0. ) {
@@ -193,8 +189,7 @@ void INSERT_TASK_zhemm_Astat( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zhemm ),
         STARPU_EXECUTE_ON_NODE,   A->get_rankof(A, Am, An),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zhemm( side, m, n ),
@@ -215,7 +210,6 @@ void INSERT_TASK_zhemm( const RUNTIME_option_t *options,
     }
 
     struct cl_zhemm_args_s  *clargs = NULL;
-    callback_fct_t callback;
     int                      accessC;
     int                      exec = 0;
     const char              *cl_name = "zhemm";
@@ -238,9 +232,6 @@ void INSERT_TASK_zhemm( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Callback for profiling information */
-    callback = options->profiling ? cl_zhemm_callback : NULL;
-
     /* Reduce the C access if needed */
     accessC = ( beta == 0. ) ? STARPU_W : (STARPU_RW | ((beta == 1.) ? STARPU_COMMUTE : 0));
 
@@ -262,8 +253,7 @@ void INSERT_TASK_zhemm( const RUNTIME_option_t *options,
         accessC,  RTBLKADDR(C, ChamComplexDouble, Cm, Cn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zhemm ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zhemm( side, m, n ),
         0 );

@@ -90,7 +90,6 @@ void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
                                      CHAM_ipiv_t *ipiv,
                                      CHAM_desc_pivot_t *pivot )
 {
-    callback_fct_t callback = options->profiling ? cl_zgetrf_percol_diag_callback : NULL;
     const char *cl_name = "zgetrf_percol_diag";
     int rankA           = A->get_rankof(A, Am, An);
 
@@ -138,8 +137,7 @@ void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, h-1 ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgetrf_percol_diag ),
         STARPU_NAME,              cl_name,
         0 );
 }
@@ -246,7 +244,6 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
                                         CHAM_desc_t *A, int Am, int An,
                                         CHAM_desc_pivot_t *pivot )
 {
-    callback_fct_t callback = options->profiling ? cl_zgetrf_percol_offdiag_callback : NULL;
     const char *cl_name = "zgetrf_percol_offdiag";
     int access_npiv = ( h == pivot->n ) ? STARPU_R    : STARPU_REDUX;
     int access_ppiv = ( h == 0 )       ? STARPU_NONE : STARPU_R;
@@ -290,8 +287,7 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, h-1 ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgetrf_percol_offdiag ),
         STARPU_NAME,              cl_name,
         0 );
 }

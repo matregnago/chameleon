@@ -53,7 +53,6 @@ void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
                        CHAMELEON_Complex64_t alpha, const CHAM_desc_t *A, int Am, int An)
 {
 
-    callback_fct_t callback = options->profiling ? cl_zlaset2_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_W(A, Am, An);
@@ -68,7 +67,6 @@ void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
         STARPU_W,      RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,    callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zlaset2 ),
         0 );
 }

@@ -67,7 +67,6 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         return;
     }
 
-    callback_fct_t callback;
     struct cl_ztradd_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "ztradd";
@@ -91,7 +90,6 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
     }
 
     /* Callback fro profiling information */
-    callback = options->profiling ? cl_ztradd_callback : NULL;
 
     /* Reduce the B access if needed */
     accessB = ( beta == 0. ) ? STARPU_W : STARPU_RW;
@@ -105,8 +103,7 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         accessB,       RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( ztradd ),
         STARPU_NAME,              cl_name,
         0 );
 

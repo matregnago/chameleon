@@ -80,8 +80,6 @@ void INSERT_TASK_zgetrf_nopiv_percol_diag( const RUNTIME_option_t *options,
                                                  const CHAM_desc_t *U, int Um, int Un,
                                                  int iinfo )
 {
-    callback_fct_t callback = options->profiling ? cl_zgetrf_nopiv_percol_diag_callback : NULL;
-
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW( A, Am, An );
     CHAMELEON_ACCESS_W( U, Um, Un );
@@ -101,8 +99,7 @@ void INSERT_TASK_zgetrf_nopiv_percol_diag( const RUNTIME_option_t *options,
         STARPU_W,  RTBLKADDR(U, ChamComplexDouble, Um, Un),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgetrf_nopiv_percol_diag ),
         0 );
 }
 
@@ -150,8 +147,6 @@ void INSERT_TASK_zgetrf_nopiv_percol_trsm( const RUNTIME_option_t *options,
                                                  const CHAM_desc_t *A, int Am, int An,
                                                  const CHAM_desc_t *U, int Um, int Un )
 {
-    callback_fct_t callback = options->profiling ? cl_zgetrf_nopiv_percol_trsm_callback : NULL;
-
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);
     CHAMELEON_ACCESS_R(U, Um, Un);
@@ -168,7 +163,6 @@ void INSERT_TASK_zgetrf_nopiv_percol_trsm( const RUNTIME_option_t *options,
         STARPU_R,  RTBLKADDR(U, ChamComplexDouble, Um, Un),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgetrf_nopiv_percol_trsm ),
         0 );
 }

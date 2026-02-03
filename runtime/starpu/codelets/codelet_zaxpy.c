@@ -49,7 +49,6 @@ void INSERT_TASK_zaxpy( const RUNTIME_option_t *options,
                         const CHAM_desc_t *A, int Am, int An, int incA,
                         const CHAM_desc_t *B, int Bm, int Bn, int incB )
 {
-    callback_fct_t callback = options->profiling ? cl_zaxpy_callback : NULL;
 
     if ( alpha == 0. ) {
         return;
@@ -70,7 +69,6 @@ void INSERT_TASK_zaxpy( const RUNTIME_option_t *options,
             STARPU_VALUE,    &incB,                        sizeof(int),
 
             /* Common task arguments */
-            INSERT_TASK_COMMON_TASK_PARAMS,
-            STARPU_CALLBACK, callback,
+            INSERT_TASK_COMMON_TASK_PARAMS( zaxpy ),
             0);
 }

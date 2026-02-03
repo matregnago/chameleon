@@ -95,7 +95,6 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
                           const CHAM_desc_t *B, int Bm, int Bn )
 {
     const char            *cl_name;
-    callback_fct_t callback;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(V, Vm, Vn);
@@ -105,7 +104,6 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     /* Callback for profiling information */
-    callback = options->profiling ? cl_ztpmlqt_callback : NULL;
 
     /* Refine name */
     cl_name = (L == 0) ? "ztsmlqt" : "zttmlqt";
@@ -130,8 +128,7 @@ void INSERT_TASK_ztpmlqt( const RUNTIME_option_t *options,
         STARPU_SCRATCH,   options->ws_worker,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( ztpmlqt ),
         STARPU_EXECUTE_ON_NODE,   B->get_rankof(B, Bm, Bn),
         STARPU_NAME,              cl_name,
         0 );

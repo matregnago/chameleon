@@ -141,7 +141,7 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY,     clargs->handle_mode, nhandles,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
 
     /* clargs is freed by starpu. */

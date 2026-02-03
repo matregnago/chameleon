@@ -64,9 +64,8 @@ void INSERT_TASK_ztrtri( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          int iinfo )
 {
-    struct cl_ztrtri_args_s *clargs = NULL;
-    callback_fct_t callback;
-    int                      exec = 0;
+    struct cl_ztrtri_args_s *clargs  = NULL;
+    int                      exec    = 0;
     const char              *cl_name = "ztrtri";
 
     /* Handle cache */
@@ -85,9 +84,6 @@ void INSERT_TASK_ztrtri( const RUNTIME_option_t *options,
         clargs->request  = options->request;
     }
 
-    /* Callback fro profiling information */
-    callback = options->profiling ? cl_ztrtri_callback : NULL;
-
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 1, A->get_blktile( A, Am, An ) );
 
@@ -99,8 +95,7 @@ void INSERT_TASK_ztrtri( const RUNTIME_option_t *options,
         STARPU_RW,     RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( ztrtri ),
         STARPU_NAME,              cl_name,
         0 );
 

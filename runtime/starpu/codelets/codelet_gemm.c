@@ -40,7 +40,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
                   double beta,  const CHAM_desc_t *C, int Cm, int Cn )
 {
     struct starpu_codelet *codelet = NULL;
-    callback_fct_t callback = NULL;
+    callback_fct_t         cl_gemm_callback = NULL;
 
     /* if ( alpha == 0. ) { */
     /*     INSERT_TASK_zlascal( options, ChamUpperLower, m, n, nb, */
@@ -74,7 +74,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_PREC_Z)
     case ChamComplexDouble:
         codelet  = &cl_zgemm;
-        callback = cl_zgemm_callback;
+        cl_gemm_callback = cl_zgemm_callback;
         if ( exec ) {
             struct cl_zgemm_args_s *cl_zargs;
             cl_zargs = malloc( sizeof( struct cl_zgemm_args_s ) );
@@ -93,7 +93,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_PREC_C)
     case ChamComplexSingle:
         codelet  = &cl_cgemm;
-        callback = cl_cgemm_callback;
+        cl_gemm_callback = cl_cgemm_callback;
         if ( exec ) {
             struct cl_cgemm_args_s *cl_cargs;
             cl_cargs = malloc( sizeof( struct cl_cgemm_args_s ) );
@@ -112,7 +112,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_PREC_D)
     case ChamRealDouble:
         codelet  = &cl_dgemm;
-        callback = cl_dgemm_callback;
+        cl_gemm_callback = cl_dgemm_callback;
         if ( exec ) {
             struct cl_dgemm_args_s *cl_dargs;
             cl_dargs = malloc( sizeof( struct cl_dgemm_args_s ) );
@@ -131,7 +131,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_PREC_S)
     case ChamRealSingle:
         codelet  = &cl_sgemm;
-        callback = cl_sgemm_callback;
+        cl_gemm_callback = cl_sgemm_callback;
         if ( exec ) {
             struct cl_sgemm_args_s *cl_sargs;
             cl_sargs = malloc( sizeof( struct cl_sgemm_args_s ) );
@@ -150,7 +150,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
 #if (defined(CHAMELEON_PREC_D) || defined(CHAMELEON_PREC_S)) && defined(CHAMELEON_USE_CUDA)
     case ChamRealHalf:
         codelet  = &cl_hgemm;
-        callback = cl_hgemm_callback;
+        cl_gemm_callback = cl_hgemm_callback;
         if ( exec ) {
             struct cl_hgemm_args_s *cl_hargs;
             cl_hargs = malloc( sizeof( struct cl_hgemm_args_s ) );
@@ -179,9 +179,6 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
                                       B->get_blktile( B, Bm, Bn ),
                                       C->get_blktile( C, Cm, Cn ) );
 
-    /* Callback for profiling information */
-    callback = options->profiling ? callback : NULL;
-
     /* Insert the task */
     rt_starpu_insert_task(
         codelet,
@@ -194,8 +191,7 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
         accessC,  RUNTIME_data_getaddr_withconversion( options, accessC,  Cflttype, C, Cm, Cn ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( gemm ),
         STARPU_NAME,              cl_name,
         0 );
 

@@ -100,10 +100,14 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
     starpu_insert_task( (_codelet_), ##__VA_ARGS__ )
 #endif
 
-#define INSERT_TASK_COMMON_TASK_PARAMS                  \
+#define INSERT_TASK_COMMON_TASK_PARAMS_NOCB             \
     STARPU_PRIORITY,          options->priority,        \
     STARPU_EXECUTE_ON_WORKER, options->workerid,        \
     STARPU_POSSIBLY_PARALLEL, options->parallel
+
+#define INSERT_TASK_COMMON_TASK_PARAMS( _name_ )        \
+    INSERT_TASK_COMMON_TASK_PARAMS_NOCB,                \
+    STARPU_CALLBACK,          options->profiling ? cl_##_name_##_callback : NULL
 
 /*
  * Enable codelets names

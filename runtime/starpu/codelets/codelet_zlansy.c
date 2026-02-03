@@ -57,7 +57,6 @@ void INSERT_TASK_zlansy( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     (void)NB;
-    callback_fct_t callback = options->profiling ? cl_zlange_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -74,7 +73,6 @@ void INSERT_TASK_zlansy( const RUNTIME_option_t *options,
         STARPU_W,        RTBLKADDR(B, ChamRealDouble, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK, callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zlange ),
         0 );
 }

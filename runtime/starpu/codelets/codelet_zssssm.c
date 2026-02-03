@@ -67,7 +67,6 @@ void INSERT_TASK_zssssm( const RUNTIME_option_t *options,
                          const int *IPIV )
 {
     (void)nb;
-    callback_fct_t callback = options->profiling ? cl_zssssm_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A1, A1m, A1n);
@@ -91,7 +90,6 @@ void INSERT_TASK_zssssm( const RUNTIME_option_t *options,
         STARPU_VALUE,          &IPIV,                      sizeof(int*),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,    callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zssssm ),
         0 );
 }

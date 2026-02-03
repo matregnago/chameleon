@@ -52,7 +52,6 @@ void INSERT_TASK_zgessq( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *SCALESUMSQ, int SCALESUMSQm, int SCALESUMSQn )
 {
-    callback_fct_t callback = options->profiling ? cl_zgessq_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -68,7 +67,6 @@ void INSERT_TASK_zgessq( const RUNTIME_option_t *options,
         STARPU_RW,       RTBLKADDR(SCALESUMSQ, ChamRealDouble, SCALESUMSQm, SCALESUMSQn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK, callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zgessq ),
         0 );
 }

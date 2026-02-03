@@ -196,6 +196,5 @@ CUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
     }
 
     assert( rc == CUBLAS_STATUS_SUCCESS );
-    (void)rc;
-    return CHAMELEON_SUCCESS;
+    return rc;
 }

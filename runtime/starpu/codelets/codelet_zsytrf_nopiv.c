@@ -53,7 +53,6 @@ void INSERT_TASK_zsytrf_nopiv( const RUNTIME_option_t *options,
                                int iinfo )
 {
     (void)nb;
-    callback_fct_t callback = options->profiling ? cl_zsytrf_nopiv_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_RW(A, Am, An);
@@ -68,7 +67,6 @@ void INSERT_TASK_zsytrf_nopiv( const RUNTIME_option_t *options,
         /* STARPU_SCRATCH,   options->ws_worker, */
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zsytrf_nopiv ),
         0 );
 }

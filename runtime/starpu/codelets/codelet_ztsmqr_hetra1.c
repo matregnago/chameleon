@@ -73,7 +73,6 @@ void INSERT_TASK_ztsmqr_hetra1( const RUNTIME_option_t *options,
                                 const CHAM_desc_t *V,  int Vm,  int Vn,
                                 const CHAM_desc_t *T,  int Tm,  int Tn )
 {
-    callback_fct_t callback = options->profiling ? cl_ztsmqr_hetra1_callback : NULL;
 
     int ldWORK = side == ChamLeft ? ib : nb;
 
@@ -102,7 +101,6 @@ void INSERT_TASK_ztsmqr_hetra1( const RUNTIME_option_t *options,
         STARPU_SCRATCH,   options->ws_worker,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( ztsmqr_hetra1 ),
         0 );
 }

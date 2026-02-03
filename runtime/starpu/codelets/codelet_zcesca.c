@@ -68,7 +68,6 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
                          CHAM_desc_t *A, int Am, int An )
 {
     struct cl_zcesca_args_s *clargs = NULL;
-    callback_fct_t callback = options->profiling ? cl_zcesca_callback : NULL;
     int exec = 0;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -103,7 +102,6 @@ void INSERT_TASK_zcesca( const RUNTIME_option_t *options,
         STARPU_RW,       RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK, callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zcesca ),
         0 );
 }

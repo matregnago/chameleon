@@ -104,7 +104,6 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
-    callback_fct_t callback          = NULL;
     struct cl_zlatro_args_s *clargs  = NULL;
     int                      exec    = 0;
     const char              *cl_name = "zlatro";
@@ -124,7 +123,6 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
         clargs->n     = n;
     }
 
-    callback = options->profiling ? cl_zlatro_callback : NULL;
 
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 2,
@@ -138,8 +136,7 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
         STARPU_W,                 RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,          callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zlatro ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zlatro( uplo, m, n ),
         0 );

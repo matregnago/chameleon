@@ -86,7 +86,6 @@ void INSERT_TASK_zlag2c(const RUNTIME_option_t *options,
                        const CHAM_desc_t *B, int Bm, int Bn)
 {
     (void)nb;
-    callback_fct_t callback = options->profiling ? cl_zlag2c_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -103,8 +102,7 @@ void INSERT_TASK_zlag2c(const RUNTIME_option_t *options,
         STARPU_W, RTBLKADDR(B, ChamComplexFloat, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( zlag2c ),
         0);
 }
 
@@ -160,7 +158,6 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
     (void)nb;
-    callback_fct_t callback = options->profiling ? cl_clag2z_callback : NULL;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R( A, Am, An );
@@ -177,7 +174,6 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
         STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS,
-        STARPU_CALLBACK,  callback,
+        INSERT_TASK_COMMON_TASK_PARAMS( clag2z ),
         0);
 }
