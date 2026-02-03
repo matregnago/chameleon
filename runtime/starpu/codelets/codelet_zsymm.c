@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -159,8 +159,6 @@ void INSERT_TASK_zsymm_Astat( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Callback for profiling information */
-
     /* Reduce the C access if needed */
     if ( beta == 0. ) {
         accessC = STARPU_W;
@@ -234,8 +232,6 @@ void INSERT_TASK_zsymm( const RUNTIME_option_t *options,
         clargs->alpha = alpha;
         clargs->beta  = beta;
     }
-
-    /* Callback for profiling information */
 
     /* Reduce the C access if needed */
     accessC = ( beta == 0. ) ? STARPU_W : (STARPU_RW | ((beta == 1.) ? STARPU_COMMUTE : 0));

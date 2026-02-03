@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -88,8 +88,6 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         clargs->alpha = alpha;
         clargs->beta  = beta;
     }
-
-    /* Callback fro profiling information */
 
     /* Reduce the B access if needed */
     accessB = ( beta == 0. ) ? STARPU_W : STARPU_RW;

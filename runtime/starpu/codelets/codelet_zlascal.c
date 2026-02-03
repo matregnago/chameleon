@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -84,8 +84,6 @@ void INSERT_TASK_zlascal( const RUNTIME_option_t *options,
         clargs->n     = n;
         clargs->alpha = alpha;
     }
-
-    /* Callback fro profiling information */
 
     /* Insert the task */
     rt_starpu_insert_task(

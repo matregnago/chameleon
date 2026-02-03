@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2016 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  * @brief Chameleon ztpmqrt StarPU codelet
@@ -102,8 +102,6 @@ void INSERT_TASK_ztpmqrt( const RUNTIME_option_t *options,
     CHAMELEON_ACCESS_RW(A, Am, An);
     CHAMELEON_ACCESS_RW(B, Bm, Bn);
     CHAMELEON_END_ACCESS_DECLARATION;
-
-    /* Callback for profiling information */
 
     /* Refine name */
     cl_name = (L == 0) ? "ztsmqrt" : "zttmqrt";
