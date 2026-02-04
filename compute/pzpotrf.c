@@ -42,6 +42,7 @@ void chameleon_pzpotrf( cham_uplo_t         uplo,
 
     int k, m, n;
     int tempkm, tempmm, tempnn;
+    size_t ws_worker = 0;
     size_t ws_host   = 0;
 
     CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
@@ -53,7 +54,19 @@ void chameleon_pzpotrf( cham_uplo_t         uplo,
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
 
-    RUNTIME_options_ws_alloc( &options, 0, ws_host );
+    /* Allocation of temporary (scratch) working space */
+#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+    {
+        int lwork = 0;
+        if (chamctxt->ncudas > 0) {
+            cusolverDnZpotrf_bufferSize( RUNTIME_get_cusolverDn_handle(),
+                                         chameleon_cublas_const(uplo), A->nb,
+                                         NULL, A->nb, &lwork );
+        }
+        ws_worker = sizeof(CHAMELEON_Complex64_t) * lwork + sizeof(int);
+    }
+#endif
+    RUNTIME_options_ws_alloc( &options, ws_worker, ws_host );
 
     /*
      *  ChamLower
