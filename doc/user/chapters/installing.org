@@ -34,22 +34,20 @@ and [[sec:ug:brew][Brew]] on macOS.
 
     To install Chameleon's libraries, header files, and executables, one
     needs:
-    - CMake (version 3.3 minimum, 3.17 to compile with the H-Mat support): the build system
-    - C and Fortran compilers: GNU compiler suite, Clang, Intel or IBM
-      can be used
+    - CMake (version 3.12 minimum, 3.17 to compile with the H-Mat support): the build system
+    - C and Fortran compilers: GNU compiler suite, Clang, Intel, HPE, or IBM can be used
     - python: to generate files in the different precisions
     - external libraries: this depends on the configuration, by default
       the required libraries are
       - runtimes: [[http://runtime.bordeaux.inria.fr/StarPU/][StarPU]] or [[http://icl.utk.edu/parsec/][PaRSEC]] or [[http://icl.cs.utk.edu/quark/][QUARK]] or [[https://www.openmp.org/][OpenMP]]
-      - kernels : CBLAS, LAPACKE (with TMG). These are C interfaces to
-        Fortran kernels BLAS and LAPACK. There exist several providers
-        that can be used with Chameleon (Intel MKL, Netlib, OpenBLAS,
-        BLIS/FLAME)
+      - kernels : CBLAS, LAPACKE (with TMG). These are C interfaces to Fortran kernels BLAS and LAPACK.
+        There exist several providers that can be used with Chameleon
+        (Intel MKL, Netlib, OpenBLAS, BLIS/FLAME, IBM essl, HPE libsci)
 
     Optional libraries:
-    - cuda: [[https://developer.nvidia.com/cuda-downloads][cuda]], [[http://docs.nvidia.com/cuda/cublas/][cublas]] (comes with cuda)
     - mpi: [[http://www.open-mpi.org/][openmpi]], [[https://www.mpich.org/][mpich]], [[https://software.intel.com/en-us/mpi-library][intelmpi]]
-    - rocm: [[https://github.com/ROCm-Developer-Tools/HIP][HIP]] and [[https://github.com/ROCmSoftwarePlatform/hipBLAS][hipBLAS]]
+    - cuda: [[https://developer.nvidia.com/cuda-downloads][cuda]], [[http://docs.nvidia.com/cuda/cublas/][cublas]] (comes with cuda)
+    - rocm: [[https://github.com/ROCm/hip][HIP]] and [[https://github.com/ROCm/hipBLAS][hipBLAS]]
 
     These packages must be installed on the system before trying to
     configure/build chameleon.  Please look at the distrib/ directory
@@ -131,7 +129,7 @@ and [[sec:ug:brew][Brew]] on macOS.
        /liblapacke-dev/ (no problem with Intel MKL) do provide the tmg
        interface. If not you can possibly update your distribution or
        install the lapacke interface library in another way, by
-       yourself from source or with [[https://gitlab.inria.fr/solverstack/spack-repo][Spack]], or with [[https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free][Guix-HPC]],...
+       yourself from source or with [[https://spack.io/][Spack]], or with [[https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free][Guix-HPC]].
 **** Some details about dependencies
 ***** BLAS implementation
       [[http://www.netlib.org/blas/][BLAS]] (Basic Linear Algebra Subprograms), are a de facto standard
@@ -246,7 +244,7 @@ and [[sec:ug:brew][Brew]] on macOS.
 
       *Caution about the compatibility:* hwloc should be compatible with
       the runtime system used.
-***** OpenMPI
+***** MPI
       [[http://www.open-mpi.org/][OpenMPI]] is an open source Message Passing Interface
       implementation for execution on multiple nodes with
       distributed-memory environment.  MPI can be enabled only if the
@@ -255,6 +253,7 @@ and [[sec:ug:brew][Brew]] on macOS.
 
       *Caution about the compatibility:* OpenMPI should be built with the
       --enable-mpi-thread-multiple option.
+      [[https://www.mpich.org/][MPICH]], [[https://mvapich.cse.ohio-state.edu/overview/][MVAPICH2]] and [[https://pm2.gitlabpages.inria.fr/newmadeleine/][New Madeleine]] can also be used.
 ***** Nvidia CUDA Toolkit
       [[https://developer.nvidia.com/cuda-toolkit][Nvidia CUDA Toolkit]] provides a comprehensive development
       environment for C and C++ developers building GPU-accelerated
@@ -270,7 +269,7 @@ and [[sec:ug:brew][Brew]] on macOS.
       *Caution about the compatibility:* your compiler must be compatible
       with CUDA.
 ***** HIP
-      [[https://github.com/ROCm-Developer-Tools/HIP][HIP]] is a C++ Runtime
+      [[https://rocm.docs.amd.com/projects/HIP/en/latest/install/install.html][HIP]] is a C++ Runtime
       API and Kernel Language that allows developers to create portable
       applications for AMD and NVIDIA GPUs from single source code.
 
@@ -281,53 +280,54 @@ and [[sec:ug:brew][Brew]] on macOS.
     <<sec:ug:cmake>>
     Compilation of Chameleon libraries and executables are done with
     CMake (http://www.cmake.org/). This version has been tested with
-    CMake 3.10.2 but any version superior to 3.3 should be fine,
+    CMake 3.28 but any version superior to 3.12 should be fine,
     unless you enable the H-Mat support that requires the minimum
     revision to be 3.17.
 
     Here the steps to configure, build, test and install
     1. configure:
        #+begin_src
-       cmake path/to/chameleon -DOPTION1= -DOPTION2= ...
+       cmake -S path/to/chameleon -B build -DOPTION1= -DOPTION2= ...
        # see the "Configuration options" section to get list of options
        # see the "Dependencies detection" for details about libraries detection
        #+end_src
     2. build:
        #+begin_src
-       make
-       # do not hesitate to use -j[ncores] option to speedup the compilation
+       cmake --build build -j5 --verbose
+       # tips: -j[ncores] option to speedup the compilation
+       #       --verbose to enable verbose messages
+       #       --target install can be added to also install directly after build
        #+end_src
     3. test (optional, required CHAMELEON_ENABLE_TESTING=ON):
        #+begin_src
-       make test
-       # or
-       ctest
+       ctest --test-dir build --verbose
+       # tip: use -R to filter by tests name
        #+end_src
     4. install (optional):
        #+begin_src
-       make install
+       cmake --install build
        #+end_src
        Do not forget to specify the install directory with
        *-DCMAKE_INSTALL_PREFIX* at configure.
        #+begin_example
-       cmake /home/jdoe/chameleon -DCMAKE_INSTALL_PREFIX=/home/jdoe/install/chameleon
+       cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/home/jdoe/install/chameleon
        #+end_example
        Note that the install process is optional. You are free to use
        Chameleon binaries compiled in the build directory.
 **** Configuration options
      You can optionally activate some options at cmake configure (like CUDA, MPI, ...)
-     invoking ~cmake path/to/your/CMakeLists.txt -DOPTION1= -DOPTION2= ...~
+     invoking ~cmake -B build -DOPTION1= -DOPTION2= ...~
      #+begin_src
-     cmake /home/jdoe/chameleon/ -DCMAKE_BUILD_TYPE=Debug \
-                                 -DCMAKE_INSTALL_PREFIX=/home/jdoe/install/ \
-                                 -DCHAMELEON_USE_CUDA=ON \
-                                 -DCHAMELEON_USE_MPI=ON \
-                                 -DBLA_VENDOR=Intel10_64lp_seq
+     cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+                         -DCMAKE_INSTALL_PREFIX=/home/jdoe/install/chameleon \
+                         -DCHAMELEON_USE_CUDA=ON \
+                         -DCHAMELEON_USE_MPI=ON \
+                         -DBLA_VENDOR=Intel10_64lp_seq
      #+end_src
 
      You can get the full list of options with *-L[A][H]* options of cmake command
      #+begin_src
-     cmake -LH /home/jdoe/chameleon/
+     cmake -LH -S . -B build
      #+end_src
 
      You can also set the options thanks to the *ccmake* interface.
@@ -408,6 +408,9 @@ and [[sec:ug:brew][Brew]] on macOS.
         enables kernel traces to debug the task execution order.
       * *CHAMELEON_KERNELS_MT* (default OFF):
         Use multithreaded kernels (e.g. intel MKL MT)
+      * *CHAMELEON_VERBOSE* (default OFF): Enable debug information from Chameleon
+        (Use CHAMELEON_SILENT to dynamically turn off)
+      * *CHAMELEON_BATCH_SIZE* (default 10): Maximum size for the batched kernels
 
 **** Dependencies detection
      <<sec:depdet>>
@@ -420,7 +423,13 @@ and [[sec:ug:brew][Brew]] on macOS.
      environment variable and the ~CMAKE_PREFIX_PATH~ environment (or CMake)
      variable. Different cases:
 
-     1) detection of dependencies through environment variables:
+     1) using [[https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html#variable:CMAKE_PREFIX_PATH][CMAKE_PREFIX_PATH]] for libraries that provide some CMake config
+        files containing targets definitions (e.g. fooConfig.cmake).
+     2) using [[https://www.freedesktop.org/wiki/Software/pkg-config/][pkg-config]] for libraries that provide .pc files
+        - update your *PKG_CONFIG_PATH* to the paths where to find .pc
+          files of installed external libraries like hwloc, starpu, some
+          blas/lapack, etc
+     3) detection of dependencies through environment variables:
         - LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Mac OSX) should contain
           the list of paths where to find the libraries:
           #+begin_src
@@ -431,37 +440,32 @@ and [[sec:ug:brew][Brew]] on macOS.
           #+begin_src
           export INCLUDE=$INCLUDE:install/path/to/your/headers
           #+end_src
-     2) detection with user's given paths:
+     4) detection with user's given paths:
         - you can specify the path at cmake configure by invoking
           #+begin_example
-          cmake path/to/your/CMakeLists.txt -DLIB_DIR=path/to/your/lib
+          cmake -B build -DLIB_DIR=path/to/your/lib
           #+end_example
           where LIB stands for the name of the lib to look for, /e.g./
           #+begin_src
-          cmake path/to/your/CMakeLists.txt -DQUARK_DIR=path/to/quarkdir \
-                                            -DCBLAS_DIR= ...
+          cmake -B build -DQUARK_DIR=path/to/quarkdir -DCBLAS_DIR= ...
           #+end_src
           it is also possible to specify headers and library directories
           separately
           #+begin_src
-          cmake path/to/your/CMakeLists.txt \
+          cmake -B build \
                 -DQUARK_INCDIR=path/to/quark/include \
                 -DQUARK_LIBDIR=path/to/quark/lib
           #+end_src
-     3) detection with custom environment variables: all variables like
+     5) detection with custom environment variables: all variables like
         _DIR, _INCDIR, _LIBDIR can be set as environment variables
         instead of CMake options, there will be read
-     4) using [[https://www.freedesktop.org/wiki/Software/pkg-config/][pkg-config]] for libraries that provide .pc files
-        - update your *PKG_CONFIG_PATH* to the paths where to find .pc
-          files of installed external libraries like hwloc, starpu, some
-          blas/lapack, etc
-     5) using [[https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html#variable:CMAKE_PREFIX_PATH][CMAKE_PREFIX_PATH]]
-        for libraries that provide some CMake config files containing targets definitions (e.g. fooConfig.cmake).
 
      Note that PaRSEC and StarPU are only detected with pkg-config
      mechanism because it is always provided and this avoids errors.
      The [[https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html#variable:CMAKE_PREFIX_PATH][CMAKE_PREFIX_PATH]]
      can be used to indicate where dependencies are installed.
+
+     Explore this [[https://solverstack.gitlabpages.inria.fr/pages/faq.html#faq4][FAQ]] to see how to give specific BLAS/LAPACK libraries to CMake.
 
 *** Distribution of Chameleon using GNU Guix
 :PROPERTIES:
@@ -534,24 +538,30 @@ and [[sec:ug:brew][Brew]] on macOS.
      guix shell --pure chameleon -- /bin/bash --norc
      #+end_src
 
-     Notice that there exist several build variants
-     - chameleon (default) : with starpu - with mpi - with OpenBlas
-     - chameleon-aocl : with starpu - with mpi - with FLAME/BLIS from AMD
-     - chameleon-mkl : default version but with Intel MKL sequential to replace OpenBlas
-     - chameleon-mkl-mt : default version but with Intel MKL multithreaded to replace OpenBlas
-     - chameleon-mkl-mt-nompi : with Intel MKL multithreaded and without mpi
-     - chameleon-cuda : with starpu - with cuda - with OpenBlas - with mpi
-     - chameleon-cuda-nompi : with starpu - with cuda - with OpenBlas - without mpi
-     - chameleon-cuda-mkl-mt : with starpu - with cuda - with Intel MKL multithreaded - with mpi
-     - chameleon-cuda-mkl-mt-nompi : with starpu - with cuda - with Intel MKL multithreaded - without mpi
-     - chameleon-hip : with starpu - with hip - with OpenBlas - with mpi
-     - chameleon-hip-nompi : with starpu - with hip - with OpenBlas - without mpi
-     - chameleon-hip-mkl-mt : with starpu - with hip - with Intel MKL multithreaded - with mpi
-     - chameleon-hip-mkl-mt-nompi : with starpu - with hip - with Intel MKL multithreaded - without mpi
-     - chameleon-simgrid : with starpu - with mpi - with simgrid
-     - chameleon-openmp : with openmp - without mpi
-     - chameleon-parsec : with parsec - without mpi
-     - chameleon-quark : with quark - without mpi
+     Notice that there exist several build variants:
+     - chameleon (default) : with starpu - with openmpi - with OpenBlas
+     - chameleon-nompi : idem chameleon but without openmpi
+     - chameleon-nmad : idem chameleon but nmad replaces openmpi
+     - chameleon-aocl : idem chameleon but AMD FLAME/BLIS replaces OpenBlas
+     - chameleon-mkl : idem chameleon but Intel MKL sequential replaces OpenBlas
+     - chameleon-mkl-mt : idem chameleon but Intel MKL multithreaded replaces OpenBlas
+     - chameleon-mkl-nompi : idem chameleon-mkl but without openmpi
+     - chameleon-mkl-mt-nompi : idem chameleon-mkl-mt but without openmpi
+     - chameleon-cuda : with starpu - with cuda - with OpenBlas - with openmpi
+     - chameleon-cuda-nompi : idem chameleon-cuda but without openmpi
+     - chameleon-cuda-mkl : idem chameleon-cuda Intel MKL sequential replaces OpenBlas
+     - chameleon-cuda-mkl-nompi : idem chameleon-cuda-mkl but without openmpi
+     - chameleon-cuda-mkl-mt : idem chameleon-cuda but Intel MKL multithreaded replaces OpenBlas
+     - chameleon-cuda-mkl-mt-nompi : idem chameleon-cuda-mkl-mt but without openmpi
+     - chameleon-hip : with starpu - with hip - with OpenBlas - with openmpi
+     - chameleon-hip-nompi : idem chameleon-hip but without openmpi
+     - chameleon-hip-mkl-mt : idem chameleon-hip but Intel MKL multithreaded replaces OpenBlas
+     - chameleon-hip-mkl-mt-nompi : idem chameleon-hip-mkl-mt but without openmpi
+     - chameleon-simgrid : with starpu - with openmpi - with simgrid
+     - chameleon-simgrid-nosmpi : with starpu - without openmpi - with simgrid
+     - chameleon-openmp : with openmp - without openmpi
+     - chameleon-parsec : with parsec - without openmpi
+     - chameleon-quark : with quark - without openmpi
 
      Change the version
      #+begin_src sh
@@ -681,9 +691,8 @@ and [[sec:ug:brew][Brew]] on macOS.
 
      #+begin_src sh
      # please read https://spack.readthedocs.io/en/latest/getting_started.html
-     git clone https://github.com/spack/spack.git
+     git clone --depth=2 https://github.com/spack/spack.git
      . spack/share/spack/setup-env.sh
-     cd spack
      #+end_src
 
      Chameleon is then available
@@ -721,8 +730,7 @@ and [[sec:ug:brew][Brew]] on macOS.
      #+end_src
 
      Notice also that default mpi is OpenMPI and default blas/lapack is
-     Openblas. This can be changed by adding some [[https://spack.readthedocs.io/en/latest/basic_usage.html#constraining-virtual-packages][constraints on
-     virtual packages]].
+     Openblas. This can be changed by adding some [[https://spack.readthedocs.io/en/latest/basic_usage.html#constraining-virtual-packages][constraints on virtual packages]].
 
      Change some dependencies
      #+begin_src sh
@@ -741,7 +749,7 @@ and [[sec:ug:brew][Brew]] on macOS.
     <<sec:ug:brew>>
 
     We provide some [[https://brew.sh/][brew]] packages here
-    https://gitlab.inria.fr/solverstack/brew-repo (under construction).
+    https://gitlab.inria.fr/solverstack/brew-repo.
 
 *** Linking an external application with Chameleon libraries
 :PROPERTIES:
@@ -814,11 +822,11 @@ and [[sec:ug:brew][Brew]] on macOS.
      /home/yourname/install/chameleon/lib/libchameleon.a        \
      /home/yourname/install/chameleon/lib/libchameleon_starpu.a \
      /home/yourname/install/chameleon/lib/libcoreblas.a         \
-     -lstarpu-1.3 -Wl,--no-as-needed -lmkl_intel_lp64           \
+     -lstarpu-1.4 -Wl,--no-as-needed -lmkl_intel_lp64           \
      -lmkl_sequential -lmkl_core -lpthread -lm -lrt
      #+end_src
      As you can see in this example, we also link with some dynamic
-     libraries *starpu-1.3*, *Intel MKL* libraries (for
+     libraries *starpu-1.4*, *Intel MKL* libraries (for
      BLAS/LAPACK/CBLAS/LAPACKE), *pthread*, *m* (math) and *rt*. These
      libraries will depend on the configuration of your Chameleon
      build.  You can find these dependencies in .pc files we generate
@@ -843,7 +851,7 @@ and [[sec:ug:brew][Brew]] on macOS.
      gcc main.o -o main \
      -L/home/yourname/install/chameleon/lib \
      -lchameleon -lchameleon_starpu -lcoreblas \
-     -lstarpu-1.3 -Wl,--no-as-needed -lmkl_intel_lp64 \
+     -lstarpu-1.4 -Wl,--no-as-needed -lmkl_intel_lp64 \
      -lmkl_sequential -lmkl_core -lpthread -lm -lrt
      #+end_src
      Note that an update of your environment variable LD_LIBRARY_PATH

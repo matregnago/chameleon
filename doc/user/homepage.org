@@ -74,8 +74,8 @@
 
   #+ATTR_HTML: :alt Table of download materials image :title Table of download materials :align center
   | Git       | Release source | [[https://brew.sh/][Brew]] (Mac) | [[https://guix.gnu.org/en/][Guix]] (Linux) | [[https://spack.readthedocs.io/en/latest/][Spack]] (Linux/Mac) |
-  |-----------+----------------+---------------+------------+--------------+-------------------|
-  | [[https://gitlab.inria.fr/solverstack/chameleon][Chameleon]] | [[https://gitlab.inria.fr/api/v4/projects/616/packages/generic/source/v1.3.0/chameleon-1.3.0.tar.gz][v1.3.0]] | [[https://gitlab.inria.fr/solverstack/brew-repo][brew-repo]] | [[https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free][guix-repo]] | [[https://github.com/spack/spack][spack-repo]] |
+  |-----------+----------------+------------+--------------+-------------------|
+  | [[https://gitlab.inria.fr/solverstack/chameleon][Chameleon]] | [[https://gitlab.inria.fr/api/v4/projects/616/packages/generic/source/v1.4.0/chameleon-1.4.0.tar.gz][v1.4.0]]         | [[https://gitlab.inria.fr/solverstack/brew-repo][brew-repo]]  | [[https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free][guix-repo]]    | [[https://github.com/spack/spack][spack-repo]]        |
 
   Some packages are part of the official distribution and we just
   provide the package name. For others we provide links where you can
@@ -84,9 +84,8 @@
   distribution please [[sec:contact][contact us]] and we will try to find a
   solution.
 
-  All these packages have been successfully installed and tested on
-  Unix systems: *Linux* (Debian testing, Ubuntu 22.04 and 24.04 LTS) and *macOS*
-  (Catalina).
+  All these packages have been successfully installed and tested on Unix systems: *Linux* (Debian testing, Ubuntu 24.04
+  LTS) and *macOS* (Homebrew package).
 
 * Quick start guide
 :PROPERTIES:
@@ -131,15 +130,17 @@
        LAPACKE=ON), linked to blis/flame.
      - The lib essl (IBM) can also be used as BLAS/LAPACK with the
        Reference LAPACK providing cblas/lapacke.
+     - [[https://cpe.ext.hpe.com/docs/24.07/csml/cray_libsci.html][HPE libSCI]] can also be used on compatible HPE supercomputers (/e.g./ [[https://www.cines.fr/calcul/adastra/][Adastra]]).
+     - Explore this [[https://solverstack.gitlabpages.inria.fr/pages/faq.html#faq4][FAQ]] to see how to give specific BLAS/LAPACK libraries to CMake.
 
      Then to install Chameleon from sources with CMake, proceed as follows
      #+begin_src sh :eval never-export
-     wget https://gitlab.inria.fr/api/v4/projects/616/packages/generic/source/v1.3.0/chameleon-1.3.0.tar.gz
-     tar xvf chameleon-1.3.0.tar.gz
-     cd chameleon-1.3.0
+     wget https://gitlab.inria.fr/api/v4/projects/616/packages/generic/source/v1.4.0/chameleon-1.4.0.tar.gz
+     tar xvf chameleon-1.4.0.tar.gz
+     cd chameleon-1.4.0
      # or clone the master branch from the git repository to get the last version
      # git clone --recursive https://gitlab.inria.fr/solverstack/chameleon.git && cd chameleon
-     cmake -B build -DCHAMELEON_USE_MPI=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PWD/install
+     cmake -B build -DCHAMELEON_USE_MPI=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$HOME/install
      cmake --build build/ -j5
      cmake --install build/
      #+end_src
@@ -194,9 +195,9 @@
 
      Then to install Chameleon from sources with CMake, proceed as follows
      #+begin_src sh :eval never-export
-     wget https://gitlab.inria.fr/api/v4/projects/616/packages/generic/source/v1.3.0/chameleon-1.3.0.tar.gz
-     tar xvf chameleon-1.3.0.tar.gz
-     cd chameleon-1.3.0
+     wget https://gitlab.inria.fr/api/v4/projects/616/packages/generic/source/v1.4.0/chameleon-1.4.0.tar.gz
+     tar xvf chameleon-1.4.0.tar.gz
+     cd chameleon-1.4.0
      # or clone from git repository
      # git clone --recursive https://gitlab.inria.fr/solverstack/chameleon.git && cd chameleon
      cmake -B build -DCHAMELEON_USE_MPI=ON -DBLA_PREFER_PKGCONFIG=ON -DBUILD_SHARED_LIBS=ON
@@ -211,14 +212,6 @@
     Brew packages for macOS are stored in our [[https://gitlab.inria.fr/solverstack/brew-repo][brew-repo]] git
     repository. Please refer to the [[https://gitlab.inria.fr/solverstack/brew-repo/-/blob/master/README.org][README]] for installation
     instructions.
-
-    Examples:
-    #+begin_src sh :eval never-export
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    git clone https://gitlab.inria.fr/solverstack/brew-repo.git
-    brew install --build-from-source ./brew-repo/starpu.rb
-    brew install --build-from-source ./brew-repo/chameleon.rb
-    #+end_src
 
 *** Guix packages
 :PROPERTIES:
@@ -539,6 +532,8 @@
   * [[sec:usetesting][Using Chameleon executables]]
   * [[sec:tuto][Tutorial LAPACK to Chameleon]]
   * [[https://fpruvost.gitlabpages.inria.fr/exa2pro/][Exa2pro: Chameleon usage on a supercomputer]]
+  * [[https://guix-hpc.gitlabpages.inria.fr/compas-tutorial-2025/executions-linalg-hpc/index.html][Compas 2025]]  (in French)
+  * [[https://solverstack.gitlabpages.inria.fr/pages/faq.html][Solverstack FAQ]]
 
 * Contact
 :PROPERTIES:
