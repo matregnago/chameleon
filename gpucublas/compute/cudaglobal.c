@@ -89,7 +89,7 @@ int chameleon_cublas_constants[] =
     0, 0, 0, 0, 0, 0, 0,
     CUBLAS_FILL_MODE_UPPER, // 121: ChamUpper
     CUBLAS_FILL_MODE_LOWER, // 122: ChamLower
-    0,                      // 123: ChamUpperLower
+    CUBLAS_FILL_MODE_FULL,  // 123: ChamUpperLower
     0, 0, 0, 0, 0, 0, 0,
     CUBLAS_DIAG_NON_UNIT,   // 131: ChamNonUnit
     CUBLAS_DIAG_UNIT,       // 132: ChamUnit
