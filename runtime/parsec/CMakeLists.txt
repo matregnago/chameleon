@@ -151,7 +151,7 @@ if (CHAMELEON_USE_MPI)
   target_link_libraries(chameleon_parsec PUBLIC MPI::MPI_C)
 endif()
 if (CHAMELEON_USE_CUDA)
-  target_link_libraries(chameleon_parsec PUBLIC CUDA::CUBLAS)
+  target_link_libraries(chameleon_parsec PUBLIC CUDA::cublas)
 endif()
 
 # export target

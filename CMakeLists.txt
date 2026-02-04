@@ -35,7 +35,7 @@
 #  @date 2025-12-19
 #
 ###
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.17)
 project(CHAMELEON Fortran C CXX)
 
 # directly make an error if in-source build
@@ -396,50 +396,19 @@ if(NOT CHAMELEON_SIMULATION)
     #----------------------------------
     if (CHAMELEON_USE_CUDA)
 
-        # When our cmake_minimum version will be 3.17 we will be able to use this
-        # far better module: FindCUDAToolkit
+        # requires cmake_minimum version 3.17
         # https://cmake.org/cmake/help/latest/module/FindCUDAToolkit.html#module:FindCUDAToolkit
+        find_package(CUDAToolkit REQUIRED)
 
-        find_package(CUDA REQUIRED)
+        message("-- ${Blue}Add definition CHAMELEON_USE_CUDA"
+        " - Activate CUDA in Chameleon${ColourReset}")
 
-        if (CUDA_FOUND)
-            if(CUDA_VERSION VERSION_LESS "4.0")
-                message(WARNING "Cuda version must be at least 4.0")
-            endif(CUDA_VERSION VERSION_LESS "4.0")
-            message("-- ${Blue}Add definition CHAMELEON_USE_CUDA"
-            " - Activate CUDA in Chameleon${ColourReset}")
-            # create imported target because not provided with old cmake
-            add_library(CUDA::CUDA INTERFACE IMPORTED)
-            add_library(CUDA::CUBLAS INTERFACE IMPORTED)
-            set(CUDA_BUILD_EMULATION OFF)
-            if (CUDA_INCLUDE_DIRS)
-                set_target_properties(CUDA::CUDA PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CUDA_INCLUDE_DIRS}")
-            else()
-                message(WARNING "CHAMELEON_USE_CUDA requires"
-                "\n   CUDA_INCLUDE_DIRS to be found. Be sure you have"
-                "\n   cuda headers with your distribution of CUDA.")
-            endif()
-            if (CUDA_LIBRARIES)
-                set_target_properties(CUDA::CUDA PROPERTIES INTERFACE_LINK_LIBRARIES "${CUDA_LIBRARIES}")
-                # Add cublas if found
-                if (CUDA_CUBLAS_LIBRARIES)
-                    set_target_properties(CUDA::CUBLAS PROPERTIES INTERFACE_LINK_LIBRARIES "${CUDA_CUBLAS_LIBRARIES}")
-                    target_link_libraries(CUDA::CUBLAS INTERFACE CUDA::CUDA)
-                    message("-- ${Blue}Add definition CHAMELEON_USE_CUBLAS"
-                    " - Use GPU kernels from cuBLAS${ColourReset}")
-                else()
-                    message(FATAL_ERROR "CHAMELEON_USE_CUDA requires"
-                    "\n   CUDA_CUBLAS_LIBRARIES to be found. Be sure you have"
-                    "\n   libcublas with your distribution of CUDA.")
-                endif()
-            else()
-                message(FATAL_ERROR "CHAMELEON_USE_CUDA requires"
-                "\n   CUDA_LIBRARIES to be found. Be sure you have"
-                "\n   libcuda with your distribution of CUDA.")
-            endif()
-            morse_export_imported_target(CUDA::CUDA cuda chameleon)
-            morse_export_imported_target(CUDA::CUBLAS cublas chameleon)
-        endif (CUDA_FOUND)
+        morse_export_imported_target(CUDA::cublas cublas chameleon)
+        morse_export_imported_target(CUDA::cudart cudart chameleon)
+
+        # we also need libraries path, for example for the pkgconfig file
+        get_target_property(CUDA_CUBLAS_LIBRARIES CUDA::cublas LOCATION)
+        get_target_property(CUDA_LIBRARIES CUDA::cudart LOCATION)
 
     endif(CHAMELEON_USE_CUDA)
 
@@ -475,7 +444,10 @@ if(NOT CHAMELEON_SIMULATION)
                 endif()
             endif()
 
-            find_package(CUDA REQUIRED)
+            find_package(CUDAToolkit REQUIRED)
+
+            # we also need libraries list, for example for the pkgconfig file
+            get_target_property(CUDA_LIBRARIES CUDA::cudart LOCATION)
 
             # location of FindHIP.cmake depending on how HIP_PATH is set
             # HIP_PATH points to /opt/rocm-<version>
@@ -501,7 +473,7 @@ if(NOT CHAMELEON_SIMULATION)
             add_library(hip::hip INTERFACE IMPORTED)
             add_library(roc::hipblas INTERFACE IMPORTED)
             target_compile_definitions(hip::hip INTERFACE "__HIP_PLATFORM_NVIDIA__")
-            set(HIP_INCLUDE_DIRS "${HIP_INCLUDE_DIRS};${CUDA_INCLUDE_DIRS}")
+            set(HIP_INCLUDE_DIRS "${HIP_INCLUDE_DIRS};${CUDAToolkit_INCLUDE_DIRS}")
             set(HIP_LIBRARIES "${HIP_LIBRARIES};${CUDA_LIBRARIES}")
 
             if (HIP_INCLUDE_DIRS)

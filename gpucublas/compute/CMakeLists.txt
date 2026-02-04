@@ -157,7 +157,7 @@ target_include_directories(gpucublas PUBLIC
   $<INSTALL_INTERFACE:include>)
 set_property(TARGET gpucublas PROPERTY INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
-target_link_libraries(gpucublas PRIVATE coreblas CUDA::CUBLAS)
+target_link_libraries(gpucublas PRIVATE coreblas CUDA::cublas)
 target_link_libraries(gpucublas PUBLIC MORSE::M)
 
 set_target_properties(gpucublas PROPERTIES
