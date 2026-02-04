@@ -74,16 +74,41 @@ cl_zpotrf_cpu_func(void *descr[], void *cl_arg)
         RUNTIME_sequence_flush( NULL, clargs->sequence, clargs->request, clargs->iinfo+info );
     }
 }
+
+#if defined(CHAMELEON_USE_CUDA)
+static void cl_zpotrf_cuda_func(void *descr[], void *cl_arg)
+{
+    cusolverDnHandle_t handle = starpu_cusolverDn_get_local_handle();
+    struct cl_zpotrf_args_s *clargs = (struct cl_zpotrf_args_s *)cl_arg;
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileW;
+    cuDoubleComplex *dW;
+    int info, lwork;
+    int *d_info;
+
+    tileA  = cti_interface_get(descr[0]);
+    tileW  = cti_interface_get(descr[1]);
+    dW     = tileW->mat;
+    lwork  = (tileW->ld - sizeof(int) ) / sizeof(cuDoubleComplex);
+    d_info = (int *)(dW + lwork);
+
+    TCUDA_zpotrf( clargs->uplo, clargs->n, tileA, dW, lwork, d_info, handle );
+
+    cudaStreamSynchronize( starpu_cuda_get_local_stream() );
+
+    cudaMemcpy( &info, d_info, sizeof(int), cudaMemcpyDeviceToHost );
+
+    if ( ( clargs->sequence->status == CHAMELEON_SUCCESS ) && ( info != 0 ) ) {
+        RUNTIME_sequence_flush( NULL, clargs->sequence, clargs->request, clargs->iinfo + info );
+    }
+}
+#endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
-#if defined(CHAMELEON_SIMULATION) && defined(CHAMELEON_SIMULATION_EXTENDED)
-CODELETS( zpotrf, cl_zpotrf_cpu_func, cl_zpotrf_cuda_func, STARPU_CUDA_ASYNC )
-#else
-CODELETS_CPU( zpotrf, cl_zpotrf_cpu_func )
-#endif
+CODELETS( zpotrf, cl_zpotrf_cpu_func, cl_zpotrf_cuda_func,  )
 
 #if defined(CHAMELEON_STARPU_USE_INSERT)
 
@@ -99,6 +124,16 @@ void INSERT_TASK_zpotrf( const RUNTIME_option_t *options,
     int                      is_rectask = 0;
     rectask_args_t          *rtargs     = NULL;
     (void)rtargs;
+
+    /*
+     * Add the workspace as scratch data when gpus are used
+     */
+    /* int accessWS = ( starpu_cuda_worker_get_count() | starpu_hip_worker_get_count() ) */
+    /*                              ? ( STARPU_SCRATCH | STARPU_NOFOOTPRINT ) */
+    /*                              : ( STARPU_NONE ); */
+    int accessWS = options->ws_worker
+        ? ( STARPU_SCRATCH | STARPU_NOFOOTPRINT )
+        : ( STARPU_NONE );
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -138,7 +173,10 @@ void INSERT_TASK_zpotrf( const RUNTIME_option_t *options,
         &cl_zpotrf,
         /* Task codelet arguments */
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zpotrf_args_s),
-        STARPU_RW,     RTBLKADDR(A, ChamComplexDouble, Am, An),
+
+        /* Task handles */
+        STARPU_RW, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        accessWS,  options->ws_worker,
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zpotrf ),
@@ -160,13 +198,20 @@ void INSERT_TASK_zpotrf( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          int iinfo )
 {
-    INSERT_TASK_COMMON_PARAMETERS( zpotrf, 1 );
+    INSERT_TASK_COMMON_PARAMETERS( zpotrf, 2 );
 
     /*
      * Set the data handles and initialize exchanges if needed
      */
     starpu_cham_exchange_init_params( options, &params, A->get_rankof( A, Am, An ) );
     starpu_cham_exchange_tile_before_execution( options, &params, &nbdata, descrs, A, Am, An, STARPU_RW );
+
+    /*
+     * Add the workspace as scratch data when gpus are used
+     */
+    if ( options->ws_worker ) {
+        starpu_cham_register_descr( &nbdata, descrs, options->ws_worker, STARPU_SCRATCH | STARPU_NOFOOTPRINT );
+    }
 
     /*
      * Not involved, let's return
