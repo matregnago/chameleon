@@ -99,6 +99,7 @@ set_target_properties(chameleon_lapack PROPERTIES SOVERSION ${CHAMELEON_VERSION_
 
 # Define dependencies
 # -------------------
+add_dependencies(chameleon_lapack chameleon_lapack_include)
 target_include_directories(chameleon_lapack PUBLIC
   $<BUILD_INTERFACE:${CHAMELEON_SOURCE_DIR}/lapack_api/include>
   $<BUILD_INTERFACE:${CHAMELEON_BINARY_DIR}/lapack_api/include>
