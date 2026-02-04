@@ -252,6 +252,7 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
 #if !defined(CHAMELEON_SIMULATION)
 #if defined(CHAMELEON_USE_CUDA)
     starpu_cublas_init();
+    starpu_cusolver_init();
 #elif defined(CHAMELEON_USE_HIP)
     starpu_hipblas_init();
 #endif
@@ -285,6 +286,7 @@ void RUNTIME_finalize( CHAM_context_t *chamctxt )
 
 #if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
     starpu_cublas_shutdown();
+    starpu_cusolver_shutdown();
 #endif
 #if defined(CHAMELEON_USE_HIP) && !defined(CHAMELEON_SIMULATION)
     starpu_hipblas_shutdown();
