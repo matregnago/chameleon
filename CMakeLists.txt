@@ -403,10 +403,24 @@ if(NOT CHAMELEON_SIMULATION)
         message("-- ${Blue}Add definition CHAMELEON_USE_CUDA"
         " - Activate CUDA in Chameleon${ColourReset}")
 
+        morse_export_imported_target(CUDA::cusolver cusolver chameleon)
         morse_export_imported_target(CUDA::cublas cublas chameleon)
         morse_export_imported_target(CUDA::cudart cudart chameleon)
+        # other cmake targets cusolver and cublas may need
+        set(TARGETS_CUDA
+          cusparse
+          cublasLt
+          culibos
+          nvJitLink
+        )
+        foreach(lib IN LISTS TARGETS_CUDA)
+          if(TARGET CUDA::${lib})
+            morse_export_imported_target(CUDA::${lib} ${lib} chameleon)
+          endif()
+        endforeach()
 
         # we also need libraries path, for example for the pkgconfig file
+        get_target_property(CUDA_CUSOLVER_LIBRARY CUDA::cusolver LOCATION)
         get_target_property(CUDA_CUBLAS_LIBRARIES CUDA::cublas LOCATION)
         get_target_property(CUDA_LIBRARIES CUDA::cudart LOCATION)
 
