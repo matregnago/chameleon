@@ -217,6 +217,23 @@ RUNTIME_comm_rank( const CHAM_context_t *ctxt );
 int
 RUNTIME_comm_size( const CHAM_context_t *ctxt );
 
+#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+/**
+ * @brief Get the cublas handle of the current worker that can be sued
+ * in workspace allocation functions.
+ *
+ * @retval The cublas handle
+ */
+cublasHandle_t RUNTIME_get_cublas_handle();
+
+/**
+ * @brief Get the cusolver Dense handle of the current worker that can be sued
+ * in workspace allocation functions.
+ *
+ * @retval The cusolverDn handle
+ */
+cusolverDnHandle_t RUNTIME_get_cusolverDn_handle();
+#endif
 /**
  * @}
  *
