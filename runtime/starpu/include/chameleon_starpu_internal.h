@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -62,6 +62,7 @@ static inline int cham_to_starpu_access( cham_access_t accessA ) {
 #include "runtime_profiling.h"
 #include "runtime_codelet_profile.h"
 #include "runtime_workspace.h"
+#include "runtime_rectasks.h"
 
 void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
                                            cham_access_t access, cham_flttype_t flttype,

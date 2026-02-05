@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -38,6 +38,26 @@ struct cl_zherk_args_s {
     double       alpha;
     double       beta;
 };
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+cl_zherk_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_zherk_args_s *clargs  = (struct cl_zherk_args_s *)(t->cl_arg);
+    rectask_args_t         *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t       request = RUNTIME_REQUEST_INITIALIZER;
+
+    /* Register the task parent */
+    request.parent = t;
+
+    chameleon_pzherk( clargs->uplo, clargs->trans,
+                      clargs->alpha, rtargs->tiles[0]->mat,
+                      clargs->beta,  rtargs->tiles[1]->mat,
+                      rtargs->sequence, &request );
+
+    free( rtargs );
+}
+#endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
@@ -124,6 +144,11 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
     int                     exec    = 0;
     const char             *cl_name = "zherk";
     int                     accessC;
+    CHAM_tile_t            *tileA;
+    CHAM_tile_t            *tileC;
+    int                     is_rectask = 0;
+    rectask_args_t         *rtargs     = NULL;
+    (void)rtargs;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
@@ -132,7 +157,25 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
     exec = __chameleon_need_exec;
     CHAMELEON_END_ACCESS_DECLARATION;
 
-    if ( exec ) {
+    tileA = A->get_blktile( A, Am, An );
+    tileC = C->get_blktile( C, Cm, Cn );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                   ( tileC->format & CHAMELEON_TILE_DESC ) );
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t*) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority ;
+        rtargs->tiles[0] = tileA;
+        rtargs->tiles[1] = tileC;
+        cl_name = "zherk_rectask";
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zherk_args_s ) );
         clargs->uplo  = uplo;
         clargs->trans = trans;
@@ -146,9 +189,7 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
     accessC = ( beta == 0. ) ? STARPU_W : STARPU_RW;
 
     /* Refine name */
-    cl_name = chameleon_codelet_name( cl_name, 2,
-                                      A->get_blktile( A, Am, An ),
-                                      C->get_blktile( C, Cm, Cn ) );
+    cl_name = chameleon_codelet_name( cl_name, 2, tileA, tileC );
 
     /* Insert the task */
     rt_starpu_insert_task(
@@ -162,8 +203,13 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
         INSERT_TASK_COMMON_TASK_PARAMS( zherk ),
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zherk( k, n ),
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zherk )
         0 );
 
+    (void)tileA;
+    (void)tileC;
     (void)nb;
 }
 

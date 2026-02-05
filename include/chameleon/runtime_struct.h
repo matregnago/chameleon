@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -68,12 +68,13 @@ typedef enum runtime_id_e {
 typedef struct runtime_request_s {
     int   status;   /**< Return status registered by the tasks for the request   */
     int   flush;    /**< Enable/disable automatic data flush within this request */
+    void *parent;   /**< Specify the parent in recursive submission mode         */
 } RUNTIME_request_t;
 
 /**
  *  @brief Runtime request initializer
  */
-#define RUNTIME_REQUEST_INITIALIZER { .status = 0, .flush = CHAMELEON_TRUE }
+#define RUNTIME_REQUEST_INITIALIZER { .status = 0, .flush = CHAMELEON_TRUE, .parent = NULL }
 
 /**
  * @brief RUNTIME sequence structure
