@@ -317,6 +317,7 @@ int chameleon_desc_init( const CHAM_context_t *chamctxt,
             chameleon_error("CHAMELEON_Desc_Create", "CHAMELEON Out-of-Core descriptors are supported only with StarPU");
             return CHAMELEON_ERR_NOT_SUPPORTED;
         }
+        desc->get_blkaddr = chameleon_getaddr_null;
         desc->mat = NULL;
         desc->ooc = 1;
         break;
