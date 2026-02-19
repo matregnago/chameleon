@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -140,8 +140,8 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
                  ((lastmm   * lastnn   * eltsze) % pagesize != 0) )
             {
                 chameleon_error("RUNTIME_desc_create",
-                                "Matrix and tile size not suitable for out-of-core: all tiles have to be multiples of the system page size.\n"
-                                      "Tip : choose 'n' and 'nb' as both multiples of 32." );
+                                "Matrix and tile size not suitable for out-of-core with the unistd_o_direct backend: all tiles have to be multiples of the system page size.\n"
+                                      "Tip : choose 'n' and 'nb' as both multiples of 32, or use STARPU_DISK_SWAP_BACKEND=unistd to drop the o_direct part." );
                 chameleon_cleanenv( backend );
                 return;
             }
