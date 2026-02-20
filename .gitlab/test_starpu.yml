@@ -16,7 +16,7 @@ test_starpu_master:
   parallel:
     matrix:
       - PRECISION: [s, d, c, z]
-        CATEGORY: [shm, mpi, cdist]
+        CATEGORY: [shm, ooc, mpi, cdist]
 
 test_starpu_mr:
   extends: .test_script_starpu
@@ -25,11 +25,13 @@ test_starpu_mr:
            $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME !~ /^notest-.*$/)
   parallel:
     matrix:
-      - PRECISION: [d]
+      - PRECISION: [c]
         CATEGORY: [shm]
+      - PRECISION: [d]
+        CATEGORY: [ooc]
       - PRECISION: [s]
         CATEGORY: [mpi]
-      - PRECISION: [c]
+      - PRECISION: [z]
         CATEGORY: [cdist]
 
 test_starpu_macosx:
