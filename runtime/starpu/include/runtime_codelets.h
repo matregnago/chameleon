@@ -40,25 +40,25 @@
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 #if defined(STARPU_CUDA_ASYNC)
-#define CODELET_CUDA_FLAGS(flags) .cuda_flags = {(flags)},
+#define CODELET_CUDA_FLAGS(_flags_) .cuda_flags = {_flags_},
 #else
-#define CODELET_CUDA_FLAGS(flags)
+#define CODELET_CUDA_FLAGS(_flags_)
 #endif
 
 #if defined(STARPU_HIP_ASYNC)
-#define CODELET_HIP_FLAGS(flags) .hip_flags = {(flags)},
+#define CODELET_HIP_FLAGS(_flags_) .hip_flags = {_flags_},
 #else
-#define CODELET_HIP_FLAGS(flags)
+#define CODELET_HIP_FLAGS(_flags_)
 #endif
 
 #if defined(CHAMELEON_USE_CUDA)
 #define CODELET_GPU_FIELDS( gpu_func_name, gpu_flags )                 \
         CODELET_CUDA_FLAGS( gpu_flags )                                \
-        .cuda_funcs = {(gpu_func_name)},
+        .cuda_funcs = {gpu_func_name},
 #elif defined(CHAMELEON_USE_HIP)
 #define CODELET_GPU_FIELDS( gpu_func_name, gpu_flags )                 \
         CODELET_HIP_FLAGS( gpu_flags )                                 \
-        .hip_funcs = {(gpu_func_name)},
+        .hip_funcs = {gpu_func_name},
 #else
 #define CODELET_GPU_FIELDS( gpu_func_name, gpu_flags )
 #endif

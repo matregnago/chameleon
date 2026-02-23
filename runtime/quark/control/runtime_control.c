@@ -140,3 +140,19 @@ void RUNTIME_set_minmax_submitted_tasks( int min, int max ) {
     (void)min;
     (void)max;
 }
+
+#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+cublasHandle_t
+RUNTIME_get_cublas_handle()
+{
+    assert(0);
+    return NULL;
+}
+
+cusolverDnHandle_t
+RUNTIME_get_cusolverDn_handle()
+{
+    assert(0);
+    return NULL;
+}
+#endif

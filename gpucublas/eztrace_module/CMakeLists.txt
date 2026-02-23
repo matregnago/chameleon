@@ -45,7 +45,7 @@ if (EZTRACE_FOUND AND CHAMELEON_USE_EZTRACE)
             gpucublas_include)
 
         target_link_libraries(eztrace-gpucublas PUBLIC MORSE::EZTRACE)
-        target_link_libraries(eztrace-gpucublas PRIVATE coreblas CUDA::CUBLAS)
+        target_link_libraries(eztrace-gpucublas PRIVATE coreblas CUDA::cusolver CUDA::cublas)
 
         target_include_directories(eztrace-gpucublas PUBLIC
             $<BUILD_INTERFACE:${CHAMELEON_SOURCE_DIR}/gpucublas/include>

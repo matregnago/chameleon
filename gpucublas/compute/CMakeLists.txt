@@ -42,6 +42,7 @@ set(ZSRC
     cuda_zherk.c
     cuda_zlarfb.c
     cuda_zparfb.c
+    cuda_zpotrf.c
     cuda_zsymm.c
     cuda_zsyr2k.c
     cuda_zsyrk.c
@@ -157,14 +158,14 @@ target_include_directories(gpucublas PUBLIC
   $<INSTALL_INTERFACE:include>)
 set_property(TARGET gpucublas PROPERTY INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
-target_link_libraries(gpucublas PRIVATE coreblas CUDA::CUBLAS)
+target_link_libraries(gpucublas PRIVATE coreblas CUDA::cusolver CUDA::cublas)
 target_link_libraries(gpucublas PUBLIC MORSE::M)
 
 set_target_properties(gpucublas PROPERTIES
   CUDA_SEPARABLE_COMPILATION OFF)
 
 #target_include_directories( gpucublas PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-#target_link_libraries( gpucublas PRIVATE CUDA::cublas CUDA::cudart )
+#target_link_libraries( gpucublas PRIVATE CUDA::cusolver CUDA::cublas CUDA::cudart )
 
 # export target coreblas
 install(EXPORT gpucublasTargets

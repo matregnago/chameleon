@@ -169,6 +169,19 @@ TCUDA_zparfb( __attribute__((unused)) cham_side_t        side,
 }
 
 int
+TCUDA_zpotrf( __attribute__((unused)) cham_uplo_t        uplo,
+              __attribute__((unused)) int                n,
+              CHAM_tile_t                               *A,
+              cuComplexDouble                           *WORK,
+              __attribute__((unused)) int                lwork,
+              __attribute__((unused)) int               *d_info,
+              __attribute__((unused)) cusolverDnHandle_t handle )
+{
+    gpucublas_kernel_trace( A, WORK );
+    return 0;
+}
+
+int
 TCUDA_zsymm( __attribute__((unused)) cham_side_t           side,
              __attribute__((unused)) cham_uplo_t           uplo,
              __attribute__((unused)) int                   m,

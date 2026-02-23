@@ -252,6 +252,7 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
 #if !defined(CHAMELEON_SIMULATION)
 #if defined(CHAMELEON_USE_CUDA)
     starpu_cublas_init();
+    starpu_cusolver_init();
 #elif defined(CHAMELEON_USE_HIP)
     starpu_hipblas_init();
 #endif
@@ -285,6 +286,7 @@ void RUNTIME_finalize( CHAM_context_t *chamctxt )
 
 #if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
     starpu_cublas_shutdown();
+    starpu_cusolver_shutdown();
 #endif
 #if defined(CHAMELEON_USE_HIP) && !defined(CHAMELEON_SIMULATION)
     starpu_hipblas_shutdown();
@@ -456,3 +458,18 @@ void RUNTIME_set_minmax_submitted_tasks( int min, int max ){
              "    export STARPU_LIMIT_MAX_SUBMITTED_TASKS=%d\n", min, max );
 #endif
 }
+
+
+#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+cublasHandle_t
+RUNTIME_get_cublas_handle()
+{
+    return starpu_cublas_get_local_handle();
+}
+
+cusolverDnHandle_t
+RUNTIME_get_cusolverDn_handle()
+{
+    return starpu_cusolverDn_get_local_handle();
+}
+#endif
