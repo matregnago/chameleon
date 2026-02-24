@@ -219,7 +219,7 @@ TCUDA_zpotrf( cham_uplo_t        uplo,
               int               *d_info,
               cusolverDnHandle_t handle )
 {
-    gpucublas_kernel_trace( A, WORK );
+    gpucublas_kernel_trace( A );
     assert( A->format & CHAMELEON_TILE_FULLRANK );
     return CUDA_zpotrf( uplo, n, (cuDoubleComplex *)A->mat, A->ld, dW, lwork, d_info, handle );
 }
