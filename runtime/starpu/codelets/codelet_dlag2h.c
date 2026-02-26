@@ -82,13 +82,17 @@ void INSERT_TASK_dlag2h( const RUNTIME_option_t *options,
 {
     (void)nb;
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_W(B, Bm, Bn);
     CHAMELEON_END_ACCESS_DECLARATION;
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_dlag2h,
+
+        /* Task codelet arguments */
         STARPU_VALUE, &m, sizeof(int),
         STARPU_VALUE, &n, sizeof(int),
 
@@ -144,13 +148,17 @@ void INSERT_TASK_hlag2d( const RUNTIME_option_t *options,
 {
     (void)nb;
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R( A, Am, An );
     CHAMELEON_ACCESS_W( B, Bm, Bn );
     CHAMELEON_END_ACCESS_DECLARATION;
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_hlag2d,
+
+        /* Task codelet arguments */
         STARPU_VALUE, &m, sizeof(int),
         STARPU_VALUE, &n, sizeof(int),
 

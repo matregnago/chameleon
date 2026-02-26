@@ -40,7 +40,7 @@ static void
 cl_gemmex_cuda_func( void *descr[], void *cl_arg )
 {
     struct cl_gemmex_args_s *clargs = (struct cl_gemmex_args_s *)cl_arg;
-    cublasHandle_t          handle = starpu_cublas_get_local_handle();
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
     CHAM_tile_t *tileA;
     CHAM_tile_t *tileB;
     CHAM_tile_t *tileC;
@@ -123,7 +123,7 @@ void INSERT_TASK_gemmex_Astat( const RUNTIME_option_t *options,
     /*     return; */
     /* } */
 
-    struct cl_gemmex_args_s  *clargs = NULL;
+    struct cl_gemmex_args_s *clargs = NULL;
     int                      accessC;
     int                      exec    = 0;
     const char              *cl_name = "gemmex_Astat";
@@ -199,7 +199,7 @@ void INSERT_TASK_gemmex( const RUNTIME_option_t *options,
     /*     return; */
     /* } */
 
-    struct cl_gemmex_args_s  *clargs = NULL;
+    struct cl_gemmex_args_s *clargs = NULL;
     int                      accessC;
     int                      exec = 0;
     const char              *cl_name = "gemmex";

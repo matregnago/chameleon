@@ -118,12 +118,16 @@ insert_task_convert( const RUNTIME_option_t *options,
         return;
     }
 
+    /* Insert the task */
     rt_starpu_insert_task(
         codelet,
-        STARPU_VALUE,    &m,                 sizeof(int),
-        STARPU_VALUE,    &n,                 sizeof(int),
-        STARPU_R,         fromtile,
-        STARPU_W,         totile,
+        /* Task codelet arguments */
+        STARPU_VALUE, &m, sizeof(int),
+        STARPU_VALUE, &n, sizeof(int),
+
+        /* Task handles */
+        STARPU_R, fromtile,
+        STARPU_W, totile,
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( convert ),

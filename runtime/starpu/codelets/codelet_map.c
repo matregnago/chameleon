@@ -237,6 +237,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
         return;
     }
 
+    /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     for( i=0; i<ndata; i++ ) {
         if ( data[i].access == ChamRW ) {
@@ -291,6 +292,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     /* Insert the task */
     switch( ndata ) {
     case 1:
+        /* Insert the task */
         rt_starpu_insert_task(
             &cl_map_one,
             /* Task codelet arguments */
@@ -307,6 +309,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
         break;
 
     case 2:
+        /* Insert the task */
         rt_starpu_insert_task(
             &cl_map_two,
             /* Task codelet arguments */
@@ -324,6 +327,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
         break;
 
     case 3:
+        /* Insert the task */
         rt_starpu_insert_task(
             &cl_map_three,
             /* Task codelet arguments */

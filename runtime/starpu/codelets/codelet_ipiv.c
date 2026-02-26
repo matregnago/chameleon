@@ -78,16 +78,21 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
                                const CHAM_ipiv_t *ipivdesc, int ipivk )
 {
 
+    /* Insert the task */
     rt_starpu_insert_task(
         &cl_ipiv_to_perm,
-        STARPU_VALUE,             &m0,  sizeof(int),
-        STARPU_VALUE,             &m,   sizeof(int),
-        STARPU_VALUE,             &k,   sizeof(int),
-        STARPU_VALUE,             &K1,  sizeof(int),
-        STARPU_VALUE,             &K2,  sizeof(int),
-        STARPU_R,                 RUNTIME_ipiv_getaddr( ipivdesc, ipivk ),
-        STARPU_W,                 RUNTIME_ipiv_getperm( ipivdesc, ipivk ),
-        STARPU_W,                 RUNTIME_ipiv_getinvp( ipivdesc, ipivk ),
+
+        /* Task codelet arguments */
+        STARPU_VALUE, &m0, sizeof(int),
+        STARPU_VALUE, &m,  sizeof(int),
+        STARPU_VALUE, &k,  sizeof(int),
+        STARPU_VALUE, &K1, sizeof(int),
+        STARPU_VALUE, &K2, sizeof(int),
+
+        /* Task handles */
+        STARPU_R, RUNTIME_ipiv_getaddr( ipivdesc, ipivk ),
+        STARPU_W, RUNTIME_ipiv_getperm( ipivdesc, ipivk ),
+        STARPU_W, RUNTIME_ipiv_getinvp( ipivdesc, ipivk ),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
