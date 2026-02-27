@@ -2,13 +2,14 @@
  *
  * @file cuda_ztile.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  * @brief Chameleon CUDA kernel interface from CHAM_tile_t layout to the real one.
  *
  * @version 1.4.0
  * @author Brieuc Nicolas
+ * @author Florent Pruvost
  * @date 2025-12-19
  * @precisions normal z -> c d s
  *
@@ -166,6 +167,20 @@ TCUDA_zlarfb( cham_side_t        side,
     assert( C->format & CHAMELEON_TILE_FULLRANK );
     assert( WORK->format & CHAMELEON_TILE_FULLRANK );
     return CUDA_zlarfb( side, trans, direct, storev, M, N, K, (const cuDoubleComplex *)V->mat, V->ld, (const cuDoubleComplex *)T->mat, T->ld, (cuDoubleComplex *)C->mat, C->ld, (cuDoubleComplex *)WORK->mat, ldwork, handle );
+}
+
+int
+TCUDA_zlaset( cham_uplo_t      uplo,
+              int              m,
+              int              n,
+              cuDoubleComplex *alpha,
+              cuDoubleComplex *beta,
+              CHAM_tile_t     *A,
+              cublasHandle_t   handle )
+{
+    gpucublas_kernel_trace( A );
+    assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
+    return CUDA_zlaset( uplo, m, n, alpha, beta, CHAM_tile_get_ptr( A ), A->ld, handle );
 }
 
 int

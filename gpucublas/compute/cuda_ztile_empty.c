@@ -2,13 +2,14 @@
  *
  * @file cuda_ztile_empty.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  * @brief Chameleon CUDA kernel empty interface from CHAM_tile_t layout.
  *
  * @version 1.4.0
  * @author Brieuc Nicolas
+ * @author Florent Pruvost
  * @date 2025-12-19
  * @precisions normal z -> c d s
  *
@@ -142,6 +143,19 @@ TCUDA_zlarfb( __attribute__((unused)) cham_side_t        side,
               __attribute__((unused)) cublasHandle_t     handle )
 {
     gpucublas_kernel_trace( V, T, C, WORK );
+    return 0;
+}
+
+int
+TCUDA_zlaset( __attribute__((unused)) cham_uplo_t      uplo,
+              __attribute__((unused)) int              m,
+              __attribute__((unused)) int              n,
+              __attribute__((unused)) cuDoubleComplex *alpha,
+              __attribute__((unused)) cuDoubleComplex *beta,
+              CHAM_tile_t                             *A,
+              __attribute__((unused)) cublasHandle_t   handle )
+{
+    gpucublas_kernel_trace( A );
     return 0;
 }
 
