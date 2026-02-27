@@ -160,11 +160,13 @@ TCUDA_zlaset( __attribute__((unused)) cham_uplo_t      uplo,
 }
 
 int
-TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
-              int M, int N,
-              CHAM_tile_t *A,
-              CHAM_tile_t *B,
-              cublasHandle_t handle)
+TCUDA_zlatro( __attribute__((unused)) cham_uplo_t    uplo,
+              __attribute__((unused)) cham_trans_t   trans,
+              __attribute__((unused)) int            M,
+              __attribute__((unused)) int            N,
+              CHAM_tile_t                           *A,
+              CHAM_tile_t                           *B,
+              __attribute__((unused)) cublasHandle_t handle )
 {
     gpucubla_kernel_trace( A, B );
     return 0;

@@ -184,11 +184,13 @@ TCUDA_zlaset( cham_uplo_t      uplo,
 }
 
 int
-TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
-              int M, int N,
+TCUDA_zlatro( cham_uplo_t        uplo,
+              cham_trans_t       trans,
+              int                M,
+              int                N,
               const CHAM_tile_t *A,
-              CHAM_tile_t *B,
-              cublasHandle_t handle )
+              CHAM_tile_t       *B,
+              cublasHandle_t     handle )
 {
     gpucublas_kernel_trace( A, B );
     assert( A->format & CHAMELEON_TILE_FULLRANK );
