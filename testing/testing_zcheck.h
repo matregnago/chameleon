@@ -2,7 +2,7 @@
  *
  * @file testing_zcheck.h
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -54,6 +54,8 @@ static inline int check_zrankk_std    ( run_arg_list_t *args, int M, int N, int 
 static inline int check_zrankk        ( run_arg_list_t *args, int K, CHAM_desc_t *descA ) { return 0; }
 static inline int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LBD ) { return 0; }
 static inline int check_ztranspose    ( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB ) { return 0; }
+static inline int check_zset_std      ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, int M, int N, CHAMELEON_Complex64_t *A, int LDA ) { return 0; }
+static inline int check_zset          ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAM_desc_t *descA ) { return 0; }
 
 /* Blas check */
 static inline int check_zgemm_std     ( run_arg_list_t *args, cham_trans_t transA, cham_trans_t transB, CHAMELEON_Complex64_t alpha, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA,
@@ -135,6 +137,8 @@ int check_zrankk_std    ( run_arg_list_t *args, int M, int N, int K, CHAMELEON_C
 int check_zrankk        ( run_arg_list_t *args, int K, CHAM_desc_t *descA );
 int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LBD );
 int check_ztranspose    ( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB );
+int check_zset_std      ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, int M, int N, CHAMELEON_Complex64_t *A, int LDA );
+int check_zset          ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAM_desc_t *descA );
 
 /* Blas check */
 int check_zgemm_std     ( run_arg_list_t *args, cham_trans_t transA, cham_trans_t transB, CHAMELEON_Complex64_t alpha, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA,

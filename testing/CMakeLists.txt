@@ -4,7 +4,7 @@
 #
 # @copyright 2009-2014 The University of Tennessee and The University of
 #                      Tennessee Research Foundation. All rights reserved.
-# @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+# @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                      Univ. Bordeaux. All rights reserved.
 #
 ###
@@ -72,7 +72,7 @@ set(ZSRC_W_STDAPI
 )
 
 set(ZSRC_WO_STDAPI
-  #testing_zlaset.c
+  testing_zlaset.c
   testing_zlacpy.c
   testing_zlatro.c
   testing_zgeadd.c
