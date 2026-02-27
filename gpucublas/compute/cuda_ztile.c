@@ -178,7 +178,6 @@ TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
     gpucublas_kernel_trace( A, B );
     assert( A->format & CHAMELEON_TILE_FULLRANK );
     assert( B->format & CHAMELEON_TILE_FULLRANK );
-
     return CUDA_zlatro( uplo, trans, M, N, (cuDoubleComplex *)A->mat, A->ld, (cuDoubleComplex *)B->mat, B->ld, handle );
 }
 

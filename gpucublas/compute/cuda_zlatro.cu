@@ -137,6 +137,7 @@ CUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
              cuDoubleComplex *B, int ldb,
              cublasHandle_t handle )
 {
+    cudaError_t err;
     cublasStatus_t rc = CUBLAS_STATUS_SUCCESS;
     cudaStream_t stream;
 
@@ -196,5 +197,11 @@ CUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
     }
 
     assert( rc == CUBLAS_STATUS_SUCCESS );
+    err = cudaGetLastError();
+    if ( err != cudaSuccess )
+    {
+        fprintf( stderr, "CUDA_zlatro failed to launch CUDA kernel %s\n", cudaGetErrorString(err) );
+        return CHAMELEON_ERR_UNEXPECTED;
+    }
     return rc;
 }
