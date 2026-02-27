@@ -81,7 +81,7 @@ subs = {
         ('gpucublas_ds',         'gpucublas_zc'           ),
     ],
     # ------------------------------------------------------------
-    # replacements applied to mixed precision files.
+    # replacements applied to normal precision files.
     'normal': [
         # pattern                single                  double                  single-complex          double-complex
         #'12345678901234567890', '12345678901234567890', '12345678901234567890', '12345678901234567890', '12345678901234567890')
