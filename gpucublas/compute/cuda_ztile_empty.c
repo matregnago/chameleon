@@ -146,6 +146,17 @@ TCUDA_zlarfb( __attribute__((unused)) cham_side_t        side,
 }
 
 int
+TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
+              int M, int N,
+              CHAM_tile_t *A,
+              CHAM_tile_t *B,
+              cublasHandle_t handle)
+{
+    gpucubla_kernel_trace( A, B );
+    return 0;
+}
+
+int
 TCUDA_zparfb( __attribute__((unused)) cham_side_t        side,
               __attribute__((unused)) cham_trans_t       trans,
               __attribute__((unused)) cham_dir_t         direct,
@@ -417,16 +428,5 @@ TCUDA_zunmqrt( __attribute__((unused)) cham_side_t        side,
                __attribute__((unused)) cublasHandle_t     handle )
 {
     gpucublas_kernel_trace( A, T, C, WORK );
-    return 0;
-}
-
-int
-TCUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans,
-              int M, int N,
-              CHAM_tile_t *A,
-              CHAM_tile_t *B,
-              cublasHandle_t handle)
-{
-    gpucubla_kernel_trace( A, B );
     return 0;
 }
