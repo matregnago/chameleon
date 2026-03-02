@@ -128,8 +128,8 @@ int CHAMELEON_Distributed_start (void);
 int CHAMELEON_Distributed_stop  (void);
 int CHAMELEON_Comm_size         (void);
 int CHAMELEON_Comm_rank         (void);
-int CHAMELEON_Lap2Desc          ( cham_uplo_t uplo, void *Af77, int LDA, CHAM_desc_t *A );
-int CHAMELEON_Desc2Lap          ( cham_uplo_t uplo, CHAM_desc_t *A, void *Af77, int LDA );
+int CHAMELEON_Lap2Desc          ( cham_uplo_t uplo, void *A, int LDA, CHAM_desc_t *descA );
+int CHAMELEON_Desc2Lap          ( cham_uplo_t uplo, CHAM_desc_t *descA, void *A, int LDA );
 int CHAMELEON_Distributed_start (void);
 int CHAMELEON_Distributed_stop  (void);
 int CHAMELEON_Distributed_size  (int *size);
@@ -138,8 +138,8 @@ int CHAMELEON_GetThreadNbr      (void);
 
 CHAM_context_t *CHAMELEON_GetContext();
 
-int CHAMELEON_Lapack_to_Tile( void *Af77, int LDA, CHAM_desc_t *A ) __attribute__((deprecated("Please refer to CHAMELEON_Lap2Desc() instead")));
-int CHAMELEON_Tile_to_Lapack( CHAM_desc_t *A, void *Af77, int LDA ) __attribute__((deprecated("Please refer to CHAMELEON_Desc2Lap() instead")));
+int CHAMELEON_Lapack_to_Tile( void *A, int LDA, CHAM_desc_t *descA ) __attribute__((deprecated("Please refer to CHAMELEON_Lap2Desc() instead")));
+int CHAMELEON_Tile_to_Lapack( CHAM_desc_t *descA, void *A, int LDA ) __attribute__((deprecated("Please refer to CHAMELEON_Desc2Lap() instead")));
 
 /* Descriptor */
 ssize_t CHAMELEON_Element_Size( cham_flttype_t type );
