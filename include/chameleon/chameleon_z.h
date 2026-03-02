@@ -376,13 +376,6 @@ int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *A, int LDA, CH
 int CHAMELEON_zDesc2Lap( cham_uplo_t uplo, CHAM_desc_t *descA, CHAMELEON_Complex64_t *A, int LDA );
 
 /**
- *  User Builder function prototypes
- */
-int CHAMELEON_zbuild(cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t *A, int LDA, void *user_data, void* user_build_callback) __attribute__((deprecated("Please refer to CHAMELEON_mapv_Tile() instead")));
-int CHAMELEON_zbuild_Tile(cham_uplo_t uplo,  CHAM_desc_t *A, void *user_data, void* user_build_callback ) __attribute__((deprecated("Please refer to CHAMELEON_mapv_Tile() instead")));
-int CHAMELEON_zbuild_Tile_Async(cham_uplo_t uplo, CHAM_desc_t *A, void *user_data, void* user_build_callback, RUNTIME_sequence_t *sequence, RUNTIME_request_t  *request) __attribute__((deprecated("Please refer to CHAMELEON_mapv_Tile_Async() instead")));
-
-/**
  * Centered-Scaled function prototypes
  */
 int CHAMELEON_zcesca(int center, int scale, cham_store_t axis, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *SR, CHAMELEON_Complex64_t *SC );

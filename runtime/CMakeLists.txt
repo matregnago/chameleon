@@ -112,10 +112,6 @@ set(CODELETS_ZSRC
     codelets/codelet_zunmlq.c
     codelets/codelet_zunmqr.c
     ##################
-    # BUILD
-    ##################
-    codelets/codelet_zbuild.c
-    ##################
     # CENTERED-SCALED and GRAM
     ##################
     codelets/codelet_zgesum.c

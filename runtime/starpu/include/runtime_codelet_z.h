@@ -121,7 +121,6 @@ CODELETS_HEADER(dzasum);
  * CPU only functions
  */
 CODELETS_HEADER(zplrnt);
-CODELETS_HEADER(zbuild);
 
 /*
  * centered-scaled and gram functions

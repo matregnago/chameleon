@@ -33,7 +33,6 @@ _extra_blas = [
     ('',                     'sy2sb',                'sy2sb' ,               'he2hb',                'he2hb'               ),
     ('',                     'she2ge',               'dhe2ge',               'che2ge',               'zhe2ge'              ),
     ('',                     'slatro',               'dlatro',               'clatro',               'zlatro'              ), #=> Replace by getmo/gecmo as in essl
-    ('',                     'sbuild',               'dbuild',               'cbuild',               'zbuild'              ), #=> Replace by map function
     ('',                     'sbcast',               'dbcast',               'cbcast',               'zbcast'              ),
     ('',                     'sgram',                'dgram',                'cgram',                'zgram'               ),
     ('',                     'slaran',               'dlaran',               'claran',               'zlaran'              ),
@@ -150,7 +149,6 @@ subs = {
       # ('',                     's_check',              'd_check',              'c_check',              'z_check'             ),
       # ('',                     'stesting',             'dtesting',             'ctesting',             'ztesting'            ),
       # ('',                     'SAUXILIARY',           'DAUXILIARY',           'CAUXILIARY',           'ZAUXILIARY'          ),
-      # ('',                     'sbuild',               'dbuild',               'cbuild',               'zbuild'              ),
         # Hmat-OSS kernels
         ('hmat_p',               'hmat_s',               'hmat_d',               'hmat_c',               'hmat_z'              ),
     ]
