@@ -47,7 +47,6 @@ set(CHAMELEON_HDRS
     descriptor.h
     gkkleader.h
     global.h
-    chameleon_f77.h
     workspace.h
     )
 

@@ -48,8 +48,6 @@ set(CHAMELEON_CONTROL
     ../control/lamch.c
     ../control/tile.c
     ../control/workspace.c
-    ../control/chameleon_f77.c
-    ../control/chameleon_mf77.c
     map.c
     mapv.c
     pmap.c
@@ -289,7 +287,6 @@ precisions_rules_py(CHAMELEON_SRCS_GENERATED "${ZSRC}"
 set(CONTROL_SRCS_GENERATED "")
 set(ZSRC
     ../control/workspace_z.c
-    ../control/chameleon_zf77.c
 )
 
 precisions_rules_py(CONTROL_SRCS_GENERATED "${ZSRC}"
