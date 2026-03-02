@@ -117,7 +117,6 @@ int CHAMELEON_mapv_Tile_Async( cham_uplo_t          uplo,
 /* Auxiliary */
 int CHAMELEON_Version           (int *ver_major, int *ver_minor, int *ver_micro);
 int CHAMELEON_Initialized       (void);
-int CHAMELEON_My_Mpi_Rank       (void) __attribute__((deprecated));
 int __chameleon_init            (int nworkers, int ncudas);
 int __chameleon_initpar         (int nworkers, int ncudas, int nthreads_per_worker);
 int __chameleon_initparcomm     (int nworkers, int ncudas, int nthreads_per_worker, MPI_Comm comm);
