@@ -88,30 +88,6 @@ module chameleon_z
   !  FORTRAN API - math functions (simple interface)
   !
   interface
-     function CHAMELEON_zLapack_to_Tile_c(A,LDA,descA) &
-          & bind(c, name='CHAMELEON_zLapack_to_Tile')
-       use iso_c_binding
-       implicit none
-       integer(kind=c_int) :: CHAMELEON_zLapack_to_Tile_c
-       type(c_ptr), value :: A
-       integer(kind=c_int), value :: LDA
-       type(c_ptr), value :: descA
-     end function CHAMELEON_zLapack_to_Tile_c
-  end interface
-
-  interface
-     function CHAMELEON_zTile_to_Lapack_c(descA,A,LDA) &
-          & bind(c, name='CHAMELEON_zTile_to_Lapack')
-       use iso_c_binding
-       implicit none
-       integer(kind=c_int) :: CHAMELEON_zTile_to_Lapack_c
-       type(c_ptr), value :: descA
-       type(c_ptr), value :: A
-       integer(kind=c_int), value :: LDA
-     end function CHAMELEON_zTile_to_Lapack_c
-  end interface
-
-  interface
      function CHAMELEON_zgebrd_c(M,N,A,LDA,D,E,descT) &
           & bind(c, name='CHAMELEON_zgebrd')
        use iso_c_binding
@@ -5545,25 +5521,5 @@ contains
     type(c_ptr), value :: W ! Arg managed by CHAMELEON: opaque to Fortran
     info = CHAMELEON_Alloc_Workspace_zgetri_Tile_Async_c(A,W)
   end subroutine CHAMELEON_Alloc_Workspace_zgetri_Tile_Async
-
-  subroutine CHAMELEON_zLapack_to_Tile(A,LDA,descA,info)
-    use iso_c_binding
-    implicit none
-    integer(kind=c_int), intent(out) :: info
-    integer(kind=c_int), intent(in) :: LDA
-    complex(kind=c_double_complex), intent(in), target :: A(LDA,*)
-    type(c_ptr), value :: descA ! Arg managed by CHAMELEON: opaque to Fortran
-    info = CHAMELEON_zLapack_to_Tile_c(c_loc(A),LDA,descA)
-  end subroutine CHAMELEON_zLapack_to_Tile
-
-  subroutine CHAMELEON_zTile_to_Lapack(descA,A,LDA,info)
-    use iso_c_binding
-    implicit none
-    integer(kind=c_int), intent(out) :: info
-    integer(kind=c_int), intent(in) :: LDA
-    complex(kind=c_double_complex), intent(out), target :: A(LDA,*)
-    type(c_ptr), value :: descA ! Arg managed by CHAMELEON: opaque to Fortran
-    info = CHAMELEON_zTile_to_Lapack_c(descA,c_loc(A),LDA)
-  end subroutine CHAMELEON_zTile_to_Lapack
 
 end module chameleon_z

@@ -26,7 +26,7 @@
  * @details This program is a copy of step6 with some additional calls to
  * build a matrix from within chameleon using a function provided by the user.
  * This can be seen as a replacement of the function like CHAMELEON_dplgsy_Tile() that can be used
- * to fill the matrix with random data, CHAMELEON_dLapack_to_Tile() to fill the matrix
+ * to fill the matrix with random data, CHAMELEON_dLap2Desc() to fill the matrix
  * with data stored in a lapack-like buffer, or CHAMELEON_Desc_Create_User() that can be used
  * to describe an arbitrary tile matrix structure.
  * In this example, the map function are just wrapper towards CORE_xxx() functions, so the output

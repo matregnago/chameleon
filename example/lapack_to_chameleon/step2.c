@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
                       NB, NB,  NB*NB, N, N, 0, 0, N, N, 1, 1);
 
     /* You could alternatively create descriptors wrapping your allocated
-     * matrices to avoid copies Lapack_to_Tile with the following */
+     * matrices to avoid copies Lap2Desc with the following */
     //CHAMELEON_Desc_Create(&descA, A, ChamRealDouble,
     //                  NB, NB, NB*NB, N, N, 0, 0, N, N, 1, 1);
     /* Be aware that for distributed data (with MPI) you need to respect a
