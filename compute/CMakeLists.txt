@@ -251,11 +251,6 @@ set(ZSRC
     #pzpack.c
     ztile.c
     ##################
-    # BUILD
-    ##################
-    zbuild.c
-    pzbuild.c
-    ##################
     # Center-Scaled
     ##################
     zcesca.c
