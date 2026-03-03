@@ -38,8 +38,7 @@ cl_map_rectask_func( struct starpu_task *t, void *_args )
     int                     ndata   = t->nbuffers;
     cham_map_data_t         data[ndata];
 
-    /* Register the task as the parent of the tasks that will be submitted */
-    request.parent = t;
+    starpu_cham_rectask_initrequest( t, &request );
 
     for ( i = 0; i < ndata; i++ ) {
         const CHAM_desc_t *desc = clargs->desc[i];
