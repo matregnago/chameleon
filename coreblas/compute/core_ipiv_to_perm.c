@@ -69,27 +69,35 @@ void CORE_ipiv_to_perm( int m0, int m, int k, int K1, int K2, int *ipiv, int *pe
     int i, j, ip;
     int i_1, ip_1;
 
+    /* Loop through perm and invp to initialise them with no pivoting */
     for(i=0; i < m; i++) {
         perm[i] = i + m0;
         invp[i] = i + m0;
     }
 
+    /* Loop through ipiv to compute perm and invp */
     for(i = 0; i < k; i++) {
         if ( ( i + m0 < K1 ) || ( i + m0 > K2 ) ) {
             continue;
         }
         ip = ipiv[i]-1;
+        /* Pivot should only returns rows below or equal to the current one */
         assert( ip - m0 >= i );
 
+        /* If the row i is permuted with the row ip (i != ip) */
         if ( ip - m0 > i ) {
 
             i_1 = perm[i];
 
+            /* If the row ip is in the current block */
             if (ip-m0 < m) {
                 ip_1 = perm[ip-m0];
                 perm[ip-m0] = i_1;
-            } else {
+            }
+            /* If the row ip is not in the current block */
+            else {
                 ip_1 = ip;
+                /* Loop through invp to see if ip has already been set in the current block */
                 for(j=0; j < m; j++) {
                     if( invp[j] == ip ) {
                         ip_1 = j + m0;
