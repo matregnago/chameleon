@@ -95,7 +95,7 @@ void __coreblas_kernel_trace( const char *func, ... );
 
 #endif
 
-void CORE_ipiv_to_perm( int m0, int m, int k, int K1, int K2, int *ipiv, int *perm, int *invp );
+void CORE_ipiv_to_perm( int m0, int m, int k, int K1, int K2, const int *ipiv, int *perm, int *invp );
 
 END_C_DECLS
 

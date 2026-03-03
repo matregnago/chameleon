@@ -64,54 +64,68 @@
  *          The permutation array of the origin row indices (m0-based) of the [1,n] set of rows.
  *
  */
-void CORE_ipiv_to_perm( int m0, int m, int k, int K1, int K2, int *ipiv, int *perm, int *invp )
+void CORE_ipiv_to_perm( int m0, int m, int k, int K1, int K2,
+                        const int *ipiv, int *perm, int *invp )
 {
-    int i, j, ip;
-    int i_1, ip_1;
+    /*
+     * Let's note that variables suffixed by l are local values (shifted by
+     * -m0), and variable suffixed by g are global values.
+     */
+    int il, ipl, il_1, ipl_1, jl;
+    int ig, ipg, ig_1, ipg_1;
 
-    /* Loop through perm and invp to initialise them with no pivoting */
-    for(i=0; i < m; i++) {
-        perm[i] = i + m0;
-        invp[i] = i + m0;
+    /* Loop through perm and invp to initialize them with no pivoting */
+    for( il=0; il < m; il++ ) {
+        ig = il + m0;
+        perm[il] = ig;
+        invp[il] = ig;
     }
 
     /* Loop through ipiv to compute perm and invp */
-    for(i = 0; i < k; i++) {
-        if ( ( i + m0 < K1 ) || ( i + m0 > K2 ) ) {
+    for(il = 0; il < k; il++) {
+        ig = il + m0;
+        if ( ( ig < K1 ) || ( ig > K2 ) ) {
             continue;
         }
-        ip = ipiv[i]-1;
+
+        ipg = ipiv[ il ] - 1;
+        ipl = ipg - m0;
+
         /* Pivot should only returns rows below or equal to the current one */
-        assert( ip - m0 >= i );
+        assert( ipl >= il );
 
         /* If the row i is permuted with the row ip (i != ip) */
-        if ( ip - m0 > i ) {
+        if ( ipl > il ) {
 
-            i_1 = perm[i];
+            /* Save initial permutation in the cycle */
+            ig_1 = perm[ il ];
 
-            /* If the row ip is in the current block */
-            if (ip-m0 < m) {
-                ip_1 = perm[ip-m0];
-                perm[ip-m0] = i_1;
+            /* If the row ipl is in the current block */
+            if ( ipl < m ) {
+                /* Save final permutation point in the cycle and update intermediate one */
+                ipg_1 = perm[ ipl ];
+                perm[ ipl ] = ig_1;
             }
-            /* If the row ip is not in the current block */
+            /* If the row ipl is not in the current block */
             else {
-                ip_1 = ip;
+                ipg_1 = ipg;
                 /* Loop through invp to see if ip has already been set in the current block */
-                for(j=0; j < m; j++) {
-                    if( invp[j] == ip ) {
-                        ip_1 = j + m0;
+                for( jl=0; jl < m; jl++ ) {
+                    if( invp[jl] == ipg ) {
+                        ipg_1 = jl + m0;
                         break;
                     }
                 }
             }
 
-            perm[i] = ip_1;
-            i_1  -= m0;
-            ip_1 -= m0;
+            /* Save the final permutation */
+            perm[ il ] = ipg_1;
+            il_1  = ig_1  - m0;
+            ipl_1 = ipg_1 - m0;
 
-            if (i_1  < m) invp[i_1 ] = ip;
-            if (ip_1 < m) invp[ip_1] = i + m0;
+            /* Update initial and final invp if necessary */
+            if (il_1  < m) invp[il_1 ] = ipg;
+            if (ipl_1 < m) invp[ipl_1] = ig;
         }
     }
 }
