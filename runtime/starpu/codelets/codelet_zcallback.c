@@ -63,7 +63,6 @@ CHAMELEON_CL_CB(zsytrf_nopiv,  cti_handle_get_m(task->handles[0]), 0, 0,        
 #endif
 CHAMELEON_CL_CB(zplgsy,        cti_handle_get_m(task->handles[0]), cti_handle_get_n(task->handles[0]), 0,                                                M*N)
 CHAMELEON_CL_CB(zplrnt,        cti_handle_get_m(task->handles[0]), cti_handle_get_n(task->handles[0]), 0,                                                M*N)
-CHAMELEON_CL_CB(zbuild,        cti_handle_get_m(task->handles[0]), cti_handle_get_n(task->handles[0]), 0,                                                M*N)
 CHAMELEON_CL_CB(zplssq,        cti_handle_get_m(task->handles[0]), cti_handle_get_n(task->handles[0]), 0,                                                M*N)
 CHAMELEON_CL_CB(zplssq2,       cti_handle_get_m(task->handles[0]), cti_handle_get_n(task->handles[0]), 0,                                                2*N)
 CHAMELEON_CL_CB(zpotrf,        cti_handle_get_m(task->handles[0]), 0, 0,                                                                           (1./3.)*M* M*M)

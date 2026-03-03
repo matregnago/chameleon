@@ -33,13 +33,13 @@
  *
  *******************************************************************************
  *
- * @param[in] Af77
+ * @param[in] A
  *          LAPACK matrix.
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
- * @param[in,out] A
+ * @param[in,out] descA
  *          Descriptor of the CHAMELEON matrix.
  *
  *******************************************************************************
@@ -47,9 +47,9 @@
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_zLapack_to_Tile( CHAMELEON_Complex64_t *Af77, int LDA, CHAM_desc_t *A )
+int CHAMELEON_zLapack_to_Tile( CHAMELEON_Complex64_t *A, int LDA, CHAM_desc_t *descA )
 {
-    return CHAMELEON_zLap2Desc( ChamUpperLower, Af77, LDA, A );
+    return CHAMELEON_zLap2Desc( ChamUpperLower, A, LDA, descA );
 }
 
 /**
@@ -62,23 +62,23 @@ int CHAMELEON_zLapack_to_Tile( CHAMELEON_Complex64_t *Af77, int LDA, CHAM_desc_t
  *
  *******************************************************************************
  *
- * @param[in] A
+ * @param[in] descA
  *          Descriptor of the CHAMELEON matrix.
  *
- * @param[in,out] Af77
+ * @param[in,out] A
  *          LAPACK matrix.
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
  *******************************************************************************
  *
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_zTile_to_Lapack( CHAM_desc_t *A, CHAMELEON_Complex64_t *Af77, int LDA )
+int CHAMELEON_zTile_to_Lapack( CHAM_desc_t *descA, CHAMELEON_Complex64_t *A, int LDA )
 {
-    return CHAMELEON_zDesc2Lap( ChamUpperLower, A, Af77, LDA );
+    return CHAMELEON_zDesc2Lap( ChamUpperLower, descA, A, LDA );
 }
 
 /**
@@ -97,13 +97,13 @@ int CHAMELEON_zTile_to_Lapack( CHAM_desc_t *A, CHAMELEON_Complex64_t *Af77, int 
  *          = ChamLower: A is lower triangular;
  *          = ChamUpperLower: A is general.
  *
- * @param[in] Af77
+ * @param[in] A
  *          LAPACK matrix.
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
- * @param[in,out] A
+ * @param[in,out] descA
  *          Descriptor of the CHAMELEON matrix.
  *
  *******************************************************************************
@@ -118,12 +118,12 @@ int CHAMELEON_zTile_to_Lapack( CHAM_desc_t *A, CHAMELEON_Complex64_t *Af77, int 
  * @sa CHAMELEON_sLap2Desc
  *
  */
-int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *Af77, int LDA, CHAM_desc_t *A )
+int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *A, int LDA, CHAM_desc_t *descA )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_sequence_t *sequence = NULL;
     RUNTIME_request_t request = RUNTIME_REQUEST_INITIALIZER;
-    CHAM_desc_t B;
+    CHAM_desc_t descB;
     char *lapname;
     int status;
 
@@ -133,15 +133,15 @@ int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *Af77, int LDA,
         return CHAMELEON_ERR_NOT_INITIALIZED;
     }
     /* Check descriptor for correctness */
-    if (chameleon_desc_check( A ) != CHAMELEON_SUCCESS) {
+    if (chameleon_desc_check( descA ) != CHAMELEON_SUCCESS) {
         chameleon_error("CHAMELEON_zLap2Desc", "invalid descriptor");
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
-    /* Create the B descriptor to handle the Lapack format matrix */
-    chameleon_asprintf( &lapname, "%slap", A->name );
-    status = chameleon_desc_init( chamctxt, &B, lapname, Af77, ChamComplexDouble, A->mb, A->nb,
-                                  LDA, A->n, A->m, A->n, 1, 1,
+    /* Create the descB descriptor to handle the Lapack format matrix */
+    chameleon_asprintf( &lapname, "%slap", descA->name );
+    status = chameleon_desc_init( chamctxt, &descB, lapname, A, ChamComplexDouble, descA->mb, descA->nb,
+                                  LDA, descA->n, descA->m, descA->n, 1, 1,
                                   chameleon_getaddr_cm, chameleon_getblkldd_cm, NULL, NULL );
     free( lapname );
     if ( status != CHAMELEON_SUCCESS ) {
@@ -152,15 +152,15 @@ int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *Af77, int LDA,
     /* Start the computation */
     chameleon_sequence_create( chamctxt, &sequence );
 
-    chameleon_pzlacpy( uplo, &B, A, sequence, &request );
+    chameleon_pzlacpy( uplo, &descB, descA, sequence, &request );
 
-    CHAMELEON_Desc_Flush( &B, sequence );
-    CHAMELEON_Desc_Flush( A, sequence );
+    CHAMELEON_Desc_Flush( &descB, sequence );
+    CHAMELEON_Desc_Flush( descA, sequence );
 
     chameleon_sequence_wait( chamctxt, sequence );
 
-    /* Destroy temporary B descriptor */
-    chameleon_desc_destroy( &B );
+    /* Destroy temporary descB descriptor */
+    chameleon_desc_destroy( &descB );
 
     status = sequence->status;
     chameleon_sequence_destroy( chamctxt, sequence );
@@ -183,14 +183,14 @@ int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *Af77, int LDA,
  *          = ChamLower: A is lower triangular;
  *          = ChamUpperLower: A is general.
  *
- * @param[in] A
+ * @param[in] descA
  *          Descriptor of the CHAMELEON matrix.
  *
- * @param[in,out] Af77
+ * @param[in,out] A
  *          LAPACK matrix.
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
  *******************************************************************************
  *
@@ -204,12 +204,12 @@ int CHAMELEON_zLap2Desc( cham_uplo_t uplo, CHAMELEON_Complex64_t *Af77, int LDA,
  * @sa CHAMELEON_sDesc2Lap
  *
  */
-int CHAMELEON_zDesc2Lap( cham_uplo_t uplo, CHAM_desc_t *A, CHAMELEON_Complex64_t *Af77, int LDA )
+int CHAMELEON_zDesc2Lap( cham_uplo_t uplo, CHAM_desc_t *descA, CHAMELEON_Complex64_t *A, int LDA )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_sequence_t *sequence = NULL;
     RUNTIME_request_t request = RUNTIME_REQUEST_INITIALIZER;
-    CHAM_desc_t B;
+    CHAM_desc_t descB;
     char *lapname;
     int status;
 
@@ -219,15 +219,15 @@ int CHAMELEON_zDesc2Lap( cham_uplo_t uplo, CHAM_desc_t *A, CHAMELEON_Complex64_t
         return CHAMELEON_ERR_NOT_INITIALIZED;
     }
     /* Check descriptor for correctness */
-    if (chameleon_desc_check( A ) != CHAMELEON_SUCCESS) {
+    if (chameleon_desc_check( descA ) != CHAMELEON_SUCCESS) {
         chameleon_error("CHAMELEON_zDesc2Lap", "invalid descriptor");
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
-    /* Create the B descriptor to handle the Lapack format matrix */
-    chameleon_asprintf( &lapname, "%slap", A->name );
-    status = chameleon_desc_init( chamctxt, &B, lapname, Af77, ChamComplexDouble, A->mb, A->nb,
-                                  LDA, A->n, A->m, A->n, 1, 1,
+    /* Create the descB descriptor to handle the Lapack format matrix */
+    chameleon_asprintf( &lapname, "%slap", descA->name );
+    status = chameleon_desc_init( chamctxt, &descB, lapname, A, ChamComplexDouble, descA->mb, descA->nb,
+                                  LDA, descA->n, descA->m, descA->n, 1, 1,
                                   chameleon_getaddr_cm, chameleon_getblkldd_cm, NULL, NULL );
     free( lapname );
     if ( status != CHAMELEON_SUCCESS ) {
@@ -238,14 +238,14 @@ int CHAMELEON_zDesc2Lap( cham_uplo_t uplo, CHAM_desc_t *A, CHAMELEON_Complex64_t
     /* Start the computation */
     chameleon_sequence_create( chamctxt, &sequence );
 
-    chameleon_pzlacpy( uplo, A, &B, sequence, &request );
+    chameleon_pzlacpy( uplo, descA, &descB, sequence, &request );
 
-    CHAMELEON_Desc_Flush( A, sequence );
-    CHAMELEON_Desc_Flush( &B, sequence );
+    CHAMELEON_Desc_Flush( descA, sequence );
+    CHAMELEON_Desc_Flush( &descB, sequence );
 
     chameleon_sequence_wait( chamctxt, sequence );
 
-    chameleon_desc_destroy( &B );
+    chameleon_desc_destroy( &descB );
 
     status = sequence->status;
     chameleon_sequence_destroy( chamctxt, sequence );

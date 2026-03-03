@@ -1,3 +1,12 @@
+chameleon-2.0.0
+------------------------------------------------------------------------
+ - fortran: Remove decprecated F77 interface that was no longer maintained
+ - control: Remove deprecated Lapack_to_Tile/Tile_to_Lapack from the F90 interface
+ - control: Remove deprecated build family of functions
+ - control: Remove deprecated CHAMELEON_My_Mpi_Rank function
+ - control: Remove deprecated CHAMELEON_user_tag_size function
+ - compute/codelets: Remove the deprecated build functions that have been replaced by the map function
+
 chameleon-1.4.0
 ------------------------------------------------------------------------
  - cmake: Ugrade minimum requirement to 3.12

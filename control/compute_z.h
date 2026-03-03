@@ -282,8 +282,6 @@ void chameleon_pzunmlq( int genD, cham_side_t side, cham_trans_t trans, CHAM_des
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzunmlqrh( int genD, int BS, cham_side_t side, cham_trans_t trans, CHAM_desc_t *A, CHAM_desc_t *B, CHAM_desc_t *T, CHAM_desc_t *D,
                           RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
-void chameleon_pzbuild( cham_uplo_t uplo, CHAM_desc_t *A, void *user_data, void* user_build_callback,
-                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 
 int chameleon_pzgelqf_step( int genD, int k, int ib,
                             CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D,

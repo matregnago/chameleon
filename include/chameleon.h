@@ -117,7 +117,6 @@ int CHAMELEON_mapv_Tile_Async( cham_uplo_t          uplo,
 /* Auxiliary */
 int CHAMELEON_Version           (int *ver_major, int *ver_minor, int *ver_micro);
 int CHAMELEON_Initialized       (void);
-int CHAMELEON_My_Mpi_Rank       (void) __attribute__((deprecated));
 int __chameleon_init            (int nworkers, int ncudas);
 int __chameleon_initpar         (int nworkers, int ncudas, int nthreads_per_worker);
 int __chameleon_initparcomm     (int nworkers, int ncudas, int nthreads_per_worker, MPI_Comm comm);
@@ -128,8 +127,8 @@ int CHAMELEON_Distributed_start (void);
 int CHAMELEON_Distributed_stop  (void);
 int CHAMELEON_Comm_size         (void);
 int CHAMELEON_Comm_rank         (void);
-int CHAMELEON_Lap2Desc          ( cham_uplo_t uplo, void *Af77, int LDA, CHAM_desc_t *A );
-int CHAMELEON_Desc2Lap          ( cham_uplo_t uplo, CHAM_desc_t *A, void *Af77, int LDA );
+int CHAMELEON_Lap2Desc          ( cham_uplo_t uplo, void *A, int LDA, CHAM_desc_t *descA );
+int CHAMELEON_Desc2Lap          ( cham_uplo_t uplo, CHAM_desc_t *descA, void *A, int LDA );
 int CHAMELEON_Distributed_start (void);
 int CHAMELEON_Distributed_stop  (void);
 int CHAMELEON_Distributed_size  (int *size);
@@ -138,8 +137,8 @@ int CHAMELEON_GetThreadNbr      (void);
 
 CHAM_context_t *CHAMELEON_GetContext();
 
-int CHAMELEON_Lapack_to_Tile( void *Af77, int LDA, CHAM_desc_t *A ) __attribute__((deprecated("Please refer to CHAMELEON_Lap2Desc() instead")));
-int CHAMELEON_Tile_to_Lapack( CHAM_desc_t *A, void *Af77, int LDA ) __attribute__((deprecated("Please refer to CHAMELEON_Desc2Lap() instead")));
+int CHAMELEON_Lapack_to_Tile( void *A, int LDA, CHAM_desc_t *descA ) __attribute__((deprecated("Please refer to CHAMELEON_Lap2Desc() instead")));
+int CHAMELEON_Tile_to_Lapack( CHAM_desc_t *descA, void *A, int LDA ) __attribute__((deprecated("Please refer to CHAMELEON_Desc2Lap() instead")));
 
 /* Descriptor */
 ssize_t CHAMELEON_Element_Size( cham_flttype_t type );
@@ -192,13 +191,6 @@ int  CHAMELEON_Disable (int option);
 int  CHAMELEON_Set     (int param, int  value);
 int  CHAMELEON_Get     (int param, int *value);
 int  CHAMELEON_Set_update_progress_callback(void (*p)(int, int)) ;
-
-static inline void CHAMELEON_user_tag_size(int, int)  __attribute__((deprecated("This function is no longer needed")));
-static inline void CHAMELEON_user_tag_size(int user_tag_width, int user_tag_sep) {
-    (void)user_tag_width;
-    (void)user_tag_sep;
-    return;
-}
 
 /* Sequences */
 int CHAMELEON_Sequence_Create  (RUNTIME_sequence_t **sequence);

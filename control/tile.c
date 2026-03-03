@@ -37,13 +37,13 @@
  *
  ******************************************************************************
  *
- * @param[in] Af77
+ * @param[in] A
  *          LAPACK matrix.
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
- * @param[in,out] A
+ * @param[in,out] descA
  *          Descriptor of the CHAMELEON matrix in tile layout.
  *
  ******************************************************************************
@@ -52,9 +52,9 @@
  *
  */
 int
-CHAMELEON_Lapack_to_Tile(  void *Af77, int LDA, CHAM_desc_t *A )
+CHAMELEON_Lapack_to_Tile( void *A, int LDA, CHAM_desc_t *descA )
 {
-    return CHAMELEON_Lap2Desc( ChamUpperLower, Af77, LDA, A );
+    return CHAMELEON_Lap2Desc( ChamUpperLower, A, LDA, descA );
 }
 
 /**
@@ -66,14 +66,14 @@ CHAMELEON_Lapack_to_Tile(  void *Af77, int LDA, CHAM_desc_t *A )
  *
  ******************************************************************************
  *
- * @param[in] A
+ * @param[in] descA
  *          Descriptor of the CHAMELEON matrix in tile layout.
  *
- * @param[in,out] Af77
+ * @param[in,out] A
  *          LAPACK matrix (only needed on proc 0).
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
  ******************************************************************************
  *
@@ -81,9 +81,9 @@ CHAMELEON_Lapack_to_Tile(  void *Af77, int LDA, CHAM_desc_t *A )
  *
  */
 int
-CHAMELEON_Tile_to_Lapack( CHAM_desc_t *A, void *Af77, int LDA )
+CHAMELEON_Tile_to_Lapack( CHAM_desc_t *descA, void *A, int LDA )
 {
-    return CHAMELEON_Desc2Lap( ChamUpperLower, A, Af77, LDA );
+    return CHAMELEON_Desc2Lap( ChamUpperLower, descA, A, LDA );
 }
 
 /**
@@ -100,41 +100,41 @@ CHAMELEON_Tile_to_Lapack( CHAM_desc_t *A, void *Af77, int LDA )
  *          = ChamLower: A is lower triangular, the upper part is not referenced;
  *          = ChamUpperLower: A is general.
  *
- * @param[in] Af77
+ * @param[in] A
  *          LAPACK matrix.
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
- * @param[in,out] A
- *          Descriptor of the CHAMELEON matrix initialized with data from Af77.
+ * @param[in,out] descA
+ *          Descriptor of the CHAMELEON matrix initialized with data from A.
  *
  ******************************************************************************
  *
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_Lap2Desc( cham_uplo_t uplo, void *Af77, int LDA, CHAM_desc_t *A )
+int CHAMELEON_Lap2Desc( cham_uplo_t uplo, void *A, int LDA, CHAM_desc_t *descA )
 {
-    switch( A->dtyp ) {
+    switch( descA->dtyp ) {
 #if defined(PRECISION_z)
     case ChamComplexDouble:
-        return CHAMELEON_zLap2Desc( uplo, (CHAMELEON_Complex64_t *)Af77, LDA, A );
+        return CHAMELEON_zLap2Desc( uplo, (CHAMELEON_Complex64_t *)A, LDA, descA );
         break;
 #endif
 #if defined(PRECISION_c)
     case ChamComplexFloat:
-        return CHAMELEON_cLap2Desc( uplo, (CHAMELEON_Complex32_t *)Af77, LDA, A );
+        return CHAMELEON_cLap2Desc( uplo, (CHAMELEON_Complex32_t *)A, LDA, descA );
         break;
 #endif
 #if defined(PRECISION_s)
     case ChamRealFloat:
-        return CHAMELEON_sLap2Desc( uplo, (float *)Af77, LDA, A );
+        return CHAMELEON_sLap2Desc( uplo, (float *)A, LDA, descA );
         break;
 #endif
 #if defined(PRECISION_d)
     case ChamRealDouble:
-        return CHAMELEON_dLap2Desc( uplo, (double *)Af77, LDA, A );
+        return CHAMELEON_dLap2Desc( uplo, (double *)A, LDA, descA );
         break;
 #endif
     default:
@@ -156,41 +156,41 @@ int CHAMELEON_Lap2Desc( cham_uplo_t uplo, void *Af77, int LDA, CHAM_desc_t *A )
  *          = ChamLower: A is lower triangular, the upper part is not referenced;
  *          = ChamUpperLower: A is general.
  *
- * @param[in] A
+ * @param[in] descA
  *          Descriptor of the CHAMELEON matrix in tile layout.
  *
- * @param[in,out] Af77
+ * @param[in,out] A
  *          LAPACK matrix (only needed on proc 0).
  *
  * @param[in] LDA
- *          The leading dimension of the matrix Af77.
+ *          The leading dimension of the matrix A.
  *
  ******************************************************************************
  *
  * @retval CHAMELEON_SUCCESS successful exit
  *
  */
-int CHAMELEON_Desc2Lap( cham_uplo_t uplo, CHAM_desc_t *A, void *Af77, int LDA )
+int CHAMELEON_Desc2Lap( cham_uplo_t uplo, CHAM_desc_t *descA, void *A, int LDA )
 {
-    switch( A->dtyp ) {
+    switch( descA->dtyp ) {
 #if defined(PRECISION_z)
     case ChamComplexDouble:
-        return CHAMELEON_zDesc2Lap( uplo, A, (CHAMELEON_Complex64_t *)Af77, LDA );
+        return CHAMELEON_zDesc2Lap( uplo, descA, (CHAMELEON_Complex64_t *)A, LDA );
         break;
 #endif
 #if defined(PRECISION_c)
     case ChamComplexFloat:
-        return CHAMELEON_cDesc2Lap( uplo, A, (CHAMELEON_Complex32_t *)Af77, LDA );
+        return CHAMELEON_cDesc2Lap( uplo, descA, (CHAMELEON_Complex32_t *)A, LDA );
         break;
 #endif
 #if defined(PRECISION_s)
     case ChamRealFloat:
-        return CHAMELEON_sDesc2Lap( uplo, A, (float *)Af77, LDA );
+        return CHAMELEON_sDesc2Lap( uplo, descA, (float *)A, LDA );
         break;
 #endif
 #if defined(PRECISION_d)
     case ChamRealDouble:
-        return CHAMELEON_dDesc2Lap( uplo, A, (double *)Af77, LDA );
+        return CHAMELEON_dDesc2Lap( uplo, descA, (double *)A, LDA );
         break;
 #endif
     default:

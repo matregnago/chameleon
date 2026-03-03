@@ -751,7 +751,7 @@
 
      This program is a copy of step6 with some additional calls to build a matrix from within chameleon using a function
      provided by the user.  This can be seen as a replacement of the function like *CHAMELEON_dplgsy_Tile()* that can be
-     used to fill the matrix with random data, *CHAMELEON_dLapack_to_Tile()* to fill the matrix with data stored in a
+     used to fill the matrix with random data, *CHAMELEON_dLap2Desc()* to fill the matrix with data stored in a
      lapack-like buffer, or *CHAMELEON_Desc_Create_User()* that can be used to describe an arbitrary tile matrix
      structure.  In this example, the build callback function are just wrapper towards *CORE_xxx()* functions, so the
      output of the program step7 should be exactly similar to that of step6.  The difference is that the function used
@@ -1022,7 +1022,7 @@
      * *CHAMELEON_INNER_BLOCK_SIZE*: size of tile inner block,
      * *CHAMELEON_HOUSEHOLDER_MODE*: type of householder trees (FLAT or TREE),
      * *CHAMELEON_HOUSEHOLDER_SIZE*: size of the groups in householder trees,
-     * *CHAMELEON_TRANSLATION_MODE*: related to the *CHAMELEON_Lapack_to_Tile*, see ztile.c.
+     * *CHAMELEON_TRANSLATION_MODE*: related to the *CHAMELEON_Lap2Desc*, see ztile.c.
      * *CHAMELEON_LOOKAHEAD*: lookahead size used in some algorithms (GEMM summa_c, symm/hemm, getrf, getrf_nopiv).
 
      Get value of CHAMELEON parameter.

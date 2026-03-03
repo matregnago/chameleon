@@ -229,24 +229,6 @@ ssize_t CHAMELEON_Element_Size( cham_flttype_t type )
 }
 
 /**
- *
- * @ingroup Auxiliary
- *
- *  CHAMELEON_My_Mpi_Rank - Return the MPI rank of the calling process.
- *
- ******************************************************************************
- *
- ******************************************************************************
- *
- * @retval MPI rank
- *
- */
-int CHAMELEON_My_Mpi_Rank(void)
-{
-    return CHAMELEON_Comm_rank();
-}
-
-/**
  *  Display a progress percentage in stderr
  */
 void update_progress(int currentValue, int maximumValue) {

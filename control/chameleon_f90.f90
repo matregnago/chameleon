@@ -153,26 +153,6 @@ module chameleon
       end interface
 
       interface
-         function CHAMELEON_Lapack_to_Tile_c(a_lpk,lda,a_pma) &
-          & bind(c, name='CHAMELEON_Lapack_to_Tile')
-            use iso_c_binding
-            integer(kind=c_int) :: CHAMELEON_Lapack_to_Tile_c
-            type(c_ptr), value :: a_lpk, a_pma
-            integer(kind=c_int), value :: lda
-         end function CHAMELEON_Lapack_to_Tile_c
-      end interface
-
-      interface
-         function CHAMELEON_Tile_to_Lapack_c(a_pma,a_lpk,lda) &
-          & bind(c, name='CHAMELEON_Tile_to_Lapack')
-            use iso_c_binding
-            integer(kind=c_int) :: CHAMELEON_Tile_to_Lapack_c
-            type(c_ptr), value :: a_lpk, a_pma
-            integer(kind=c_int), value :: lda
-         end function CHAMELEON_Tile_to_Lapack_c
-      end interface
-
-      interface
          function CHAMELEON_Desc_Create_c(desc, mat, dtyp, mb, nb, bsiz, lm, ln, i, j, m, n, p, q) &
           & bind(c, name='CHAMELEON_Desc_Create')
             use iso_c_binding
@@ -312,20 +292,6 @@ module chameleon
          end function CHAMELEON_Sequence_Flush_c
       end interface
 
-      interface chameleon_lapack_to_tile
-         module procedure chameleon_lapack_to_tile_s
-         module procedure chameleon_lapack_to_tile_d
-         module procedure chameleon_lapack_to_tile_cpx
-         module procedure chameleon_lapack_to_tile_z
-      end interface chameleon_lapack_to_tile
-
-      interface chameleon_tile_to_lapack
-         module procedure chameleon_tile_to_lapack_s
-         module procedure chameleon_tile_to_lapack_d
-         module procedure chameleon_tile_to_lapack_cpx
-         module procedure chameleon_tile_to_lapack_z
-      end interface chameleon_tile_to_lapack
-
       interface chameleon_desc_create
          module procedure chameleon_desc_create_s
          module procedure chameleon_desc_create_d
@@ -385,88 +351,6 @@ module chameleon
       integer(kind=c_int), intent(out) :: info
       info = chameleon_disable_c(param)
    end subroutine chameleon_disable
-
-! overloaded: single precision
-   subroutine chameleon_lapack_to_tile_s(a_lpk,lda,a_pma,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      real(kind=sp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(out) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_lapack_to_tile_c(c_loc(a_lpk),lda,a_pma)
-   end subroutine chameleon_lapack_to_tile_s
-! overloaded: double precision
-   subroutine chameleon_lapack_to_tile_d(a_lpk,lda,a_pma,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      real(kind=dp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(out) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_lapack_to_tile_c(c_loc(a_lpk),lda,a_pma)
-   end subroutine chameleon_lapack_to_tile_d
-! overloaded: single precision complex
-   subroutine chameleon_lapack_to_tile_cpx(a_lpk,lda,a_pma,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      complex(kind=sp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(out) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_lapack_to_tile_c(c_loc(a_lpk),lda,a_pma)
-   end subroutine chameleon_lapack_to_tile_cpx
-! overloaded: double precision complex
-   subroutine chameleon_lapack_to_tile_z(a_lpk,lda,a_pma,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      complex(kind=dp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(out) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_lapack_to_tile_c(c_loc(a_lpk),lda,a_pma)
-   end subroutine chameleon_lapack_to_tile_z
-
-! overloaded: single precision
-   subroutine chameleon_tile_to_lapack_s(a_pma,a_lpk,lda,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      real(kind=sp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(in) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_tile_to_lapack_c(a_pma,c_loc(a_lpk),lda)
-   end subroutine chameleon_tile_to_lapack_s
-! overloaded: double precision
-   subroutine chameleon_tile_to_lapack_d(a_pma,a_lpk,lda,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      real(kind=dp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(in) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_tile_to_lapack_c(a_pma,c_loc(a_lpk),lda)
-   end subroutine chameleon_tile_to_lapack_d
-! overloaded: single precision complex
-   subroutine chameleon_tile_to_lapack_cpx(a_pma,a_lpk,lda,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      complex(kind=sp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(in) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_tile_to_lapack_c(a_pma,c_loc(a_lpk),lda)
-   end subroutine chameleon_tile_to_lapack_cpx
-! overloaded: double precision complex
-   subroutine chameleon_tile_to_lapack_z(a_pma,a_lpk,lda,info)
-      use iso_c_binding
-      implicit none
-      integer(kind=c_int), intent(in) :: lda
-      complex(kind=dp), intent(out), target :: a_lpk(lda,*)
-      type(c_ptr), intent(in) ::  a_pma
-      integer(kind=c_int), intent(out) :: info
-      info = chameleon_tile_to_lapack_c(a_pma,c_loc(a_lpk),lda)
-   end subroutine chameleon_tile_to_lapack_z
 
 ! overloaded: single precision
    subroutine chameleon_desc_create_s(desc,mat,dtyp,mb,nb,bsiz,lm,ln,i,j,m,n,p,q,info)
