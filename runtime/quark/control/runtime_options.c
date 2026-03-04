@@ -40,7 +40,7 @@ void RUNTIME_options_init( RUNTIME_option_t     *options,
     options->request   = request;
     options->profiling = CHAMELEON_STATISTICS == CHAMELEON_TRUE;
     options->parallel  = CHAMELEON_PARALLEL == CHAMELEON_TRUE;
-    options->priority  = RUNTIME_PRIORITY_MIN;
+    options->priority  = request->priority;
     options->workerid  = -1;
     options->forcesub  = 0;
     options->withlacpy = 0;

@@ -59,6 +59,16 @@ typedef enum runtime_id_e {
 #define RUNTIME_HIP  ((1ULL)<<3)
 
 /**
+ * @brief Minimal priority value
+ */
+#define RUNTIME_PRIORITY_MIN 0
+
+/**
+ * @brief Maximal priority value
+ */
+#define RUNTIME_PRIORITY_MAX INT_MAX
+
+/**
  * @brief RUNTIME request structure
  *
  * A request is used to uniquely identifies a set of submitted tasks together,
@@ -68,13 +78,14 @@ typedef enum runtime_id_e {
 typedef struct runtime_request_s {
     int   status;   /**< Return status registered by the tasks for the request   */
     int   flush;    /**< Enable/disable automatic data flush within this request */
+    int   priority; /**< Field to set a default priority in an algorithm         */
     void *parent;   /**< Specify the parent in recursive submission mode         */
 } RUNTIME_request_t;
 
 /**
  *  @brief Runtime request initializer
  */
-#define RUNTIME_REQUEST_INITIALIZER { .status = 0, .flush = CHAMELEON_TRUE, .parent = NULL }
+#define RUNTIME_REQUEST_INITIALIZER { .status = 0, .flush = CHAMELEON_TRUE, .priority = RUNTIME_PRIORITY_MIN, .parent = NULL }
 
 /**
  * @brief RUNTIME sequence structure
@@ -113,16 +124,6 @@ typedef struct runtime_option_s {
     void               *ws_host;   /**< Pointer to the host workspace (structure)                */
     void               *schedopt;  /**< Specific runtime data pointer to handle the sequence     */
 } RUNTIME_option_t;
-
-/**
- * @brief Minimal priority value
- */
-#define RUNTIME_PRIORITY_MIN 0
-
-/**
- * @brief Maximal priority value
- */
-#define RUNTIME_PRIORITY_MAX INT_MAX
 
 END_C_DECLS
 

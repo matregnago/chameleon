@@ -26,6 +26,35 @@ struct cl_map_args_s {
     const CHAM_desc_t   *desc[1];
 };
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+
+static inline void
+cl_map_rectask_func( struct starpu_task *t, void *_args )
+{
+    struct cl_zgemm_args_s *clargs  = (struct cl_zgemm_args_s *)(t->cl_arg);
+    rectask_args_t         *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t       request = RUNTIME_REQUEST_INITIALIZER;
+    int                     i;
+    int                     ndata   = t->nbuffers;
+    cham_map_data_t         data[ndata];
+
+    starpu_cham_rectask_initrequest( t, &request );
+
+    for ( i = 0; i < ndata; i++ ) {
+        const CHAM_desc_t *desc = clargs->desc[i];
+        CHAM_tile_t       *tile = desc->get_blktile( desc, clargs->m, clargs->n );
+        enum starpu_data_access_mode mode = STARPU_TASK_GET_MODE( t, i );
+
+        data[i].access = starpu_to_cham_access( mode );
+        data[i].desc   = tile->mat;
+    }
+
+    chameleon_pmap( clargs->uplo, t->nbuffers, data, clargs->op_fcts, clargs->op_args,
+                    rtargs->sequence, &request );
+}
+
+#endif /* CHAMELEON_USE_RECURSIVE_TASKS */
+
 /*
  * Map with a single tile as parameter
  */
@@ -231,6 +260,8 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     int                   i, readonly = 1;
     size_t                clargs_size = 0;
     uint32_t              where       = 0;
+    int                   is_rectask  = 1;
+    CHAM_tile_t          *tiles[ndata];
 
     if ( ( ndata < 0 ) || ( ndata > 3 ) ) {
         fprintf( stderr, "INSERT_TASK_map() can handle only 1 to 3 parameters\n" );
@@ -259,7 +290,29 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     }
     CHAMELEON_END_ACCESS_DECLARATION;
 
-    if ( exec ) {
+    for( i=0; i<ndata; i++ ) {
+        tiles[i] = (data[i].desc)->get_blktile( data[i].desc, m, n );
+ #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+        if ( !(tiles[i]->format & CHAMELEON_TILE_DESC) ) {
+            is_rectask = 0;
+        }
+#else
+        is_rectask = 0;
+#endif
+    }
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    /* Check if this is a rectask */
+    if ( is_rectask ) {
+        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t*) * (ndata-1) );
+        rtargs->sequence = options->sequence;
+        rtargs->parent   = options->request->parent;
+        rtargs->priority = options->priority;
+        memcpy( rtags->tiles, tiles, ndata * sizeof(CHAM_tile_t*) );
+    }
+#endif
+
+    if ( is_rectask || exec ) {
         clargs_size = sizeof( struct cl_map_args_s ) + sizeof( CHAM_desc_t * ) * (ndata - 1);
         clargs = malloc( clargs_size );
         clargs->uplo    = uplo;
@@ -274,8 +327,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
 
     /* Refine name */
     for( i=0; i<ndata; i++ ) {
-        cl_name = chameleon_codelet_name( cl_name, 1,
-                                          (data[i].desc)->get_blktile( data[i].desc, m, n ) );
+        cl_name = chameleon_codelet_name( cl_name, 1, tiles[i] );
     }
 
     /* Where to execute */
@@ -305,6 +357,9 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             INSERT_TASK_COMMON_TASK_PARAMS( map_one ),
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
+
+            /* Recursive task management */
+            INSERT_TASK_RECTASK_PARAMS( map )
             0 );
         break;
 
@@ -323,6 +378,9 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             INSERT_TASK_COMMON_TASK_PARAMS( map_two ),
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
+
+            /* Recursive task management */
+            INSERT_TASK_RECTASK_PARAMS( map )
             0 );
         break;
 
@@ -342,6 +400,9 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
             INSERT_TASK_COMMON_TASK_PARAMS( map_three ),
             STARPU_EXECUTE_WHERE,     where,
             STARPU_NAME,              cl_name,
+
+            /* Recursive task management */
+            INSERT_TASK_RECTASK_PARAMS( map )
             0 );
         break;
     }

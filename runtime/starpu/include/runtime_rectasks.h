@@ -91,4 +91,20 @@ starpu_cham_is_not_recursive( __attribute__((unused)) struct starpu_task *task,
     return 0;
 }
 
+/**
+ * @brief Internal function to initialize request in recursive tasks
+ */
+static inline void
+starpu_cham_rectask_initrequest( struct starpu_task *task,
+                                 RUNTIME_request_t  *request )
+{
+    /* Register the task parent */
+    request->parent = task;
+
+    /* Propagate the rectask priority to subtasks if needed */
+    request->priority = task->priority;
+
+    return;
+}
+
 #endif /* _runtime_rectasks_h_ */

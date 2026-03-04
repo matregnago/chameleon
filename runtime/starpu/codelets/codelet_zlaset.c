@@ -43,8 +43,7 @@ cl_zlaset_rectask_func( struct starpu_task *t, void *_args )
     rectask_args_t          *rtargs  = (rectask_args_t *)_args;
     RUNTIME_request_t        request = RUNTIME_REQUEST_INITIALIZER;
 
-    /* Register the task parent */
-    request.parent = t;
+    starpu_cham_rectask_initrequest( t, &request );
 
     chameleon_pzlaset( clargs->uplo, clargs->alpha, clargs->beta, rtargs->tiles[0]->mat,
                        rtargs->sequence, &request );
