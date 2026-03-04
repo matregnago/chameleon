@@ -372,7 +372,8 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
         RUNTIME_options_init( &options, chamctxt, sequence, request );
         for ( k = 0; k < A->mt; k++ ) {
             tempkm = A->get_blkdim( A, k, DIM_m, A->m );
-            INSERT_TASK_ipiv_to_perm( &options, k * A->mb, tempkm, tempkm, 0, A->m,
+            INSERT_TASK_ipiv_to_perm( &options, k * A->mb, tempkm, tempkm,
+                                      0, A->m, A->mt - k,
                                       IPIV, k );
         }
         chameleon_sequence_wait( chamctxt, sequence );

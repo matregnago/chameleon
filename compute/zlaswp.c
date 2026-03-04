@@ -561,7 +561,7 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
                     continue;
                 }
                 INSERT_TASK_ipiv_to_perm( &options, m0, tempkm, tempkm,
-                                          K1 - 1, K2 - 1, IPIV, k );
+                                          K1 - 1, K2 - 1, A->mt - k, IPIV, k );
                 RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
             }
         }
@@ -575,7 +575,7 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
                     continue;
                 }
                 INSERT_TASK_ipiv_to_perm( &options, n0, tempkn, tempkn,
-                                          K1 - 1, K2 - 1, IPIV, k );
+                                          K1 - 1, K2 - 1, A->nt - k, IPIV, k );
                 RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
             }
         }

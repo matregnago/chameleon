@@ -157,8 +157,10 @@ chameleon_pzgetrf_panel_facto_percol( struct chameleon_pzgetrf_s *ws,
     }
 
     /* Flush temporary data used for the pivoting */
-    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
+    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, A->mt - k, ipiv, k );
     RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
+
+    (void)ws;
 }
 
 /*
@@ -212,7 +214,7 @@ chameleon_pzgetrf_panel_facto_percol_batched( struct chameleon_pzgetrf_s *ws,
     free( clargs );
 
     /* Flush temporary data used for the pivoting */
-    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
+    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, A->mt - k, ipiv, k );
     RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
@@ -302,7 +304,7 @@ chameleon_pzgetrf_panel_facto_blocked( struct chameleon_pzgetrf_s *ws,
     chameleon_data_flush( options->sequence, Up(myrank), request->flush );
 
     /* Flush temporary data used for the pivoting */
-    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
+    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, A->mt - k, ipiv, k );
     RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
@@ -392,7 +394,7 @@ chameleon_pzgetrf_panel_facto_blocked_batched( struct chameleon_pzgetrf_s *ws,
     chameleon_data_flush( options->sequence, Up(myrank), request->flush );
 
     /* Flush temporary data used for the pivoting */
-    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, ipiv, k );
+    INSERT_TASK_ipiv_to_perm( options, k * A->mb, tempkm, minmn, 0, A->m, A->mt - k, ipiv, k );
     RUNTIME_pivot_flushone( options->sequence, pivot, A->myrank );
 }
 
