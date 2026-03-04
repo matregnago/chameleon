@@ -190,11 +190,18 @@ int CORE_zlaswp_get( cham_side_t side, int m0, int m, int n, int k,
                      const CHAMELEON_Complex64_t *A, int lda,
                      CHAMELEON_Complex64_t *B, int ldb,
                      const int *perm );
-int CORE_zlaswp_set( cham_side_t side,
-                     int m0, int m, int n, int k,
+int CORE_zlaswp_get_idx( cham_side_t side, int m0, int m, int n, int k,
+                         const CHAMELEON_Complex64_t *A, int lda,
+                         CHAMELEON_Complex64_t *B, int ldb,
+                         int perm_m, int perm_mt, const int *perm_idx );
+int CORE_zlaswp_set( cham_side_t side, int m0, int m, int n, int k,
                      const CHAMELEON_Complex64_t *A, int lda,
                      CHAMELEON_Complex64_t *B, int ldb,
                      const int *invp );
+int CORE_zlaswp_set_idx( cham_side_t side, int m0, int m, int n, int k,
+                         const CHAMELEON_Complex64_t *A, int lda,
+                         CHAMELEON_Complex64_t *B, int ldb,
+                         int invp_m, int invp_mt, const int *invp_idx );
 int  CORE_zlaswp_ontile( CHAM_desc_t descA, int i1, int i2, const int *ipiv, int inc);
 int  CORE_zlatro(cham_uplo_t uplo, cham_trans_t trans,
                  int M, int N,
