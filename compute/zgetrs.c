@@ -139,7 +139,9 @@ int CHAMELEON_zgetrs( cham_trans_t trans, int N, int NRHS,
                          B, NB, NB, LDB, NRHS, N, NRHS, sequence, &request );
 
     ws = CHAMELEON_zlaswp_WS_Alloc( ChamLeft, &descBt );
-    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N, 1, 1, IPIV, NULL );
+    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N,
+                         0, -1, -1,
+                         1, 1, IPIV, NULL );
 
     /* Call the tile interface */
     CHAMELEON_zgetrs_Tile_Async( trans, &descAt, &descIPIV, &descBt, ws, sequence, &request );

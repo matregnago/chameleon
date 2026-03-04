@@ -134,7 +134,9 @@ int CHAMELEON_zgesv( int N, int NRHS,
     /* Allocate workspace for partial pivoting */
     ws = CHAMELEON_zgetrf_WS_Alloc( &descAt );
 
-    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N, 1, 1, IPIV, NULL );
+    chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N,
+                         0, -1, -1,
+                         1, 1, IPIV, NULL );
 
     /* Call the tile interface */
     CHAMELEON_zgesv_Tile_Async( &descAt, &descIPIV, &descBt, ws, sequence, &request );

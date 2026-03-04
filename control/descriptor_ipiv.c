@@ -52,6 +52,15 @@
  * @param[in] m
  *          The size of the pivot array.
  *
+ * @param[in] withidx
+ *          Boolean to choose if we use the classic perm/invp arrays or the more complex perm/invp_idx arrays that sorts the rows/columns to permute per targeted tile.
+ *
+ * @param[in] max_m
+ *          The maximum value of the ipiv/perm/invp array, i.e. the total number of rows/columns of the matrix to permute. Not referenced if !widthidx.
+ *
+ * @param[in] max_mt
+ *          The maximum number of tiles involved in permutation, i.e. the total number of row/column tiles of the matrix to permute. Not referenced if !widthidx.
+ *
  * @param[in] p
  *          Number of processes rows for the 2D block-cyclic distribution.
  *
@@ -70,6 +79,7 @@
  *
  */
 int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
+                         int withidx, int max_m, int max_mt,
                          int p, int np, void *data,
                          blkrankof_ipiv_fct_t get_rankof )
 {
@@ -93,18 +103,22 @@ int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
 
     ipiv->get_blkdim = chameleon_getblkdim_ipiv;
 
-    ipiv->data   = data;
-    ipiv->myrank = RUNTIME_comm_rank( chamctxt );
-    ipiv->i      = 0;
-    ipiv->m      = m;
-    ipiv->mb     = mb;
-    ipiv->mt     = chameleon_ceil( ipiv->m, ipiv->mb );
-    ipiv->P      = p;
-    ipiv->NP     = np;
+    ipiv->data    = data;
+    ipiv->myrank  = RUNTIME_comm_rank( chamctxt );
+    ipiv->i       = 0;
+    ipiv->m       = m;
+    ipiv->mb      = mb;
+    ipiv->mt      = chameleon_ceil( ipiv->m, ipiv->mb );
+    ipiv->withidx = withidx;
+    ipiv->max_m   = max_m;
+    ipiv->max_mt  = max_mt;
+    ipiv->P       = p;
+    ipiv->NP      = np;
 
     /* Create runtime specific structure like registering data */
     RUNTIME_ipiv_create( ipiv );
 
+    (void)side;
     return rc;
 }
 
@@ -176,7 +190,7 @@ int CHAMELEON_Ipiv_Create( CHAM_ipiv_t **ipivptr, cham_side_t side, int mb, int 
         return CHAMELEON_ERR_OUT_OF_RESOURCES;
     }
 
-    chameleon_ipiv_init( ipiv, side, mb, m, p, np, data, NULL );
+    chameleon_ipiv_init( ipiv, side, mb, m, 0, -1, -1, p, np, data, NULL );
 
     *ipivptr = ipiv;
     return CHAMELEON_SUCCESS;
