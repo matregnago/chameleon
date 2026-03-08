@@ -140,6 +140,7 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
         STARPU_NAME,              cl_name,
         STARPU_FLOPS,             flops_zlatro( uplo, m, n ),
         0 );
+
     (void)mb;
 }
 
@@ -201,6 +202,8 @@ void INSERT_TASK_zlatro( const RUNTIME_option_t *options,
         }
     }
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
+
+    (void)mb;
 }
 
 #endif

@@ -367,12 +367,16 @@ chameleon_zdesc_alloc_diag( const CHAM_context_t *chamctxt,
                             CHAM_desc_t *descA, const char *name,
                             int nb, int m, int n, int p, int q )
 {
-    int diag_m = chameleon_min( m, n );
-    return chameleon_desc_init( chamctxt, descA, "Diag", CHAMELEON_MAT_ALLOC_TILE,
+    int   rc, diag_m = chameleon_min( m, n );
+    char *subname;
+    chameleon_asprintf( &subname, "%s_diag", name );
+    rc = chameleon_desc_init( chamctxt, descA, subname, CHAMELEON_MAT_ALLOC_TILE,
                                 ChamComplexDouble, nb, nb, diag_m, nb, diag_m, nb, p, q,
                                 chameleon_getaddr_diag,
                                 chameleon_getblkldd_ccrb,
                                 chameleon_getrankof_2d_diag, NULL );
+    free( subname );
+    return rc;
 }
 
 #define chameleon_zdesc_alloc( descA, name, mb, nb, m, n, free)         \

@@ -100,6 +100,8 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
+
+    (void)k;
 }
 
 #else /* defined(CHAMELEON_STARPU_USE_INSERT) */
@@ -155,8 +157,9 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
         chameleon_error( "INSERT_TASK_zgetrf_cpy_pivrow_in_Up", "Failed to submit the task to StarPU" );
         return;
     }
-
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
+
+    (void)k;
 }
 
 #endif /* defined(CHAMELEON_STARPU_USE_INSERT) */

@@ -52,12 +52,12 @@ typedef struct chameleon_pivot_s {
 
 typedef struct chameleon_tile_s {
 #if defined(CHAMELEON_KERNELS_TRACE)
-    char  *name;
+    char          *name;
 #endif
-    void  *mat;
-    int    rank, m, n, ld;
-    int8_t format;
-    int8_t flttype;
+    void          *mat;
+    int            rank, m, n, ld;
+    int8_t         format;
+    cham_flttype_t flttype;
 } CHAM_tile_t;
 
 /**
@@ -159,7 +159,7 @@ struct chameleon_desc_s {
     int j;            /**> column index to the beginning of the submatrix */
     int m;            /**> number of rows of the submatrix                */
     int n;            /**> number of columns of the submatrix             */
-    int lm;  	      /**> number of rows of the entire matrix            */
+    int lm;           /**> number of rows of the entire matrix            */
     int ln;           /**> number of columns of the entire matrix         */
 
     /* Number of rows/columns tiles for the full problem */

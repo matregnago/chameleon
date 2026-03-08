@@ -242,14 +242,14 @@ cppi_peek_data( starpu_data_handle_t handle, unsigned node, void *ptr, size_t co
     int   *tmp  = ptr;
     size_t size = cppi_interface->arraysize * 2;
 
+    STARPU_ASSERT( count == (size + sizeof(int) * 4) );
+
 #if defined(CHAMELEON_USE_MPI_DATATYPES) && 0
     /*
      * We may end up here if an early reception occured before the handle of the
      * received data has been registered. Thus, datatype was not existant and we
-     * need to unpack the data ourselves
+     * always need to unpack the data ourselves
      */
-    STARPU_ASSERT( count == (size + sizeof(int) * 4) );
-
 #else
 
     cppi_interface->has_diag     = tmp[0];
@@ -386,7 +386,7 @@ compare_pivots( cham_flttype_t type, int h, void * redux, void * input ){
 }
 
 void
-cl_cppi_redux_cpu_func(void *descr[], void *cl_arg)
+cl_cppi_redux_cpu_func( void *descr[], void *cl_arg )
 {
     cppi_interface_t *cppi_redux = ((cppi_interface_t *) descr[0]);
     cppi_interface_t *cppi_input = ((cppi_interface_t *) descr[1]);
@@ -439,6 +439,7 @@ cl_cppi_redux_cpu_func(void *descr[], void *cl_arg)
     cppi_display_dbg( cppi_input, stderr, "ARed Input: ");
     cppi_display_dbg( cppi_redux, stderr, "ARed Inout: ");
 
+    (void)cl_arg;
     return;
 }
 #endif

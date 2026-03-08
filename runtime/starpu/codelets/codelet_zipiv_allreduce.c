@@ -149,6 +149,7 @@ INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
     (void)cl;
     (void)cl_name;
+    (void)k;
 }
 
 static void
@@ -203,6 +204,8 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
 
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
     starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, h ) );
+
+    (void)k;
 }
 
 #endif /* defined(CHAMELEON_STARPU_USE_INSERT) */

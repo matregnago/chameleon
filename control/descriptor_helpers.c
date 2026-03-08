@@ -103,6 +103,7 @@ int chameleon_getrankof_2d_diag( const CHAM_desc_t *A, int m, int n )
 int chameleon_getrankof_ipiv_2d_row( const CHAM_ipiv_t *IPIV, int m, int n )
 {
     int Q = IPIV->NP / IPIV->P;
+    (void)n;
     return ( m % IPIV->P ) * Q;
 }
 
@@ -125,6 +126,7 @@ int chameleon_getrankof_ipiv_2d_row( const CHAM_ipiv_t *IPIV, int m, int n )
 int chameleon_getrankof_ipiv_2d_col( const CHAM_ipiv_t *IPIV, int m, int n )
 {
     int Q = IPIV->NP / IPIV->P;
+    (void)m;
     return n % Q;
 }
 

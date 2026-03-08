@@ -200,6 +200,7 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
      * WARNING: tags are not released in submit as they may always been used by
      * the runtime it can only be done by the synchronous destroy
      */
+    (void)sequence;
 }
 
 /**

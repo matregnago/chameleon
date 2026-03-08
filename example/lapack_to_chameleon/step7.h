@@ -91,6 +91,7 @@ static int Cham_build_plgsy_cpu( void *op_args, cham_uplo_t uplo, int m, int n, 
                   descA->m, m * descA->mb, n * descA->nb, data->seed );
 
     (void)uplo;
+    (void)ndata;
     return 0;
 }
 
@@ -109,6 +110,7 @@ static int Cham_build_plrnt_cpu( void *op_args, cham_uplo_t uplo, int m, int n, 
                   descA->m, m * descA->mb, n * descA->nb, data->seed );
 
     (void)uplo;
+    (void)ndata;
     return 0;
 }
 

@@ -240,6 +240,7 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
     *clargs_ptr = NULL;
     (void)clargs;
     (void)cl_name;
+    (void)An;
 }
 
 #endif /* defined(CHAMELEON_STARPU_USE_INSERT) */
