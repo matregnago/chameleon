@@ -36,6 +36,7 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
     assert( 0 );
     (void)options;
     (void)dir;
+    (void)side;
     (void)m0;
     (void)m;
     (void)n;
