@@ -37,6 +37,7 @@ INSERT_TASK_zgetrf_panel_offdiag_batched( const RUNTIME_option_t *options,
     (void)n;
     (void)h;
     (void)m0;
+    (void)ws;
     (void)A;
     (void)Am;
     (void)An;

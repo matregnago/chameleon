@@ -761,7 +761,7 @@ int CHAMELEON_Desc_Create_OOC_User(CHAM_desc_t **descptr, cham_flttype_t dtyp, i
 #if !defined (CHAMELEON_SCHED_STARPU)
     (void)descptr; (void)dtyp; (void)mb; (void)nb; (void)bsiz;
     (void)lm; (void)ln; (void)i; (void)j; (void)m; (void)n; (void)p; (void)q;
-    (void)get_rankof;
+    (void)get_rankof;(void)get_rankof_arg;
 
     chameleon_error("CHAMELEON_Desc_Create_OOC_User", "Only StarPU supports on-demand tile allocation");
     return CHAMELEON_ERR_NOT_SUPPORTED;

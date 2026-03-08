@@ -56,6 +56,8 @@ void INSERT_TASK_zlag2c( const RUNTIME_option_t *options,
                        sizeof(RUNTIME_sequence_t*),           &(options->sequence),  VALUE,
                        sizeof(RUNTIME_request_t*),            &(options->request),   VALUE,
                        0 );
+
+    (void)nb;
 }
 
 void CORE_clag2z_quark( Quark *quark )
@@ -83,4 +85,5 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
                        sizeof(void*), RTBLKADDR(A, CHAMELEON_Complex32_t, Am, An),             INPUT,
                        sizeof(void*), RTBLKADDR(B, CHAMELEON_Complex64_t, Bm, Bn),             INOUT,
                        0 );
+    (void)nb;
 }
