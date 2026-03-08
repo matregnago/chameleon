@@ -49,7 +49,8 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
     /* } */
 
     void          *clargs = NULL;
-    int            accessC;
+    cham_access_t  cham_accessC;
+    int            stpu_accessC;
     int            exec = 0;
     size_t         argssize = 0;
     const char    *cl_name = "Xgemm";
@@ -65,7 +66,8 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
     CHAMELEON_END_ACCESS_DECLARATION;
 
     /* Reduce the C access if needed */
-    accessC = ( beta == 0. ) ? STARPU_W : (STARPU_RW | ((beta == 1.) ? STARPU_COMMUTE : 0));
+    cham_accessC = ( beta == 0. ) ? ChamW    : ChamRW;
+    stpu_accessC = ( beta == 0. ) ? STARPU_W : (STARPU_RW | ((beta == 1.) ? STARPU_COMMUTE : 0));
 
     tileC = C->get_blktile( C, Cm, Cn );
     Cflttype = tileC->flttype;
@@ -186,14 +188,15 @@ INSERT_TASK_gemm( const RUNTIME_option_t *options,
         STARPU_CL_ARGS, clargs, argssize,
 
         /* Task handles */
-        STARPU_R, RUNTIME_data_getaddr_withconversion( options, STARPU_R, Cflttype, A, Am, An ),
-        STARPU_R, RUNTIME_data_getaddr_withconversion( options, STARPU_R, Cflttype, B, Bm, Bn ),
-        accessC,  RUNTIME_data_getaddr_withconversion( options, accessC,  Cflttype, C, Cm, Cn ),
+        STARPU_R,     RUNTIME_data_getaddr_withconversion( options, ChamR,        Cflttype, A, Am, An ),
+        STARPU_R,     RUNTIME_data_getaddr_withconversion( options, ChamR,        Cflttype, B, Bm, Bn ),
+        stpu_accessC, RUNTIME_data_getaddr_withconversion( options, cham_accessC, Cflttype, C, Cm, Cn ),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( gemm ),
         STARPU_NAME,              cl_name,
         0 );
 
+    (void)nb;
     return;
 }

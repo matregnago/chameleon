@@ -54,7 +54,7 @@ void RUNTIME_pivot_create( CHAM_desc_pivot_t *pivot )
 void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
                                    CHAM_desc_pivot_t  *pivot )
 {
-    int                   i;
+    size_t                i;
     starpu_data_handle_t *handle = (starpu_data_handle_t*)(pivot->nextpiv);
     size_t                nbhandles = 2 * pivot->P;
 
@@ -89,7 +89,7 @@ void RUNTIME_pivot_destroy( CHAM_desc_pivot_t *pivot )
     starpu_data_handle_t *handle = (starpu_data_handle_t*)(pivot->nextpiv);
 
     if ( handle ) {
-        int    i;
+        size_t i;
         size_t nbhandles = 2 * pivot->P;
 
         for ( i = 0; i < nbhandles; i++ ) {

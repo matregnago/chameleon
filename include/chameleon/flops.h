@@ -414,9 +414,9 @@ static inline double flops_cgetrf_percol_offdiag( int m, int n, int h ){ return 
 static inline double flops_dgetrf_percol_offdiag( int m, int n, int h ){ return flops_dgetrf_blocked_offdiag( m, n, h, n ); }
 static inline double flops_sgetrf_percol_offdiag( int m, int n, int h ){ return flops_sgetrf_blocked_offdiag( m, n, h, n ); }
 
-static inline double flops_zgetrf_trsm( int m, int n, int h, int ib ){ return ( n - h ) > 0 ? flops_ztrsm_unit( ChamLeft, ib, n-h ) : 0.; }
-static inline double flops_cgetrf_trsm( int m, int n, int h, int ib ){ return ( n - h ) > 0 ? flops_ctrsm_unit( ChamLeft, ib, n-h ) : 0.; }
-static inline double flops_dgetrf_trsm( int m, int n, int h, int ib ){ return ( n - h ) > 0 ? flops_dtrsm_unit( ChamLeft, ib, n-h ) : 0.; }
-static inline double flops_sgetrf_trsm( int m, int n, int h, int ib ){ return ( n - h ) > 0 ? flops_strsm_unit( ChamLeft, ib, n-h ) : 0.; }
+static inline double flops_zgetrf_trsm( int m, int n, int h, int ib ){ (void)m; return ( n - h ) > 0 ? flops_ztrsm_unit( ChamLeft, ib, n-h ) : 0.; }
+static inline double flops_cgetrf_trsm( int m, int n, int h, int ib ){ (void)m; return ( n - h ) > 0 ? flops_ctrsm_unit( ChamLeft, ib, n-h ) : 0.; }
+static inline double flops_dgetrf_trsm( int m, int n, int h, int ib ){ (void)m; return ( n - h ) > 0 ? flops_dtrsm_unit( ChamLeft, ib, n-h ) : 0.; }
+static inline double flops_sgetrf_trsm( int m, int n, int h, int ib ){ (void)m; return ( n - h ) > 0 ? flops_strsm_unit( ChamLeft, ib, n-h ) : 0.; }
 
 #endif /* _flops_h_ */

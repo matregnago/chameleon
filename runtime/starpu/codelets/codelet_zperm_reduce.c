@@ -283,6 +283,7 @@ insert_task_zperm_reduce_send( const RUNTIME_option_t *options,
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
     (void)cl;
     (void)cl_name;
+    (void)me;
 }
 
 /*
@@ -333,6 +334,7 @@ insert_task_zperm_reduce_recv( const RUNTIME_option_t *options,
     starpu_cham_task_exchange_data_after_execution( options, params, nbdata, descrs );
     starpu_mpi_cache_flush( options->sequence->comm, cpui_handle );
     (void)clargs;
+    (void)me;
 }
 
 #endif /* defined(CHAMELEON_STARPU_USE_INSERT) */

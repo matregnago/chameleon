@@ -98,6 +98,7 @@ chameleon_pzplrnk_generic( CHAM_context_t         *chamctxt,
     }
 
     free( initB );
+    (void)chamctxt;
 }
 
 /**
@@ -164,6 +165,7 @@ chameleon_pzplrnk_2dbc( CHAM_context_t         *chamctxt,
             chameleon_data_flush( sequence, WB(myp, n), request->flush );
         }
     }
+    (void)chamctxt;
 }
 
 /**

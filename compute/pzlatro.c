@@ -39,6 +39,7 @@ chameleon_pzlatro_upperlower( CHAM_context_t *chamctxt,
                 A( m, n ), B( n, m ) );
         }
     }
+    (void)chamctxt;
 }
 
 static inline void
@@ -62,6 +63,7 @@ chameleon_pzlatro_upper( CHAM_context_t *chamctxt,
                 A( m, n ), B( n, m ) );
         }
     }
+    (void)chamctxt;
 }
 
 static inline void
@@ -85,6 +87,7 @@ chameleon_pzlatro_lower( CHAM_context_t *chamctxt,
                 A( m, n ), B( n, m ) );
         }
     }
+    (void)chamctxt;
 }
 
 /**

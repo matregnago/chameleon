@@ -437,7 +437,7 @@ val_t pread_norm( const char *str )
 val_t pread_rec( const char *str )
 {
     val_t val;
-    val.ntype = ChamRecFull;
+    val.rec = ChamRecFull;
     if ( strcasecmp("full", str) == 0 )
     {
         val.rec = ChamRecFull;

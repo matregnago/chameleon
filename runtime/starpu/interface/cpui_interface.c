@@ -309,8 +309,8 @@ cpui_peek_data( starpu_data_handle_t  handle,
     /* cpui_interface->ws.offset = tmp[5]; */
     /* tmp += 6; */
 
+    assert( count >= sizeof(int) );
     count -= sizeof(int);
-    assert( count >= 0 );
     cpui_interface->ws.nindex = tmp[0];
     tmp++;
 
@@ -321,8 +321,8 @@ cpui_peek_data( starpu_data_handle_t  handle,
     }
 
     /* Make sure we received the full index array as annouced */
+    assert( count >= idx_size );
     count -= idx_size;
-    assert( count >= 0 );
 
     memcpy( cpui_interface->ws.index, tmp, idx_size );
     tmp += cpui_interface->m;
@@ -330,8 +330,8 @@ cpui_peek_data( starpu_data_handle_t  handle,
     data_size = elt_size * cpui_interface->ws.nindex * cpui_interface->n;
 
     /* Make sure we received the full data array as annouced */
+    assert( count >= data_size );
     count -= data_size;
-    assert( count >= 0 );
 
     memcpy( cpui_interface->ws.rows, tmp, data_size );
 

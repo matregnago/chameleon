@@ -73,7 +73,11 @@ int chameleon_desc_datadist_get_iparam( const CHAM_desc_t *desc, int i )
     return desc->data_dist->distrib[desc->data_dist->get_distrib(desc, i)];
 }
 
-int chameleon_get_2d_block_cyclic( const CHAM_desc_t *desc, int i ) { return i; }
+int chameleon_get_2d_block_cyclic( const CHAM_desc_t *desc, int i )
+{
+    (void)desc;
+    return i;
+}
 
 void chameleon_desc_set_datadist( CHAM_desc_t *to, cham_data_dist_t *from )
 {

@@ -83,4 +83,6 @@ CORE_zprint( FILE *file, const char *header,
         fprintf( output, FOOTER );
         fflush( output );
     }
+
+    (void)uplo;
 }

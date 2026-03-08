@@ -48,7 +48,7 @@ zpotrf_batch_cpu( void *op_args,
     }
 
     (void)uplo;
-
+    (void)m;
     return 0;
 }
 #else
