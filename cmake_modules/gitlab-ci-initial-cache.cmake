@@ -3,9 +3,9 @@ set(CMAKE_INSTALL_PREFIX "$ENV{PWD}/install-$ENV{VERSION}" CACHE PATH "")
 set(CMAKE_VERBOSE_MAKEFILE "ON" CACHE BOOL "")
 
 if(CMAKE_C_FLAGS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror" CACHE STRING "")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -fprofile-update=atomic" CACHE STRING "")
 else()
-  set(CMAKE_C_FLAGS "-Werror" CACHE STRING "")
+  set(CMAKE_C_FLAGS "-Werror -fprofile-update=atomic" CACHE STRING "")
 endif()
 
 option(MORSE_ENABLE_WARNING  "Enable warning messages"        ON)
