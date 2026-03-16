@@ -41,15 +41,15 @@ cl_zlaswp_batched_cpu_func( void *descr[],
                             void *cl_arg )
 {
     int          i, *permget, *permset;
-    CHAM_tile_t *A, *U, *B;
+    CHAM_tile_t *A, *WAP, *WA;
     struct cl_zlaswp_batched_args_s *clargs  = ( struct cl_zlaswp_batched_args_s * ) cl_arg;
     struct cl_zlaswp_single_tile_s  *tilearg = clargs->tiles;
     starpu_cham_tile_interface_t   **descrA;
 
     permget = (int *)STARPU_VECTOR_GET_PTR( descr[0] );
     permset = (int *)STARPU_VECTOR_GET_PTR( descr[1] );
-    U       = (CHAM_tile_t *)cti_interface_get( descr[2] );
-    B       = (CHAM_tile_t *)cti_interface_get( descr[3] );
+    WAP     = (CHAM_tile_t *)cti_interface_get( descr[2] );
+    WA      = (CHAM_tile_t *)cti_interface_get( descr[3] );
 
     descrA = (starpu_cham_tile_interface_t**)&(descr[4]);
     if ( clargs->perm_mt < 0 ) {
@@ -57,9 +57,9 @@ cl_zlaswp_batched_cpu_func( void *descr[],
             A = (CHAM_tile_t *) cti_interface_get( *descrA );
 
             TCORE_zlaswp_get( clargs->side, tilearg->m0, tilearg->m,
-                              tilearg->n, clargs->k, A, U, permget );
+                              tilearg->n, clargs->k, A, WAP, permget );
             TCORE_zlaswp_set( clargs->side, tilearg->m0, tilearg->m,
-                              tilearg->n, clargs->k, B, A, permset );
+                              tilearg->n, clargs->k, WA, A, permset );
 
             descrA++;
             tilearg++;
@@ -70,10 +70,10 @@ cl_zlaswp_batched_cpu_func( void *descr[],
             A = (CHAM_tile_t *) cti_interface_get( *descrA );
 
             TCORE_zlaswp_get_idx( clargs->side, tilearg->m0, tilearg->m,
-                                  tilearg->n, clargs->k, A, U,
+                                  tilearg->n, clargs->k, A, WAP,
                                   tilearg->perm_m, clargs->perm_mt, permget );
             TCORE_zlaswp_set_idx( clargs->side, tilearg->m0, tilearg->m,
-                                  tilearg->n, clargs->k, B, A,
+                                  tilearg->n, clargs->k, WA, A,
                                   tilearg->perm_m, clargs->perm_mt, permset );
 
             descrA++;
@@ -97,15 +97,15 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
                                  int                     k,
                                  void                   *ws,
                                  const CHAM_ipiv_t      *ipiv, int ipivk,
-                                 const CHAM_desc_t      *Am,   int Amm, int Amn,
-                                 const CHAM_desc_t      *Ak,   int Akm, int Akn,
-                                 const CHAM_desc_t      *U,    int Um,  int Un,
+                                 const CHAM_desc_t      *A,   int Am,   int An,
+                                 const CHAM_desc_t      *WA,  int WAm,  int WAn,
+                                 const CHAM_desc_t      *WAP, int WAPm, int WAPn,
                                  void                  **clargs_ptr )
 {
     int task_num   = 0;
     int batch_size = ((struct chameleon_pzlaswp_s *)ws)->batch_size_swap;
     struct cl_zlaswp_batched_args_s *clargs = *clargs_ptr;
-    if ( Am->get_rankof( Am, Amm, Amn) != Am->myrank ) {
+    if ( A->get_rankof( A, Am, An) != A->myrank ) {
         return;
     }
 
@@ -116,10 +116,10 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
         clargs->k         = k;
         if ( ipiv->withidx ) {
             if ( side == ChamLeft ) {
-                clargs->perm_mt = Am->mt - ipivk;
+                clargs->perm_mt = A->mt - ipivk;
             }
             else {
-                clargs->perm_mt = Am->nt - ipivk;
+                clargs->perm_mt = A->nt - ipivk;
             }
         }
         else {
@@ -132,14 +132,14 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
     clargs->tiles[ task_num ].m0     = m0;
     clargs->tiles[ task_num ].m      = m;
     clargs->tiles[ task_num ].n      = n;
-    clargs->tiles[ task_num ].perm_m = (side == ChamLeft) ? ( Amm - ipivk ) : ( Amn - ipivk );
+    clargs->tiles[ task_num ].perm_m = (side == ChamLeft) ? ( Am - ipivk ) : ( An - ipivk );
 
-    clargs->handle_mode[ task_num ].handle = RTBLKADDR(Am, CHAMELEON_Complex64_t, Amm, Amn);
+    clargs->handle_mode[ task_num ].handle = RTBLKADDR(A, CHAMELEON_Complex64_t, Am, An);
     clargs->handle_mode[ task_num ].mode   = STARPU_RW;
     clargs->tasks_nbr ++;
 
     if ( clargs->tasks_nbr == batch_size ) {
-        INSERT_TASK_zlaswp_batched_flush( options, dir, ipiv, ipivk, Ak, Akm, Akn, U, Um, Un, clargs_ptr );
+        INSERT_TASK_zlaswp_batched_flush( options, dir, ipiv, ipivk, WA, WAm, WAn, WAP, WAPm, WAPn, clargs_ptr );
     }
 }
 
@@ -148,8 +148,8 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
 void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
                                        cham_dir_t              dir,
                                        const CHAM_ipiv_t      *ipiv, int ipivk,
-                                       const CHAM_desc_t      *Ak,   int Akm, int Akn,
-                                       const CHAM_desc_t      *U,    int Um,  int Un,
+                                       const CHAM_desc_t      *WA, int WAm, int WAn,
+                                       const CHAM_desc_t      *WAP, int WAPm, int WAPn,
                                        void                  **clargs_ptr )
 {
     struct cl_zlaswp_batched_args_s *clargs   = *clargs_ptr;
@@ -176,8 +176,8 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
         STARPU_CL_ARGS,             clargs, sizeof(struct cl_zlaswp_batched_args_s),
         STARPU_R,                   ipiv_handle_get,
         STARPU_R,                   ipiv_handle_set,
-        STARPU_RW | STARPU_COMMUTE, RTBLKADDR(U, ChamComplexDouble, Um, Un),
-        STARPU_R,                   RTBLKADDR(Ak, ChamComplexDouble, Akm, Akn),
+        STARPU_RW | STARPU_COMMUTE, RTBLKADDR(WAP, ChamComplexDouble, WAPm, WAPn),
+        STARPU_R,                   RTBLKADDR(WA,  ChamComplexDouble, WAm,  WAn),
         STARPU_DATA_MODE_ARRAY,     clargs->handle_mode, nhandles,
 
         /* Common task arguments */
@@ -193,8 +193,8 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
 void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
                                        cham_dir_t              dir,
                                        const CHAM_ipiv_t      *ipiv, int ipivk,
-                                       const CHAM_desc_t      *Ak,   int Akm, int Akn,
-                                       const CHAM_desc_t      *U,    int Um,  int Un,
+                                       const CHAM_desc_t      *WA,   int WAm,  int WAn,
+                                       const CHAM_desc_t      *WAP,  int WAPm, int WAPn,
                                        void                  **clargs_ptr )
 {
     int                              ret, k;
@@ -221,15 +221,19 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
     /*
      * Register the data handles, might need to receive perm and invp
      */
-    starpu_cham_exchange_init_params( options, &params, Ak->myrank );
+    starpu_cham_exchange_init_params( options, &params, WA->myrank );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
                                                   ipiv_handle_get,
                                                   STARPU_R );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
                                                   ipiv_handle_set,
                                                   STARPU_R );
-    starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs, RTBLKADDR( U, ChamComplexDouble, Um, Un ),    STARPU_RW | STARPU_COMMUTE );
-    starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs, RTBLKADDR( Ak, ChamComplexDouble, Akm, Akn ), STARPU_R );
+    starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
+                                                  RTBLKADDR( WAP, ChamComplexDouble, WAPm, WAPn ),
+                                                  STARPU_RW | STARPU_COMMUTE );
+    starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
+                                                  RTBLKADDR( WA, ChamComplexDouble, WAm, WAn ),
+                                                  STARPU_R );
     for ( k = 0; k < myclargs->tasks_nbr; k++ ) {
         starpu_cham_register_descr( &nbdata, descrs, myclargs->handle_mode[ k ].handle, STARPU_RW );
     }

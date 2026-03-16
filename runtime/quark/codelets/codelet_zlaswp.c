@@ -23,9 +23,9 @@
 
 static void CORE_zlaswp_get_quark( Quark *quark )
 {
+    cham_side_t  side;
     int          m0, k, *perm;
     CHAM_tile_t *A, *B;
-    cham_side_t  side;
 
     quark_unpack_args_6( quark, side, m0, k, perm, A, B );
 
@@ -36,8 +36,8 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
                              cham_side_t side, cham_dir_t dir,
                              int m0, int m, int n, int k,
                              const CHAM_ipiv_t *ipiv, int ipivk,
-                             const CHAM_desc_t *A, int Am, int An,
-                             const CHAM_desc_t *U, int Um, int Un )
+                             const CHAM_desc_t *A,   int Am,   int An,
+                             const CHAM_desc_t *WAP, int WAPm, int WAPn )
 {
     quark_option_t *opt = (quark_option_t*)(options->schedopt);
     DAG_CORE_LASWP;
@@ -47,9 +47,9 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
         sizeof(cham_side_t),  &side, VALUE,
         sizeof(int),          &m0,   VALUE,
         sizeof(int),          &k,    VALUE,
-        sizeof(int*),         RUNTIME_ipiv_getperm( ipiv, ipivk ),     INPUT,
-        sizeof(CHAM_tile_t*), RTBLKADDR(A, ChamComplexDouble, Am, An), INPUT,
-        sizeof(CHAM_tile_t*), RTBLKADDR(U, ChamComplexDouble, Um, Un), INOUT,
+        sizeof(int*),         RUNTIME_ipiv_getperm( ipiv, ipivk ),           INPUT,
+        sizeof(CHAM_tile_t*), RTBLKADDR(A,   ChamComplexDouble, Am,   An  ), INPUT,
+        sizeof(CHAM_tile_t*), RTBLKADDR(WAP, ChamComplexDouble, WAPm, WAPn), INOUT,
         0 );
 
     (void)dir;
@@ -59,12 +59,13 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
 
 static void CORE_zlaswp_set_quark( Quark *quark )
 {
-    int          m0, k, *invp;
+    cham_side_t  side;
+    int          m0, m, n, k, *invp;
     CHAM_tile_t *A, *B;
 
-    quark_unpack_args_5( quark, m0, k, invp, A, B );
+    quark_unpack_args_8( quark, side, m0, m, n, k, invp, A, B );
 
-    TCORE_zlaswp_set( ChamLeft, m0, A->m, A->n, k, A, B, invp );
+    TCORE_zlaswp_set( side, m0, A->m, A->n, k, A, B, invp );
 }
 
 void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
@@ -72,25 +73,25 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
                              cham_dir_t              dir,
                              int m0, int m, int n, int k,
                              const CHAM_ipiv_t *ipiv, int ipivk,
-                             const CHAM_desc_t *A, int Am, int An,
-                             const CHAM_desc_t *B, int Bm, int Bn )
+                             const CHAM_desc_t *WA, int WAm, int WAn,
+                             const CHAM_desc_t *A,  int Am,  int An )
 {
     quark_option_t *opt = (quark_option_t*)(options->schedopt);
     DAG_CORE_LASWP;
 
     QUARK_Insert_Task(
         opt->quark, CORE_zlaswp_set_quark, (Quark_Task_Flags*)opt,
-        sizeof(int),          &m0, VALUE,
-        sizeof(int),          &k,  VALUE,
-        sizeof(int*),         RUNTIME_ipiv_getinvp( ipiv, ipivk ),     INPUT,
-        sizeof(CHAM_tile_t*), RTBLKADDR(A, ChamComplexDouble, Am, An), INPUT,
-        sizeof(CHAM_tile_t*), RTBLKADDR(B, ChamComplexDouble, Bm, Bn), INOUT,
+        sizeof(cham_side_t),  &side, VALUE,
+        sizeof(int),          &m0,   VALUE,
+        sizeof(int),          &m,    VALUE,
+        sizeof(int),          &n,    VALUE,
+        sizeof(int),          &k,    VALUE,
+        sizeof(int*),         RUNTIME_ipiv_getinvp( ipiv, ipivk ),        INPUT,
+        sizeof(CHAM_tile_t*), RTBLKADDR(WA, ChamComplexDouble, WAm, WAn), INPUT,
+        sizeof(CHAM_tile_t*), RTBLKADDR(A,  ChamComplexDouble, Am, An),   INOUT,
         0 );
 
     (void)dir;
-    (void)side;
-    (void)m;
-    (void)n;
 }
 
 #if defined(CHAMELEON_USE_MPI)
