@@ -132,7 +132,17 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
     clargs->tiles[ task_num ].m0     = m0;
     clargs->tiles[ task_num ].m      = m;
     clargs->tiles[ task_num ].n      = n;
-    clargs->tiles[ task_num ].perm_m = (side == ChamLeft) ? ( Am - ipivk ) : ( An - ipivk );
+    if ( ipiv->withidx ) {
+        if ( side == ChamLeft ) {
+            clargs->tiles[ task_num ].perm_m = Am - ipivk;
+        }
+        else {
+            clargs->tiles[ task_num ].perm_m = An - ipivk;
+        }
+    }
+    else {
+        clargs->tiles[ task_num ].perm_m = -1;
+    }
 
     clargs->handle_mode[ task_num ].handle = RTBLKADDR(A, CHAMELEON_Complex64_t, Am, An);
     clargs->handle_mode[ task_num ].mode   = STARPU_RW;
