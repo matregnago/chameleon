@@ -35,16 +35,18 @@ void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
 static inline void
 CORE_ipiv_to_perm_quark( Quark *quark )
 {
-    int m0, m, k;
+    int m0, m, k, K1, K2, mt;
     int *ipiv, *perm, *invp;
 
-    quark_unpack_args_6( quark, m0, m, k, ipiv, perm, invp );
+    quark_unpack_args_9( quark, m0, m, k, K1, K2, mt, ipiv, perm, invp );
 
-    CORE_ipiv_to_perm( m0, m, k, 1, m, ipiv, perm, invp );
+    CORE_ipiv_to_perm( m0, m, k, K1, K2, ipiv, perm, invp );
+
+    (void)mt;
 }
 
 void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
-                               int m0, int m, int k, int K1, int K2,
+                               int m0, int m, int k, int K1, int K2, int mt,
                                const CHAM_ipiv_t *ipivdesc, int ipivk )
 {
     quark_option_t *opt = (quark_option_t*)(options->schedopt);
@@ -54,11 +56,11 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         sizeof(int),  &m0,  VALUE,
         sizeof(int),  &m,   VALUE,
         sizeof(int),  &k,   VALUE,
+        sizeof(int),  &K1,  VALUE,
+        sizeof(int),  &K2,  VALUE,
+        sizeof(int),  &mt,  VALUE,
         sizeof(int*), RUNTIME_ipiv_getaddr( ipivdesc, ipivk ), INPUT,
         sizeof(int*), RUNTIME_ipiv_getperm( ipivdesc, ipivk ), OUTPUT,
         sizeof(int*), RUNTIME_ipiv_getinvp( ipivdesc, ipivk ), OUTPUT,
         0 );
-
-    (void)K1;
-    (void)K2;
 }

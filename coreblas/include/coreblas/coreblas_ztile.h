@@ -56,7 +56,13 @@ int  TCORE_zlascal( cham_uplo_t uplo, int m, int n, CHAMELEON_Complex64_t alpha,
 void TCORE_zlaset( cham_uplo_t uplo, int n1, int n2, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAM_tile_t *A );
 void TCORE_zlaset2( cham_uplo_t uplo, int n1, int n2, CHAMELEON_Complex64_t alpha, CHAM_tile_t *A );
 int TCORE_zlaswp_get( cham_side_t side, int m0, int m, int n, int k, CHAM_tile_t *A, CHAM_tile_t *B, const int *perm );
+int TCORE_zlaswp_get_idx( cham_side_t side, int m0, int m, int n, int k,
+                          const CHAM_tile_t *A, CHAM_tile_t *B,
+                          int perm_m, int perm_mt, const int *perm_idx );
 int TCORE_zlaswp_set( cham_side_t side, int m0, int m, int n, int k, CHAM_tile_t *A, CHAM_tile_t *B, const int *invp );
+int TCORE_zlaswp_set_idx( cham_side_t side, int m0, int m, int n, int k,
+                          const CHAM_tile_t *A, CHAM_tile_t *B,
+                          int invp_m, int invp_mt, const int *invp_idx );
 int  TCORE_zlatro( cham_uplo_t uplo, cham_trans_t trans, int M, int N, const CHAM_tile_t *A, CHAM_tile_t *B );
 void TCORE_zlauum( cham_uplo_t uplo, int N, CHAM_tile_t *A );
 #if defined(PRECISION_z) || defined(PRECISION_c)

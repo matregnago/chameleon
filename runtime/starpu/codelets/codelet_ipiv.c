@@ -19,6 +19,16 @@
  */
 #include "chameleon_starpu_internal.h"
 
+struct cl_ipiv_to_perm_args_s {
+    int withidx;
+    int m0;
+    int m;
+    int k;
+    int K1;
+    int K2;
+    int mt;
+};
+
 void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
                                CHAM_desc_pivot_t *pivot, int k, int h, int rank )
 {
@@ -40,21 +50,33 @@ void INSERT_TASK_ipiv_reducek( const RUNTIME_option_t *options,
     }
 
     (void)options;
+    (void)k;
 }
 
 #if !defined(CHAMELEON_SIMULATION)
 static void cl_ipiv_to_perm_cpu_func( void *descr[], void *cl_arg )
 {
-    int  m0, m, k, K1, K2;
+    struct cl_ipiv_to_perm_args_s *clargs = (struct cl_ipiv_to_perm_args_s *)cl_arg;
     int *ipiv, *perm, *invp;
-
-    starpu_codelet_unpack_args( cl_arg, &m0, &m, &k, &K1, &K2 );
 
     ipiv = (int*)STARPU_VECTOR_GET_PTR(descr[0]);
     perm = (int*)STARPU_VECTOR_GET_PTR(descr[1]);
     invp = (int*)STARPU_VECTOR_GET_PTR(descr[2]);
 
-    CORE_ipiv_to_perm( m0, m, k, K1, K2, ipiv, perm, invp );
+    if ( clargs->withidx ) {
+        int permtmp[ clargs->m ];
+        int invptmp[ clargs->m ];
+        CORE_ipiv_to_perm( clargs->m0, clargs->m, clargs->k,
+                           clargs->K1, clargs->K2,
+                           ipiv, permtmp, invptmp );
+        CORE_perm_to_idx( clargs->m0, clargs->m, clargs->mt,
+                          permtmp, invptmp, perm, invp );
+    }
+    else {
+        CORE_ipiv_to_perm( clargs->m0, clargs->m, clargs->k,
+                           clargs->K1, clargs->K2,
+                           ipiv, perm, invp );
+    }
 }
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
@@ -74,20 +96,31 @@ static struct starpu_codelet cl_ipiv_to_perm = {
 };
 
 void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
-                               int m0, int m, int k, int K1, int K2,
+                               int m0, int m, int k, int K1, int K2, int mt,
                                const CHAM_ipiv_t *ipivdesc, int ipivk )
 {
+    struct cl_ipiv_to_perm_args_s *clargs = NULL;
+
+    /* Handle cache */
+    if ( ipivdesc->get_rankof( ipivdesc, ipivk, ipivk ) != ipivdesc->myrank ) {
+        return;
+    }
+
+    clargs = malloc( sizeof(struct cl_ipiv_to_perm_args_s) );
+    clargs->withidx = ipivdesc->withidx;
+    clargs->m0 = m0;
+    clargs->m  = m;
+    clargs->k  = k;
+    clargs->K1 = K1;
+    clargs->K2 = K2;
+    clargs->mt = mt;
 
     /* Insert the task */
     rt_starpu_insert_task(
         &cl_ipiv_to_perm,
 
         /* Task codelet arguments */
-        STARPU_VALUE, &m0, sizeof(int),
-        STARPU_VALUE, &m,  sizeof(int),
-        STARPU_VALUE, &k,  sizeof(int),
-        STARPU_VALUE, &K1, sizeof(int),
-        STARPU_VALUE, &K2, sizeof(int),
+        STARPU_CL_ARGS, clargs, sizeof(struct cl_ipiv_to_perm_args_s),
 
         /* Task handles */
         STARPU_R, RUNTIME_ipiv_getaddr( ipivdesc, ipivk ),

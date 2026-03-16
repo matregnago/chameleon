@@ -176,6 +176,7 @@ void         chameleon_desc_destroy  ( CHAM_desc_t *desc );
 void         chameleon_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence );
 
 int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
+                         int withidx, int max_m, int max_mt,
                          int p, int np, void *data,
                          blkrankof_ipiv_fct_t get_rankof );
 void chameleon_ipiv_destroy( CHAM_ipiv_t *ipiv );

@@ -58,7 +58,7 @@ void RUNTIME_ipiv_create( CHAM_ipiv_t *ipiv )
  */
 void RUNTIME_ipiv_destroy( CHAM_ipiv_t *ipiv )
 {
-    int                   i;
+    size_t                i;
     starpu_data_handle_t *handle = (starpu_data_handle_t*)(ipiv->ipiv);
     size_t                nbhandles = 3 * ipiv->mt;
 
@@ -98,7 +98,12 @@ __runtime_ipiv_getaddr( const CHAM_ipiv_t    *ipiv,
         ncols = (mm == (ipiv->mt-1)) ? ipiv->m - mm * ipiv->mb : ipiv->mb;
     }
     else {
-        ncols = ipiv->mb;
+        if ( ipiv->withidx ) {
+            ncols = (ipiv->max_mt - m + 1) + 2 * ipiv->mb;
+        }
+        else {
+            ncols = ipiv->mb;
+        }
     }
 
     if ( data ) {

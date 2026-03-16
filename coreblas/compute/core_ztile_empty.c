@@ -370,7 +370,43 @@ TCORE_zlaswp_get( cham_side_t side, int m0, int m, int n, int k, CHAM_tile_t *A,
 }
 
 int
+TCORE_zlaswp_get_idx( __attribute__((unused)) cham_side_t side,
+                      __attribute__((unused)) int         m0,
+                      __attribute__((unused)) int         m,
+                      __attribute__((unused)) int         n,
+                      __attribute__((unused)) int         k,
+                      const CHAM_tile_t                  *A,
+                      CHAM_tile_t                        *B,
+                      __attribute__((unused)) int        perm_m,
+                      __attribute__((unused)) int        perm_mt,
+                      __attribute__((unused)) const int *perm_idx )
+{
+    coreblas_kernel_trace( A, B );
+    assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
+    assert( B->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
+    return 0;
+}
+
+int
 TCORE_zlaswp_set( cham_side_t side, int m0, int m, int n, int k, CHAM_tile_t *A, CHAM_tile_t *B, const int *invp )
+{
+    coreblas_kernel_trace( A, B );
+    assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
+    assert( B->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
+    return 0;
+}
+
+int
+TCORE_zlaswp_set_idx( __attribute__((unused)) cham_side_t side,
+                      __attribute__((unused)) int         m0,
+                      __attribute__((unused)) int         m,
+                      __attribute__((unused)) int         n,
+                      __attribute__((unused)) int         k,
+                      const CHAM_tile_t                  *A,
+                      CHAM_tile_t                        *B,
+                      __attribute__((unused)) int        invp_m,
+                      __attribute__((unused)) int        invp_mt,
+                      __attribute__((unused)) const int *invp_idx )
 {
     coreblas_kernel_trace( A, B );
     assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );

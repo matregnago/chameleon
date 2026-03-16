@@ -222,6 +222,9 @@ struct chameleon_ipiv_s {
     int                  m;           /**> The number of row in the vector ipiv                                                        */
     int                  mb;          /**> The number of row per block                                                                 */
     int                  mt;          /**> The number of tiles                                                                         */
+    int                  withidx;     /**> Boolean to enable/disable the use of the {perm/invp}_idx instead of the classic ones        */
+    int                  max_m;       /**> The number of rows/columns of the matrix to permute                                         */
+    int                  max_mt;      /**> The number of row/clumn tiles of the matrix to permute                                      */
     int                  P;           /**> The number of processes per column on a tiled matrix                                        */
     int                  NP;          /**> The total number of processes                                                               */
 };
