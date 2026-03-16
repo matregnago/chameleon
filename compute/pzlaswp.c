@@ -73,6 +73,8 @@ chameleon_pzlaswp_panel_permute( struct chameleon_pzlaswp_s *ws,
 
 /**
  *  Permutation of the panel n at step k
+ *  This version batched sets of tasks together (one batch for the set, one for
+ *  the set)
  */
 static inline void
 chameleon_pzlaswp_panel_permute_batched( struct chameleon_pzlaswp_s *ws,
@@ -100,15 +102,19 @@ chameleon_pzlaswp_panel_permute_batched( struct chameleon_pzlaswp_s *ws,
                         A(k, n), Wu(A->myrank, n) );
     options->withlacpy = withlacpy;
 
-    INSERT_TASK_zlaswp_get( options, ChamLeft, dir, k*A->mb, tempkm, tempnn, tempkm,
-                            ipiv, k, A(k, n), Wu(A->myrank, n) );
+    for ( m = k; m < A->mt; m++ ) {
+        tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        INSERT_TASK_zlaswp_get_batched( options, ChamLeft, dir, m*A->mb, tempmm, tempnn, tempkm, (void *)ws, ipiv, k,
+                                        A(m, n), Wu(A->myrank, n), clargs );
+    }
+    INSERT_TASK_zlaswp_get_batched_flush( options, dir, ipiv, k, Wu(A->myrank, n), clargs );
 
     for ( m = k + 1; m < A->mt; m++ ) {
         tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-        INSERT_TASK_zlaswp_batched( options, ChamLeft, dir, m*A->mb, tempmm, tempnn, tempkm, (void *)ws, ipiv, k,
-                                    A(m, n), A(k, n), Wu(A->myrank, n), clargs );
+        INSERT_TASK_zlaswp_set_batched( options, ChamLeft, dir, m*A->mb, tempmm, tempnn, tempkm, (void *)ws, ipiv, k,
+                                        A(k, n), A(m, n), clargs );
     }
-    INSERT_TASK_zlaswp_batched_flush( options, dir, ipiv, k, A(k, n), Wu(A->myrank, n), clargs );
+    INSERT_TASK_zlaswp_set_batched_flush( options, dir, ipiv, k, A(k, n), clargs );
 
 #if defined(CHAMELEON_USE_MPI)
     if ( ws->allreduce ) {
