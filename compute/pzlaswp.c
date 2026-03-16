@@ -105,7 +105,7 @@ chameleon_pzlaswp_panel_permute_batched( struct chameleon_pzlaswp_s *ws,
 
     for ( m = k + 1; m < A->mt; m++ ) {
         tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-        INSERT_TASK_zlaswp_batched( options, ws->ws.side, dir, m*A->mb, tempmm, tempnn, tempkm, (void *)ws, ipiv, k,
+        INSERT_TASK_zlaswp_batched( options, ChamLeft, dir, m*A->mb, tempmm, tempnn, tempkm, (void *)ws, ipiv, k,
                                     A(m, n), A(k, n), Wu(A->myrank, n), clargs );
     }
     INSERT_TASK_zlaswp_batched_flush( options, dir, ipiv, k, A(k, n), Wu(A->myrank, n), clargs );
