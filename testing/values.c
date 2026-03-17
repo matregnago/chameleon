@@ -859,6 +859,10 @@ testing_salea()
     /* Real part */
     val = 0.5f - ran * RndF_Mul;
 
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &val, 1, MPI_FLOAT, 0, MPI_COMM_WORLD );
+#endif
+
     return val;
 }
 
@@ -889,6 +893,10 @@ testing_dalea()
     /* Real part */
     val = 0.5f - ran * RndF_Mul;
 
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &val, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
+#endif
+
     return val;
 }
 
@@ -910,6 +918,10 @@ testing_calea()
     /* Imaginary part */
     val += I*(0.5f - ran * RndF_Mul);
 
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &val, 1, MPI_COMPLEX, 0, MPI_COMM_WORLD );
+#endif
+
     return val;
 }
 
@@ -930,6 +942,10 @@ testing_zalea()
 
     /* Imaginary part */
     val += I*(0.5f - ran * RndF_Mul);
+
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &val, 1, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD );
+#endif
 
     return val;
 }
