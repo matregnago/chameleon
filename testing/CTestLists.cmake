@@ -172,6 +172,14 @@ if (NOT CHAMELEON_SIMULATION)
           set_tests_properties( ${getrf_test_prefix}_ppivblocked_batch
             PROPERTIES ENVIRONMENT "CHAMELEON_GETRF_ALGO=ppiv;CHAMELEON_BATCH_SIZE=3" )
 
+          add_test( ${getrf_test_prefix}_split_laswp_set_gemm ${getrf_test_cmd} )
+          set_tests_properties( ${getrf_test_prefix}_split_laswp_set_gemm
+            PROPERTIES ENVIRONMENT "CHAMELEON_GETRF_ALGO=ppiv;CHAMELEON_BATCH_SIZE=0;CHAMELEON_SPLIT_LASWP_GEMM=1" )
+
+          add_test( ${getrf_test_prefix}_split_laswp_set_gemm ${getrf_test_cmd} )
+          set_tests_properties( ${getrf_test_prefix}_split_laswp_set_gemm
+            PROPERTIES ENVIRONMENT "CHAMELEON_GETRF_ALGO=ppiv;CHAMELEON_BATCH_SIZE=3;CHAMELEON_SPLIT_LASWP_GEMM=1" )
+
           # if ( ${cat} STREQUAL "mpi" )
           #   add_test( ${getrf_test_prefix}_ppiv_comm_with_task ${getrf_test_cmd} -P ${NP} )
           #   add_test( test_${cat}_${prec}getrs_ppiv_comm_with_task ${PREFIX} ${CMD} -c -t ${THREADS} -g ${gpus} -P ${NP} -f input/getrs.in )
