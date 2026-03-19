@@ -98,6 +98,14 @@ CHAMELEON_zgetrf_WS_Alloc( const CHAM_desc_t *A )
     }
 
     /*
+     * Chose if laswp_set and gemm are done together or not
+     */
+    {
+       int split_laswp_set_gemm = chameleon_env_on_off( "CHAMELEON_SPLIT_LASWP_GEMM", CHAMELEON_FALSE );
+       ws->panel_permute_update = ( split_laswp_set_gemm ) ? chameleon_pzgetrf_panel_update : chameleon_pzgetrf_panel_permute_update;
+    }
+
+    /*
      * Disable Backward pivoting when performing HPL computations
      */
     {

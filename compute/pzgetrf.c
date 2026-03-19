@@ -499,7 +499,7 @@ chameleon_pzgetrf_panel_update_ws( struct chameleon_pzgetrf_s *ws,
 }
 #endif
 
-static inline void
+void
 chameleon_pzgetrf_panel_update( struct chameleon_pzgetrf_s *ws,
                                 CHAM_desc_t                *A,
                                 CHAM_ipiv_t                *ipiv,
@@ -790,7 +790,7 @@ void chameleon_pzgetrf( struct chameleon_pzgetrf_s *ws,
             if ( chameleon_involved_in_panelk_2dbc( A, k ) ||
                  chameleon_involved_in_panelk_2dbc( A, n ) )
             {
-                chameleon_pzgetrf_panel_update( ws, A, IPIV, k, n, &options, sequence );
+                ws->panel_permute_update( ws, A, IPIV, k, n, &options, sequence );
             }
         }
 
