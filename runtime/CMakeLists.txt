@@ -73,6 +73,7 @@ set(CODELETS_ZSRC
     codelets/codelet_zgetrf_batched.c
     codelets/codelet_zgetrf_blocked.c
     codelets/codelet_zgetrf_blocked_trsm.c
+    codelets/codelet_zlaswp_gemm.c
     codelets/codelet_zhe2ge.c
     codelets/codelet_zherfb.c
     codelets/codelet_zhessq.c
