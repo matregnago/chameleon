@@ -110,14 +110,29 @@ CHAMELEON_zlaswp_WS_Alloc( cham_side_t side, const CHAM_desc_t *A )
     /*
      * Read the environment variable to setup the batch size
      */
-    ws->batch_size_swap = chameleon_getenv_get_value_int( "CHAMELEON_BATCH_SIZE", 0 );
-    ws->batch_size_swap = chameleon_getenv_get_value_int( "CHAMELEON_LASWP_BATCH_SIZE", ws->batch_size_swap );
+    ws->batch_size_swap     = chameleon_getenv_get_value_int( "CHAMELEON_BATCH_SIZE", 0 );
+    ws->batch_size_swap     = chameleon_getenv_get_value_int( "CHAMELEON_LASWP_BATCH_SIZE",     ws->batch_size_swap );
+    ws->batch_size_swap_get = chameleon_getenv_get_value_int( "CHAMELEON_LASWP_BATCH_SIZE_GET", ws->batch_size_swap );
+    ws->batch_size_swap_set = chameleon_getenv_get_value_int( "CHAMELEON_LASWP_BATCH_SIZE_SET", ws->batch_size_swap );
     if ( ws->batch_size_swap > CHAMELEON_BATCH_SIZE ) {
         chameleon_warning( "CHAMELEON_BATCH_SIZE",
                            "CHAMELEON_LASWP_BATCH_SIZE must be smaller than CHAMELEON_BATCH_SIZE:\n"
                            " please recompile with the right CHAMELEON_BATCH_SIZE, or reduce the CHAMELEON_LASWP_BATCH_SIZE value\n" );
         ws->batch_size_swap = CHAMELEON_BATCH_SIZE;
     }
+    if ( ws->batch_size_swap_get > CHAMELEON_BATCH_SIZE ) {
+        chameleon_warning( "CHAMELEON_BATCH_SIZE",
+                           "CHAMELEON_LASWP_BATCH_SIZE_GET must be smaller than CHAMELEON_BATCH_SIZE:\n"
+                           " please recompile with the right CHAMELEON_BATCH_SIZE, or reduce the CHAMELEON_LASWP_BATCH_SIZE_GET value\n" );
+        ws->batch_size_swap_get = CHAMELEON_BATCH_SIZE;
+    }
+    if ( ws->batch_size_swap_set > CHAMELEON_BATCH_SIZE ) {
+        chameleon_warning( "CHAMELEON_BATCH_SIZE",
+                           "CHAMELEON_LASWP_BATCH_SIZE_SET must be smaller than CHAMELEON_BATCH_SIZE:\n"
+                           " please recompile with the right CHAMELEON_BATCH_SIZE, or reduce the CHAMELEON_LASWP_BATCH_SIZE_SET value\n" );
+        ws->batch_size_swap_set = CHAMELEON_BATCH_SIZE;
+    }
+
     ws->Wu = malloc( sizeof(CHAM_desc_t) );
     if ( side == ChamLeft ) {
         chameleon_desc_init_2dtile( chamctxt, ws->Wu, "LASWP_Wu", ChamComplexDouble,

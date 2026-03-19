@@ -28,13 +28,14 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
                                  int                     k,
                                  void                   *ws,
                                  const CHAM_ipiv_t      *ipiv, int ipivk,
-                                 const CHAM_desc_t      *Am,   int Amm, int Amn,
-                                 const CHAM_desc_t      *Ak,   int Akm, int Akn,
-                                 const CHAM_desc_t      *U,    int Um,  int Un,
+                                 const CHAM_desc_t      *A,   int Am,   int An,
+                                 const CHAM_desc_t      *WA,  int WAm,  int WAn,
+                                 const CHAM_desc_t      *WAP, int WAPm, int WAPn,
                                  void                  **clargs_ptr )
 {
     assert( 0 );
     (void)options;
+    (void)side;
     (void)dir;
     (void)m0;
     (void)m;
@@ -43,34 +44,135 @@ void INSERT_TASK_zlaswp_batched( const RUNTIME_option_t *options,
     (void)ws;
     (void)ipiv;
     (void)ipivk;
+    (void)A;
     (void)Am;
-    (void)Amm;
-    (void)Amn;
-    (void)Ak;
-    (void)Akm;
-    (void)Akn;
-    (void)U;
-    (void)Um;
-    (void)Un;
+    (void)An;
+    (void)WA;
+    (void)WAm;
+    (void)WAn;
+    (void)WAP;
+    (void)WAPm;
+    (void)WAPn;
     (void)clargs_ptr;
 }
 
 void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
                                        cham_dir_t              dir,
                                        const CHAM_ipiv_t      *ipiv, int ipivk,
-                                       const CHAM_desc_t      *Ak,   int Akm, int Akn,
-                                       const CHAM_desc_t      *U,    int Um,  int Un,
+                                       const CHAM_desc_t      *WA,  int WAm,  int WAn,
+                                       const CHAM_desc_t      *WAP, int WAPm, int WAPn,
                                        void                  **clargs_ptr )
 {
+    assert( 0 );
     (void)options;
     (void)dir;
     (void)ipiv;
     (void)ipivk;
-    (void)Ak;
-    (void)Akm;
-    (void)Akn;
-    (void)U;
-    (void)Um;
-    (void)Un;
+    (void)WA;
+    (void)WAm;
+    (void)WAn;
+    (void)WAP;
+    (void)WAPm;
+    (void)WAPn;
+    (void)clargs_ptr;
+}
+
+void INSERT_TASK_zlaswp_get_batched( const RUNTIME_option_t *options,
+                                     cham_side_t             side,
+                                     cham_dir_t              dir,
+                                     int                     m0,
+                                     int                     m,
+                                     int                     n,
+                                     int                     k,
+                                     void                   *ws,
+                                     const CHAM_ipiv_t      *ipiv, int ipivk,
+                                     const CHAM_desc_t      *A,   int Am,   int An,
+                                     const CHAM_desc_t      *WAP, int WAPm, int WAPn,
+                                     void                  **clargs_ptr )
+{
+    assert( 0 );
+    (void)options;
+    (void)side;
+    (void)dir;
+    (void)m0;
+    (void)m;
+    (void)n;
+    (void)k;
+    (void)ws;
+    (void)ipiv;
+    (void)ipivk;
+    (void)A;
+    (void)Am;
+    (void)An;
+    (void)WAP;
+    (void)WAPm;
+    (void)WAPn;
+    (void)clargs_ptr;
+}
+
+void INSERT_TASK_zlaswp_get_batched_flush( const RUNTIME_option_t *options,
+                                           cham_dir_t              dir,
+                                           const CHAM_ipiv_t      *ipiv, int ipivk,
+                                           const CHAM_desc_t      *WAP, int WAPm, int WAPn,
+                                           void                  **clargs_ptr )
+{
+    assert( 0 );
+    (void)options;
+    (void)dir;
+    (void)ipiv;
+    (void)ipivk;
+    (void)WAP;
+    (void)WAPm;
+    (void)WAPn;
+    (void)clargs_ptr;
+}
+
+void INSERT_TASK_zlaswp_set_batched( const RUNTIME_option_t *options,
+                                     cham_side_t             side,
+                                     cham_dir_t              dir,
+                                     int                     m0,
+                                     int                     m,
+                                     int                     n,
+                                     int                     k,
+                                     void                   *ws,
+                                     const CHAM_ipiv_t      *ipiv, int ipivk,
+                                     const CHAM_desc_t      *A,   int Am,   int An,
+                                     const CHAM_desc_t      *WA,  int WAm,  int WAn,
+                                     void                  **clargs_ptr )
+{
+    assert( 0 );
+    (void)options;
+    (void)side;
+    (void)dir;
+    (void)m0;
+    (void)m;
+    (void)n;
+    (void)k;
+    (void)ws;
+    (void)ipiv;
+    (void)ipivk;
+    (void)A;
+    (void)Am;
+    (void)An;
+    (void)WA;
+    (void)WAm;
+    (void)WAn;
+    (void)clargs_ptr;
+}
+
+void INSERT_TASK_zlaswp_set_batched_flush( const RUNTIME_option_t *options,
+                                           cham_dir_t              dir,
+                                           const CHAM_ipiv_t      *ipiv, int ipivk,
+                                           const CHAM_desc_t      *WA,  int WAm,  int WAn,
+                                           void                  **clargs_ptr )
+{
+    assert( 0 );
+    (void)options;
+    (void)dir;
+    (void)ipiv;
+    (void)ipivk;
+    (void)WA;
+    (void)WAm;
+    (void)WAn;
     (void)clargs_ptr;
 }

@@ -25,8 +25,8 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
                              cham_side_t side, cham_dir_t dir,
                              int m0, int m, int n, int k,
                              const CHAM_ipiv_t *ipiv, int ipivk,
-                             const CHAM_desc_t *A, int Am, int An,
-                             const CHAM_desc_t *U, int Um, int Un )
+                             const CHAM_desc_t *A,   int Am,   int An,
+                             const CHAM_desc_t *WAP, int WAPm, int WAPn )
 {
     assert( 0 );
     (void)options;
@@ -41,6 +41,9 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
     (void)A;
     (void)Am;
     (void)An;
+    (void)WAP;
+    (void)WAPm;
+    (void)WAPn;
 }
 
 void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
@@ -48,23 +51,22 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
                              cham_dir_t              dir,
                              int m0, int m, int n, int k,
                              const CHAM_ipiv_t *ipiv, int ipivk,
-                             const CHAM_desc_t *A, int Am, int An,
-                             const CHAM_desc_t *B, int Bm, int Bn )
+                             const CHAM_desc_t *WA, int WAm, int WAn,
+                             const CHAM_desc_t *A,  int Am,  int An )
 {
-    CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
-    CHAM_tile_t *tileB = B->get_blktile( B, Bm, Bn );
+    CHAM_tile_t *tileWA = WA->get_blktile( WA, WAm, WAn );
+    CHAM_tile_t *tileA  = A->get_blktile( A, Am, An );
     int         *invp  = NULL; // get invp from ipiv
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
+    assert( tileWA->format & CHAMELEON_TILE_FULLRANK );
+    assert( tileA->format  & CHAMELEON_TILE_FULLRANK );
 
-#pragma omp task firstprivate( m0, k, ipiv, A, B ) depend( in:invp ) depend( in:tileA[0] ) depend( inout:tileB[0] )
+#pragma omp task firstprivate( m0, k, ipiv, WA, A ) depend( in:invp ) depend( in:tileWA[0] ) depend( inout:tileA[0] )
     {
-        TCORE_zlaswp_set( ChamLeft, m0, m, n, k, tileA, tileB, invp );
+        TCORE_zlaswp_set( side, m0, m, n, k, tileWA, tileA, invp );
     }
 
     (void)options;
-    (void)side;
     (void)dir;
 }
 
