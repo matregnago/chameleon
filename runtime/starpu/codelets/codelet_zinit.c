@@ -31,7 +31,7 @@ cl_zinit_cpu_func( void *descr[], void *cl_arg )
     (void)cl_arg;
 }
 
-#if defined(CHAMELEON_USE_CUDA) && 0
+#if defined(CHAMELEON_USE_CUDA)
 static void
 cl_zinit_cuda_func( void *descr[], void *cl_arg )
 {
@@ -63,7 +63,7 @@ starpu_cuda_func_t const cl_zinit_cuda_func = (starpu_cuda_func_t)1;
  * Codelet definition
  */
 struct starpu_codelet cl_zinit = {
-#if defined(CHAMELEON_USE_CUDA) && 0
+#if defined(CHAMELEON_USE_CUDA)
     .where      = STARPU_CPU | STARPU_CUDA,
     .cuda_flags = { STARPU_CUDA_ASYNC },
     .cuda_funcs = { cl_zinit_cuda_func },
