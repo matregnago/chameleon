@@ -591,6 +591,155 @@ chameleon_pzgetrf_panel_update( struct chameleon_pzgetrf_s *ws,
     (void)chamctxt;
 }
 
+void
+chameleon_pzgetrf_panel_permute_update( struct chameleon_pzgetrf_s *ws,
+                                        CHAM_desc_t                *A,
+                                        CHAM_ipiv_t                *ipiv,
+                                        int                         k,
+                                        int                         n,
+                                        RUNTIME_option_t           *options,
+                                        RUNTIME_sequence_t         *sequence )
+{
+    const CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
+    CHAM_context_t             *chamctxt = chameleon_context_self();
+    const RUNTIME_request_t    *request  = options->request;
+    CHAM_reduce_t              *reduce   = &(ws->laswp->reduce);
+    void **clargs;
+    int m, tempkm, tempmm, tempnn, withlacpy;
+
+#if defined(CHAMELEON_USE_MPI)
+    /* Initizalize the list of nodes invovlved in the panel n */
+    chameleon_get_proc_involved_in_panelk_2dbc( A, k, n, reduce );
+
+    /* If on the rank who owns the ipiv array */
+    if ( A->myrank == ipiv->get_rankof( ipiv, k, k ) ) {
+        /* Exchange between all nodes involved the perm array */
+        INSERT_TASK_zperm_allreduce_send_perm( options, ChamDirForward, ipiv, k, A->myrank,
+                                               reduce->np_involved, reduce->proc_involved );
+
+        /* Exchange between all nodes involved the invp array */
+        INSERT_TASK_zperm_allreduce_send_invp_row( options, ChamDirForward, ipiv, k, A, k, n );
+    }
+
+    /* Bcast the top tile of the panel to all involved nodes */
+    if ( A->myrank == chameleon_getrankof_2d( A, k, n ) ) {
+        INSERT_TASK_zperm_allreduce_send_A( options, A, k, n, A->myrank,
+                                            reduce->np_involved, reduce->proc_involved );
+    }
+
+    /* If I'm not involved in the reduction, no need to go further */
+    if ( !reduce->involved ) {
+        return;
+    }
+#endif
+
+    tempkm = A->get_blkdim( A, k, DIM_m, A->m );
+    tempnn = A->get_blkdim( A, n, DIM_n, A->n );
+
+    clargs = malloc( sizeof(char *) );
+    *clargs = NULL;
+
+    /* Copy tile A(k,n) into Wu(me,n) */
+    withlacpy = options->withlacpy;
+    options->withlacpy = 1;
+    INSERT_TASK_zlacpy( options, ChamUpperLower, tempkm, tempnn,
+                        A(k, n), Wu(A->myrank, n) );
+    options->withlacpy = withlacpy;
+
+    /* Copy permuted rows of tiles A(m,n) into Wu(me,n) */
+    for ( m = k; m < A->mt; m++ ) {
+        tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        INSERT_TASK_zlaswp_get_batched( options, ChamLeft, ChamDirForward, m*A->mb, tempmm, tempnn, tempkm, (void *)ws->laswp, ipiv, k,
+                                        A(m, n), Wu(A->myrank, n), clargs );
+    }
+    INSERT_TASK_zlaswp_get_batched_flush( options, ChamDirForward, ipiv, k, Wu(A->myrank, n), clargs );
+
+#if defined(CHAMELEON_USE_MPI)
+    /* Allreduce of Wu(me,n) to fully form the permuted tile A(k,n) and to replicate trsm */
+    if ( ws->laswp->allreduce ) {
+        INSERT_TASK_zperm_allreduce( options, ChamDirForward, A, Wu(A->myrank, n), ipiv, k, k, n, ws->laswp );
+    }
+    else {
+        INSERT_TASK_zperm_reduce( options, ChamDirForward, A(k, n), ipiv, k, Wu(A->myrank, n), ws->laswp, A->myrank, n );
+    }
+#endif
+
+#if defined(CHAMELEON_USE_MPI)
+    int lookahead = chamctxt->lookahead;
+    int Q         = chameleon_desc_datadist_get_iparam(A, 1);
+    int myq       = A->myrank % Q;
+    int lq        = (k % lookahead) * Q;
+
+    /* Convert the tile ws(me,n) used to perform the allreduce into Wu(me,n) if needed */
+    if ( reduce->np_involved != 1 ) {
+        if ( reduce->alg_allreduce == ChamStarPUTasks ) {
+            INSERT_TASK_zlaswp_ret( options, Ws(A->myrank, n), Wu(A->myrank, n) );
+        }
+        RUNTIME_perm_flush( sequence, A->myrank, Ws(A->myrank, n) );
+    }
+
+    if ( RUNTIME_comm_size( chamctxt ) > 1 ) {
+        /* Trsm replicated on all processes involved in the column */
+        if ( reduce->involved ) {
+            INSERT_TASK_ztrsm(
+                options,
+                ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
+                tempkm, tempnn, A->mb,
+                zone, Wu(A->myrank, k),
+                      Wu(A->myrank, n) );
+        }
+
+        /* Copy the inverse permuted rows of the tile A(k,n) into A(m,n) and perform the gemm in the same task */
+        for ( m = k + 1; m < A->mt; m++ ) {
+            tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+            INSERT_TASK_zlaswp_gemm( options, ChamLeft, ChamDirForward,
+                                     m*A->mb, tempmm, tempnn, tempkm,
+                                     (void *)ws->laswp, ipiv, k,
+                                     A(k, n), Wl(m, myq + lq), Wu( A->myrank, n),
+                                     A(m, n), clargs );
+
+        }
+        INSERT_TASK_zlaswp_gemm_flush( options, ChamDirForward, ipiv, k, A(k, n),
+                                       Wu( A->myrank, n), clargs );
+
+        /* Copy the tile Wu(me,n) into A(k,n) */
+        if ( A->myrank == chameleon_getrankof_2d( A, k, n ) ) {
+            INSERT_TASK_zlacpy( options, ChamUpperLower, tempkm, tempnn,
+                                Wu(A->myrank, n), A(k, n) );
+        }
+    }
+    else
+#endif
+    {
+        INSERT_TASK_ztrsm(
+            options,
+            ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
+            tempkm, tempnn, A->mb,
+            zone, A( k, k ),
+                  Wu( A->myrank, n ) );
+
+        for (m = k+1; m < A->mt; m++) {
+            tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+            INSERT_TASK_zlaswp_gemm( options, ChamLeft, ChamDirForward,
+                                     m*A->mb, tempmm, tempnn, tempkm,
+                                     (void *)ws->laswp, ipiv, k,
+                                     A(k, n), A(m, k), Wu( A->myrank, n),
+                                     A(m, n), clargs );
+        }
+        INSERT_TASK_zlaswp_gemm_flush( options, ChamDirForward, ipiv, k, A(k, n),
+                                       Wu( A->myrank, n), clargs );
+
+        INSERT_TASK_zlacpy( options, ChamUpperLower, tempkm, tempnn,
+                            Wu(A->myrank, n), A(k, n) );
+    }
+
+    free( clargs );
+    chameleon_data_flush( options->sequence, Wu(A->myrank, n), request->flush );
+    chameleon_data_flush( options->sequence, A(k, n), request->flush );
+    (void)reduce;
+    (void)chamctxt;
+}
+
 /**
  *  Parallel tile LU factorization with no pivoting - dynamic scheduling
  */
