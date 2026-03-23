@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -48,11 +48,16 @@ static void cl_zlaset2_cpu_func(void *descr[], void *cl_arg)
  */
 CODELETS_CPU(zlaset2, cl_zlaset2_cpu_func)
 
-void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
-                       cham_uplo_t uplo, int M, int N,
-                       CHAMELEON_Complex64_t alpha, const CHAM_desc_t *A, int Am, int An)
+void INSERT_TASK_zlaset2( const RUNTIME_option_t *options,
+                          cham_uplo_t uplo, int M, int N,
+                          CHAMELEON_Complex64_t alpha,
+                          const CHAM_desc_t *A, int Am, int An )
 {
+    enum starpu_data_access_mode accessA = STARPU_W;
 
+    if ( uplo != ChamUpperLower ) {
+        accessA = STARPU_RW;
+    }
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_W(A, Am, An);
@@ -60,11 +65,14 @@ void INSERT_TASK_zlaset2(const RUNTIME_option_t *options,
 
     rt_starpu_insert_task(
         &cl_zlaset2,
-        STARPU_VALUE,  &uplo,                sizeof(int),
-        STARPU_VALUE,     &M,                        sizeof(int),
-        STARPU_VALUE,     &N,                        sizeof(int),
-        STARPU_VALUE, &alpha,         sizeof(CHAMELEON_Complex64_t),
-        STARPU_W,      RTBLKADDR(A, ChamComplexDouble, Am, An),
+        /* Task codelet arguments */
+        STARPU_VALUE, &uplo,  sizeof(cham_uplo_t),
+        STARPU_VALUE, &M,     sizeof(int),
+        STARPU_VALUE, &N,     sizeof(int),
+        STARPU_VALUE, &alpha, sizeof(CHAMELEON_Complex64_t),
+
+        /* Task handles */
+        accessA, RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlaset2 ),

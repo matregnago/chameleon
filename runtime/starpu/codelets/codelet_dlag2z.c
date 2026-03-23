@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -13,6 +13,7 @@
  *
  * @version 1.4.0
  * @author Mathieu Faverge
+ * @author Florent Pruvost
  * @date 2024-10-18
  * @precisions normal z -> c
  *
@@ -52,12 +53,17 @@ void INSERT_TASK_dlag2z( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
+    enum starpu_data_access_mode accessB = STARPU_W;
 
     /* Handle cache */
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
     CHAMELEON_ACCESS_W(B, Bm, Bn);
     CHAMELEON_END_ACCESS_DECLARATION;
+
+    if ( uplo != ChamUpperLower ) {
+        accessB = STARPU_RW;
+    }
 
     /* Insert the task */
     rt_starpu_insert_task(
@@ -70,7 +76,7 @@ void INSERT_TASK_dlag2z( const RUNTIME_option_t *options,
 
         /* Task handles */
         STARPU_R, RTBLKADDR(A, ChamRealDouble, Am, An),
-        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+        accessB,  RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( dlag2z ),

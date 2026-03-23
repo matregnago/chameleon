@@ -75,12 +75,13 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
                          CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta,
                          const CHAM_desc_t *A, int Am, int An )
 {
-    struct cl_zlaset_args_s *clargs = NULL;
-    int                      exec = 0;
-    const char              *cl_name = "zlaset";
-    CHAM_tile_t             *tileA;
-    int                      is_rectask = 0;
-    rectask_args_t          *rtargs     = NULL;
+    struct cl_zlaset_args_s     *clargs  = NULL;
+    int                          exec    = 0;
+    const char                  *cl_name = "zlaset";
+    enum starpu_data_access_mode accessA = STARPU_W;
+    CHAM_tile_t                 *tileA;
+    int                          is_rectask = 0;
+    rectask_args_t              *rtargs     = NULL;
     (void)rtargs;
 
     /* Handle cache */
@@ -113,12 +114,16 @@ void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
+    if ( uplo != ChamUpperLower ) {
+        accessA = STARPU_RW;
+    }
+
     /* Insert the task */
     rt_starpu_insert_task(
         &cl_zlaset,
         /* Task codelet arguments */
         STARPU_CL_ARGS, clargs, sizeof(struct cl_zlaset_args_s),
-        STARPU_W,      RTBLKADDR(A, ChamComplexDouble, Am, An),
+        accessA, RTBLKADDR(A, ChamComplexDouble, Am, An),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlaset ),

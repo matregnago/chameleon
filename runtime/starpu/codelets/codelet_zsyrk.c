@@ -140,14 +140,14 @@ void INSERT_TASK_zsyrk( const RUNTIME_option_t *options,
         return;
     }
 
-    struct cl_zsyrk_args_s *clargs  = NULL;
-    int                     exec    = 0;
-    const char             *cl_name = "zsyrk";
-    int                     accessC;
-    CHAM_tile_t            *tileA;
-    CHAM_tile_t            *tileC;
-    int                     is_rectask = 0;
-    rectask_args_t         *rtargs     = NULL;
+    struct cl_zsyrk_args_s      *clargs  = NULL;
+    int                          exec    = 0;
+    const char                  *cl_name = "zsyrk";
+    enum starpu_data_access_mode accessC = STARPU_RW;
+    CHAM_tile_t                 *tileA;
+    CHAM_tile_t                 *tileC;
+    int                          is_rectask = 0;
+    rectask_args_t              *rtargs     = NULL;
     (void)rtargs;
 
     /* Handle cache */
@@ -185,8 +185,10 @@ void INSERT_TASK_zsyrk( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Reduce the C access if needed */
-    accessC = ( beta == 0. ) ? STARPU_W : STARPU_RW;
+    /* Add commute if possible (rectask is not compatible yet) */
+    if ( (beta == (CHAMELEON_Complex64_t)1.) && !is_rectask ) {
+        accessC |= STARPU_COMMUTE;
+    }
 
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 2, tileA, tileC );
@@ -228,10 +230,12 @@ void INSERT_TASK_zsyrk( const RUNTIME_option_t *options,
     }
 
     INSERT_TASK_COMMON_PARAMETERS( zsyrk, 2 );
-    int accessC;
+    enum starpu_data_access_mode accessC = STARPU_RW;
 
-    /* Reduce the C access if needed */
-    accessC = ( beta == (CHAMELEON_Complex64_t)0. ) ? STARPU_W : STARPU_RW;
+    /* Add commute if possible (rectask is not compatible yet) */
+    if ( beta == (CHAMELEON_Complex64_t)1. ) {
+        accessC |= STARPU_COMMUTE;
+    }
 
     /*
      * Set the data handles and initialize exchanges if needed
