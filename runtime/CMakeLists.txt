@@ -77,7 +77,6 @@ set(CODELETS_ZSRC
     codelets/codelet_zhe2ge.c
     codelets/codelet_zherfb.c
     codelets/codelet_zhessq.c
-    codelets/codelet_zipiv_allreduce.c
     codelets/codelet_zlacpy.c
     codelets/codelet_zlange.c
     codelets/codelet_zlanhe.c
@@ -91,6 +90,7 @@ set(CODELETS_ZSRC
     codelets/codelet_zlauum.c
     codelets/codelet_zperm_allreduce.c
     codelets/codelet_zperm_reduce.c
+    codelets/codelet_zpivot_allreduce.c
     codelets/codelet_zplghe.c
     codelets/codelet_zplgsy.c
     codelets/codelet_zplrnt.c

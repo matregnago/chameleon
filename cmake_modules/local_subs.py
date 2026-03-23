@@ -53,7 +53,7 @@ _extra_blas = [
     ('',                     'sprint',               'dprint',               'cprint',               'zprint'              ),
     ('',                     'sgered',               'dgered',               'cgered',               'zgered'              ),
     ('',                     'sgerst',               'dgerst',               'cgerst',               'zgerst'              ),
-    ('',                     'sipiv_allreduce',      'dipiv_allreduce',      'cipiv_allreduce',      'zipiv_allreduce'     ),
+    ('',                     'spivot_allreduce',     'dpivot_allreduce',     'cpivot_allreduce',     'zpivot_allreduce'    ),
     ('',                     'sperm_allreduce',      'dperm_allreduce',      'cperm_allreduce',      'zperm_allreduce'     ),
     ('',                     'sperm_reduce',         'dperm_reduce',         'cperm_reduce',         'zperm_reduce'        ),
 ]
