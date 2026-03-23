@@ -323,6 +323,7 @@ set(RUNTIME_SRCS_GENERATED "")
 set(ZSRC
   codelets/codelet_zcallback.c
   codelets/codelet_zccallback.c
+  codelets/codelet_zinit.c
   ${CODELETS_ZSRC}
 )
 
@@ -340,6 +341,7 @@ precisions_rules_py(RUNTIME_SRCS_GENERATED "${ZSRC}"
 set(CODELETS_SRC
   codelets/codelet_convert.c
   codelets/codelet_gemm.c
+  codelets/codelet_binit.c
   ${CODELETS_SRC}
   )
 

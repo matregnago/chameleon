@@ -3,7 +3,7 @@
 
  Python Chameleon specific substitution rules for the Precision Generator script.
 
- @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
                       Univ. Bordeaux. All rights reserved.
 
  @version 1.4.0
@@ -51,6 +51,7 @@ _extra_blas = [
     ('',                     'sgesum',               'dgesum',               'cgesum',               'zgesum'              ),
     ('',                     'sgersum',              'dgersum',              'cgersum',              'zgersum'             ),
     ('',                     'sprint',               'dprint',               'cprint',               'zprint'              ),
+    ('',                     'sinit',                'dinit',                'cinit',                'zinit'               ),
     ('',                     'sgered',               'dgered',               'cgered',               'zgered'              ),
     ('',                     'sgerst',               'dgerst',               'cgerst',               'zgerst'              ),
     ('',                     'spivot_allreduce',     'dpivot_allreduce',     'cpivot_allreduce',     'zpivot_allreduce'    ),

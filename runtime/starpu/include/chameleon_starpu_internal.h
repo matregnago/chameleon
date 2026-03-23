@@ -76,6 +76,20 @@ starpu_to_cham_access( enum starpu_data_access_mode accessA ) {
 #include "runtime_workspace.h"
 #include "runtime_rectasks.h"
 
+#if defined(CHAMELEON_PREC_Z)
+extern struct starpu_codelet cl_zinit;
+#endif
+#if defined(CHAMELEON_PREC_C)
+extern struct starpu_codelet cl_cinit;
+#endif
+#if defined(CHAMELEON_PREC_D)
+extern struct starpu_codelet cl_dinit;
+#endif
+#if defined(CHAMELEON_PREC_S)
+extern struct starpu_codelet cl_sinit;
+#endif
+extern struct starpu_codelet cl_binit;
+
 void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
                                            cham_access_t access, cham_flttype_t flttype,
                                            const CHAM_desc_t *A, int m, int n );
