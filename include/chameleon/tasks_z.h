@@ -629,6 +629,28 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
                                           int                     n,
                                           CHAM_desc_pivot_t      *pivot );
 
+void INSERT_TASK_zlaswp_gemm( const RUNTIME_option_t *options,
+                              cham_side_t             side,
+                              cham_dir_t              dir,
+                              int                     m0,
+                              int                     m,
+                              int                     n,
+                              int                     k,
+                              void                   *ws,
+                              const CHAM_ipiv_t      *ipiv, int ipivk,
+                              const CHAM_desc_t      *WA,   int WAm, int WAn,
+                              const CHAM_desc_t      *A,    int Am,  int An,
+                              const CHAM_desc_t      *B,    int Bm,  int Bn,
+                              const CHAM_desc_t      *C,    int Cm,  int Cn,
+                              void                  **clargs_ptr );
+
+void INSERT_TASK_zlaswp_gemm_flush( const RUNTIME_option_t *options,
+                                    cham_dir_t              dir,
+                                    const CHAM_ipiv_t      *ipiv, int ipivk,
+                                    const CHAM_desc_t      *WA,   int WAm, int WAn,
+                                    const CHAM_desc_t      *B,    int Bm,  int Bn,
+                                    void                  **clargs_ptr );
+
 #if defined(CHAMELEON_USE_MPI)
 /**
  ********************************************************************************

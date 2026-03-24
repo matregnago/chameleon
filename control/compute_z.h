@@ -54,23 +54,29 @@ struct chameleon_pzlaswp_s {
     int            allreduce;           /**< Specifies whether the reduction is replicated or not */
 };
 
+struct chameleon_pzgetrf_s;
+
+typedef void (*chameleon_zgetrf_update_fct_t) (
+    struct chameleon_pzgetrf_s *, CHAM_desc_t *, CHAM_ipiv_t *, int, int, RUNTIME_option_t *, RUNTIME_sequence_t * );
+
 /**
  * @brief Data structure to handle the GETRF workspaces with partial pivoting
  */
 struct chameleon_pzgetrf_s {
-    struct chameleon_pzlaswp_s *laswp;            /**< Structure containing the permutation workspace and the reduce data   */
-    CHAM_desc_pivot_t           pivot;            /**< Structure containing the workspace used for the panel factorisation  */
-    cham_getrf_t                alg;              /**< Define the algorithm used to compute the getrf                       */
-    cham_bool_t                 backperm_enabled; /**< Define if the backward perumtation is enabled or not                 */
-    int                         ib;               /**< Internal blocking parameter                                          */
-    int                         batch_adaptive;   /**< Whether to use adaptative batch or not                               */
-    int                         batch_size;       /**< Batch size                                                           */
-    int                         batch_size_blas2; /**< Batch size for the blas 2 operations of the panel factorization      */
-    int                         batch_size_blas3; /**< Batch size for the blas 3 operations of the panel factorization      */
-    int                         ringswitch;       /**< Define when to switch to ring bcast                                  */
-    cham_fixdbl_t               flops_min;        /**< Define size of batched task in MFlops                                */
-    CHAM_desc_t                *Up;               /**< Workspace used for the panel factorization                           */
-    CHAM_desc_t                *Wl;               /**< Workspace used for the update                                        */
+    struct chameleon_pzlaswp_s    *laswp;                /**< Structure containing the permutation workspace and the reduce data   */
+    CHAM_desc_pivot_t              pivot;                /**< Structure containing the workspace used for the panel factorisation  */
+    cham_getrf_t                   alg;                  /**< Define the algorithm used to compute the getrf                       */
+    cham_bool_t                    backperm_enabled;     /**< Define if the backward perumtation is enabled or not                 */
+    int                            ib;                   /**< Internal blocking parameter                                          */
+    int                            batch_adaptive;       /**< Whether to use adaptative batch or not                               */
+    int                            batch_size;           /**< Batch size                                                           */
+    int                            batch_size_blas2;     /**< Batch size for the blas 2 operations of the panel factorization      */
+    int                            batch_size_blas3;     /**< Batch size for the blas 3 operations of the panel factorization      */
+    int                            ringswitch;           /**< Define when to switch to ring bcast                                  */
+    cham_fixdbl_t                  flops_min;            /**< Define size of batched task in MFlops                                */
+    chameleon_zgetrf_update_fct_t  panel_permute_update; /**< Function to apply the panel permute and panel update                 */
+    CHAM_desc_t                   *Up;                   /**< Workspace used for the panel factorization                           */
+    CHAM_desc_t                   *Wl;                   /**< Workspace used for the update                                        */
 };
 
 /**
@@ -184,6 +190,20 @@ void chameleon_pzgetrf_reclap(CHAM_desc_t *A, int *IPIV,
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzgetrf_rectil(CHAM_desc_t *A, int *IPIV,
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
+void chameleon_pzgetrf_panel_permute_update( struct chameleon_pzgetrf_s *ws,
+                                             CHAM_desc_t                *A,
+                                             CHAM_ipiv_t                *ipiv,
+                                             int                         k,
+                                             int                         n,
+                                             RUNTIME_option_t           *options,
+                                             RUNTIME_sequence_t         *sequence );
+void chameleon_pzgetrf_panel_update( struct chameleon_pzgetrf_s *ws,
+                                     CHAM_desc_t                *A,
+                                     CHAM_ipiv_t                *ipiv,
+                                     int                         k,
+                                     int                         n,
+                                     RUNTIME_option_t           *options,
+                                     RUNTIME_sequence_t         *sequence );
 void chameleon_pzhegst(int itype, cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzhemm( struct chameleon_pzgemm_s *ws,cham_side_t side, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc_t *A, CHAM_desc_t *B, CHAMELEON_Complex64_t beta, CHAM_desc_t *C,
