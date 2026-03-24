@@ -687,13 +687,13 @@ void INSERT_TASK_zlaswp_gemm_flush( const RUNTIME_option_t *options,
  *
  *******************************************************************************
  */
-void INSERT_TASK_zipiv_allreduce( const RUNTIME_option_t *options,
-                                  CHAM_desc_t            *A,
-                                  CHAM_desc_pivot_t      *pivot,
-                                  int                     k,
-                                  int                     h,
-                                  int                     n,
-                                  void                   *ws );
+void INSERT_TASK_zpivot_allreduce( const RUNTIME_option_t *options,
+                                   CHAM_desc_t            *A,
+                                   CHAM_desc_pivot_t      *pivot,
+                                   int                     k,
+                                   int                     h,
+                                   int                     n,
+                                   void                   *ws );
 
 /**
  ********************************************************************************

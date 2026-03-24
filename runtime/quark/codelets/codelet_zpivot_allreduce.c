@@ -1,6 +1,6 @@
 /**
  *
- * @file quark/codelet_zipiv_allreduce.c
+ * @file quark/codelet_zpivot_allreduce.c
  *
  * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
@@ -20,13 +20,13 @@
 
 #if defined(CHAMELEON_USE_MPI)
 
-void INSERT_TASK_zipiv_allreduce( const RUNTIME_option_t *options,
-                                  CHAM_desc_t            *A,
-                                  CHAM_desc_pivot_t      *pivot,
-                                  int                     k,
-                                  int                     h,
-                                  int                     n,
-                                  void                   *ws )
+void INSERT_TASK_zpivot_allreduce( const RUNTIME_option_t *options,
+                                   CHAM_desc_t            *A,
+                                   CHAM_desc_pivot_t      *pivot,
+                                   int                     k,
+                                   int                     h,
+                                   int                     n,
+                                   void                   *ws )
 {
     (void)options;
     (void)A;

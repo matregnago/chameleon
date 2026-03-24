@@ -1,6 +1,6 @@
 /**
  *
- * @file starpu/codelet_zipiv_allreduce.c
+ * @file starpu/codelet_zpivot_allreduce.c
  *
  * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
@@ -31,10 +31,10 @@ struct cl_redux_args_s {
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
-zipiv_allreduce_cpu_func( cppi_interface_t *cppi_me,
-                          cppi_interface_t *cppi_src,
-                          int               h,
-                          int               n )
+zpivot_allreduce_cpu_func( cppi_interface_t *cppi_me,
+                           cppi_interface_t *cppi_src,
+                           int               h,
+                           int               n )
 {
     CHAM_pivot_t          *nextpiv_me  = &(cppi_me->pivot);
     CHAM_pivot_t          *nextpiv_src = &(cppi_src->pivot);
@@ -72,26 +72,26 @@ zipiv_allreduce_cpu_func( cppi_interface_t *cppi_me,
 }
 
 static void
-cl_zipiv_allreduce_cpu_func( void *descr[], void *cl_arg )
+cl_zpivot_allreduce_cpu_func( void *descr[], void *cl_arg )
 {
     struct cl_redux_args_s *clargs   = (struct cl_redux_args_s *) cl_arg;
     cppi_interface_t       *cppi_me  = ((cppi_interface_t *) descr[0]);
     cppi_interface_t       *cppi_src = ((cppi_interface_t *) descr[1]);
-    zipiv_allreduce_cpu_func(  cppi_me, cppi_src, clargs->h, clargs->n );
+    zpivot_allreduce_cpu_func(  cppi_me, cppi_src, clargs->h, clargs->n );
 }
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
-CODELETS_CPU( zipiv_allreduce, cl_zipiv_allreduce_cpu_func )
+CODELETS_CPU( zpivot_allreduce, cl_zpivot_allreduce_cpu_func )
 
 #if defined(CHAMELEON_STARPU_USE_INSERT) /* defined(CHAMELEON_STARPU_USE_INSERT) */
 
 static void
-INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
-                                  CHAM_desc_pivot_t      *pivot,
-                                  int                     me,
-                                  int                     dst,
-                                  int                     k,
-                                  int                     h )
+INSERT_TASK_zpivot_allreduce_send( const RUNTIME_option_t *options,
+                                   CHAM_desc_pivot_t      *pivot,
+                                   int                     me,
+                                   int                     dst,
+                                   int                     k,
+                                   int                     h )
 {
     rt_starpu_insert_task(
         NULL,
@@ -104,13 +104,13 @@ INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
 }
 
 static void
-INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
-                                  CHAM_desc_pivot_t      *pivot,
-                                  int                     me,
-                                  int                     src,
-                                  int                     k,
-                                  int                     h,
-                                  int                     n )
+INSERT_TASK_zpivot_allreduce_recv( const RUNTIME_option_t *options,
+                                   CHAM_desc_pivot_t      *pivot,
+                                   int                     me,
+                                   int                     src,
+                                   int                     k,
+                                   int                     h,
+                                   int                     n )
 {
     struct cl_redux_args_s *clargs;
     clargs    = malloc( sizeof( struct cl_redux_args_s ) );
@@ -118,7 +118,7 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
     clargs->n = n;
 
     rt_starpu_insert_task(
-        &cl_zipiv_allreduce,
+        &cl_zpivot_allreduce,
         STARPU_CL_ARGS,           clargs, sizeof(struct cl_redux_args_s),
         STARPU_RW,                RUNTIME_pivot_getaddr( pivot, me, h ),
         STARPU_R,                 RUNTIME_pivot_getaddr( pivot, src, h ),
@@ -133,14 +133,14 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
 #else /* defined(CHAMELEON_STARPU_USE_INSERT) */
 
 static void
-INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
-                                  CHAM_desc_pivot_t      *pivot,
-                                  int                     me,
-                                  int                     dst,
-                                  int                     k,
-                                  int                     h )
+INSERT_TASK_zpivot_allreduce_send( const RUNTIME_option_t *options,
+                                   CHAM_desc_pivot_t      *pivot,
+                                   int                     me,
+                                   int                     dst,
+                                   int                     k,
+                                   int                     h )
 {
-    INSERT_TASK_COMMON_PARAMETERS_CLNULL( zipiv_allreduce_send, 1 )
+    INSERT_TASK_COMMON_PARAMETERS_CLNULL( zpivot_allreduce_send, 1 )
 
     starpu_cham_exchange_init_params( options, &params, dst );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
@@ -153,17 +153,17 @@ INSERT_TASK_zipiv_allreduce_send( const RUNTIME_option_t *options,
 }
 
 static void
-INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
-                                  CHAM_desc_pivot_t      *pivot,
-                                  int                     me,
-                                  int                     src,
-                                  int                     k,
-                                  int                     h,
-                                  int                     n )
+INSERT_TASK_zpivot_allreduce_recv( const RUNTIME_option_t *options,
+                                   CHAM_desc_pivot_t      *pivot,
+                                   int                     me,
+                                   int                     src,
+                                   int                     k,
+                                   int                     h,
+                                   int                     n )
 {
     int ret;
     struct starpu_task *task;
-    INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zipiv_allreduce_recv, zipiv_allreduce, redux, 2 )
+    INSERT_TASK_COMMON_PARAMETERS_EXTENDED( zpivot_allreduce_recv, zpivot_allreduce, redux, 2 )
 
     starpu_cham_exchange_init_params( options, &params, me );
     starpu_cham_exchange_handle_before_execution( options, &params, &nbdata, descrs,
@@ -198,7 +198,7 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
     if ( ret == -ENODEV ) {
         task->destroy = 0;
         starpu_task_destroy( task );
-        chameleon_error( "INSERT_TASK_zipiv_allreduce", "Failed to submit the task to StarPU" );
+        chameleon_error( "INSERT_TASK_zpivot_allreduce", "Failed to submit the task to StarPU" );
         return;
     }
 
@@ -211,13 +211,13 @@ INSERT_TASK_zipiv_allreduce_recv( const RUNTIME_option_t *options,
 #endif /* defined(CHAMELEON_STARPU_USE_INSERT) */
 
 static void
-zipiv_allreduce_chameleon_starpu_task( const RUNTIME_option_t *options,
-                                       CHAM_desc_t            *A,
-                                       CHAM_desc_pivot_t      *pivot,
-                                       int                    *proc_involved,
-                                       int                     k,
-                                       int                     h,
-                                       int                     n )
+zpivot_allreduce_chameleon_starpu_task( const RUNTIME_option_t *options,
+                                        CHAM_desc_t            *A,
+                                        CHAM_desc_pivot_t      *pivot,
+                                        int                    *proc_involved,
+                                        int                     k,
+                                        int                     h,
+                                        int                     n )
 {
     int np_involved = chameleon_min( chameleon_desc_datadist_get_iparam(A, 0), A->mt - k);
     int np_iter     = np_involved;
@@ -242,8 +242,8 @@ zipiv_allreduce_chameleon_starpu_task( const RUNTIME_option_t *options,
             p_send = proc_involved[ ( me + shift               ) % np_involved ];
             p_recv = proc_involved[ ( me - shift + np_involved ) % np_involved ];
 
-            INSERT_TASK_zipiv_allreduce_send( options, pivot, A->myrank, p_send, k, h    );
-            INSERT_TASK_zipiv_allreduce_recv( options, pivot, A->myrank, p_recv, k, h, n );
+            INSERT_TASK_zpivot_allreduce_send( options, pivot, A->myrank, p_send, k, h    );
+            INSERT_TASK_zpivot_allreduce_recv( options, pivot, A->myrank, p_recv, k, h, n );
 
             shift   = shift << 1;
             np_iter = chameleon_ceil( np_iter, 2 );
@@ -252,7 +252,7 @@ zipiv_allreduce_chameleon_starpu_task( const RUNTIME_option_t *options,
 }
 
 void
-INSERT_TASK_zipiv_allreduce( const RUNTIME_option_t *options,
+INSERT_TASK_zpivot_allreduce( const RUNTIME_option_t *options,
                              CHAM_desc_t            *A,
                              CHAM_desc_pivot_t      *pivot,
                              int                     k,
@@ -265,7 +265,7 @@ INSERT_TASK_zipiv_allreduce( const RUNTIME_option_t *options,
     switch( alg ) {
     case ChamStarPUTasks:
     default:
-        zipiv_allreduce_chameleon_starpu_task( options, A, pivot, tmp->reduce.proc_involved, k, h, n );
+        zpivot_allreduce_chameleon_starpu_task( options, A, pivot, tmp->reduce.proc_involved, k, h, n );
     }
 }
 

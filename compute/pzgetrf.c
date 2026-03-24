@@ -152,7 +152,7 @@ chameleon_pzgetrf_panel_facto_percol( struct chameleon_pzgetrf_s *ws,
 
 #if defined(CHAMELEON_USE_MPI)
         /* Reduce globally (between MPI processes) */
-        INSERT_TASK_zipiv_allreduce( options, A, pivot, k, h, tempkn, ws->laswp );
+        INSERT_TASK_zpivot_allreduce( options, A, pivot, k, h, tempkn, ws->laswp );
 #endif
     }
 
@@ -207,7 +207,7 @@ chameleon_pzgetrf_panel_facto_percol_batched( struct chameleon_pzgetrf_s *ws,
 
 #if defined(CHAMELEON_USE_MPI)
         /* Reduce globally (between MPI processes) */
-        INSERT_TASK_zipiv_allreduce( options, A, pivot, k, h, tempkn, ws->laswp );
+        INSERT_TASK_zpivot_allreduce( options, A, pivot, k, h, tempkn, ws->laswp );
 #endif
     }
 
@@ -286,7 +286,7 @@ chameleon_pzgetrf_panel_facto_blocked( struct chameleon_pzgetrf_s *ws,
 
 #if defined(CHAMELEON_USE_MPI)
             /* Reduce globally (between MPI processes) */
-            INSERT_TASK_zipiv_allreduce( options, A, pivot, k, j, tempkn, ws->laswp );
+            INSERT_TASK_zpivot_allreduce( options, A, pivot, k, j, tempkn, ws->laswp );
 #endif
 
             /*
@@ -374,7 +374,7 @@ chameleon_pzgetrf_panel_facto_blocked_batched( struct chameleon_pzgetrf_s *ws,
 
 #if defined(CHAMELEON_USE_MPI)
             /* Reduce globally (between MPI processes) */
-            INSERT_TASK_zipiv_allreduce( options, A, pivot, k, j, tempkn, ws->laswp );
+            INSERT_TASK_zpivot_allreduce( options, A, pivot, k, j, tempkn, ws->laswp );
 #endif
 
             /*
