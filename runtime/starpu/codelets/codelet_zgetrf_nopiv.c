@@ -40,9 +40,8 @@ struct cl_zgetrf_nopiv_args_s {
 static void
 cl_zgetrf_nopiv_rectask_func( struct starpu_task *t, void *_args )
 {
-    struct cl_zgetrf_nopiv_args_s *clargs  = (struct cl_zgetrf_nopiv_args_s *)(t->cl_arg);
-    rectask_args_t                *rtargs  = (rectask_args_t *)_args;
-    RUNTIME_request_t              request = RUNTIME_REQUEST_INITIALIZER;
+    rectask_args_t   *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t request = RUNTIME_REQUEST_INITIALIZER;
 
     starpu_cham_rectask_initrequest( t, &request );
 
