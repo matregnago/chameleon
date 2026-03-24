@@ -262,6 +262,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     int                   is_rectask  = 1;
     rectask_args_t       *rtargs      = NULL;
     CHAM_tile_t          *tiles[ndata];
+    (void)rtargs;
 
     if ( ( ndata < 0 ) || ( ndata > 3 ) ) {
         fprintf( stderr, "INSERT_TASK_map() can handle only 1 to 3 parameters\n" );
