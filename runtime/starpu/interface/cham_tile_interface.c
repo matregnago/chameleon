@@ -2,7 +2,7 @@
  *
  * @file starpu/cham_tile_interface.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -711,6 +711,34 @@ starpu_cham_tile_register( starpu_data_handle_t *handleptr,
     }
 
     starpu_data_register( handleptr, home_node, &cham_tile_interface, &starpu_interface_cham_tile_ops );
+
+    switch( cham_get_flttype( flttype ) ) {
+#if defined(CHAMELEON_PREC_Z)
+    case ChamComplexDouble:
+        starpu_data_set_reduction_methods( *handleptr, NULL, &cl_zinit );
+        break;
+#endif
+#if defined(CHAMELEON_PREC_C)
+    case ChamComplexFloat:
+        starpu_data_set_reduction_methods( *handleptr, NULL, &cl_cinit );
+        break;
+#endif
+#if defined(CHAMELEON_PREC_D)
+    case ChamRealDouble:
+        starpu_data_set_reduction_methods( *handleptr, NULL, &cl_dinit );
+        break;
+#endif
+#if defined(CHAMELEON_PREC_S)
+    case ChamRealFloat:
+        starpu_data_set_reduction_methods( *handleptr, NULL, &cl_sinit );
+        break;
+#endif
+    case ChamByte:
+        starpu_data_set_reduction_methods( *handleptr, NULL, &cl_binit );
+        break;
+    default:
+        STARPU_ASSERT_MSG( 0, "starpu_cham_tile_register: unsupported flttype\n" );
+    }
 }
 
 size_t

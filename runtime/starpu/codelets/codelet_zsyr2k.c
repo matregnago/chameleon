@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -122,10 +122,10 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         return;
     }
 
-    struct cl_zsyr2k_args_s *clargs  = NULL;
-    int                      exec    = 0;
-    const char              *cl_name = "zsyr2k";
-    int                      accessC;
+    struct cl_zsyr2k_args_s     *clargs  = NULL;
+    int                          exec    = 0;
+    const char                  *cl_name = "zsyr2k";
+    enum starpu_data_access_mode accessC = STARPU_RW;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -144,8 +144,10 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Reduce the C access if needed */
-    accessC = ( beta == 0. ) ? STARPU_W : STARPU_RW;
+    /* Add commute if possible (rectask is not compatible yet) */
+    if ( beta == (CHAMELEON_Complex64_t)1. ) {
+        accessC |= STARPU_COMMUTE;
+    }
 
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 3,
@@ -186,10 +188,12 @@ void INSERT_TASK_zsyr2k( const RUNTIME_option_t *options,
     }
 
     INSERT_TASK_COMMON_PARAMETERS( zsyr2k, 3 );
-    int accessC;
+    enum starpu_data_access_mode accessC = STARPU_RW;
 
-    /* Reduce the C access if needed */
-    accessC = ( beta == (CHAMELEON_Complex64_t)0. ) ? STARPU_W : STARPU_RW;
+    /* Add commute if possible (rectask is not compatible yet) */
+    if ( beta == (CHAMELEON_Complex64_t)1. ) {
+        accessC |= STARPU_COMMUTE;
+    }
 
     /*
      * Set the data handles and initialize exchanges if needed

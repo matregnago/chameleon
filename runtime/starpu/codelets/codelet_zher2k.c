@@ -121,10 +121,10 @@ void INSERT_TASK_zher2k( const RUNTIME_option_t *options,
         return;
     }
 
-    struct cl_zher2k_args_s *clargs  = NULL;
-    int                      exec    = 0;
-    const char              *cl_name = "zher2k";
-    int                      accessC;
+    struct cl_zher2k_args_s     *clargs  = NULL;
+    int                          exec    = 0;
+    const char                  *cl_name = "zher2k";
+    enum starpu_data_access_mode accessC = STARPU_RW;
 
     CHAMELEON_BEGIN_ACCESS_DECLARATION;
     CHAMELEON_ACCESS_R(A, Am, An);
@@ -143,8 +143,10 @@ void INSERT_TASK_zher2k( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Reduce the C access if needed */
-    accessC = ( beta == 0. ) ? STARPU_W : STARPU_RW;
+    /* Add commute if possible (rectask is not compatible yet) */
+    if ( beta == (double)1. ) {
+        accessC |= STARPU_COMMUTE;
+    }
 
     /* Refine name */
     cl_name = chameleon_codelet_name( cl_name, 3,
@@ -185,10 +187,12 @@ void INSERT_TASK_zher2k( const RUNTIME_option_t *options,
     }
 
     INSERT_TASK_COMMON_PARAMETERS( zher2k, 3 );
-    int accessC;
+    enum starpu_data_access_mode accessC = STARPU_RW;
 
-    /* Reduce the C access if needed */
-    accessC = ( beta == (double)0. ) ? STARPU_W : STARPU_RW;
+    /* Add commute if possible (rectask is not compatible yet) */
+    if ( beta == (double)1. ) {
+        accessC |= STARPU_COMMUTE;
+    }
 
     /*
      * Set the data handles and initialize exchanges if needed

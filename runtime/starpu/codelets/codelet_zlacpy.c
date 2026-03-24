@@ -202,12 +202,14 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
                           int displA, const CHAM_desc_t *A, int Am, int An, int lda,
                           int displB, const CHAM_desc_t *B, int Bm, int Bn, int ldb )
 {
-    int             exec       = 0;
-    char           *cl_name    = "zlacpyx";
-    CHAM_tile_t    *tileA      = A->get_blktile( A, Am, An );
-    CHAM_tile_t    *tileB      = B->get_blktile( B, Bm, Bn );
-    int             is_rectask = 0;
-    rectask_args_t *rtargs     = NULL;
+    int                          exec       = 0;
+    char                        *cl_name    = "zlacpyx";
+    CHAM_tile_t                 *tileA      = A->get_blktile( A, Am, An );
+    CHAM_tile_t                 *tileB      = B->get_blktile( B, Bm, Bn );
+    int                          is_rectask = 0;
+    rectask_args_t              *rtargs     = NULL;
+    struct cl_zlacpy_args_s     *clargs     = NULL;
+    enum starpu_data_access_mode accessB    = STARPU_W;
     (void)rtargs;
 
     /* Handle cache */
@@ -238,8 +240,6 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
     }
 #endif
 
-    struct cl_zlacpy_args_s *clargs = NULL;
-
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     /* Check if this is a rectask */
     is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
@@ -266,6 +266,10 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
         clargs->ldb    = ldb;
     }
 
+    if ( uplo != ChamUpperLower ) {
+        accessB = STARPU_RW;
+    }
+
     /* Insert the task */
     rt_starpu_insert_task(
         &cl_zlacpyx,
@@ -274,7 +278,7 @@ void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
 
         /* Task handles */
         STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+        accessB,  RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlacpyx ),
@@ -293,12 +297,14 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn )
 {
-    int             exec       = 0;
-    char           *cl_name    = "zlacpy";
-    CHAM_tile_t    *tileA      = A->get_blktile( A, Am, An );
-    CHAM_tile_t    *tileB      = B->get_blktile( B, Bm, Bn );
-    int             is_rectask = 0;
-    rectask_args_t *rtargs     = NULL;
+    int                          exec       = 0;
+    char                        *cl_name    = "zlacpy";
+    CHAM_tile_t                 *tileA      = A->get_blktile( A, Am, An );
+    CHAM_tile_t                 *tileB      = B->get_blktile( B, Bm, Bn );
+    int                          is_rectask = 0;
+    rectask_args_t              *rtargs     = NULL;
+    struct cl_zlacpy_args_s     *clargs     = NULL;
+    enum starpu_data_access_mode accessB    = STARPU_W;
     (void)rtargs;
 
     /* Handle cache */
@@ -328,8 +334,6 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
     }
 #endif
 
-    struct cl_zlacpy_args_s *clargs = NULL;
-
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     /* Check if this is a rectask */
     is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
@@ -356,6 +360,10 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
         clargs->ldb    = tileB->ld;
     }
 
+    if ( uplo != ChamUpperLower ) {
+        accessB = STARPU_RW;
+    }
+
     rt_starpu_insert_task(
         &cl_zlacpy,
         /* Task codelet arguments */
@@ -363,7 +371,7 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
 
         /* Task handles */
         STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
-        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+        accessB,  RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
 
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS( zlacpy ),

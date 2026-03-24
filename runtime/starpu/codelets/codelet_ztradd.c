@@ -87,14 +87,14 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         return;
     }
 
-    struct cl_ztradd_args_s *clargs  = NULL;
-    int                      exec    = 0;
-    const char              *cl_name = "ztradd";
-    int                      accessB;
-    CHAM_tile_t             *tileA;
-    CHAM_tile_t             *tileB;
-    int                      is_rectask = 0;
-    rectask_args_t          *rtargs     = NULL;
+    struct cl_ztradd_args_s     *clargs  = NULL;
+    int                          exec    = 0;
+    const char                  *cl_name = "ztradd";
+    enum starpu_data_access_mode accessB = STARPU_RW;
+    CHAM_tile_t                 *tileA;
+    CHAM_tile_t                 *tileB;
+    int                          is_rectask = 0;
+    rectask_args_t              *rtargs     = NULL;
     (void)rtargs;
 
     /* Handle cache */
@@ -132,8 +132,10 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         clargs->beta  = beta;
     }
 
-    /* Reduce the B access if needed */
-    accessB = ( beta == 0. ) ? STARPU_W : STARPU_RW;
+    /* Reduce the B access if possible */
+    if ( ( uplo == ChamUpperLower ) && ( beta == 0. ) ) {
+        accessB = STARPU_W;
+    }
 
     /* Insert the task */
     rt_starpu_insert_task(
@@ -170,11 +172,12 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
     }
 
     INSERT_TASK_COMMON_PARAMETERS( ztradd, 2 );
-    int accessB;
+    enum starpu_data_access_mode accessB = STARPU_RW;
 
-
-    /* Reduce the B access if needed */
-    accessB = ( beta == 0. ) ? STARPU_W : STARPU_RW;
+    /* Reduce the B access if possible */
+    if ( ( uplo == ChamUpperLower ) && ( beta == 0. ) ) {
+        accessB = STARPU_W;
+    }
 
     /*
      * Set the data handles and initialize exchanges if needed
