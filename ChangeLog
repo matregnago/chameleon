@@ -7,6 +7,7 @@ chameleon-2.0.0
  - control: Remove deprecated CHAMELEON_My_Mpi_Rank function
  - control: Remove deprecated CHAMELEON_user_tag_size function
  - compute/codelets: Remove the deprecated build functions that have been replaced by the map function
+ - gpucublas: Add laset kernel (available with StarPU)
 
 chameleon-1.4.0
 ------------------------------------------------------------------------

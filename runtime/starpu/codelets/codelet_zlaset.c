@@ -20,6 +20,7 @@
  * @author Florent Pruvost
  * @author Samuel Thibault
  * @author Gwenole Lucas
+ * @author Brieuc Nicolas
  * @date 2024-10-18
  * @precisions normal z -> c d s
  *
@@ -63,12 +64,29 @@ cl_zlaset_cpu_func( void *descr[], void *cl_arg )
 
     TCORE_zlaset( clargs->uplo, clargs->m, clargs->n, clargs->alpha, clargs->beta, tileA );
 }
+
+#if defined(CHAMELEON_USE_CUDA)
+static void
+cl_zlaset_cuda_func( void *descr[], void *cl_arg )
+{
+    struct cl_zlaset_args_s *clargs = (struct cl_zlaset_args_s *)cl_arg;
+    cublasHandle_t          handle = starpu_cublas_get_local_handle();
+    CHAM_tile_t *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+
+    TCUDA_zlaset( clargs->uplo, clargs->m, clargs->n,
+                  (cuDoubleComplex *)&(clargs->alpha),
+                  (cuDoubleComplex *)&(clargs->beta),
+                  tileA, handle );
+}
+#endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
-CODELETS_CPU( zlaset, cl_zlaset_cpu_func )
+CODELETS( zlaset, cl_zlaset_cpu_func, cl_zlaset_cuda_func, STARPU_CUDA_ASYNC )
 
 void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
                          cham_uplo_t uplo, int m, int n,

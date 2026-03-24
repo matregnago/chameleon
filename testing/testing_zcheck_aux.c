@@ -2,7 +2,7 @@
  *
  * @file testing_zcheck_aux.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -912,4 +912,113 @@ int check_ztranspose( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans
     return info_solution;
 }
 
+/**
+ ********************************************************************************
+ *
+ * @ingroup testing
+ *
+ * @brief Checks matrix setting correctness.
+ *
+ *******************************************************************************
+ *
+ * @param[in] uplo
+ *          Whether it is a upper triangular matrix, a lower triangular matrix or a general matrix.
+ *
+ * @param[in] alpha
+ *          All the offdiagonal array elements are set to alpha.
+ *
+ * @param[in] beta
+ *          All the diagonal array elements are set to beta.
+ *
+ * @param[in] M
+ *          The number of rows of the matrix A.
+ *
+ * @param[in] N
+ *          The number of columns of the matrix A.
+ *
+ * @param[in] A
+ *          The matrix A.
+ *
+ * @param[in] LDA
+ *          The leading dimension of the matrix A.
+ *
+ * @retval 0 successfull set
+ *
+ *******************************************************************************
+ */
+int check_zset_std( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, int M, int N, CHAMELEON_Complex64_t *A, int LDA )
+{
+    int  info_solution;
+
+    CHAMELEON_Complex64_t *B = NULL;
+    B = malloc( sizeof(CHAMELEON_Complex64_t) * M * N );
+
+    LAPACKE_zlaset_work(
+        LAPACK_COL_MAJOR,
+        chameleon_lapack_const(uplo),
+        M, N, alpha, beta, B, M );
+
+    /* Compares the two matrices */
+    info_solution = check_zmatrices_std( args, uplo, M, N, A, LDA, B, M );
+
+    free( B );
+
+    return info_solution;
+}
+
+/**
+ ********************************************************************************
+ *
+ * @ingroup testing
+ *
+ * @brief Checks matrix setting correctness.
+ *
+ ********************************************************************************
+ *
+ * @param[in] uplo
+ *          Whether it is a upper triangular matrix, a lower triangular matrix or a general matrix.
+ *
+ * @param[in] alpha
+ *          All the offdiagonal array elements are set to alpha.
+ *
+ * @param[in] beta
+ *          All the diagonal array elements are set to beta.
+ *
+ * @param[in] descA
+ *          The descriptor of the matrix A.
+ *
+ * @retval 0 successfull set
+ *
+ ********************************************************************************
+ */
+int check_zset( run_arg_list_t *args, cham_uplo_t uplo,  CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, CHAM_desc_t *descA )
+{
+    int info_solution        = 0;
+    int M                    = descA->m;
+    int N                    = descA->n;
+    int rank                 = CHAMELEON_Comm_rank();
+    CHAMELEON_Complex64_t *A = NULL;
+
+    if ( rank == 0 ) {
+        A = (CHAMELEON_Complex64_t *)malloc( sizeof( CHAMELEON_Complex64_t) * M * N );
+    }
+
+    CHAMELEON_zDesc2Lap( uplo, descA, A, M );
+
+    /* Compares the two matrices */
+    if ( rank == 0 ) {
+        info_solution = check_zset_std( args, uplo, alpha, beta, M, N, A, M );
+    }
+
+    /* Broadcasts the result from the main processus */
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &info_solution, 1, MPI_INT, 0, MPI_COMM_WORLD );
+#endif
+
+    if ( rank == 0 ) {
+        free( A );
+    }
+
+    return info_solution;
+}
 #endif /* defined(CHAMELEON_SIMULATION) */
