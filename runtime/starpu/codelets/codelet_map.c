@@ -16,7 +16,6 @@
  *
  */
 #include "chameleon_starpu_internal.h"
-#include "runtime_codelet_z.h"
 
 struct cl_map_args_s {
     cham_uplo_t          uplo;
@@ -31,12 +30,12 @@ struct cl_map_args_s {
 static inline void
 cl_map_rectask_func( struct starpu_task *t, void *_args )
 {
-    struct cl_zgemm_args_s *clargs  = (struct cl_zgemm_args_s *)(t->cl_arg);
-    rectask_args_t         *rtargs  = (rectask_args_t *)_args;
-    RUNTIME_request_t       request = RUNTIME_REQUEST_INITIALIZER;
-    int                     i;
-    int                     ndata   = t->nbuffers;
-    cham_map_data_t         data[ndata];
+    struct cl_map_args_s *clargs  = (struct cl_map_args_s *)(t->cl_arg);
+    rectask_args_t       *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t     request = RUNTIME_REQUEST_INITIALIZER;
+    int                   i;
+    int                   ndata   = t->nbuffers;
+    cham_map_data_t       data[ndata];
 
     starpu_cham_rectask_initrequest( t, &request );
 
@@ -261,6 +260,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
     size_t                clargs_size = 0;
     uint32_t              where       = 0;
     int                   is_rectask  = 1;
+    rectask_args_t       *rtargs      = NULL;
     CHAM_tile_t          *tiles[ndata];
 
     if ( ( ndata < 0 ) || ( ndata > 3 ) ) {
@@ -308,7 +308,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
         rtargs->sequence = options->sequence;
         rtargs->parent   = options->request->parent;
         rtargs->priority = options->priority;
-        memcpy( rtags->tiles, tiles, ndata * sizeof(CHAM_tile_t*) );
+        memcpy( rtargs->tiles, tiles, ndata * sizeof(CHAM_tile_t*) );
     }
 #endif
 
