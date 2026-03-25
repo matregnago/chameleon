@@ -175,13 +175,13 @@ TCUDA_zlacpyx( __attribute__((unused)) cham_uplo_t    uplo,
 }
 
 int
-TCUDA_zlaset( __attribute__((unused)) cham_uplo_t      uplo,
-              __attribute__((unused)) int              m,
-              __attribute__((unused)) int              n,
-              __attribute__((unused)) cuDoubleComplex *alpha,
-              __attribute__((unused)) cuDoubleComplex *beta,
-              CHAM_tile_t                             *A,
-              __attribute__((unused)) cublasHandle_t   handle )
+TCUDA_zlaset( __attribute__((unused)) cham_uplo_t            uplo,
+              __attribute__((unused)) int                    m,
+              __attribute__((unused)) int                    n,
+              __attribute__((unused)) const cuDoubleComplex *alpha,
+              __attribute__((unused)) const cuDoubleComplex *beta,
+              CHAM_tile_t                                   *A,
+              __attribute__((unused)) cublasHandle_t         handle )
 {
     gpucublas_kernel_trace( A );
     return 0;

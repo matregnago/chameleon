@@ -90,7 +90,7 @@ void CUDA_zlaset_upperlower( int              m,
 
 extern "C" int
 CUDA_zlaset( cham_uplo_t uplo, int m, int n,
-             cuDoubleComplex *alpha, cuDoubleComplex *beta,
+             const cuDoubleComplex *alpha, const cuDoubleComplex *beta,
              cuDoubleComplex *A, int lda,
              cublasHandle_t handle )
 {

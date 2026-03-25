@@ -42,7 +42,7 @@ int CUDA_zherk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const doubl
 int CUDA_zherfb( cham_uplo_t uplo, int n, int k, int ib, int nb, const cuDoubleComplex *A, int lda, const cuDoubleComplex *T, int ldt, cuDoubleComplex *C, int ldc, cuDoubleComplex *WORK, int ldwork, cublasHandle_t handle );
 int CUDA_zlarfb( cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M, int N, int K, const cuDoubleComplex *V, int LDV, const cuDoubleComplex *T, int LDT, cuDoubleComplex *C, int LDC, cuDoubleComplex *WORK, int LDWORK, cublasHandle_t handle );
 int CUDA_zlacpy( cham_uplo_t uplo, int M, int N, const cuDoubleComplex *A, int LDA, cuDoubleComplex *B, int LDB, cublasHandle_t handle );
-int CUDA_zlaset( cham_uplo_t uplo, int n1, int n2, cuDoubleComplex *alpha, cuDoubleComplex *beta, cuDoubleComplex *tileA, int ldtilea, cublasHandle_t handle );
+int CUDA_zlaset( cham_uplo_t uplo, int n1, int n2, const cuDoubleComplex *alpha, const cuDoubleComplex *beta, cuDoubleComplex *tileA, int ldtilea, cublasHandle_t handle );
 int CUDA_zlatro( cham_uplo_t uplo, cham_trans_t trans, int m, int n, const cuDoubleComplex *A, int lda, cuDoubleComplex *B, int ldb, cublasHandle_t handle );
 int CUDA_zparfb( cham_side_t side, cham_trans_t trans, cham_dir_t direct, cham_store_t storev, int M1, int N1, int M2, int N2, int K, int L, cuDoubleComplex *A1, int LDA1, cuDoubleComplex *A2, int LDA2, const cuDoubleComplex *V, int LDV, const cuDoubleComplex *T, int LDT, cuDoubleComplex *WORK, int LWORK, cublasHandle_t handle );
 int CUDA_zpotrf( cham_uplo_t uplo, int n, cuDoubleComplex *A, int lda, cuDoubleComplex *WORK, int lwork, int *d_info, cusolverDnHandle_t handle);
