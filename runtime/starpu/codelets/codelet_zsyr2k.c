@@ -90,9 +90,9 @@ static void cl_zsyr2k_hip_func(void *descr[], void *cl_arg)
 
     HIP_zsyr2k( clargs->uplo, clargs->trans,
                 clargs->n, clargs->k,
-                (hipblasDoubleComplex*)&(clargs->alpha), tileA->mat, tileA->ld,
+                (hipDoubleComplex*)&(clargs->alpha), tileA->mat, tileA->ld,
                                                          tileB->mat, tileB->ld,
-                (hipblasDoubleComplex*)&(clargs->beta),  tileC->mat, tileC->ld,
+                (hipDoubleComplex*)&(clargs->beta),  tileC->mat, tileC->ld,
                 handle );
 }
 #endif /* defined(CHAMELEON_USE_HIP) */

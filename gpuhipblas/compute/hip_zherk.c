@@ -25,9 +25,9 @@ int
 HIP_zherk( cham_uplo_t uplo, cham_trans_t trans,
            int n, int k,
            const double *alpha,
-           const hipblasDoubleComplex *A, int lda,
+           const hipDoubleComplex *A, int lda,
            const double *beta,
-           hipblasDoubleComplex *B, int ldb,
+           hipDoubleComplex *B, int ldb,
            hipblasHandle_t handle )
 {
     hipblasStatus_t rc;

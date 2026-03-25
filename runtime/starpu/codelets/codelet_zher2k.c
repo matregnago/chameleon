@@ -89,7 +89,7 @@ static void cl_zher2k_hip_func(void *descr[], void *cl_arg)
 
     HIP_zher2k( clargs->uplo, clargs->trans,
                 clargs->n, clargs->k,
-                (hipblasDoubleComplex*)&(clargs->alpha), tileA->mat, tileA->ld,
+                (hipDoubleComplex*)&(clargs->alpha), tileA->mat, tileA->ld,
                                                          tileB->mat, tileB->ld,
                 &(clargs->beta),                         tileC->mat, tileC->ld,
                 handle );
