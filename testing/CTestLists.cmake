@@ -211,9 +211,8 @@ else (NOT CHAMELEON_SIMULATION)
   set(CHAMELEON_PRECISIONS_SIMU "s;d")
   set(TEST_CMD_simushm -t ${THREADS} -g 0)
   set(TEST_CMD_simugpu -t ${THREADS} -g 1)
-  set(PLATFORMS "mirage;sirocco")
-  set(BSIZE_mirage "320;960")
-  set(BSIZE_sirocco "80;440;960;1440;1920")
+  set(PLATFORMS "sirocco-a100-ctest")
+  set(BSIZE_sirocco-a100-ctest "800;1600")
 
   # loop over constraints
   foreach(cat ${TEST_CATEGORIES})
