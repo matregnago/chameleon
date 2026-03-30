@@ -29,12 +29,13 @@
 #include "runtime_codelet_z.h"
 
 struct cl_zplghe_args_s {
-    double bump;
-    int m;
-    int n;
-    int bigM;
-    int m0;
-    int n0;
+    double                 bump;
+    cham_uplo_t            uplo;
+    int                    m;
+    int                    n;
+    int                    bigM;
+    int                    m0;
+    int                    n0;
     unsigned long long int seed;
 };
 
@@ -110,6 +111,7 @@ void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
     if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zplghe_args_s ) );
         clargs->bump = bump;
+        clargs->uplo = ChamUpperLower;
         clargs->m    = m;
         clargs->n    = n;
         clargs->bigM = bigM;
