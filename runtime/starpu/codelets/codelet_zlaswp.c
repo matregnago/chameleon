@@ -85,13 +85,12 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
     clargs->k    = k;
     if ( ipiv->withidx ) {
         if ( side == ChamLeft ) {
-            clargs->perm_m  = Am    - ipivk;
-            clargs->perm_mt = A->mt - ipivk;
+            clargs->perm_m = Am - ipivk;
         }
         else {
-            clargs->perm_m  = An    - ipivk;
-            clargs->perm_mt = A->nt - ipivk;
+            clargs->perm_m = An - ipivk;
         }
+        clargs->perm_mt = ipiv->max_mt - ipivk;
     }
     else {
         clargs->perm_m  = -1;
@@ -183,13 +182,12 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
         clargs->k    = k;
         if ( ipiv->withidx ) {
             if ( side == ChamLeft ) {
-                clargs->perm_m  = Am    - ipivk;
-                clargs->perm_mt = A->mt - ipivk;
+                clargs->perm_m = Am - ipivk;
             }
             else {
-                clargs->perm_m  = An    - ipivk;
-                clargs->perm_mt = A->nt - ipivk;
+                clargs->perm_m = An - ipivk;
             }
+            clargs->perm_mt = ipiv->max_mt - ipivk;
         }
         else {
             clargs->perm_m  = -1;
@@ -279,13 +277,12 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
     clargs->k    = k;
     if ( ipiv->withidx ) {
         if ( side == ChamLeft ) {
-            clargs->perm_m  = Am    - ipivk;
-            clargs->perm_mt = A->mt - ipivk;
+            clargs->perm_m = Am - ipivk;
         }
         else {
-            clargs->perm_m  = An    - ipivk;
-            clargs->perm_mt = A->nt - ipivk;
+            clargs->perm_m = An - ipivk;
         }
+        clargs->perm_mt = ipiv->max_mt - ipivk;
     }
     else {
         clargs->perm_m  = -1;
@@ -375,13 +372,12 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
         clargs->k    = k;
         if ( ipiv->withidx ) {
             if ( side == ChamLeft ) {
-                clargs->perm_m  = Am    - ipivk;
-                clargs->perm_mt = A->mt - ipivk;
+                clargs->perm_m = Am - ipivk;
             }
             else {
-                clargs->perm_m  = An    - ipivk;
-                clargs->perm_mt = A->nt - ipivk;
+                clargs->perm_m = An - ipivk;
             }
+            clargs->perm_mt = ipiv->max_mt - ipivk;
         }
         else {
             clargs->perm_m  = -1;

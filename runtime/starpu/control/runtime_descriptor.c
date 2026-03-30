@@ -226,8 +226,7 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
         nbtiles *= 3;
     }
 
-    for (m = 0; m < nbtiles; m++, handle++)
-    {
+    for (m = 0; m < nbtiles; m++, handle++) {
         if ( *handle != NULL ) {
             starpu_data_unregister(*handle);
             *handle = NULL;
@@ -269,8 +268,7 @@ int RUNTIME_desc_acquire( const CHAM_desc_t *desc )
     int m, n;
 
     for (n = 0; n < lnt; n++) {
-        for (m = 0; m < lmt; m++)
-        {
+        for (m = 0; m < lmt; m++) {
             if ( (*handle == NULL) ||
                  !chameleon_desc_islocal( desc, m, n ) )
             {
@@ -295,8 +293,7 @@ int RUNTIME_desc_release( const CHAM_desc_t *desc )
     int m, n;
 
     for (n = 0; n < lnt; n++) {
-        for (m = 0; m < lmt; m++)
-        {
+        for (m = 0; m < lmt; m++) {
             if ( (*handle == NULL) ||
                  !chameleon_desc_islocal( desc, m, n ) )
             {

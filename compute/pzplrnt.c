@@ -29,9 +29,13 @@
 /**
  *  chameleon_pzplrnt - Generate a random matrix by tiles.
  */
-void chameleon_pzplrnt( CHAM_desc_t *A,
-                        int bigM, int m0, int n0, unsigned long long int seed,
-                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+void chameleon_pzplrnt_generic( CHAM_desc_t            *A,
+                                int                     bigM,
+                                int                     m0,
+                                int                     n0,
+                                unsigned long long int  seed,
+                                RUNTIME_sequence_t     *sequence,
+                                RUNTIME_request_t      *request )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_option_t options;
@@ -58,4 +62,15 @@ void chameleon_pzplrnt( CHAM_desc_t *A,
         }
     }
     RUNTIME_options_finalize(&options, chamctxt);
+}
+
+void chameleon_pzplrnt( CHAM_desc_t            *A,
+                        int                     bigM,
+                        int                     m0,
+                        int                     n0,
+                        unsigned long long int  seed,
+                        RUNTIME_sequence_t     *sequence,
+                        RUNTIME_request_t      *request )
+{
+    chameleon_pzplrnt_generic( A, bigM, m0, n0, seed, sequence, request );
 }

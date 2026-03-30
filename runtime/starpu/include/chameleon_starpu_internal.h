@@ -52,22 +52,22 @@ typedef void (*callback_fct_t)(void *);
  * @brief Convert the Chameleon access enum to the StarPU one
  */
 static inline enum starpu_data_access_mode
-cham_to_starpu_access( cham_access_t accessA ) {
+cham_to_starpu_access( cham_access_t mode ) {
     assert( (enum starpu_data_access_mode)ChamR  == STARPU_R  );
     assert( (enum starpu_data_access_mode)ChamW  == STARPU_W  );
     assert( (enum starpu_data_access_mode)ChamRW == STARPU_RW );
-    return (enum starpu_data_access_mode)accessA;
+    return (enum starpu_data_access_mode)mode;
 }
 
 /**
  * @brief Convert the Chameleon access enum to the StarPU one
  */
 static inline cham_access_t
-starpu_to_cham_access( enum starpu_data_access_mode accessA ) {
+starpu_to_cham_access( enum starpu_data_access_mode mode ) {
     assert( (enum starpu_data_access_mode)ChamR  == STARPU_R  );
     assert( (enum starpu_data_access_mode)ChamW  == STARPU_W  );
     assert( (enum starpu_data_access_mode)ChamRW == STARPU_RW );
-    return (cham_access_t)accessA;
+    return (cham_access_t)(mode | STARPU_RW);
 }
 
 #include "runtime_codelets.h"

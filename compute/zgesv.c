@@ -135,7 +135,7 @@ int CHAMELEON_zgesv( int N, int NRHS,
     ws = CHAMELEON_zgetrf_WS_Alloc( &descAt );
 
     chameleon_ipiv_init( &descIPIV, ChamLeft, descAt.mb, N,
-                         0, -1, -1,
+                         1, descAt.m, descAt.mt,
                          1, 1, IPIV, NULL );
 
     /* Call the tile interface */

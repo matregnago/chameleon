@@ -232,7 +232,7 @@ CORE_zlaswp_get_idx( cham_side_t side, int m0, int m, int n, int k,
     int        A_ld, A_inc;
     int        B_ld, B_inc;
     int        first, last;
-    const int *perm_data = perm_idx + perm_mt;
+    const int *perm_data = perm_idx + perm_mt + 1;
 
     /* Check input arguments */
     if (m < 0) {
@@ -516,7 +516,7 @@ CORE_zlaswp_set_idx( cham_side_t side, int m0, int m, int n, int k,
     int        A_ld, A_inc;
     int        B_ld, B_inc;
     int        first, last;
-    const int *invp_data = invp_idx + invp_mt;
+    const int *invp_data = invp_idx + invp_mt + 1;
 
     /* Check input arguments */
     if (m0 < 0) {
@@ -580,7 +580,7 @@ CORE_zlaswp_set_idx( cham_side_t side, int m0, int m, int n, int k,
     last  = invp_idx[ invp_m + 1 ];
     invp_data += first * 2;
 
-    for( i = first; i < last; i += 2 ) {
+    for( i = first; i < last; i++ ) {
         int ia = invp_data[ 0 ];
         int ib = invp_data[ 1 ] - m0;
 

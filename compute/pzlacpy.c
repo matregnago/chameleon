@@ -27,8 +27,12 @@
 
 #define A(m,n) A,  m,  n
 #define B(m,n) B,  m,  n
-void chameleon_pzlacpy(cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
-                       RUNTIME_sequence_t *sequence, RUNTIME_request_t *request)
+
+void chameleon_pzlacpy_generic( cham_uplo_t         uplo,
+                                CHAM_desc_t        *A,
+                                CHAM_desc_t        *B,
+                                RUNTIME_sequence_t *sequence,
+                                RUNTIME_request_t  *request )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_option_t options;
@@ -114,4 +118,13 @@ void chameleon_pzlacpy(cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
         }
     }
     RUNTIME_options_finalize(&options, chamctxt);
+}
+
+void chameleon_pzlacpy( cham_uplo_t         uplo,
+                        CHAM_desc_t        *A,
+                        CHAM_desc_t        *B,
+                        RUNTIME_sequence_t *sequence,
+                        RUNTIME_request_t  *request )
+{
+    chameleon_pzlacpy_generic( uplo, A, B, sequence, request );
 }

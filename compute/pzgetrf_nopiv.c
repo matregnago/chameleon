@@ -86,7 +86,7 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
 
     kmin = chameleon_max( 0,       chamctxt->first_step );
     kmax = chameleon_min( min_mnt, chamctxt->last_step  );
-    for (k = kmin; k < kmax; k++ ) {
+    for ( k = kmin; k < kmax; k++ ) {
 
         RUNTIME_iteration_push(chamctxt, k);
 
@@ -99,7 +99,7 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
             tempkm, tempkn, ib, A->mb,
             A(k, k), A->mb*k);
 
-        for (m = k+1; m < A->mt; m++) {
+        for ( m = k+1; m < A->mt; m++ ) {
             options.priority = 2*A->nt - 2*k - m;
             tempmm = A->get_blkdim( A, m, DIM_m, A->m );
             INSERT_TASK_ztrsm(
@@ -109,7 +109,7 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
                 zone, A(k, k),
                       A(m, k));
         }
-        for (n = k+1; n < A->nt; n++) {
+        for ( n = k+1; n < A->nt; n++ ) {
             tempnn = A->get_blkdim( A, n, DIM_n, A->n );
             options.priority = 2*A->nt - 2*k - n;
             INSERT_TASK_ztrsm(
@@ -119,7 +119,7 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
                 zone, A(k, k),
                       A(k, n));
 
-            for (m = k+1; m < A->mt; m++) {
+            for ( m = k+1; m < A->mt; m++ ) {
                 tempmm = A->get_blkdim( A, m, DIM_m, A->m );
                 options.priority = 2*A->nt - 2*k  - n - m;
                 INSERT_TASK_zgemm(
@@ -184,7 +184,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
     myp = A->myrank / Q;
     myq = A->myrank % Q;
 
-    for (k = 0; k < chameleon_min(A->mt, A->nt); k++) {
+    for ( k = 0; k < chameleon_min( A->mt, A->nt ); k++ ) {
         RUNTIME_iteration_push(chamctxt, k);
         lp = (k % lookahead) * P;
         lq = (k % lookahead) * Q;
@@ -208,7 +208,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
 
         chameleon_data_flush( sequence, A( k, k ), request->flush );
 
-        for (m = k+1; m < A->mt; m++) {
+        for ( m = k+1; m < A->mt; m++ ) {
 
             /* Skip the row if you are not involved with */
             if ( ( m % P ) != myp ) {
@@ -224,7 +224,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
                 ChamRight, ChamUpper, ChamNoTrans, ChamNonUnit,
                 tempmm, tempkn, A->mb,
                 zone, WU( myp + lp, k ),
-                      A( m, k ) );
+                      A(  m,        k ) );
 
             /* Broadcast A(m,k) into temp buffers through a ring */
             chameleon_pzbcast_tile( ChamRowwise, ChamBcastRing,
@@ -233,7 +233,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
             chameleon_data_flush( sequence, A( m, k ), request->flush );
         }
 
-        for (n = k+1; n < A->nt; n++) {
+        for ( n = k+1; n < A->nt; n++ ) {
 
             /* Skip the column if you are not involved with */
             if ( ( n % Q ) != myq ) {
@@ -257,7 +257,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
 
             chameleon_data_flush( sequence, A( k, n ), request->flush );
 
-            for (m = k+1; m < A->mt; m++) {
+            for ( m = k+1; m < A->mt; m++ ) {
 
                 /* Skip the row if you are not involved with */
                 if ( ( m % P ) != myp ) {
