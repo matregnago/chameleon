@@ -24,12 +24,21 @@
 #include "control/common.h"
 
 #define A(m,n) A,  m,  n
+
 /**
- *  chameleon_pzplgsy - Generate a random symmetric (positive definite if 'bump' is large enough) half-matrix by tiles.
+ * @brief Generic tile algorithm to generate a symmetric random matrix
+ *
+ * This is the version to use by default.
  */
-void chameleon_pzplgsy( CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_t *A,
-                        int bigM, int m0, int n0, unsigned long long int seed,
-                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+void chameleon_pzplgsy_generic( CHAMELEON_Complex64_t  bump,
+                                cham_uplo_t            uplo,
+                                CHAM_desc_t           *A,
+                                int                    bigM,
+                                int                    m0,
+                                int                    n0,
+                                unsigned long long int seed,
+                                RUNTIME_sequence_t    *sequence,
+                                RUNTIME_request_t     *request )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_option_t options;
@@ -94,4 +103,11 @@ void chameleon_pzplgsy( CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_
         }
     }
     RUNTIME_options_finalize(&options, chamctxt);
+}
+
+void chameleon_pzplgsy( CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_t *A,
+                        int bigM, int m0, int n0, unsigned long long int seed,
+                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+{
+    chameleon_pzplgsy_generic( bump, uplo, A, bigM, m0, n0, seed, sequence, request );
 }
