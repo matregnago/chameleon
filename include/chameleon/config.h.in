@@ -98,6 +98,9 @@
 /* Support for StarPU Recursive tasks */
 #cmakedefine CHAMELEON_USE_RECURSIVE_TASKS
 
+/* Enable STARPU_COMMUTE mode */
+#cmakedefine CHAMELEON_STARPU_COMMUTE
+
 #cmakedefine HAVE_FALLTHROUGH
 #if defined(HAVE_FALLTHROUGH)
 #define chameleon_attr_fallthrough __attribute__((fallthrough))
