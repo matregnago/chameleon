@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -141,7 +141,8 @@ void RUNTIME_set_minmax_submitted_tasks( int min, int max ) {
     (void)max;
 }
 
-#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+#if !defined(CHAMELEON_SIMULATION)
+#if defined(CHAMELEON_USE_CUDA)
 cublasHandle_t
 RUNTIME_get_cublas_handle()
 {
@@ -155,4 +156,19 @@ RUNTIME_get_cusolverDn_handle()
     assert(0);
     return NULL;
 }
+#elif defined(CHAMELEON_USE_HIP)
+hipblasHandle_t
+RUNTIME_get_hipblas_handle()
+{
+    assert(0);
+    return NULL;
+}
+
+hipsolverDnHandle_t
+RUNTIME_get_hipsolverDn_handle()
+{
+    assert(0);
+    return NULL;
+}
+#endif
 #endif

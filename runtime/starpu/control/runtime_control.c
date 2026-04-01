@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -255,6 +255,7 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
     starpu_cusolver_init();
 #elif defined(CHAMELEON_USE_HIP)
     starpu_hipblas_init();
+    starpu_hipsolver_init();
 #endif
 #endif
 
@@ -290,6 +291,7 @@ void RUNTIME_finalize( CHAM_context_t *chamctxt )
 #endif
 #if defined(CHAMELEON_USE_HIP) && !defined(CHAMELEON_SIMULATION)
     starpu_hipblas_shutdown();
+    starpu_hipsolver_shutdown();
 #endif
 
 #if defined(CHAMELEON_USE_MPI)
@@ -459,8 +461,8 @@ void RUNTIME_set_minmax_submitted_tasks( int min, int max ){
 #endif
 }
 
-
-#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+#if !defined(CHAMELEON_SIMULATION)
+#if defined(CHAMELEON_USE_CUDA)
 cublasHandle_t
 RUNTIME_get_cublas_handle()
 {
@@ -472,4 +474,21 @@ RUNTIME_get_cusolverDn_handle()
 {
     return starpu_cusolverDn_get_local_handle();
 }
+#elif defined(CHAMELEON_USE_HIP)
+hipblasHandle_t
+RUNTIME_get_hipblas_handle()
+{
+    return starpu_hipblas_get_local_handle();
+}
+
+hipsolverDnHandle_t
+RUNTIME_get_hipsolverDn_handle()
+{
+#if defined(STARPU_HAVE_LIBHIPSOLVER)
+    return starpu_hipsolverDn_get_local_handle();
+#else
+    return NULL;
+#endif
+}
+#endif
 #endif
