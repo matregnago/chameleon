@@ -4,7 +4,7 @@
 #
 # @copyright 2009-2014 The University of Tennessee and The University of
 #                      Tennessee Research Foundation. All rights reserved.
-# @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+# @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                      Univ. Bordeaux. All rights reserved.
 #
 ###
@@ -34,6 +34,7 @@ set(ZSRC
     hip_zhemm.c
     hip_zher2k.c
     hip_zherk.c
+    hip_zpotrf.c
     hip_zsymm.c
     hip_zsyr2k.c
     hip_zsyrk.c
@@ -71,6 +72,7 @@ target_include_directories(gpuhipblas PUBLIC
 set_property(TARGET gpuhipblas PROPERTY INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
 target_link_libraries(gpuhipblas PRIVATE coreblas)
+target_link_libraries(gpuhipblas PUBLIC roc::hipsolver)
 target_link_libraries(gpuhipblas PUBLIC roc::hipblas)
 target_link_libraries(gpuhipblas PUBLIC MORSE::M)
 
