@@ -267,6 +267,7 @@ endif()
 
 option(CHAMELEON_VERBOSE "Enable debug information from Chameleon (Use CHAMELEON_SILENT to dynamically turn off)" OFF )
 option(CHAMELEON_DEBUG_GERED  "Enable GERED debug"  OFF)
+option(CHAMELEON_STARPU_COMMUTE  "Enable STARPU_COMMUTE mode usage in codelets when useful" ON)
 
 # Option to activate or not simulation mode (use Simgrid through StarPU)
 # ----------------------------------------------------------------------
