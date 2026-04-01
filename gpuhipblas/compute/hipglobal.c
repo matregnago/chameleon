@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -45,7 +45,7 @@ int chameleon_hipblas_constants[] =
     0, 0, 0, 0, 0, 0, 0,
     HIPBLAS_FILL_MODE_UPPER, // 121: ChamUpper
     HIPBLAS_FILL_MODE_LOWER, // 122: ChamLower
-    0,                      // 123: ChamUpperLower
+    HIPBLAS_FILL_MODE_FULL,  // 123: ChamUpperLower
     0, 0, 0, 0, 0, 0, 0,
     HIPBLAS_DIAG_NON_UNIT,   // 131: ChamNonUnit
     HIPBLAS_DIAG_UNIT,       // 132: ChamUnit
