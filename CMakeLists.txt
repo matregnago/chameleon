@@ -4,7 +4,7 @@
 #
 # @copyright 2009-2014 The University of Tennessee and The University of
 #                      Tennessee Research Foundation. All rights reserved.
-# @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+# @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                      Univ. Bordeaux. All rights reserved.
 #
 ###
@@ -440,6 +440,10 @@ if(NOT CHAMELEON_SIMULATION)
             # should define targets: roc::hipblas
             find_package(hipblas REQUIRED CONFIG)
             message(STATUS "hipblas target found")
+
+            # should define targets: roc::hipsolver
+            find_package(hipsolver REQUIRED)
+            message(STATUS "hipsolver target found")
 
         elseif(CHAMELEON_USE_HIP_CUDA)
 
