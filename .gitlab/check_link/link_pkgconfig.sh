@@ -56,3 +56,6 @@ $CC $FLAGS ../../../example/link_chameleon/link_chameleon.c $LIBS -o link_chamel
 if [[ "$VERSION" != "starpu_simgrid" ]]; then
     ./link_chameleon_c
 fi
+
+cd ..
+rm -rf build
