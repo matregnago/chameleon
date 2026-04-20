@@ -444,7 +444,7 @@ chameleon_zdesc_copy_and_restrict( const CHAM_context_t *chamctxt,
 static inline int
 chameleon_zlap2tile( const CHAM_context_t *chamctxt, const char *name,
                      CHAM_desc_t *descAl, CHAM_desc_t *descAt,
-                     int mode, cham_uplo_t uplo,
+                     cham_desc_access_t mode, cham_uplo_t uplo,
                      CHAMELEON_Complex64_t *A, int mb, int nb, int lm, int ln, int m, int n,
                      RUNTIME_sequence_t *seq, RUNTIME_request_t *req )
 {
@@ -486,7 +486,7 @@ chameleon_zlap2tile( const CHAM_context_t *chamctxt, const char *name,
  */
 static inline int
 chameleon_ztile2lap( const CHAM_context_t *chamctxt, CHAM_desc_t *descAl, CHAM_desc_t *descAt,
-                     int mode, cham_uplo_t uplo,
+                     cham_desc_access_t mode, cham_uplo_t uplo,
                      RUNTIME_sequence_t *seq, RUNTIME_request_t *req )
 {
     if ( CHAMELEON_TRANSLATION == ChamOutOfPlace ) {
