@@ -179,7 +179,7 @@ chameleon_parsec_data_of_key(parsec_data_collection_t *data_collection, parsec_d
                                mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp) );
 }
 
-#ifdef parsec_PROF_TRACE
+#if defined(PARSEC_PROF_TRACE)
 static inline int
 chameleon_parsec_key_to_string(parsec_data_collection_t *data_collection, parsec_data_key_t key, char * buffer, uint32_t buffer_size)
 {
