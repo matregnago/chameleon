@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -25,6 +25,7 @@
  * @author Ana Hourcau
  * @author Pierre Esterie
  * @author Matteo Marcos
+ * @author Brieuc Nicolas
  * @date 2025-12-19
  * @precisions normal z -> c d s
  *
@@ -373,13 +374,6 @@ void chameleon_pzgram( struct chameleon_pzgram_s *ws, cham_uplo_t uplo, CHAM_des
  * Specific functions called when option is already initialized
  */
 void chameleon_pzbcast_tile( cham_store_t dir, cham_bcast_t algo, const CHAM_desc_t *A, int Am, int An, const CHAM_desc_t *W, int Wm, int Wn, RUNTIME_option_t *options );
-
-/**
- *  LAPACK/Tile Descriptor accesses
- */
-#define ChamDescInput  1
-#define ChamDescOutput 2
-#define ChamDescInout  (ChamDescInput | ChamDescOutput)
 
 /**
  *  Macro for matrix conversion / Lapack interface
