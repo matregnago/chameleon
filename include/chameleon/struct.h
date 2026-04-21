@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -181,6 +181,7 @@ struct chameleon_desc_s {
     int occurences;   /**> identify main matrix desc (occurences=1) or                        */
                       /**> submatrix desc (occurences>1) to avoid unregistering               */
                       /**> GPU data twice                                                     */
+    int sync;         /**> 1 if we the descriptor needs to be synced during flush - else 0    */
     int use_mat;      /**> 1 if we have a pointer to the overall data mat - else 0            */
     int alloc_mat;    /**> 1 if we handle the allocation of mat - else 0                      */
     int register_mat; /**> 1 if we have to register mat - else 0 (handled by the application) */

@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -275,7 +275,7 @@ RUNTIME_sequence_create( CHAM_context_t     *ctxt,
  */
 int
 RUNTIME_sequence_destroy( CHAM_context_t     *ctxt,
-                          RUNTIME_sequence_t *sequence);
+                          RUNTIME_sequence_t *sequence );
 
 /**
  * @brief Wait for completion of all tasks in the given sequence.
@@ -423,13 +423,19 @@ RUNTIME_desc_release( const CHAM_desc_t *desc );
 /**
  * @brief Flush all pieces of data from a descriptor.
  *
- * This function marks all pieces of data from the descriptor as unused in the future to:
- *   - cleanup the data from the distributed cache if present.
- *   - mark for eviction from the GPU if space is needed
- *   - move the data back to the main memory
+ * This function marks all pieces of data from the descriptor as unused in the
+ * future to:
+ *   - cleanup the data from the distributed cache if present,
+ *   - mark copies for eviction if space is needed,
+ *   - submit movement of the data back to its home memory node if needed.
+ *
+ * @warning: If the descriptor sync field is false, synchronization of data to their home memory node
+ * is done in a lazy way and is not guaranteed after a wait on the sequence. If
+ * sync is true, the synchronization is explicit and done asynchronously but
+ * guaranteed after a wait on a the associated sequence. The sync field is set internally when the descriptor in accessed in write mode.
  *
  * @param[in] desc
- *            The descriptor to flush.
+ *            The descriptor for which data needs to be flushed or acquired.
  *
  * @param[in] sequence
  *            The sequence in which the data is used.
