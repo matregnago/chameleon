@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_zpivot_allreduce.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -101,6 +101,8 @@ INSERT_TASK_zpivot_allreduce_send( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
+
+    (void)k;
 }
 
 static void
@@ -128,6 +130,8 @@ INSERT_TASK_zpivot_allreduce_recv( const RUNTIME_option_t *options,
         INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, h ) );
+
+    (void)k;
 }
 
 #else /* defined(CHAMELEON_STARPU_USE_INSERT) */
