@@ -168,7 +168,7 @@ TCUDA_zlatro( __attribute__((unused)) cham_uplo_t    uplo,
               CHAM_tile_t                           *B,
               __attribute__((unused)) cublasHandle_t handle )
 {
-    gpucubla_kernel_trace( A, B );
+    gpucublas_kernel_trace( A, B );
     return 0;
 }
 
