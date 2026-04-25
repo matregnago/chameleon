@@ -1,11 +1,13 @@
 chameleon-2.0.0
 ------------------------------------------------------------------------
+ - compute: Fix the zlaswp right case that was incorrect on non square PxQ grid
  - starpu: Fix issue when using STARPU_W on both triangle side of a tile that was creating an incorrect DAG on heterogeneous architectures.
  - fortran: Remove decprecated F77 interface that was no longer maintained
  - control: Remove deprecated Lapack_to_Tile/Tile_to_Lapack from the F90 interface
  - control: Remove deprecated build family of functions
  - control: Remove deprecated CHAMELEON_My_Mpi_Rank function
  - control: Remove deprecated CHAMELEON_user_tag_size function
+ - control: Internally change the descriptor structure to detect when the RUNTIME_desc_flush() has to enforce or not the synchronization of the data with their home memory node.
  - compute/codelets: Remove the deprecated build functions that have been replaced by the map function
  - gpucublas: Add laset kernel (available with StarPU)
 
