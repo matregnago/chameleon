@@ -2,7 +2,7 @@
  *
  * @file pzlaswp.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -171,7 +171,7 @@ chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws,
 
     /*
      * Perform the permutation on the panel, the final top tile is stored in
-     * Wu(..,n) or Ws(...,n) when done dpeending on the configuration.
+     * Wu(...,n) or Ws(...,n) when done depending on the configuration.
      */
     if ( ws->batch_size_swap == 0 ){
         chameleon_pzlaswp_panel_permute( ws, dir, A, ipiv, k, n, options );
