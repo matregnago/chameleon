@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -87,8 +87,8 @@
  *
  */
 int CHAMELEON_zgeadd( cham_trans_t trans, int M, int N,
-                  CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t *A, int LDA,
-                  CHAMELEON_Complex64_t beta,  CHAMELEON_Complex64_t *B, int LDB )
+                      CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t *A, int LDA,
+                      CHAMELEON_Complex64_t beta,  CHAMELEON_Complex64_t *B, int LDB )
 {
     int NB;
     int Am, An;
@@ -223,8 +223,8 @@ int CHAMELEON_zgeadd( cham_trans_t trans, int M, int N,
  *
  */
 int CHAMELEON_zgeadd_Tile( cham_trans_t trans,
-                       CHAMELEON_Complex64_t alpha, CHAM_desc_t *A,
-                       CHAMELEON_Complex64_t beta,  CHAM_desc_t *B )
+                           CHAMELEON_Complex64_t alpha, CHAM_desc_t *A,
+                           CHAMELEON_Complex64_t beta,  CHAM_desc_t *B )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_sequence_t *sequence = NULL;
@@ -279,9 +279,9 @@ int CHAMELEON_zgeadd_Tile( cham_trans_t trans,
  *
  */
 int CHAMELEON_zgeadd_Tile_Async( cham_trans_t trans,
-                             CHAMELEON_Complex64_t alpha, CHAM_desc_t *A,
-                             CHAMELEON_Complex64_t beta,  CHAM_desc_t *B,
-                             RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
+                                 CHAMELEON_Complex64_t alpha, CHAM_desc_t *A,
+                                 CHAMELEON_Complex64_t beta,  CHAM_desc_t *B,
+                                 RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
 {
     CHAM_context_t *chamctxt;
     int M, N;
