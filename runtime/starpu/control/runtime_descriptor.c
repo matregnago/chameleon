@@ -348,6 +348,9 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
     }
 }
 
+/**
+ *  Flush or retrieve data to its home location for later use outside the runtime
+ */
 void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
@@ -357,6 +360,12 @@ void RUNTIME_desc_flush( CHAM_desc_t              *desc,
     int mt   = desc->mt;
     int nt   = desc->nt;
     int i, m, n;
+    int sync = desc->sync;
+
+    /* Fallback if the matrix is allocated by the runtime */
+    if ( !desc->use_mat ) {
+        sync = 0;
+    }
 
     if ( cham_is_mixed( desc->dtyp ) ) {
         imax = 3;
@@ -369,9 +378,11 @@ void RUNTIME_desc_flush( CHAM_desc_t              *desc,
         {
             for (m = 0; m < mt; m++, handle++, tile++)
             {
-                runtime_data_flush_one( sequence, tile, *handle, 0 );
+                runtime_data_flush_one( sequence, tile, *handle, sync );
             }
         }
+         /* Only the main precision is synchronized */
+        sync = 0;
     }
     desc->sync = 0;
 }
