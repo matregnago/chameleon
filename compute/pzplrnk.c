@@ -2,7 +2,7 @@
  *
  * @file pzplrnk.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -213,6 +213,8 @@ chameleon_pzplrnk( int                         K,
 
         chameleon_pzplrnk_generic( chamctxt, K, &WA, &WB, C, seedA, seedB, &options );
     }
+    /* Mark written data for synchronization */
+    C->sync = 1;
 
     RUNTIME_desc_flush( &WA, sequence );
     RUNTIME_desc_flush( &WB, sequence );

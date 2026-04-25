@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -110,4 +110,6 @@ void chameleon_pzplgsy( CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
 {
     chameleon_pzplgsy_generic( bump, uplo, A, bigM, m0, n0, seed, sequence, request );
+    /* Mark written data for synchronization */
+    A->sync = 1;
 }

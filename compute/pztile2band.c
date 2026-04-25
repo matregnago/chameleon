@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -16,6 +16,7 @@
  * @author Gregoire Pichon
  * @author Mathieu Faverge
  * @author Alycia Lisito
+ * @author Florent Pruvost
  * @date 2025-01-24
  * @precisions normal z -> s d c
  *
@@ -107,6 +108,8 @@ void chameleon_pztile2band( cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
             }
         }
     }
+    /* Mark written data for synchronization */
+    B->sync = 1;
     RUNTIME_options_finalize(&options, chamctxt);
 }
 #undef B

@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -14,6 +14,7 @@
  * @version 1.4.0
  * @author Dalal Sukkari
  * @author Mathieu Faverge
+ * @author Florent Pruvost
  * @date 2025-01-24
  * @precisions normal z -> s d c
  *
@@ -99,5 +100,8 @@ void chameleon_pzlascal(cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc
             }
         }
     }
+    /* Mark written data for synchronization */
+    A->sync = 1;
+
     RUNTIME_options_finalize(&options, chamctxt);
 }

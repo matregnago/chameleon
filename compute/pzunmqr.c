@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -379,6 +379,8 @@ void chameleon_pzunmqr( int genD, cham_side_t side, cham_trans_t trans,
             }
         }
     }
+    /* Mark written data for synchronization */
+    C->sync = 1;
 
     RUNTIME_options_ws_free(&options);
     RUNTIME_options_finalize(&options, chamctxt);

@@ -2,7 +2,7 @@
  *
  * @file pzlatms.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  * @copyright 2016-2020 KAUST. All rights reserved.
  *
@@ -320,6 +320,8 @@ void chameleon_pzlatms( cham_dist_t idist, unsigned long long int seed, cham_sym
 
         libhqr_finalize( &qrtree );
     }
+    /* Mark written data for synchronization */
+    A->sync = 1;
 
     RUNTIME_options_finalize(&options, chamctxt);
 

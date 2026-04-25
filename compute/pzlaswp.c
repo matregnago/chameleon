@@ -263,5 +263,8 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
             RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
     }
+    /* Mark written data for synchronization */
+    A->sync = 1;
+
     RUNTIME_options_finalize( &options, chamctxt );
 }
