@@ -32,7 +32,7 @@
 #define DROW(m, n)  &DROW,  m, n
 
 void
-chameleon_pzgenm2( double tol, const CHAM_desc_t *A, double *result,
+chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
                    RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
 {
     CHAM_context_t  *chamctxt;

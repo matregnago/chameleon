@@ -146,8 +146,8 @@ typedef struct cham_map_operator_s {
  * @brief Structure to store the data information in the map operation
  */
 typedef struct cham_map_data_s {
-    cham_access_t      access; /**< Access type to the descriptor. Must be one of ChamR, ChamW, ChamRW. */
-    const CHAM_desc_t *desc;   /**< Descriptor in which the data is taken to apply the map operation.   */
+    cham_access_t  access; /**< Access type to the descriptor. Must be one of ChamR, ChamW, ChamRW. */
+    CHAM_desc_t   *desc;   /**< Descriptor in which the data is taken to apply the map operation.   */
 } cham_map_data_t;
 
 void INSERT_TASK_map( const RUNTIME_option_t *options,
