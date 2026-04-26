@@ -360,7 +360,7 @@ void RUNTIME_flush( CHAM_context_t *chamctxt )
     return;
 }
 
-void RUNTIME_desc_flush( const CHAM_desc_t        *desc,
+void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
     parsec_taskpool_t* PARSEC_dtd_taskpool = (parsec_taskpool_t *)(sequence->schedopt);

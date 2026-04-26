@@ -68,7 +68,7 @@ int RUNTIME_desc_release( const CHAM_desc_t *desc )
 }
 
 void
-RUNTIME_desc_flush( const CHAM_desc_t        *desc,
+RUNTIME_desc_flush( CHAM_desc_t              *desc,
                     const RUNTIME_sequence_t *sequence )
 {
     (void)desc;

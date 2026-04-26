@@ -434,14 +434,14 @@ RUNTIME_desc_release( const CHAM_desc_t *desc );
  * sync is true, the synchronization is explicit and done asynchronously but
  * guaranteed after a wait on a the associated sequence. The sync field is set internally when the descriptor in accessed in write mode.
  *
- * @param[in] desc
+ * @param[in,out] desc
  *            The descriptor for which data needs to be flushed or acquired.
  *
  * @param[in] sequence
  *            The sequence in which the data is used.
  */
 void
-RUNTIME_desc_flush( const CHAM_desc_t        *desc,
+RUNTIME_desc_flush( CHAM_desc_t              *desc,
                     const RUNTIME_sequence_t *sequence );
 
 /**

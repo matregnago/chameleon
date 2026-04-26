@@ -348,7 +348,7 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
     }
 }
 
-void RUNTIME_desc_flush( const CHAM_desc_t        *desc,
+void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
     CHAM_tile_t          *tile;
@@ -373,6 +373,7 @@ void RUNTIME_desc_flush( const CHAM_desc_t        *desc,
             }
         }
     }
+    desc->sync = 0;
 }
 
 void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
