@@ -186,12 +186,12 @@ chameleon_parsec_key_to_string(parsec_data_collection_t *data_collection, parsec
     chameleon_parsec_desc_t *pdesc = (chameleon_parsec_desc_t*)data_collection;
     CHAM_desc_t *mdesc = pdesc->desc;
     int m, n, res;
-    chameleon_parsec_key_to_coordinates(data_collection, key, &m, &n);
-    res = snprintf(buffer, buffer_size, "(%d, %d)", m, n);
-    if (res < 0)
+    chameleon_parsec_key_to_coordinates( data_collection, key, &m, &n );
+    res = snprintf( buffer, buffer_size, "(%d, %d)", m, n );
+    if ( res < 0 )
     {
-        printf("error in key_to_string for tile (%u, %u) key: %u\n",
-               (unsigned int)m, (unsigned int)n, datakey);
+        printf( "error in key_to_string for tile (%u, %u) key: %u\n",
+                (unsigned int)m, (unsigned int)n, key );
     }
     return res;
 }
