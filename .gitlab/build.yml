@@ -66,7 +66,6 @@ build_starpu:
     CMAKE_BUILD_PARALLEL_LEVEL: 20
   script:
     - guix time-machine
-      --url=https://codeberg.org/guix/guix-mirror.git
       --channels=./.gitlab/guix-channels-${VARIANT}.scm
       -- shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
       --preserve=LOGNAME --preserve=BUILD_OPTIONS --preserve=CMAKE_BUILD_PARALLEL_LEVEL

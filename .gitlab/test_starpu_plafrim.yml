@@ -6,7 +6,6 @@
     SYSTEM: guix
   script:
     - guix time-machine
-      --url=https://codeberg.org/guix/guix-mirror.git
       --channels=./.gitlab/guix-channels-${VARIANT}.scm
       -- shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
       --preserve=LOGNAME --preserve=BUILD_OPTIONS

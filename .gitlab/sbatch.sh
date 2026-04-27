@@ -15,9 +15,6 @@ if [[ "${SLURM_CONSTRAINTS}" == "sirocco" ]]; then
     export LD_PRELOAD="/usr/lib64/libcuda.so"
 fi
 
-# the build directory comes from gitlab-ci artifacts, the absolute path may be different from the one used in the build stage, so we need to update the LD_LIBRARY_PATH to get the right chameleon libraries
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build-${VERSION}/compute:$PWD/build-${VERSION}/coreblas/compute:$PWD/build-${VERSION}/gpucublas/compute:$PWD/build-${VERSION}/hqr/src:$PWD/build-${VERSION}/lapack_api:$PWD/build-${VERSION}/runtime/starpu"
-
 # execution commands
 sbatch --wait \
        --job-name="$JOB_NAME" \

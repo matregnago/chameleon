@@ -83,4 +83,8 @@ cd .gitlab/check_link/
 ./link_pkgconfig.sh $PWD/../../install-${VERSION}
 
 cd ../..
-rm -r install-${VERSION}
+# Remove the install directory to save space, except for starpu_cuda and starpu_hip because on
+# plafrim with gpu (shell runner, not docker) the install directory is used for the tests
+if [[ "$VERSION" != "starpu_cuda" && "$VERSION" != "starpu_hip" ]]; then
+  rm -r install-${VERSION}
+fi
