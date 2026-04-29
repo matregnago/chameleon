@@ -27,3 +27,5 @@ cmake --build build --verbose
 if [[ "$VERSION" != "starpu_simgrid" ]]; then
     ctest --test-dir build --verbose
 fi
+
+rm -rf build

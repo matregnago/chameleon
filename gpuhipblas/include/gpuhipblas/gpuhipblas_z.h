@@ -25,14 +25,14 @@
 /**
  *  Declarations of hip kernels - alphabetical order
  */
-int HIP_zgemm(  cham_trans_t transa, cham_trans_t transb, int m, int n, int k, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, const hipblasDoubleComplex *B, int ldb, const hipblasDoubleComplex *beta, hipblasDoubleComplex *C, int ldc, hipblasHandle_t handle );
-int HIP_zhemm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, const hipblasDoubleComplex *B, int ldb, const hipblasDoubleComplex *beta, hipblasDoubleComplex *C, int ldc, hipblasHandle_t handle );
-int HIP_zher2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, const hipblasDoubleComplex *B, int ldb, const double *beta, hipblasDoubleComplex *C, int ldc, hipblasHandle_t handle );
-int HIP_zherk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const double *alpha, const hipblasDoubleComplex *A, int lda, const double *beta, hipblasDoubleComplex *B, int ldb, hipblasHandle_t handle );
-int HIP_zsymm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, const hipblasDoubleComplex *B, int ldb, const hipblasDoubleComplex *beta, hipblasDoubleComplex *C, int ldc, hipblasHandle_t handle );
-int HIP_zsyr2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, const hipblasDoubleComplex *B, int ldb, const hipblasDoubleComplex *beta, hipblasDoubleComplex *C, int ldc, hipblasHandle_t handle );
-int HIP_zsyrk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, const hipblasDoubleComplex *beta, hipblasDoubleComplex *C, int ldc, hipblasHandle_t handle );
-int HIP_ztrmm(  cham_side_t side, cham_uplo_t uplo, cham_trans_t transa, cham_diag_t diag, int m, int n, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, hipblasDoubleComplex *B, int ldb, hipblasHandle_t handle );
-int HIP_ztrsm(  cham_side_t side, cham_uplo_t uplo, cham_trans_t transa, cham_diag_t diag, int m, int n, const hipblasDoubleComplex *alpha, const hipblasDoubleComplex *A, int lda, hipblasDoubleComplex *B, int ldb, hipblasHandle_t handle );
+int HIP_zgemm(  cham_trans_t transa, cham_trans_t transb, int m, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+int HIP_zhemm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+int HIP_zher2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const double *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+int HIP_zherk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const double *alpha, const hipDoubleComplex *A, int lda, const double *beta, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
+int HIP_zsymm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+int HIP_zsyr2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+int HIP_zsyrk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+int HIP_ztrmm(  cham_side_t side, cham_uplo_t uplo, cham_trans_t transa, cham_diag_t diag, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
+int HIP_ztrsm(  cham_side_t side, cham_uplo_t uplo, cham_trans_t transa, cham_diag_t diag, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
 
 #endif /* _gpuhipblas_z_h_ */

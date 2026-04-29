@@ -24,7 +24,7 @@ cp -ar $HOME/.cache/guix $XDG_CACHE_HOME
 
 # save guix commits
 #guix describe --format=json > guix.json
-guix time-machine --url=https://codeberg.org/guix/guix-mirror.git \
+guix time-machine \
   --channels=./tools/bench/guix-channels.scm -- describe --format=json > guix.json
 
 # define env var depending on the node type
@@ -63,7 +63,7 @@ GUIX_ADHOC="coreutils gawk grep hwloc jube perl slurm@23"
 GUIX_RULE="-D $GUIX_ENV $GUIX_ENV_MPI $GUIX_ADHOC $GUIX_ADHOC_MPI"
 
 # 1. Run benchmark
-guix time-machine --url=https://codeberg.org/guix/guix-mirror.git \
+guix time-machine \
   --channels=./tools/bench/guix-channels.scm \
   -- shell --pure \
   --preserve="PLATFORM|NODE|^CI|^SLURM|^JUBE|^MPI|^STARPU|^CHAMELEON" \
@@ -72,7 +72,7 @@ guix time-machine --url=https://codeberg.org/guix/guix-mirror.git \
 err1=$?
 
 # 2. Upload results
-guix time-machine --url=https://codeberg.org/guix/guix-mirror.git \
+guix time-machine \
   --channels=./tools/bench/guix-channels-elk.scm \
   -- shell --pure --preserve="proxy$" \
   curl nss-certs python python-click python-certifi python-elasticsearch python-gitpython \

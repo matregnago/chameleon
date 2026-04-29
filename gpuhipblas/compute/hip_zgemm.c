@@ -24,11 +24,11 @@
 int
 HIP_zgemm( cham_trans_t transa, cham_trans_t transb,
            int m, int n, int k,
-           const hipblasDoubleComplex *alpha,
-           const hipblasDoubleComplex *A, int lda,
-           const hipblasDoubleComplex *B, int ldb,
-           const hipblasDoubleComplex *beta,
-           hipblasDoubleComplex *C, int ldc,
+           const hipDoubleComplex *alpha,
+           const hipDoubleComplex *A, int lda,
+           const hipDoubleComplex *B, int ldb,
+           const hipDoubleComplex *beta,
+           hipDoubleComplex *C, int ldc,
            hipblasHandle_t handle )
 {
     hipblasStatus_t rc;

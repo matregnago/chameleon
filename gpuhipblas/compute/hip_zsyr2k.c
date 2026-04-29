@@ -24,11 +24,11 @@
 int
 HIP_zsyr2k( cham_uplo_t uplo, cham_trans_t trans,
             int n, int k,
-            const hipblasDoubleComplex *alpha,
-            const hipblasDoubleComplex *A, int lda,
-            const hipblasDoubleComplex *B, int ldb,
-            const hipblasDoubleComplex *beta,
-            hipblasDoubleComplex *C, int ldc,
+            const hipDoubleComplex *alpha,
+            const hipDoubleComplex *A, int lda,
+            const hipDoubleComplex *B, int ldb,
+            const hipDoubleComplex *beta,
+            hipDoubleComplex *C, int ldc,
             hipblasHandle_t handle )
 {
     hipblasStatus_t rc;

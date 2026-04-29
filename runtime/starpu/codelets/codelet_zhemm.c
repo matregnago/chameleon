@@ -99,10 +99,10 @@ cl_zhemm_hip_func( void *descr[], void *cl_arg )
     HIP_zhemm(
         clargs->side, clargs->uplo,
         clargs->m, clargs->n,
-        (hipblasDoubleComplex*)&(clargs->alpha),
+        (hipDoubleComplex*)&(clargs->alpha),
         tileA->mat, tileA->ld,
         tileB->mat, tileB->ld,
-        (hipblasDoubleComplex*)&(clargs->beta),
+        (hipDoubleComplex*)&(clargs->beta),
         tileC->mat, tileC->ld,
         handle );
 }

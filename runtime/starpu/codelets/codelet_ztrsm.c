@@ -109,7 +109,7 @@ cl_ztrsm_hip_func(void *descr[], void *cl_arg)
     HIP_ztrsm(
         clargs->side, clargs->uplo, clargs->transA, clargs->diag,
         clargs->m, clargs->n,
-        (hipblasDoubleComplex*)&(clargs->alpha),
+        (hipDoubleComplex*)&(clargs->alpha),
         tileA->mat, tileA->ld,
         tileB->mat, tileB->ld,
         handle );

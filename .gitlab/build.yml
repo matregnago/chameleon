@@ -66,8 +66,7 @@ build_starpu:
     CMAKE_BUILD_PARALLEL_LEVEL: 20
   script:
     - guix time-machine
-      --url=https://codeberg.org/guix/guix-mirror.git
-      --channels=./tools/bench/guix-channels.scm
+      --channels=./.gitlab/guix-channels-${VARIANT}.scm
       -- shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
       --preserve=LOGNAME --preserve=BUILD_OPTIONS --preserve=CMAKE_BUILD_PARALLEL_LEVEL
       -D chameleon-${VARIANT} eztrace coreutils bash-minimal
@@ -85,11 +84,13 @@ build_starpu_cuda:
                     -DBLA_VENDOR=Intel10_64lp_seq"
 
 # rocm is broken for now in guix
-.build_starpu_hip:
+build_starpu_hip:
   extends: .build_script_guix
+  needs: ["build_starpu_cuda"]
+  dependencies: []
   variables:
     VERSION: starpu_hip
-    VARIANT: hip
+    VARIANT: hip-rocm
     LOGNAME: "chameleon-build-${SYSTEM}-${VERSION}"
     BUILD_OPTIONS: "-DCHAMELEON_USE_HIP_ROC=ON
                     -DCHAMELEON_USE_MPI=OFF
