@@ -633,7 +633,7 @@ starpu_cham_task_set_options( const RUNTIME_option_t   *options,
 #endif /* !defined(CHAMELEON_STARPU_USE_INSERT) */
 
 /* Disable STARPU_COMMUTE if CHAMELEON_STARPU_COMMUTE is OFF */
-#if !defined(CHAMELEON_STARPU_COMMUTE) && defined(STARPU_COMMUTE)
+#if !defined(CHAMELEON_STARPU_COMMUTE)
 #undef STARPU_COMMUTE
 #define STARPU_COMMUTE 0
 #endif
