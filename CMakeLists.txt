@@ -212,7 +212,7 @@ cmake_dependent_option(CHAMELEON_USE_MPI_DATATYPES
   "Enable MPI datatypes whenever supported by the runtime" ON
   "CHAMELEON_USE_MPI" OFF)
 
-# Enable Cuda kernels if StarPU (only if StarPU or PaRSEC runtime is enabled)
+# Enable CUDA kernels if StarPU (only if StarPU or PaRSEC runtime is enabled)
 # TODO: Default should be changed to ON/OFF when it will be ok
 cmake_dependent_option(CHAMELEON_USE_CUDA
                     "Enable CUDA kernels" OFF
@@ -221,17 +221,12 @@ if (CHAMELEON_ENABLE_CUDA AND NOT CHAMELEON_USE_CUDA)
     message("-- ${BoldGreen}CHAMELEON_USE_CUDA is set to OFF, turn it ON to use CUDA (unsupported by OpenMP and Quark)${ColourReset}")
 endif()
 
-cmake_dependent_option(CHAMELEON_USE_HIP_CUDA
-                    "Enable HIP kernels with CUDA backend" OFF
+# Enable HIP kernels if StarPU (only if StarPU runtime is enabled)
+cmake_dependent_option(CHAMELEON_USE_HIP
+                    "Enable HIP kernels with ROCM backend" OFF
                     "CHAMELEON_ENABLE_HIP" OFF)
-cmake_dependent_option(CHAMELEON_USE_HIP_ROC
-                    "Enable HIP kernels with ROCclr backend" OFF
-                    "CHAMELEON_ENABLE_HIP" OFF)
-
-if( CHAMELEON_USE_HIP_CUDA OR CHAMELEON_USE_HIP_ROC )
-    set(CHAMELEON_USE_HIP ON CACHE INTERNAL "Equivalent to CHAMELEON_USE_CUDA for HIP. Enabled only of one of the CHAMELEON_USE_HIP{CUDA,ROC} is enabled" FORCE)
-else()
-    set(CHAMELEON_USE_HIP OFF CACHE INTERNAL "Equivalent to CHAMELEON_USE_CUDA for HIP. Enabled only of one of the CHAMELEON_USE_HIP{CUDA,ROC} is enabled" FORCE)
+if (CHAMELEON_ENABLE_HIP AND NOT CHAMELEON_USE_HIP)
+    message("-- ${BoldGreen}CHAMELEON_USE_HIP is set to OFF, turn it ON to use HIP (unsupported by OpenMP, ParSEC, Quark)${ColourReset}")
 endif()
 
 # Enable Hmat-OSS kernels
@@ -431,119 +426,17 @@ if(NOT CHAMELEON_SIMULATION)
     #----------------------------------
     if (CHAMELEON_USE_HIP)
 
-        if (CHAMELEON_USE_HIP_ROC)
+        # should define targets: hip::host, hip::device
+        find_package(hip REQUIRED CONFIG)
+        message(STATUS "hip target found")
 
-            # should define targets: hip::host, hip::device
-            find_package(hip REQUIRED CONFIG)
-            message(STATUS "hip target found")
+        # should define targets: roc::hipblas
+        find_package(hipblas REQUIRED CONFIG)
+        message(STATUS "hipblas target found")
 
-            # should define targets: roc::hipblas
-            find_package(hipblas REQUIRED CONFIG)
-            message(STATUS "hipblas target found")
-
-            # should define targets: roc::hipsolver
-            find_package(hipsolver REQUIRED)
-            message(STATUS "hipsolver target found")
-
-        elseif(CHAMELEON_USE_HIP_CUDA)
-
-            # for CUDA backend we need a user-provided hipblas library as the one
-            # shipped with ROCm only works with AMD GPU
-            set(CHAMELEON_HIPBLAS_PATH "" CACHE PATH "Directory of hipblas installation with CUDA support")
-            if(NOT CHAMELEON_HIPBLAS_PATH)
-              message(FATAL_ERROR "CHAMELEON_USE_HIP_CUDA requires you to set"
-                " CHAMELEON_HIPBLAS_PATH to a hipblas installation compiled with CUDA")
-            endif()
-
-            if(NOT DEFINED HIP_PATH)
-                if(DEFINED ENV{HIP_PATH})
-                    set(HIP_PATH $ENV{HIP_PATH} CACHE PATH "Path to which HIP has been installed")
-                else()
-                    message(FATAL_ERROR "Please set HIP_PATH to your HIP installation.")
-                endif()
-            endif()
-
-            find_package(CUDAToolkit REQUIRED)
-
-            # we also need libraries list, for example for the pkgconfig file
-            get_target_property(CUDA_LIBRARIES CUDA::cudart LOCATION)
-
-            # location of FindHIP.cmake depending on how HIP_PATH is set
-            # HIP_PATH points to /opt/rocm-<version>
-            set(CMAKE_MODULE_PATH "${HIP_PATH}/lib/cmake/hip" ${CMAKE_MODULE_PATH})
-            # HIP_PATH points to /opt/rocm-<version>/hip
-            set(CMAKE_MODULE_PATH "${HIP_PATH}/cmake" ${CMAKE_MODULE_PATH})
-
-            # We use MODULE keyword to force using FindHIP.cmake instead of
-            # hip-config.cmake which doesn't support CUDA backend
-            find_package(HIP REQUIRED MODULE)
-            list( APPEND HIP_INCLUDE_DIRS "${HIP_PATH}/include")
-
-            if(CHAMELEON_HIPBLAS_PATH)
-                list(APPEND HIPBLAS_INCLUDE_DIRS "${CHAMELEON_HIPBLAS_PATH}/include")
-                list(APPEND HIPBLAS_LIBRARIES "${CHAMELEON_HIPBLAS_PATH}/lib/libhipblas.so")
-                message(STATUS "HIPBLAS_INCLUDE_DIRS: ${HIP_INCLUDE_DIRS}")
-                message(STATUS "HIPBLAS_LIBRARIES: ${HIPBLAS_LIBRARIES}")
-            else()
-                message(FATAL_ERROR "Please set CHAMELEON_HIPBLAS_PATH to your HIPBLAS installation.")
-            endif()
-
-            # create imported target because not provided with old cmake
-            add_library(hip::hip INTERFACE IMPORTED)
-            add_library(roc::hipblas INTERFACE IMPORTED)
-            target_compile_definitions(hip::hip INTERFACE "__HIP_PLATFORM_NVIDIA__")
-            set(HIP_INCLUDE_DIRS "${HIP_INCLUDE_DIRS};${CUDAToolkit_INCLUDE_DIRS}")
-            set(HIP_LIBRARIES "${HIP_LIBRARIES};${CUDA_LIBRARIES}")
-
-            if (HIP_INCLUDE_DIRS)
-                set_target_properties(hip::hip PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${HIP_INCLUDE_DIRS}")
-                if (HIPBLAS_INCLUDE_DIRS)
-                    set_target_properties(roc::hipblas PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${HIPBLAS_INCLUDE_DIRS}")
-                else()
-                    message(WARNING "CHAMELEON_USE_HIP_CUDA requires"
-                        "\n   HIPBLAS_INCLUDE_DIRS to be found. Be sure you have"
-                        "\n   hipblas headers with your distribution of HIP.")
-                endif()
-            else()
-                message(WARNING "CHAMELEON_USE_HIP_CUDA requires"
-                    "\n   HIP_INCLUDE_DIRS to be found. Be sure you have"
-                    "\n   hip headers with your distribution of HIP.")
-            endif()
-            if (HIP_LIBRARIES)
-                set_target_properties(hip::hip PROPERTIES INTERFACE_LINK_LIBRARIES "${HIP_LIBRARIES}")
-                if (HIPBLAS_LIBRARIES)
-                    set_target_properties(roc::hipblas PROPERTIES INTERFACE_LINK_LIBRARIES "${HIPBLAS_LIBRARIES}")
-                    target_link_libraries(roc::hipblas INTERFACE hip::hip)
-                else()
-                    message(FATAL_ERROR "CHAMELEON_USE_HIP_CUDA requires"
-                        "\n   HIPBLAS_LIBRARIES to be found. Be sure you have"
-                        "\n   libhipblas with your distribution of HIP.")
-                endif()
-            else()
-                message(FATAL_ERROR "CHAMELEON_USE_HIP_CUDA requires"
-                    "\n   HIP_LIBRARIES to be found. Be sure you have"
-                    "\n   libamdhip64 with your distribution of ROCm.")
-            endif()
-            if (NOT CUDA_LIBRARIES)
-                message(FATAL_ERROR "CHAMELEON_USE_HIP_CUDA requires"
-                "\n   CUDA_LIBRARIES to be found. Be sure you have"
-                "\n   libcuda with your distribution of CUDA.")
-            endif()
-
-            message("-- HIP PATH:              ${HIP_PATH}")
-            message("-- HIP version:           ${HIP_VERSION_STRING}")
-            message("-- HIP platform:          ${HIP_PLATFORM}")
-            message("-- HIP runtime:           ${HIP_RUNTIME}")
-            message("-- HIP compiler:          ${HIP_COMPILER}")
-            message("-- HIP include path:      ${HIP_INCLUDE_DIRS}")
-            message("-- HIP libraries:         ${HIP_LIBRARIES}")
-            message("-- HIPBLAS include path:  ${HIPBLAS_INCLUDE_DIRS}")
-            message("-- HIPBLAS libraries:     ${HIPBLAS_LIBRARIES}")
-
-            morse_export_imported_target(hip::hip hip chameleon)
-            morse_export_imported_target(roc::hipblas hipblas chameleon)
-
-        endif()
+        # should define targets: roc::hipsolver
+        find_package(hipsolver REQUIRED)
+        message(STATUS "hipsolver target found")
 
         message("-- ${Blue}Add definition CHAMELEON_USE_HIP"
         " - Activate HIP in Chameleon${ColourReset}")

@@ -91,7 +91,7 @@ build_starpu_hip:
     VERSION: starpu_hip
     VARIANT: hip-rocm
     LOGNAME: "chameleon-build-${SYSTEM}-${VERSION}"
-    BUILD_OPTIONS: "-DCHAMELEON_USE_HIP_ROC=ON
+    BUILD_OPTIONS: "-DCHAMELEON_USE_HIP=ON
                     -DCHAMELEON_USE_MPI=OFF
                     -DBLA_VENDOR=OpenBLAS
                     -DCMAKE_C_COMPILER=gcc
