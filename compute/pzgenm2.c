@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  * @copyright 2016-2020 KAUST. All rights reserved.
  *
@@ -32,7 +32,7 @@
 #define DROW(m, n)  &DROW,  m, n
 
 void
-chameleon_pzgenm2( double tol, const CHAM_desc_t *A, double *result,
+chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
                    RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
 {
     CHAM_context_t  *chamctxt;
@@ -158,6 +158,7 @@ chameleon_pzgenm2( double tol, const CHAM_desc_t *A, double *result,
             }
         }
     }
+    NRMX.sync = 1; /* Need to be sync to read the norm */
 
     CHAMELEON_Desc_Flush( &DROW, sequence );
     CHAMELEON_Desc_Flush( &NRMX, sequence );
@@ -389,6 +390,8 @@ chameleon_pzgenm2( double tol, const CHAM_desc_t *A, double *result,
                     NRMSX( m, myq ) );
             }
         }
+        NRMX.sync  = 1; /* Need to be sync to read the norm */
+        NRMSX.sync = 1; /* Need to be sync to read the norm */
 
         CHAMELEON_Desc_Flush( &NRMX,  sequence );
         CHAMELEON_Desc_Flush( &NRMSX, sequence );

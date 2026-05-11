@@ -28,7 +28,7 @@ void chameleon_pmap( cham_uplo_t uplo, int ndata, cham_map_data_t *data,
     CHAM_context_t *chamctxt;
     RUNTIME_option_t options;
     const CHAM_desc_t *A = data[0].desc;
-    int m, n, minmn;
+    int i, m, n, minmn;
 
     chamctxt = chameleon_context_self();
     if (sequence->status != CHAMELEON_SUCCESS)
@@ -78,6 +78,12 @@ void chameleon_pmap( cham_uplo_t uplo, int ndata, cham_map_data_t *data,
                     ndata, data,
                     op_fct, op_args );
             }
+        }
+    }
+
+    for( i=0; i<ndata; i++ ) {
+        if ( data[i].access & ChamW ) {
+            data[i].desc->sync = 1;
         }
     }
 

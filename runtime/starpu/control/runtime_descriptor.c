@@ -317,34 +317,87 @@ void RUNTIME_flush( CHAM_context_t *chamctxt )
 #endif
 }
 
-void RUNTIME_desc_flush( const CHAM_desc_t        *desc,
+static inline void
+runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
+                        const CHAM_tile_t        *tile,
+                        starpu_data_handle_t      handle,
+                        int                       sync )
+{
+    int home_node;
+
+    if ( handle == NULL ) {
+        return;
+    }
+
+#if defined(CHAMELEON_USE_MPI)
+    starpu_mpi_cache_flush( sequence->comm, handle );
+#endif
+
+    if ( sequence->myrank != tile->rank )
+    {
+        return;
+    }
+
+    home_node = starpu_data_get_home_node( handle );
+    if ( sync && (home_node >= 0) ) {
+        starpu_data_acquire_on_node_cb( handle, home_node, STARPU_R,
+                                        (callback_fct_t)starpu_data_release, handle );
+    }
+    else {
+        chameleon_starpu_data_wont_use( handle );
+    }
+}
+
+/**
+ *  Flush or retrieve data to its home location for later use outside the runtime
+ */
+void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
-    int mt = desc->mt;
-    int nt = desc->nt;
-    int m, n;
+    CHAM_tile_t          *tile;
+    starpu_data_handle_t *handle = desc->schedopt;
+    int imax = 1;
+    int mt   = desc->mt;
+    int nt   = desc->nt;
+    int i, m, n;
+    int sync = desc->sync;
 
-    for (n = 0; n < nt; n++)
-    {
-        for (m = 0; m < mt; m++)
-        {
-            RUNTIME_data_flush( sequence, desc, m, n );
-        }
+    /* Fallback if the matrix is allocated by the runtime */
+    if ( !desc->use_mat ) {
+        sync = 0;
     }
+
+    if ( cham_is_mixed( desc->dtyp ) ) {
+        imax = 3;
+    }
+
+    for( i=0; i<imax; i++ )
+    {
+        tile = desc->tiles;
+        for (n = 0; n < nt; n++)
+        {
+            for (m = 0; m < mt; m++, handle++, tile++)
+            {
+                runtime_data_flush_one( sequence, tile, *handle, sync );
+            }
+        }
+         /* Only the main precision is synchronized */
+        sync = 0;
+    }
+    desc->sync = 0;
 }
 
 void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
                          const CHAM_desc_t *A, int m, int n )
 {
-    int local, i, imax = 1;
+    int     i, imax = 1;
     int64_t mm      = m + (A->i / A->mb);
     int64_t nn      = n + (A->j / A->nb);
     int64_t shift   = ((int64_t)(A->lmt)) * nn + mm;
     int64_t nbtiles = ((int64_t)(A->lmt)) * ((int64_t)(A->lnt));
+    CHAM_tile_t          *tile   = A->get_blktile( A, m, n );
     starpu_data_handle_t *handle = A->schedopt;
     handle += shift;
-
-    local = chameleon_desc_islocal( A, m, n );
 
     if ( cham_is_mixed( A->dtyp ) ) {
         imax = 3;
@@ -352,20 +405,9 @@ void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
 
     for( i=0; i<imax; i++ ) {
         starpu_data_handle_t *handlebis;
-
         handlebis = handle + i * nbtiles;
 
-        if ( *handlebis == NULL ) {
-            continue;
-        }
-
-#if defined(CHAMELEON_USE_MPI)
-        starpu_mpi_cache_flush( sequence->comm, *handlebis );
-#endif
-
-        if ( local ) {
-            chameleon_starpu_data_wont_use( *handlebis );
-        }
+        runtime_data_flush_one( sequence, tile, *handlebis, 0 );
     }
     (void)sequence;
 }

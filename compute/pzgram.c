@@ -2,7 +2,7 @@
  *
  * @file pzgram.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -177,6 +177,9 @@ void chameleon_pzgram( struct chameleon_pzgram_s *ws, cham_uplo_t uplo, CHAM_des
     }
 
     chameleon_pzgram_internal( uplo, A, Wcol, Welt, &options );
+
+    /* Mark written data for synchronization */
+    A->sync = 1;
 
     CHAMELEON_Desc_Flush( Wcol, sequence );
     CHAMELEON_Desc_Flush( Welt, sequence );

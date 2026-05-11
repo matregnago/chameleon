@@ -2,7 +2,7 @@
  *
  * @file zlaswp.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -73,7 +73,7 @@ CHAMELEON_zlaswp_WS_Alloc( cham_side_t side, const CHAM_desc_t *A )
     reduce->alg_allreduce = ChamStarPUTasks;
 
 #if defined (CHAMELEON_USE_MPI)
-    reduce->proc_involved = malloc( sizeof( int ) * P );
+    reduce->proc_involved = malloc( sizeof( int ) * max_involved );
     reduce->involved      = 0;
     reduce->np_involved   = 0;
     reduce->arity         = chameleon_getenv_get_value_int( "CHAMELEON_ARITY", max_involved );

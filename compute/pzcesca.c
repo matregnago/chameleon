@@ -2,7 +2,7 @@
  *
  * @file pzcesca.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -295,6 +295,9 @@ void chameleon_pzcesca( struct chameleon_pzcesca_s *ws, int center, int scale, c
     }
 
     chameleon_pzcesca_internal( center, scale, axis, A, Wgcol, Wgrow, Wgelt, Wdcol, Wdrow, &options );
+
+    /* Mark written data for synchronization */
+    A->sync = 1;
 
     CHAMELEON_Desc_Flush( Wgcol, sequence );
     CHAMELEON_Desc_Flush( Wgrow, sequence );

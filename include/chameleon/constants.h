@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -376,6 +376,15 @@ typedef enum chameleon_translation_e {
     ChamInPlace    = 1,
     ChamOutOfPlace = 2,
 } cham_translation_t;
+
+/**
+ *  @brief Descriptor access types used in data conversion function as well as data flush
+ */
+typedef enum chameleon_desc_acccess_e {
+    ChamDescInput  = 1 << 0,
+    ChamDescOutput = 1 << 1,
+    ChamDescInout  = (ChamDescInput | ChamDescOutput),
+} cham_desc_access_t;
 
 /**
  * @brief Constant to describe how to initialize the mat pointer in descriptors

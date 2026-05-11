@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -194,6 +194,7 @@ void chameleon_pzgered( cham_uplo_t         uplo,
                                2, 1, workmt*2, worknt, P, Q );
 
     chameleon_pzgered_frb( uplo, A, &Wcol, &Welt, &options );
+    Welt.sync = 1; /* Need to be sync to read the norm */
 
     CHAMELEON_Desc_Flush( &Wcol, sequence );
     CHAMELEON_Desc_Flush( &Welt, sequence );
@@ -255,6 +256,7 @@ void chameleon_pzgered( cham_uplo_t         uplo,
             }
         }
     }
+    A->sync = 1; /* A has been updated */
 
     CHAMELEON_Desc_Flush( A, sequence );
     RUNTIME_sequence_wait( chamctxt, sequence );

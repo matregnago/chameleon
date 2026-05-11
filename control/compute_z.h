@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -25,6 +25,7 @@
  * @author Ana Hourcau
  * @author Pierre Esterie
  * @author Matteo Marcos
+ * @author Brieuc Nicolas
  * @date 2025-12-19
  * @precisions normal z -> c d s
  *
@@ -168,7 +169,7 @@ void chameleon_pzgelqf( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzgelqfrh( int genD, int BS, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D,
                           RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
-void chameleon_pzgenm2( double tol, const CHAM_desc_t *A, double *result,
+void chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 void chameleon_pzgemm( struct chameleon_pzgemm_s *options, cham_trans_t transA, cham_trans_t transB, CHAMELEON_Complex64_t alpha, CHAM_desc_t *A, CHAM_desc_t *B, CHAMELEON_Complex64_t beta, CHAM_desc_t *C,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
@@ -375,13 +376,6 @@ void chameleon_pzgram( struct chameleon_pzgram_s *ws, cham_uplo_t uplo, CHAM_des
 void chameleon_pzbcast_tile( cham_store_t dir, cham_bcast_t algo, const CHAM_desc_t *A, int Am, int An, const CHAM_desc_t *W, int Wm, int Wn, RUNTIME_option_t *options );
 
 /**
- *  LAPACK/Tile Descriptor accesses
- */
-#define ChamDescInput  1
-#define ChamDescOutput 2
-#define ChamDescInout  (ChamDescInput | ChamDescOutput)
-
-/**
  *  Macro for matrix conversion / Lapack interface
  */
 static inline int
@@ -450,7 +444,7 @@ chameleon_zdesc_copy_and_restrict( const CHAM_context_t *chamctxt,
 static inline int
 chameleon_zlap2tile( const CHAM_context_t *chamctxt, const char *name,
                      CHAM_desc_t *descAl, CHAM_desc_t *descAt,
-                     int mode, cham_uplo_t uplo,
+                     cham_desc_access_t mode, cham_uplo_t uplo,
                      CHAMELEON_Complex64_t *A, int mb, int nb, int lm, int ln, int m, int n,
                      RUNTIME_sequence_t *seq, RUNTIME_request_t *req )
 {
@@ -492,7 +486,7 @@ chameleon_zlap2tile( const CHAM_context_t *chamctxt, const char *name,
  */
 static inline int
 chameleon_ztile2lap( const CHAM_context_t *chamctxt, CHAM_desc_t *descAl, CHAM_desc_t *descAt,
-                     int mode, cham_uplo_t uplo,
+                     cham_desc_access_t mode, cham_uplo_t uplo,
                      RUNTIME_sequence_t *seq, RUNTIME_request_t *req )
 {
     if ( CHAMELEON_TRANSLATION == ChamOutOfPlace ) {

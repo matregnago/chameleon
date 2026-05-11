@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_zperm_reduce.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -159,6 +159,8 @@ insert_task_zperm_reduce_send( const RUNTIME_option_t *options,
         /* Common task arguments */
         INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
         0 );
+
+    (void)me;
 }
 
 /*

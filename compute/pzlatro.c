@@ -9,7 +9,7 @@
  *
  * @brief Chameleon Matrix transposition parallel algorithm
  *
- * @version 1.2.0
+ * @version 1.4.0
  * @author Brieuc Nicolas
  * @date 2026-01-23
  * @precisions normal z -> s d c
@@ -125,6 +125,8 @@ void chameleon_pzlatro( cham_uplo_t uplo, cham_trans_t trans,
             chameleon_pzlatro_lower( chamctxt, trans, A, B, &options );
             break;
     }
+    /* Mark written data for synchronization */
+    B->sync = 1;
 
     RUNTIME_options_finalize( &options, chamctxt );
 }
