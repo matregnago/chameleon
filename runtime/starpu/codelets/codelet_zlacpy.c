@@ -22,6 +22,7 @@
  * @author Samuel Thibault
  * @author Gwenole Lucas
  * @author Alycia Lisito
+ * @author Brieuc Nicolas
  * @date 2025-12-19
  * @precisions normal z -> c d s
  *
@@ -148,13 +149,47 @@ cl_zlacpyx_cpu_func(void *descr[], void *cl_arg)
     TCORE_zlacpyx( clargs->uplo, clargs->m, clargs->n, clargs->displA,
                    tileA, clargs->lda, clargs->displB, tileB, clargs->ldb );
 }
+
+#if defined(CHAMELEON_USE_CUDA)
+static void
+cl_zlacpy_cuda_func(void *descr[], void *cl_arg)
+{
+    struct cl_zlacpy_args_s *clargs = (struct cl_zlacpy_args_s *)cl_arg;
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileB;
+
+    tileA = cti_interface_get(descr[0]);
+    tileB = cti_interface_get(descr[1]);
+
+    assert( clargs->displA == 0 );
+    assert( clargs->displB == 0 );
+
+    TCUDA_zlacpy( clargs->uplo, clargs->m, clargs->n, tileA, tileB, handle );
+}
+
+static void
+cl_zlacpyx_cuda_func(void *descr[], void *cl_arg)
+{
+    struct cl_zlacpy_args_s *clargs = (struct cl_zlacpy_args_s *)cl_arg;
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileB;
+
+    tileA = cti_interface_get(descr[0]);
+    tileB = cti_interface_get(descr[1]);
+
+    TCUDA_zlacpyx( clargs->uplo, clargs->m, clargs->n, clargs->displA,
+                   tileA, clargs->lda, clargs->displB, tileB, clargs->ldb, handle );
+}
+#endif /* !defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
-CODELETS_CPU( zlacpy,  cl_zlacpy_cpu_func  )
-CODELETS_CPU( zlacpyx, cl_zlacpyx_cpu_func )
+CODELETS( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_cuda_func, STARPU_CUDA_ASYNC )
+CODELETS( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_cuda_func, STARPU_CUDA_ASYNC )
 CODELETS( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARPU_CUDA_ASYNC )
 
 static inline void
