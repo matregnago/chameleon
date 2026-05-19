@@ -101,6 +101,7 @@ void RUNTIME_zlocality_allrestrict( uint32_t where )
     cl_map_three_restrict_where( where );
 
     /* auxiliary */
+    cl_zlaset_restrict_where( where );
     cl_zlacpy_restrict_where( where );
     cl_zlatro_restrict_where( where );
 }
@@ -158,6 +159,7 @@ void RUNTIME_zlocality_onerestrict( cham_tasktype_t kernel, uint32_t where )
     case TASK_MAP_THREE: cl_map_three_restrict_where( where ); break;
 
     /* auxiliary */
+    case TASK_LASET: cl_zlaset_restrict_where( where ); break;
     case TASK_LACPY: cl_zlacpy_restrict_where( where ); break;
     case TASK_LATRO: cl_zlatro_restrict_where( where ); break;
 
@@ -214,6 +216,7 @@ void RUNTIME_zlocality_allrestore( )
     cl_map_three_restore_where();
 
     /* auxiliary */
+    cl_zlaset_restore_where();
     cl_zlacpy_restore_where();
     cl_zlatro_restore_where();
 }
@@ -268,6 +271,7 @@ void RUNTIME_zlocality_onerestore( cham_tasktype_t kernel )
     case TASK_MAP_THREE: cl_map_three_restore_where(); break;
 
     /* auxiliary */
+    case TASK_LASET: cl_zlaset_restore_where(); break;
     case TASK_LACPY: cl_zlacpy_restore_where(); break;
     case TASK_LATRO: cl_zlatro_restore_where(); break;
 
