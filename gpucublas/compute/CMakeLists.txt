@@ -75,6 +75,7 @@ if ( GPUCUBLAS_HAVE_CUDA_TOOLKIT )
     ${ZSRC}
     cuda_zlag2c.cu
     cuda_zlatro.cu
+    cuda_zlacpy.cu
     cuda_zlaset.cu
   )
 endif()

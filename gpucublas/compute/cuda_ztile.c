@@ -170,6 +170,41 @@ TCUDA_zlarfb( cham_side_t        side,
 }
 
 int
+TCUDA_zlacpy( cham_uplo_t        uplo,
+              int                M,
+              int                N,
+              const CHAM_tile_t *A,
+              CHAM_tile_t       *B,
+              cublasHandle_t     handle )
+{
+    gpucublas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+    return CUDA_zlacpy( uplo, M, N, (const cuDoubleComplex *)A->mat, A->ld, (cuDoubleComplex *)B->mat, B->ld, handle );
+}
+
+int
+TCUDA_zlacpyx( cham_uplo_t        uplo,
+               int                M,
+               int                N,
+               int                displA,
+               const CHAM_tile_t *A,
+               int                LDA,
+               int                displB,
+               CHAM_tile_t       *B,
+               int                LDB,
+               cublasHandle_t     handle )
+{
+    gpucublas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+
+    const cuDoubleComplex *Aptr = (const cuDoubleComplex *)A->mat;
+    cuDoubleComplex *Bptr = (cuDoubleComplex *)B->mat;
+    return CUDA_zlacpy( uplo, M, N, Aptr + displA, LDA, Bptr + displB, LDB, handle );
+}
+
+int
 TCUDA_zlaset( cham_uplo_t      uplo,
               int              m,
               int              n,
@@ -179,7 +214,7 @@ TCUDA_zlaset( cham_uplo_t      uplo,
               cublasHandle_t   handle )
 {
     gpucublas_kernel_trace( A );
-    assert( A->format & (CHAMELEON_TILE_FULLRANK | CHAMELEON_TILE_DESC) );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
     return CUDA_zlaset( uplo, m, n, alpha, beta, CHAM_tile_get_ptr( A ), A->ld, handle );
 }
 
