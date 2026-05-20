@@ -39,7 +39,7 @@ cl_zinit_cuda_func( void *descr[], void *cl_arg )
 #if defined(PRECISION_z) || defined(PRECISION_c)
     cuDoubleComplex zzero = make_cuDoubleComplex(0.0, 0.0);
 #else
-    double          zzero = 1.0;
+    double          zzero = 0.0;
 #endif /* defined(PRECISION_z) || defined(PRECISION_c) */
     CHAM_tile_t    *tileA;
 
