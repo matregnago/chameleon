@@ -31,13 +31,15 @@ void CUDA_zlaset_upper( int              m,
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if ( ( i < m ) && ( j < n ) && ( j >= i ) ) {
-        if ( j == i ) {
-            A[i + j*lda] = beta;
-        }
-        else {
-            A[i + j*lda] = alpha;
-        }
+    if ( ( i >= m ) || ( j >= n ) || ( j < i ) ) {
+        return;
+    }
+
+    if ( j == i ) {
+        A[i + j*lda] = beta;
+    }
+    else {
+        A[i + j*lda] = alpha;
     }
 }
 
@@ -52,13 +54,15 @@ void CUDA_zlaset_lower( int              m,
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if ( ( i < m ) && ( j < n ) && ( i >= j ) ) {
-        if ( j == i ) {
-            A[i + j*lda] = beta;
-        }
-        else {
-            A[i + j*lda] = alpha;
-        }
+    if ( ( i >= m ) || ( j >= n ) || ( i < j ) ) {
+        return;
+    }
+
+    if ( j == i ) {
+        A[i + j*lda] = beta;
+    }
+    else {
+        A[i + j*lda] = alpha;
     }
 }
 
@@ -73,13 +77,14 @@ void CUDA_zlaset_upperlower( int              m,
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if ( ( i < m ) && ( j < n ) ) {
-        if ( j == i ) {
-            A[i + j*lda] = beta;
-        }
-        else {
-            A[i + j*lda] = alpha;
-        }
+    if ( ( i >= m ) || ( j >= n ) ) {
+        return;
+    }
+    if ( j == i ) {
+        A[i + j*lda] = beta;
+    }
+    else {
+        A[i + j*lda] = alpha;
     }
 }
 

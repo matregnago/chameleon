@@ -10,6 +10,7 @@ chameleon-2.0.0
  - control: Internally change the descriptor structure to detect when the RUNTIME_desc_flush() has to enforce or not the synchronization of the data with their home memory node.
  - compute/codelets: Remove the deprecated build functions that have been replaced by the map function
  - gpucublas: Add laset kernel (available with StarPU)
+ - gpucublas: Add lacpy kernel for tiles copies not directly handled by StarPU (available with StarPU)
 
 chameleon-1.4.0
 ------------------------------------------------------------------------

@@ -147,6 +147,34 @@ TCUDA_zlarfb( __attribute__((unused)) cham_side_t        side,
 }
 
 int
+TCUDA_zlacpy( __attribute__((unused)) cham_uplo_t    uplo,
+              __attribute__((unused)) int            M,
+              __attribute__((unused)) int            N,
+              const CHAM_tile_t                     *A,
+              CHAM_tile_t                           *B,
+              __attribute__((unused)) cublasHandle_t handle )
+{
+    gpucublas_kernel_trace( A, B );
+    return 0;
+}
+
+int
+TCUDA_zlacpyx( __attribute__((unused)) cham_uplo_t    uplo,
+               __attribute__((unused)) int            M,
+               __attribute__((unused)) int            N,
+               __attribute__((unused)) int            displA,
+               const CHAM_tile_t                     *A,
+               __attribute__((unused)) int            LDA,
+               __attribute__((unused)) int            displB,
+               CHAM_tile_t                           *B,
+               __attribute__((unused)) int            LDB,
+               __attribute__((unused)) cublasHandle_t handle )
+{
+    gpucublas_kernel_trace( A, B );
+    return 0;
+}
+
+int
 TCUDA_zlaset( __attribute__((unused)) cham_uplo_t      uplo,
               __attribute__((unused)) int              m,
               __attribute__((unused)) int              n,

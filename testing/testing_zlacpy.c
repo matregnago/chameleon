@@ -2,7 +2,7 @@
  *
  * @file testing_zlacpy.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -183,7 +183,7 @@ testing_zlacpy_std( run_arg_list_t *args, int check )
 testing_t   test_zlacpy;
 const char *zlacpy_params[] = { "mtxfmt", "nb", "uplo", "m", "n", "lda", "ldb", "seedA", NULL };
 const char *zlacpy_output[] = { NULL };
-const char *zlacpy_outchk[] = { "||A||", "||B||", "RETURN", NULL };
+const char *zlacpy_outchk[] = { "||A||", "||R||", "RETURN", NULL };
 
 /**
  * @brief Testing registration function

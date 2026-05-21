@@ -120,7 +120,7 @@ int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, C
     }
 
     run_arg_add_double( args, "||A||", Anorm );
-    run_arg_add_double( args, "||B||", Rnorm );
+    run_arg_add_double( args, "||R||", Rnorm );
 
     (void)args;
     return info_solution;

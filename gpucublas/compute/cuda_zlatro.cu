@@ -44,7 +44,7 @@ void CUDA_zlatro_upper_trans( int m, int n,
     /* In Lower part of A - quick return
      * We are launching lots of blocks for nothing :/
      */
-    if( x > y || x > m || y > n ) {
+    if( ( x > y ) || ( x >= m ) || ( y >= n ) ) {
         return;
     }
 
@@ -55,8 +55,8 @@ void CUDA_zlatro_upper_trans( int m, int n,
 
 __global__
 void CUDA_zlatro_lower_trans( int m, int n,
-                        const cuDoubleComplex *A, int lda,
-                        cuDoubleComplex *B, int ldb )
+                              const cuDoubleComplex *A, int lda,
+                              cuDoubleComplex *B, int ldb )
 {
     __shared__ cuDoubleComplex wA[BLK_X * BLK_Y];
 
@@ -69,7 +69,7 @@ void CUDA_zlatro_lower_trans( int m, int n,
     /* In Upper part of A - quick return
      * We are launching lots of blocks for nothing :/
      */
-    if( x < y || x > m || y > n ) {
+    if( ( x < y ) || ( x >= m ) || ( y >= n ) ) {
         return;
     }
 
@@ -95,7 +95,7 @@ void CUDA_zlatro_upper_conjtrans( int m, int n,
     /* In Lower part of A - quick return
      * We are launching lots of blocks for nothing :/
      */
-    if( x > y || x > m || y > n ) {
+    if( ( x > y ) || ( x >= m ) || ( y >= n ) ) {
         return;
     }
 
@@ -120,7 +120,7 @@ void CUDA_zlatro_lower_conjtrans( int m, int n,
     /* In Upper part of A - quick return
      * We are launching lots of blocks for nothing :/
      */
-    if( x < y || x > m || y > n ) {
+    if( ( x < y ) || ( x >= m ) || ( y >= n ) ) {
         return;
     }
 
