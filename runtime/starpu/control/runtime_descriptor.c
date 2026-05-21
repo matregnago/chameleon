@@ -275,7 +275,7 @@ int RUNTIME_desc_acquire( const CHAM_desc_t *desc )
                 handle++;
                 continue;
             }
-            starpu_data_acquire(*handle, STARPU_R);
+            starpu_data_acquire( *handle, STARPU_RW );
             handle++;
         }
     }
@@ -317,6 +317,40 @@ void RUNTIME_flush( CHAM_context_t *chamctxt )
 #endif
 }
 
+static void cl_flush_cpu_func( void *descr[], void *cl_arg )
+{
+    (void)descr;
+    (void)cl_arg;
+    return;
+}
+
+static struct starpu_codelet cl_flush =
+{
+    .where     = STARPU_CPU,
+    .nbuffers  = 1,
+    .cpu_funcs = { cl_flush_cpu_func },
+    .modes     = { STARPU_RW },
+    .model     = NULL
+};
+
+static inline int
+__insert_task_flush( starpu_data_handle_t handle )
+{
+    struct starpu_task *task = starpu_task_create();
+    STARPU_ASSERT(task);
+    task->name = "chameleon_flush";
+
+    task->cl = &cl_flush;
+
+    STARPU_TASK_SET_HANDLE(task, handle, 0);
+
+    int ret = starpu_task_submit(task);
+    STARPU_ASSERT_MSG(ret != -ENODEV, "Failed to submit the data flush task\n");
+    STARPU_ASSERT_MSG(!ret, "Task data flush failed with code: %d\n", ret);
+
+    return 0;
+}
+
 static inline void
 runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
                         const CHAM_tile_t        *tile,
@@ -340,8 +374,10 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
 
     home_node = starpu_data_get_home_node( handle );
     if ( sync && (home_node >= 0) ) {
-        starpu_data_acquire_on_node_cb( handle, home_node, STARPU_R,
-                                        (callback_fct_t)starpu_data_release, handle );
+        assert( home_node == 0 );
+        __insert_task_flush( handle );
+        /* starpu_data_acquire_on_node_cb( handle, home_node, STARPU_RW, */
+        /*                                 (callback_fct_t)starpu_data_release, handle ); */
     }
     else {
         chameleon_starpu_data_wont_use( handle );
