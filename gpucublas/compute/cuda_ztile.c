@@ -205,13 +205,13 @@ TCUDA_zlacpyx( cham_uplo_t        uplo,
 }
 
 int
-TCUDA_zlaset( cham_uplo_t      uplo,
-              int              m,
-              int              n,
-              cuDoubleComplex *alpha,
-              cuDoubleComplex *beta,
-              CHAM_tile_t     *A,
-              cublasHandle_t   handle )
+TCUDA_zlaset( cham_uplo_t            uplo,
+              int                    m,
+              int                    n,
+              const cuDoubleComplex *alpha,
+              const cuDoubleComplex *beta,
+              CHAM_tile_t           *A,
+              cublasHandle_t         handle )
 {
     gpucublas_kernel_trace( A );
     assert( A->format & CHAMELEON_TILE_FULLRANK );

@@ -81,17 +81,23 @@
 int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LDB )
 {
     int info_solution        = 0;
-    double Anorm, Rnorm, result;
+    double Anorm, Bnorm, Rnorm, result;
     cham_fixdbl_t eps = testing_getaccuracy();
 
     /* Computes the norms */
     if ( uplo == ChamUpperLower ) {
-        Anorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'M', M, N, A, LDA, NULL );
+        Anorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'F', M, N, A, LDA, NULL );
+        Bnorm = LAPACKE_zlange_work( LAPACK_COL_MAJOR, 'F', M, N, B, LDB, NULL );
     }
     else {
-        Anorm = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, 'M', chameleon_lapack_const(uplo), 'N',
+        Anorm = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, 'F', chameleon_lapack_const(uplo), 'N',
                                      M, N, A, LDA, NULL );
+        Bnorm = LAPACKE_zlantr_work( LAPACK_COL_MAJOR, 'F', chameleon_lapack_const(uplo), 'N',
+                                     M, N, B, LDB, NULL );
     }
+
+    run_arg_add_double( args, "||A||", Anorm );
+    run_arg_add_double( args, "||B||", Bnorm );
 
     /* Computes the difference with the core function */
     CORE_zgeadd( ChamNoTrans, M, N, 1, A, LDA, -1, B, LDB );
@@ -110,6 +116,7 @@ int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, C
     else {
         result = Rnorm;
     }
+    run_arg_add_double( args, "||R||", Rnorm );
 
     /* Verifies if the result is inside a threshold */
     if ( isnan(Rnorm) || isinf(Rnorm) || isnan(result) || isinf(result) || (result > 10.0) ) {
@@ -118,9 +125,6 @@ int check_zmatrices_std( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, C
     else {
         info_solution = 0;
     }
-
-    run_arg_add_double( args, "||A||", Anorm );
-    run_arg_add_double( args, "||R||", Rnorm );
 
     (void)args;
     return info_solution;

@@ -157,7 +157,7 @@ testing_zlaswp_desc( run_arg_list_t *args, int check )
 testing_t   test_zlaswp;
 const char *zlaswp_params[] = { "mtxfmt", "nb", "side", "dir", "m", "n", "lda", "k1", "k2", "seedA", NULL };
 const char *zlaswp_output[] = { NULL };
-const char *zlaswp_outchk[] = { "RETURN", NULL };
+const char *zlaswp_outchk[] = { "||A||", "||B||", "||R||", "RETURN", NULL };
 
 /**
  * @brief Testing registration function

@@ -76,8 +76,8 @@ cl_zlaset_cuda_func( void *descr[], void *cl_arg )
     tileA = cti_interface_get(descr[0]);
 
     TCUDA_zlaset( clargs->uplo, clargs->m, clargs->n,
-                  (cuDoubleComplex *)&(clargs->alpha),
-                  (cuDoubleComplex *)&(clargs->beta),
+                  (const cuDoubleComplex *)&(clargs->alpha),
+                  (const cuDoubleComplex *)&(clargs->beta),
                   tileA, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
