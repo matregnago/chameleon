@@ -83,7 +83,6 @@ build_starpu_cuda:
                     -DCHAMELEON_USE_EZTRACE=ON
                     -DBLA_VENDOR=Intel10_64lp_seq"
 
-# rocm is broken for now in guix
 build_starpu_hip:
   extends: .build_script_guix
   needs: ["build_starpu_cuda"]
@@ -92,11 +91,19 @@ build_starpu_hip:
     VERSION: starpu_hip
     VARIANT: hip-rocm
     LOGNAME: "chameleon-build-${SYSTEM}-${VERSION}"
-    BUILD_OPTIONS: "-DCHAMELEON_USE_HIP_ROC=ON
+    BUILD_OPTIONS: "-DCHAMELEON_USE_HIP=ON
                     -DCHAMELEON_USE_MPI=OFF
                     -DBLA_VENDOR=OpenBLAS
                     -DCMAKE_C_COMPILER=gcc
                     -DCMAKE_Fortran_COMPILER=gfortran"
+  script:
+    - guix time-machine
+      --channels=./.gitlab/guix-channels-${VARIANT}.scm
+      -- shell --fallback --pure --preserve=SYSTEM --preserve=VERSION
+      --preserve=LOGNAME --preserve=BUILD_OPTIONS --preserve=CMAKE_BUILD_PARALLEL_LEVEL
+      -D chameleon-${VARIANT} --with-branch=starpu-${VARIANT}=master --without-tests=starpu-${VARIANT}
+      eztrace coreutils bash-minimal
+      -- bash .gitlab/build.sh | tee ${LOGNAME}.log
 
 build_starpu_simgrid:
   extends: .build_script_linux

@@ -4,7 +4,7 @@
 #
 # @copyright 2009-2014 The University of Tennessee and The University of
 #                      Tennessee Research Foundation. All rights reserved.
-# @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+# @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                      Univ. Bordeaux. All rights reserved.
 #
 ###
@@ -29,6 +29,7 @@
 #  @author Matthieu Kuhn
 #  @author Ana Hourcau
 #  @author Matteo Marcos
+#  @author Brieuc Nicolas
 #  @date 2025-12-19
 #
 ###
@@ -374,6 +375,7 @@ endif()
 if (CHAMELEON_USE_HIP)
   if (NOT CHAMELEON_SIMULATION)
     target_link_libraries(chameleon PUBLIC gpuhipblas)
+    target_link_libraries(chameleon PUBLIC roc::hipsolver)
     target_link_libraries(chameleon PUBLIC roc::hipblas)
   endif()
 endif()

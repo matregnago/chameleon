@@ -226,7 +226,7 @@ int main() {
   if (CHAMELEON_USE_HIP AND NOT CHAMELEON_SIMULATION)
     check_function_exists(starpu_hipblas_get_local_handle HAVE_STARPU_HIPBLAS_GET_LOCAL_HANDLE)
     if ( NOT HAVE_STARPU_HIPBLAS_GET_LOCAL_HANDLE )
-      message(FATAL_ERROR "The detected StarPU library does not include hipblas support. Please disable CHAMELEON_USE_HIP_{CUDA,ROC} or provide a StarPU library with hipblas support.")
+      message(FATAL_ERROR "The detected StarPU library does not include hipblas support. Please disable CHAMELEON_USE_HIP or provide a StarPU library with hipblas support.")
     endif()
   endif()
 
@@ -437,7 +437,7 @@ if (NOT CHAMELEON_SIMULATION)
     target_link_libraries(chameleon_starpu PUBLIC CUDA::cusolver CUDA::cublas)
   endif()
   if (CHAMELEON_USE_HIP)
-    target_link_libraries(chameleon_starpu PUBLIC roc::hipblas)
+    target_link_libraries(chameleon_starpu PUBLIC roc::hipsolver roc::hipblas)
   endif()
 endif()
 

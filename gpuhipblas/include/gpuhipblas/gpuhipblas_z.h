@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -34,5 +34,8 @@ int HIP_zsyr2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDou
 int HIP_zsyrk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
 int HIP_ztrmm(  cham_side_t side, cham_uplo_t uplo, cham_trans_t transa, cham_diag_t diag, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
 int HIP_ztrsm(  cham_side_t side, cham_uplo_t uplo, cham_trans_t transa, cham_diag_t diag, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
+
+/* hipsolver */
+int HIP_zpotrf( cham_uplo_t uplo, int n, hipDoubleComplex *dA, int lda, hipDoubleComplex *dW, int lwork, int *d_info, hipsolverDnHandle_t handle );
 
 #endif /* _gpuhipblas_z_h_ */

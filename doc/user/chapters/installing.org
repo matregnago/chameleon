@@ -371,13 +371,9 @@ and [[sec:ug:brew][Brew]] on macOS.
         runtime (implementation paradigm for accelerated codes on Nvidia GPUs)
         and cuBLAS library (optimized BLAS kernels on Nvidia GPUs), can only
         be used with StarPU and PaRSEC
-      * *CHAMELEON_USE_HIP_ROC=ON|OFF* (default OFF): to link with HIP
+      * *CHAMELEON_USE_HIP=ON|OFF* (default OFF): to link with HIP
         runtime (implementation paradigm for accelerated codes on AMD GPUs)
         and hipBLAS library (optimized BLAS kernels on AMD GPUs), can only
-        be used with StarPU
-      * *CHAMELEON_USE_HIP_CUDA=ON|OFF* (default OFF): to link with HIP
-        runtime (implementation paradigm for accelerated codes on Nvidia GPUs)
-        and hipBLAS library (optimized BLAS kernels on Nvidia GPUs), can only
         be used with StarPU
       * *CHAMELEON_ENABLE_DOC=ON|OFF* (default OFF): to control build of
         the documentation contained in doc/ sub-directory

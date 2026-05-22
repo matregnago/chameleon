@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -39,6 +39,7 @@
 #include <hip/hip_fp16.h>
 
 #include <hipblas/hipblas.h>
+#include <hipsolver/hipsolver.h>
 
 #define HIPBLAS_SADDR(_a_) (&(_a_))
 #define HIPBLAS_VALUE(_a_) (_a_)

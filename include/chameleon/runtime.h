@@ -217,9 +217,10 @@ RUNTIME_comm_rank( const CHAM_context_t *ctxt );
 int
 RUNTIME_comm_size( const CHAM_context_t *ctxt );
 
-#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+#if !defined(CHAMELEON_SIMULATION)
+#if defined(CHAMELEON_USE_CUDA)
 /**
- * @brief Get the cublas handle of the current worker that can be sued
+ * @brief Get the cublas handle of the current worker that can be used
  * in workspace allocation functions.
  *
  * @retval The cublas handle
@@ -227,13 +228,31 @@ RUNTIME_comm_size( const CHAM_context_t *ctxt );
 cublasHandle_t RUNTIME_get_cublas_handle();
 
 /**
- * @brief Get the cusolver Dense handle of the current worker that can be sued
+ * @brief Get the cusolver Dense handle of the current worker that can be used
  * in workspace allocation functions.
  *
  * @retval The cusolverDn handle
  */
 cusolverDnHandle_t RUNTIME_get_cusolverDn_handle();
+#elif defined(CHAMELEON_USE_HIP)
+/**
+ * @brief Get the hipblas handle of the current worker that can be used
+ * in workspace allocation functions.
+ *
+ * @retval The hipblas handle
+ */
+hipblasHandle_t RUNTIME_get_hipblas_handle();
+
+/**
+ * @brief Get the hipsolver Dense handle of the current worker that can be used
+ * in workspace allocation functions.
+ *
+ * @retval The hipsolverDn handle
+ */
+hipsolverDnHandle_t RUNTIME_get_hipsolverDn_handle();
 #endif
+#endif
+
 /**
  * @}
  *

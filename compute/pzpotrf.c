@@ -55,13 +55,22 @@ void chameleon_pzpotrf( cham_uplo_t         uplo,
     RUNTIME_options_init(&options, chamctxt, sequence, request);
 
     /* Allocation of temporary (scratch) working space */
-#if defined(CHAMELEON_USE_CUDA) && !defined(CHAMELEON_SIMULATION)
+#if !defined(CHAMELEON_SIMULATION)
     {
         int lwork = 0;
         if (chamctxt->ncudas > 0) {
+#if defined(CHAMELEON_USE_CUDA)
             cusolverDnZpotrf_bufferSize( RUNTIME_get_cusolverDn_handle(),
                                          chameleon_cublas_const(uplo), A->nb,
                                          NULL, A->nb, &lwork );
+#elif defined(CHAMELEON_USE_HIP)
+            hipsolverDnHandle_t handle = RUNTIME_get_hipsolverDn_handle();
+            if ( handle ) {
+                hipsolverDnZpotrf_bufferSize( handle,
+                                              chameleon_hipblas_const(uplo), A->nb,
+                                              NULL, A->nb, &lwork );
+            }
+#endif
         }
         ws_worker = sizeof(CHAMELEON_Complex64_t) * lwork + sizeof(int);
     }

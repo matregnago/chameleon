@@ -102,12 +102,48 @@ static void cl_zpotrf_cuda_func(void *descr[], void *cl_arg)
     }
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP) && defined(STARPU_HAVE_LIBHIPSOLVER)
+static void
+cl_zpotrf_hip_func( void *descr[], void *cl_arg )
+{
+    hipsolverDnHandle_t handle = starpu_hipsolverDn_get_local_handle();
+    struct cl_zpotrf_args_s *clargs = (struct cl_zpotrf_args_s *)cl_arg;
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileW;
+    hipDoubleComplex *dW;
+    int info, lwork;
+    int *d_info;
+
+    tileA  = cti_interface_get(descr[0]);
+    tileW  = cti_interface_get(descr[1]);
+    dW     = tileW->mat;
+    lwork  = (tileW->ld - sizeof(int) ) / sizeof(hipDoubleComplex);
+    d_info = (int *)(dW + lwork);
+
+    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
+
+    HIP_zpotrf( clargs->uplo, clargs->n, tileA->mat, tileA->ld, dW, lwork, d_info, handle );
+
+    hipStreamSynchronize(starpu_hip_get_local_stream());
+
+    hipMemcpy( &info, d_info, sizeof(int), hipMemcpyDeviceToHost);
+
+    if ( (clargs->sequence->status == CHAMELEON_SUCCESS) && (info != 0) ) {
+        RUNTIME_sequence_flush( NULL, clargs->sequence, clargs->request, clargs->iinfo+info );
+    }
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP) && defined(STARPU_HAVE_LIBHIPSOLVER)
+CODELETS_GPU( zpotrf, cl_zpotrf_cpu_func, cl_zpotrf_hip_func,  )
+#else
 CODELETS( zpotrf, cl_zpotrf_cpu_func, cl_zpotrf_cuda_func,  )
+#endif
 
 #if defined(CHAMELEON_STARPU_USE_INSERT)
 

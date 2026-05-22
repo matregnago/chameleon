@@ -4,7 +4,7 @@
 #
 # @copyright 2009-2014 The University of Tennessee and The University of
 #                      Tennessee Research Foundation. All rights reserved.
-# @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+# @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                      Univ. Bordeaux. All rights reserved.
 #
 ###
@@ -77,8 +77,7 @@ set(dep_message "${dep_message}"
 "\n"
 "       Implementation paradigm\n"
 "       CUDA ................: ${CHAMELEON_USE_CUDA}\n"
-"       HIP-ROC .............: ${CHAMELEON_USE_HIP_ROC}\n"
-"       HIP-CUDA ............: ${CHAMELEON_USE_HIP_CUDA}\n"
+"       HIP .................: ${CHAMELEON_USE_HIP}\n"
 "       MPI .................: ${CHAMELEON_USE_MPI}\n"
 "\n"
 "       Runtime specific\n"
