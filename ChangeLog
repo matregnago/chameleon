@@ -11,6 +11,7 @@ chameleon-2.0.0
  - compute/codelets: Remove the deprecated build functions that have been replaced by the map function
  - gpucublas: Add laset kernel (available with StarPU)
  - gpucublas: Add lacpy kernel for tiles copies not directly handled by StarPU (available with StarPU)
+ - hip: Add hipsolver support and especially xpotrf kernels support with StarPU
 
 chameleon-1.4.0
 ------------------------------------------------------------------------
