@@ -795,6 +795,141 @@ int check_zrankk( run_arg_list_t *args, int K, CHAM_desc_t *descA )
  *
  * @ingroup testing
  *
+ * @brief Checks random matrix generator correctness.
+ *
+ *******************************************************************************
+ *
+ * @param[in] matrix_type
+ *          Whether it is a general, hermitian or symmetric matrix.
+ *
+ * @param[in] uplo
+ *          Whether it is a upper triangular matrix, a lower triangular matrix or a general matrix.
+ *
+ * @param[in] M
+ *          The number of rows of the matrix A.
+ *
+ * @param[in] N
+ *          The number of columns of the matrix A.
+ *
+ * @param[in] A
+ *          The matrix A.
+ *
+ * @param[in] LDA
+ *          The leading dimension of the matrix A.
+ *
+ * @param[in] seedA
+ *          The seed used in the random generation.
+ *
+ * @param[in] bump
+ *          The value to add to the diagonal of each tile to be sure
+ *          they are positive definite matrices.
+ *
+ * @retval 0 successfull generation
+ *
+ *******************************************************************************
+ */
+int check_zgenerate_std( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t *A, int LDA, unsigned long long int seedA, CHAMELEON_Complex64_t bump )
+{
+    int  info_solution;
+    CHAMELEON_Complex64_t *B = NULL;
+
+    B = malloc( sizeof(CHAMELEON_Complex64_t) * M * N );
+
+    /* Randomly generates using core function */
+    switch (matrix_type) {
+    case ChamGeneral:
+        CORE_zplrnt( M, N, B, M, M, 0, 0, seedA );
+        break;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case ChamHermitian:
+        CORE_zplghe( creal(bump), M, N, B, M, M, 0, 0, seedA );
+        break;
+#endif
+    case ChamSymmetric:
+        CORE_zplgsy( bump, M, N, B, M, M, 0, 0, seedA );
+        break;
+    case ChamTriangular:
+        break;
+    default:
+        fprintf(stderr, "check_zgenerate: matrix_type(%d) unsupported\n", matrix_type );
+        return 1;
+    }
+
+    /* Compares the two matrices */
+    info_solution = check_zmatrices_std( args, uplo, M, N, B, M, A, LDA );
+
+    free( B );
+
+    return info_solution;
+}
+
+/**
+ ********************************************************************************
+ *
+ * @ingroup testing
+ *
+ * @brief Checks random matrix generator correctness.
+ *
+ *******************************************************************************
+ *
+ * @param[in] matrix_type
+ *          Whether it is a general, hermitian or symmetric matrix.
+ *
+ * @param[in] uplo
+ *          Whether it is a upper triangular matrix, a lower triangular matrix or a general matrix.
+ *
+ * @param[in] descA
+ *          The descriptor of the matrix A.
+ *
+ * @param[in] seedA
+ *          The seed used in the random generation.
+ *
+ * @param[in] bump
+ *          The value to add to the diagonal of each tile to be sure
+ *          they are positive definite matrices.
+ *
+ * @retval 0 successfull generation
+ *
+ *******************************************************************************
+ */
+int check_zgenerate( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_uplo_t uplo, CHAM_desc_t *descA, unsigned long long int seedA, CHAMELEON_Complex64_t bump )
+{
+    int info_solution        = 0;
+    int M                    = descA->m;
+    int N                    = descA->n;
+    int LDA                  = M;
+    int rank                 = CHAMELEON_Comm_rank();
+    CHAMELEON_Complex64_t *A = NULL;
+
+    if ( rank == 0 ) {
+        A = (CHAMELEON_Complex64_t *)malloc(sizeof( CHAMELEON_Complex64_t) * LDA * N );
+    }
+
+    /* Converts the matrix to LAPACK layout in order to scale with BLAS */
+    CHAMELEON_zDesc2Lap( uplo, descA, A, LDA );
+
+    /* Compares the two matrices */
+    if ( rank == 0 ) {
+        info_solution = check_zgenerate_std( args, matrix_type, uplo, M, N, A, LDA, seedA, bump );
+    }
+
+    /* Broadcasts the result from the main processus */
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Bcast( &info_solution, 1, MPI_INT, 0, MPI_COMM_WORLD );
+#endif
+
+    if ( rank == 0 ) {
+        free( A );
+    }
+
+    return info_solution;
+}
+
+/**
+ ********************************************************************************
+ *
+ * @ingroup testing
+ *
  * @brief Checks matrix transposition correctness.
  *
  *******************************************************************************

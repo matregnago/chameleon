@@ -72,6 +72,9 @@ set(ZSRC_W_STDAPI
 )
 
 set(ZSRC_WO_STDAPI
+  testing_zplrnt.c
+  testing_zplgsy.c
+  testing_zplghe.c
   testing_zlaset.c
   testing_zlacpy.c
   testing_zlatro.c

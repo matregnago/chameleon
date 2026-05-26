@@ -261,6 +261,55 @@ TCUDA_zparfb( cham_side_t        side,
     return CUDA_zparfb( side, trans, direct, storev, M1, N1, M2, N2, K, L, (cuDoubleComplex *)A1->mat, A1->ld, (cuDoubleComplex *)A2->mat, A2->ld, (const cuDoubleComplex *)V->mat, V->ld, (const cuDoubleComplex *)T->mat, T->ld, (cuDoubleComplex *)WORK->mat, lwork, handle );
 }
 
+#if defined( PRECISION_z ) || defined( PRECISION_c )
+int
+TCUDA_zplghe( const double          *bump,
+              int                    m,
+              int                    n,
+              CHAM_tile_t           *A,
+              int                    bigM,
+              int                    m0,
+              int                    n0,
+              unsigned long long int seed,
+              cublasHandle_t         handle )
+{
+    gpucublas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return CUDA_zplghe( bump, m, n, (cuDoubleComplex*)(A->mat), A->ld, bigM, m0, n0, seed, handle );
+}
+#endif
+
+int
+TCUDA_zplgsy( const cuDoubleComplex *bump,
+              int                    m,
+              int                    n,
+              CHAM_tile_t           *A,
+              int                    bigM,
+              int                    m0,
+              int                    n0,
+              unsigned long long int seed,
+              cublasHandle_t         handle )
+{
+    gpucublas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return CUDA_zplgsy( bump, m, n, (cuDoubleComplex*)(A->mat), A->ld, bigM, m0, n0, seed, handle );
+}
+
+int
+TCUDA_zplrnt( int                    m,
+              int                    n,
+              CHAM_tile_t           *A,
+              int                    bigM,
+              int                    m0,
+              int                    n0,
+              unsigned long long int seed,
+              cublasHandle_t         handle )
+{
+    gpucublas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return CUDA_zplrnt( m, n, (cuDoubleComplex *)A->mat, A->ld, bigM, m0, n0, seed, handle );
+}
+
 int
 TCUDA_zpotrf( cham_uplo_t        uplo,
               int                n,

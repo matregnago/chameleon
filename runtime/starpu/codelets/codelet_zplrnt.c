@@ -68,12 +68,28 @@ cl_zplrnt_cpu_func(void *descr[], void *cl_arg)
     TCORE_zplrnt( clargs->m, clargs->n, tileA,
                   clargs->bigM, clargs->m0, clargs->n0, clargs->seed );
 }
+
+#if defined(CHAMELEON_USE_CUDA)
+static void
+cl_zplrnt_cuda_func(void *descr[], void *cl_arg)
+{
+    struct cl_zplrnt_args_s *clargs = (struct cl_zplrnt_args_s *)cl_arg;
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
+    CHAM_tile_t *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+
+    TCUDA_zplrnt( clargs->m, clargs->n, tileA,
+                  clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
+                  handle );
+}
+#endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
-CODELETS_CPU( zplrnt, cl_zplrnt_cpu_func )
+CODELETS( zplrnt, cl_zplrnt_cpu_func, cl_zplrnt_cuda_func, STARPU_CUDA_ASYNC )
 
 void INSERT_TASK_zplrnt( const RUNTIME_option_t *options,
                          int m, int n, const CHAM_desc_t *A, int Am, int An,

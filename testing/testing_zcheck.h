@@ -52,6 +52,8 @@ static inline int check_zscale_std    ( run_arg_list_t *args, cham_uplo_t uplo, 
 static inline int check_zscale        ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc_t *descAinit, CHAM_desc_t *descA ) { return 0; }
 static inline int check_zrankk_std    ( run_arg_list_t *args, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA ) { return 0; }
 static inline int check_zrankk        ( run_arg_list_t *args, int K, CHAM_desc_t *descA ) { return 0; }
+static inline int check_zgenerate_std ( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t *A, int LDA, unsigned long long int seedA, CHAMELEON_Complex64_t bump ) { return 0; }
+static inline int check_zgenerate     ( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_uplo_t uplo, CHAM_desc_t *descA, unsigned long long int seedA, CHAMELEON_Complex64_t bump ) { return 0; }
 static inline int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LBD ) { return 0; }
 static inline int check_ztranspose    ( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB ) { return 0; }
 static inline int check_zset_std      ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, int M, int N, CHAMELEON_Complex64_t *A, int LDA ) { return 0; }
@@ -135,6 +137,8 @@ int check_zscale_std    ( run_arg_list_t *args, cham_uplo_t uplo, int M, int N, 
 int check_zscale        ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc_t *descAinit, CHAM_desc_t *descA );
 int check_zrankk_std    ( run_arg_list_t *args, int M, int N, int K, CHAMELEON_Complex64_t *A, int LDA );
 int check_zrankk        ( run_arg_list_t *args, int K, CHAM_desc_t *descA );
+int check_zgenerate_std ( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_uplo_t uplo, int M, int N, CHAMELEON_Complex64_t *A, int LDA, unsigned long long int seedA, CHAMELEON_Complex64_t bump );
+int check_zgenerate     ( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_uplo_t uplo, CHAM_desc_t *descA, unsigned long long int seedA, CHAMELEON_Complex64_t bump );
 int check_ztranspose_std( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, int M, int N, CHAMELEON_Complex64_t *A, int LDA, CHAMELEON_Complex64_t *B, int LBD );
 int check_ztranspose    ( run_arg_list_t *args, cham_uplo_t uplo, cham_trans_t trans, CHAM_desc_t *descA, CHAM_desc_t *descB );
 int check_zset_std      ( run_arg_list_t *args, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAMELEON_Complex64_t beta, int M, int N, CHAMELEON_Complex64_t *A, int LDA );

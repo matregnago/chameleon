@@ -21,6 +21,7 @@
  * @author Florent Pruvost
  * @author Samuel Thibault
  * @author Gwenole Lucas
+ * @author Brieuc Nicolas
  * @date 2024-10-18
  * @precisions normal z -> c
  *
@@ -68,12 +69,30 @@ static void cl_zplghe_cpu_func(void *descr[], void *cl_arg)
     TCORE_zplghe( clargs->bump, clargs->m, clargs->n, tileA,
                   clargs->bigM, clargs->m0, clargs->n0, clargs->seed );
 }
+
+#if defined(CHAMELEON_USE_CUDA)
+static void
+cl_zplghe_cuda_func(void *descr[], void *cl_arg)
+{
+    struct cl_zplghe_args_s *clargs = (struct cl_zplghe_args_s *)cl_arg;
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
+    CHAM_tile_t *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+
+    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
+
+    TCUDA_zplghe( &(clargs->bump), clargs->m, clargs->n, tileA,
+                  clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
+                  handle );
+}
+#endif /* defined(CHAMELEON_USE_CUDA) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
-CODELETS_CPU( zplghe, cl_zplghe_cpu_func )
+CODELETS( zplghe, cl_zplghe_cpu_func, cl_zplghe_cuda_func, STARPU_CUDA_ASYNC )
 
 void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
                          double bump, int m, int n, const CHAM_desc_t *A, int Am, int An,

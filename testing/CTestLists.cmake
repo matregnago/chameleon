@@ -40,9 +40,9 @@ if (NOT CHAMELEON_SIMULATION)
     # Create the list of test based on precision and runtime
     #
     # Norms
-    set( TESTS print lacpy laset latro lange lantr lansy plrnk )
+    set( TESTS print lacpy laset latro plrnt plgsy lange lantr lansy plrnk )
     if ( ${prec} STREQUAL c OR ${prec} STREQUAL z )
-      set( TESTS ${TESTS} lanhe )
+      set( TESTS ${TESTS} plghe lanhe )
     endif()
     # BLAS
     set( TESTS ${TESTS} geadd tradd lascal gemm symm syrk syr2k trmm trsm )
@@ -211,9 +211,8 @@ else (NOT CHAMELEON_SIMULATION)
   set(CHAMELEON_PRECISIONS_SIMU "s;d")
   set(TEST_CMD_simushm -t ${THREADS} -g 0)
   set(TEST_CMD_simugpu -t ${THREADS} -g 1)
-  set(PLATFORMS "mirage;sirocco")
-  set(BSIZE_mirage "320;960")
-  set(BSIZE_sirocco "80;440;960;1440;1920")
+  set(PLATFORMS "sirocco-a100-ctest")
+  set(BSIZE_sirocco-a100-ctest "800;1600")
 
   # loop over constraints
   foreach(cat ${TEST_CATEGORIES})
