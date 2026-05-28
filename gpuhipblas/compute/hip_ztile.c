@@ -129,6 +129,119 @@ THIP_zherk( cham_uplo_t        uplo,
 #endif
 
 int
+THIP_zlacpy( cham_uplo_t        uplo,
+             int                M,
+             int                N,
+             const CHAM_tile_t *A,
+             CHAM_tile_t       *B,
+             hipblasHandle_t    handle )
+{
+    gpuhipblas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+    return HIP_zlacpy( uplo, M, N, (const hipDoubleComplex *)A->mat, A->ld, (hipDoubleComplex *)B->mat, B->ld, handle );
+}
+
+int
+THIP_zlacpyx( cham_uplo_t        uplo,
+              int                M,
+              int                N,
+              int                displA,
+              const CHAM_tile_t *A,
+              int                LDA,
+              int                displB,
+              CHAM_tile_t       *B,
+              int                LDB,
+              hipblasHandle_t    handle )
+{
+    gpuhipblas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+
+    const hipDoubleComplex *Aptr = (const hipDoubleComplex *)A->mat;
+    hipDoubleComplex       *Bptr = (hipDoubleComplex *)B->mat;
+    return HIP_zlacpy( uplo, M, N, Aptr + displA, LDA, Bptr + displB, LDB, handle );
+}
+
+int
+THIP_zlaset( cham_uplo_t             uplo,
+             int                     m,
+             int                     n,
+             const hipDoubleComplex *alpha,
+             const hipDoubleComplex *beta,
+             CHAM_tile_t            *A,
+             hipblasHandle_t         handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return HIP_zlaset( uplo, m, n, alpha, beta, CHAM_tile_get_ptr( A ), A->ld, handle );
+}
+
+int
+THIP_zlatro( cham_uplo_t        uplo,
+             cham_trans_t       trans,
+             int                M,
+             int                N,
+             const CHAM_tile_t *A,
+             CHAM_tile_t       *B,
+             hipblasHandle_t    handle )
+{
+    gpuhipblas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+    return HIP_zlatro( uplo, trans, M, N, (hipDoubleComplex *)A->mat, A->ld, (hipDoubleComplex *)B->mat, B->ld, handle );
+}
+
+#if defined( PRECISION_z ) || defined( PRECISION_c )
+int
+THIP_zplghe( const double          *bump,
+             int                    m,
+             int                    n,
+             CHAM_tile_t           *A,
+             int                    bigM,
+             int                    m0,
+             int                    n0,
+             unsigned long long int seed,
+             hipblasHandle_t        handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return HIP_zplghe( bump, m, n, (hipDoubleComplex*)(A->mat), A->ld, bigM, m0, n0, seed, handle );
+}
+#endif
+
+int
+THIP_zplgsy( const hipDoubleComplex *bump,
+             int                     m,
+             int                     n,
+             CHAM_tile_t            *A,
+             int                     bigM,
+             int                     m0,
+             int                     n0,
+             unsigned long long int  seed,
+             hipblasHandle_t         handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return HIP_zplgsy( bump, m, n, (hipDoubleComplex*)(A->mat), A->ld, bigM, m0, n0, seed, handle );
+}
+
+int
+THIP_zplrnt( int                    m,
+             int                    n,
+             CHAM_tile_t           *A,
+             int                    bigM,
+             int                    m0,
+             int                    n0,
+             unsigned long long int seed,
+             hipblasHandle_t        handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return HIP_zplrnt( m, n, (hipDoubleComplex *)A->mat, A->ld, bigM, m0, n0, seed, handle );
+}
+
+int
 THIP_zsymm( cham_side_t             side,
             cham_uplo_t             uplo,
             int                     m,
