@@ -57,7 +57,7 @@ static void
 cl_zgeadd_cuda_func( void *descr[], void *cl_arg )
 {
     struct cl_zgeadd_args_s *clargs = (struct cl_zgeadd_args_s *)cl_arg;
-    cublasHandle_t handle = starpu_cublas_get_local_handle();
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
     CHAM_tile_t   *tileA;
     CHAM_tile_t   *tileB;
 
@@ -70,12 +70,35 @@ cl_zgeadd_cuda_func( void *descr[], void *cl_arg )
     return;
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zgeadd_hip_func( void *descr[], void *cl_arg )
+{
+    struct cl_zgeadd_args_s *clargs = (struct cl_zgeadd_args_s *)cl_arg;
+    hipblasHandle_t          handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t   *tileA;
+    CHAM_tile_t   *tileB;
+
+    tileA = cti_interface_get( descr[0] );
+    tileB = cti_interface_get( descr[1] );
+
+    THIP_zgeadd( clargs->trans, clargs->m, clargs->n,
+                 (hipDoubleComplex *)&(clargs->alpha), tileA, (hipDoubleComplex *)&(clargs->beta), tileB, handle );
+
+    return;
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP)
+CODELETS_GPU( zgeadd, cl_zgeadd_cpu_func, cl_zgeadd_hip_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zgeadd, cl_zgeadd_cpu_func, cl_zgeadd_cuda_func, STARPU_CUDA_ASYNC )
+#endif
 
 #if defined(CHAMELEON_STARPU_USE_INSERT)
 

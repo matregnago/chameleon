@@ -11,6 +11,7 @@
  *
  * @version 1.4.0
  * @author Mathieu Faverge
+ * @author Brieuc Nicolas
  * @date 2026-03-23
  * @precisions normal z -> c d s
  *
@@ -52,6 +53,24 @@ cl_zinit_cuda_func( void *descr[], void *cl_arg )
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zinit_hip_func( void *descr[], void *cl_arg )
+{
+    CHAM_tile_t *tileA;
+    hipError_t rc;
+
+    tileA = cti_interface_get(descr[0]);
+
+    rc = hipMemset2D( tileA->mat, sizeof(CHAMELEON_Complex64_t) * tileA->ld, 0,
+                       sizeof(CHAMELEON_Complex64_t) * tileA->m, tileA->n );
+    assert( rc == hipSuccess );
+
+    (void)cl_arg;
+    (void)rc;
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
+
 #else /* !defined(CHAMELEON_SIMULATION) */
 
 starpu_cpu_func_t const cl_zinit_cpu_func  = (starpu_cpu_func_t)1;
@@ -67,6 +86,10 @@ struct starpu_codelet cl_zinit = {
     .where      = STARPU_CPU | STARPU_CUDA,
     .cuda_flags = { STARPU_CUDA_ASYNC },
     .cuda_funcs = { cl_zinit_cuda_func },
+#elif defined(CHAMELEON_USE_HIP)
+    .where     = STARPU_CPU | STARPU_HIP,
+    .hip_flags = { STARPU_HIP_ASYNC },
+    .hip_funcs = { cl_zinit_hip_func },
 #else
     .where      = STARPU_CPU,
 #endif

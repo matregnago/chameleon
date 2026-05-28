@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -22,6 +22,7 @@
  * @author Lucas Barros de Assis
  * @author Florent Pruvost
  * @author Samuel Thibault
+ * @author Brieuc Nicolas
  * @date 2024-10-18
  * @precisions normal z -> c d s
  *
@@ -75,9 +76,9 @@ static void
 cl_zlatro_cuda_func( void *descr[], void *cl_arg )
 {
     struct cl_zlatro_args_s *clargs = (struct cl_zlatro_args_s *)cl_arg;
+    cublasHandle_t           handle = starpu_cublas_get_local_handle();
     CHAM_tile_t *tileA;
     CHAM_tile_t *tileB;
-    cublasHandle_t handle = starpu_cublas_get_local_handle();
 
     tileA = cti_interface_get(descr[0]);
     tileB = cti_interface_get(descr[1]);

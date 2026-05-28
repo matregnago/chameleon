@@ -106,13 +106,9 @@ cl_ztrsm_hip_func(void *descr[], void *cl_arg)
     tileA = cti_interface_get(descr[0]);
     tileB = cti_interface_get(descr[1]);
 
-    HIP_ztrsm(
-        clargs->side, clargs->uplo, clargs->transA, clargs->diag,
-        clargs->m, clargs->n,
-        (hipDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        handle );
+    THIP_ztrsm( clargs->side, clargs->uplo, clargs->transA, clargs->diag,
+                clargs->m, clargs->n,
+                (hipDoubleComplex *)&(clargs->alpha), tileA, tileB, handle );
 }
 #endif /* defined(CHAMELEON_USE_HIP) */
 

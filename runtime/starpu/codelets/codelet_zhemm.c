@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -92,19 +92,10 @@ cl_zhemm_hip_func( void *descr[], void *cl_arg )
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileC->format & CHAMELEON_TILE_FULLRANK );
-
-    HIP_zhemm(
-        clargs->side, clargs->uplo,
-        clargs->m, clargs->n,
-        (hipDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        (hipDoubleComplex*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    THIP_zhemm( clargs->side, clargs->uplo,
+                clargs->m, clargs->n,
+                (hipDoubleComplex *)&(clargs->alpha), tileA, tileB,
+                (hipDoubleComplex *)&(clargs->beta),  tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

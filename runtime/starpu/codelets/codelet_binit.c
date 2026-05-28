@@ -11,6 +11,7 @@
  *
  * @version 1.4.0
  * @author Mathieu Faverge
+ * @author Brieuc Nicolas
  * @date 2026-03-23
  *
  */
@@ -47,6 +48,24 @@ cl_binit_cuda_func( void *descr[], void *cl_arg )
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
 
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_binit_hip_func( void *descr[], void *cl_arg )
+{
+    hipblasStatus_t rc;
+    CHAM_tile_t   *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+    assert( tileA->ld == tileA->m );
+
+    rc = hipMemset( CHAM_tile_get_ptr( tileA ), 0, sizeof(char) * tileA->ld * tileA->n );
+    assert( rc == CUBLAS_STATUS_SUCCESS );
+
+    (void)cl_arg;
+    (void)rc;
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
+
 #else /* !defined(CHAMELEON_SIMULATION) */
 
 starpu_cpu_func_t  const cl_binit_cpu_func = (starpu_cpu_func_t)1;
@@ -62,6 +81,10 @@ struct starpu_codelet cl_binit = {
     .where      = STARPU_CPU | STARPU_CUDA,
     .cuda_flags = { STARPU_CUDA_ASYNC },
     .cuda_funcs = { cl_binit_cuda_func },
+#elif defined(CHAMELEON_USE_HIP)
+    .where     = STARPU_CPU | STARPU_HIP,
+    .hip_flags = { STARPU_HIP_ASYNC },
+    .hip_funcs = { cl_binit_hip_func },
 #else
     .where      = STARPU_CPU,
 #endif
