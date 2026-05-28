@@ -86,12 +86,32 @@ cl_zlatro_cuda_func( void *descr[], void *cl_arg )
     TCUDA_zlatro( clargs->uplo, clargs->trans, clargs->m, clargs->n, tileA, tileB, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zlatro_hip_func( void *descr[], void *cl_arg )
+{
+    struct cl_zlatro_args_s *clargs = (struct cl_zlatro_args_s *)cl_arg;
+    hipblasHandle_t          handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileB;
+
+    tileA = cti_interface_get(descr[0]);
+    tileB = cti_interface_get(descr[1]);
+
+    THIP_zlatro( clargs->uplo, clargs->trans, clargs->m, clargs->n, tileA, tileB, handle );
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP)
+CODELETS( zlatro, cl_zlatro_cpu_func, cl_zlatro_hip_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zlatro, cl_zlatro_cpu_func, cl_zlatro_cuda_func, STARPU_CUDA_ASYNC )
+#endif
 
 #if defined(CHAMELEON_STARPU_USE_INSERT)
 /**

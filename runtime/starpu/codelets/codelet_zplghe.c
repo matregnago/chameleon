@@ -87,12 +87,34 @@ cl_zplghe_cuda_func(void *descr[], void *cl_arg)
                   handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zplghe_hip_func(void *descr[], void *cl_arg)
+{
+    struct cl_zplghe_args_s *clargs = (struct cl_zplghe_args_s *)cl_arg;
+    hipblasHandle_t          handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+
+    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
+
+    THIP_zplghe( &(clargs->bump), clargs->m, clargs->n, tileA,
+                 clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
+                 handle );
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP)
+CODELETS( zplghe, cl_zplghe_cpu_func, cl_zplghe_hip_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zplghe, cl_zplghe_cpu_func, cl_zplghe_cuda_func, STARPU_CUDA_ASYNC )
+#endif
 
 void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
                          double bump, int m, int n, const CHAM_desc_t *A, int Am, int An,

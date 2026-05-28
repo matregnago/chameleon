@@ -143,17 +143,20 @@ cl_zgersum_init_cuda_func( void *descr[], void *cl_arg )
 static void
 cl_zgersum_init_hip_func( void *descr[], void *cl_arg )
 {
-    CHAM_tile_t *tileA;
-    hipError_t rc;
+    hipblasHandle_t  handle = starpu_hipblas_get_local_handle();
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    hipDoubleComplex zzero = make_hipDoubleComplex(0.0, 0.0);
+#else
+    double           zzero = 0.0;
+#endif /* defined(PRECISION_z) || defined(PRECISION_c) */
+    CHAM_tile_t     *tileA;
 
     tileA = cti_interface_get(descr[0]);
 
-    rc = hipMemset2D( tileA->mat, sizeof(CHAMELEON_Complex64_t) * tileA->ld, 0,
-                       sizeof(CHAMELEON_Complex64_t) * tileA->m, tileA->n );
-    assert( rc == hipSuccess );
-
+    THIP_zlaset( ChamUpperLower, tileA->m, tileA->n,
+                 &zzero, &zzero,
+                 tileA, handle );
     (void)cl_arg;
-    (void)rc;
 }
 #endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
