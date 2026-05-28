@@ -22,6 +22,7 @@
 #  @author Guillaume Sylvand
 #  @author Mathieu Faverge
 #  @author Loris Lucido
+#  @author Brieuc Nicolas
 #  @date 2025-12-19
 #
 ###
@@ -30,6 +31,7 @@
 # ------------------------------------------------------
 set(GPUHIPBLAS_SRCS_GENERATED "")
 set(ZSRC
+    hip_zgeadd.c
     hip_zgemm.c
     hip_zhemm.c
     hip_zher2k.c
