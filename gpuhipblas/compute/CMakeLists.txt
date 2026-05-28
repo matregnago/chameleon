@@ -31,6 +31,7 @@
 # ------------------------------------------------------
 set(GPUHIPBLAS_SRCS_GENERATED "")
 set(ZSRC
+    hip_ztile.c
     hip_zgeadd.c
     hip_zgemm.c
     hip_zhemm.c
@@ -43,6 +44,16 @@ set(ZSRC
     hip_ztrmm.c
     hip_ztrsm.c
     )
+
+if ( CHAMELEON_NO_KERNELS )
+  list( APPEND ZSRC
+    hip_ztile_empty.c
+    )
+else()
+  list( APPEND ZSRC
+    hip_ztile.c
+    )
+endif()
 
 precisions_rules_py(
   GPUHIPBLAS_SRCS_GENERATED "${ZSRC}"

@@ -16,6 +16,7 @@
  * @author Mathieu Faverge
  * @author Nathalie Furmento
  * @author Loris Lucido
+ * @author Brieuc Nicolas
  * @date 2025-12-19
  * @precisions normal z -> c d s
  *
@@ -38,6 +39,7 @@
 #include <hip/hip_complex.h>
 #include <hip/hip_fp16.h>
 
+#define HIPBLAS_V2
 #include <hipblas/hipblas.h>
 #include <hipsolver/hipsolver.h>
 
@@ -60,6 +62,10 @@ BEGIN_C_DECLS
 #include "gpuhipblas/gpuhipblas_d.h"
 #include "gpuhipblas/gpuhipblas_c.h"
 #include "gpuhipblas/gpuhipblas_s.h"
+#include "gpuhipblas/gpuhipblas_ztile.h"
+#include "gpuhipblas/gpuhipblas_dtile.h"
+#include "gpuhipblas/gpuhipblas_ctile.h"
+#include "gpuhipblas/gpuhipblas_stile.h"
 
 int HIP_hgemm( cham_trans_t transa, cham_trans_t transb,
                int m, int n, int k,
@@ -69,13 +75,38 @@ int HIP_hgemm( cham_trans_t transa, cham_trans_t transb,
                const hipblasHalf *beta,
                hipblasHalf *C, int ldc,
                hipblasHandle_t handle );
+int THIP_hgemm( cham_trans_t transa, cham_trans_t transb,
+                int m, int n, int k,
+                const hipblasHalf *alpha,
+                const CHAM_tile_t *A,
+                const CHAM_tile_t *B,
+                const hipblasHalf *beta,
+                CHAM_tile_t *C,
+                hipblasHandle_t handle );
 
 END_C_DECLS
 
 /**
- * Coreblas Error
+ * Gpuhipblas Error
  */
 #define gpuhipblas_error(k, str) fprintf(stderr, "%s: Parameter %d / %s\n", __func__, k, str)
+
+/**
+ * Gpuhipblas kernel tracing
+ */
+#if defined(CHAMELEON_KERNELS_TRACE)
+
+void __gpuhipblas_kernel_trace( const char *func, ... );
+#define gpuhipblas_kernel_trace( ... )                                    \
+    do {                                                                \
+        __gpuhipblas_kernel_trace( __chameleon_func__, ##__VA_ARGS__, NULL );  \
+    } while(0)
+
+#else
+
+#define gpuhipblas_kernel_trace( ... ) do {} while(0)
+
+#endif
 
 /**
  *  LAPACK Constants

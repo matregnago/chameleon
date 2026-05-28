@@ -4,7 +4,7 @@
 #
 # @copyright 2009-2014 The University of Tennessee and The University of
 #                      Tennessee Research Foundation. All rights reserved.
-# @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+# @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
 #                      Univ. Bordeaux. All rights reserved.
 #
 ###
@@ -21,6 +21,7 @@
 #  @author Florent Pruvost
 #  @author Mathieu Faverge
 #  @author Loris Lucido
+#  @author Brieuc Nicolas
 #  @date 2024-02-18
 #
 ###
@@ -30,6 +31,7 @@
 set(GPUHIPBLAS_HDRS_GENERATED "")
 set(ZHDR
     gpuhipblas/gpuhipblas_z.h
+    gpuhipblas/gpuhipblas_ztile.h
 )
 precisions_rules_py(
   GPUHIPBLAS_HDRS_GENERATED "${ZHDR}"
