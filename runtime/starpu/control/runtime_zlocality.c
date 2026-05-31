@@ -60,7 +60,6 @@ void RUNTIME_zlocality_allrestrict( uint32_t where )
     cl_zhemm_restrict_where( where );
     cl_zher2k_restrict_where( where );
     cl_zherk_restrict_where( where );
-    cl_zsytrf_nopiv_restrict_where( where );
 #endif
     cl_zsymm_restrict_where( where );
     cl_zsyr2k_restrict_where( where );
@@ -75,6 +74,11 @@ void RUNTIME_zlocality_allrestrict( uint32_t where )
     cl_zpotrf_restrict_where( where );
     cl_zlauum_restrict_where( where );
     cl_ztrtri_restrict_where( where );
+
+    /* SYTRF */
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    cl_zsytrf_nopiv_restrict_where( where );
+#endif
 
     /* LU */
     cl_zgetrf_incpiv_restrict_where( where );
@@ -125,7 +129,6 @@ void RUNTIME_zlocality_onerestrict( cham_tasktype_t kernel, uint32_t where )
     case TASK_HEMM:   cl_zhemm_restrict_where( where );  break;
     case TASK_HER2K:  cl_zher2k_restrict_where( where ); break;
     case TASK_HERK:   cl_zherk_restrict_where( where );  break;
-    case TASK_SYTRF_NOPIV: cl_zsytrf_nopiv_restrict_where( where );  break;
 #endif
     case TASK_SYMM:   cl_zhemm_restrict_where( where );  break;
     case TASK_SYR2K:  cl_zher2k_restrict_where( where ); break;
@@ -140,6 +143,11 @@ void RUNTIME_zlocality_onerestrict( cham_tasktype_t kernel, uint32_t where )
     case TASK_POTRF:  cl_zpotrf_restrict_where( where ); break;
     case TASK_LAUUM:  cl_zlauum_restrict_where( where ); break;
     case TASK_TRTRI:  cl_ztrtri_restrict_where( where ); break;
+
+    /* SYTRF */
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case TASK_SYTRF_NOPIV: cl_zsytrf_nopiv_restrict_where( where );  break;
+#endif
 
     /* LU */
     case TASK_GETRF_INCPIV: cl_zgetrf_incpiv_restrict_where( where ); break;
@@ -190,7 +198,6 @@ void RUNTIME_zlocality_allrestore( )
     cl_zhemm_restore_where();
     cl_zher2k_restore_where();
     cl_zherk_restore_where();
-    cl_zsytrf_nopiv_restore_where();
 #endif
     cl_zsymm_restore_where();
     cl_zsyr2k_restore_where();
@@ -205,6 +212,11 @@ void RUNTIME_zlocality_allrestore( )
     cl_zpotrf_restore_where();
     cl_zlauum_restore_where();
     cl_ztrtri_restore_where();
+
+    /* SYTRF */
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    cl_zsytrf_nopiv_restore_where();
+#endif
 
     /* LU incpiv */
     cl_zgetrf_incpiv_restore_where();
@@ -251,7 +263,6 @@ void RUNTIME_zlocality_onerestore( cham_tasktype_t kernel )
     case TASK_HEMM:   cl_zhemm_restore_where();  break;
     case TASK_HER2K:  cl_zher2k_restore_where(); break;
     case TASK_HERK:   cl_zherk_restore_where();  break;
-    case TASK_SYTRF_NOPIV: cl_zsytrf_nopiv_restore_where();  break;
 #endif
     case TASK_SYMM:   cl_zhemm_restore_where();  break;
     case TASK_SYR2K:  cl_zher2k_restore_where(); break;
@@ -266,6 +277,11 @@ void RUNTIME_zlocality_onerestore( cham_tasktype_t kernel )
     case TASK_POTRF:  cl_zpotrf_restore_where(); break;
     case TASK_LAUUM:  cl_zlauum_restore_where(); break;
     case TASK_TRTRI:  cl_ztrtri_restore_where(); break;
+
+    /* SYTRF */
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case TASK_SYTRF_NOPIV: cl_zsytrf_nopiv_restore_where();  break;
+#endif
 
     /* LU */
     case TASK_GETRF_INCPIV: cl_zgetrf_incpiv_restore_where(); break;

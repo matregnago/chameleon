@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -32,7 +32,6 @@ void RUNTIME_zdisplay_allprofile()
     profiling_display_zhemm_info();
     profiling_display_zher2k_info();
     profiling_display_zherk_info();
-    profiling_display_zsytrf_nopiv_info();
 #endif
     profiling_display_zsymm_info();
     profiling_display_zsyr2k_info();
@@ -50,6 +49,9 @@ void RUNTIME_zdisplay_allprofile()
     profiling_display_zlauum_info();
     profiling_display_zpotrf_info();
     profiling_display_zssssm_info();
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    profiling_display_zsytrf_nopiv_info();
+#endif
     profiling_display_ztplqt_info();
     profiling_display_ztpmlqt_info();
     profiling_display_ztpmqrt_info();
@@ -72,7 +74,6 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
     case TASK_HEMM:         profiling_display_zhemm_info();         break;
     case TASK_HER2K:        profiling_display_zher2k_info();        break;
     case TASK_HERK:         profiling_display_zherk_info();         break;
-    case TASK_SYTRF_NOPIV:  profiling_display_zsytrf_nopiv_info();  break;
 #endif
     case TASK_SYMM:         profiling_display_zsymm_info();         break;
     case TASK_SYR2K:        profiling_display_zsyr2k_info();        break;
@@ -90,12 +91,15 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
     case TASK_LAUUM:        profiling_display_zlauum_info();        break;
     case TASK_POTRF:        profiling_display_zpotrf_info();        break;
     case TASK_SSSSM:        profiling_display_zssssm_info();        break;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case TASK_SYTRF_NOPIV:  profiling_display_zsytrf_nopiv_info();  break;
+#endif
     case TASK_TRTRI:        profiling_display_ztrtri_info();        break;
     case TASK_TSTRF:        profiling_display_ztstrf_info();        break;
 
     case TASK_TPLQT:        profiling_display_ztplqt_info();        break;
-    case TASK_TPMLQT:       profiling_display_ztpmlqt_info();        break;
-    case TASK_TPMQRT:       profiling_display_ztpmqrt_info();        break;
+    case TASK_TPMLQT:       profiling_display_ztpmlqt_info();       break;
+    case TASK_TPMQRT:       profiling_display_ztpmqrt_info();       break;
     case TASK_TPQRT:        profiling_display_ztpqrt_info();        break;
 
     case TASK_UNMLQ:        profiling_display_zunmlq_info();        break;
