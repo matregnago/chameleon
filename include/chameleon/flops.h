@@ -205,6 +205,31 @@ static inline double flops_csymv( double __n) { double flops =  (6. * FMULS_SYMV
 static inline double flops_dsymv( double __n) { double flops =  (     FMULS_SYMV((__n)) +       FADDS_SYMV((__n)) ); return flops; }
 static inline double flops_ssymv( double __n) { double flops =  (     FMULS_SYMV((__n)) +       FADDS_SYMV((__n)) ); return flops; }
 
+static inline double flops_tradd_nbelt( cham_uplo_t __uplo, int __m, int __n )
+{
+    double flops = 0.;
+    double minMN = (double)chameleon_min( __m, __n );
+
+    switch ( __uplo ) {
+    case ChamUpper:
+        flops = ( minMN * ( minMN + 1 ) / 2 ) + __m * (double)chameleon_max( 0, __n - __m );
+        break;
+    case ChamLower:
+        flops = ( minMN * ( minMN + 1 ) / 2 ) + __n * (double)chameleon_max( 0, __m - __n );
+        break;
+    case ChamUpperLower:
+    default:
+        flops = __m * __n;
+    }
+    return flops;
+}
+
+/* 2 multiplications and 1 addition per element */
+static inline double flops_ztradd( cham_uplo_t __uplo, int __m, int __n ) { return ( 14. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_ctradd( cham_uplo_t __uplo, int __m, int __n ) { return ( 14. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_dtradd( cham_uplo_t __uplo, int __m, int __n ) { return (  3. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_stradd( cham_uplo_t __uplo, int __m, int __n ) { return (  3. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+
 /*
  * Level 3 BLAS
  */
