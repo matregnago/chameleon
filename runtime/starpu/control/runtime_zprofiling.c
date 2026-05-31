@@ -27,6 +27,7 @@ void RUNTIME_zdisplay_allprofile()
 {
 
     /* BLAS 3 */
+    profiling_display_zgeadd_info();
     profiling_display_zgemm_info();
 #if defined(PRECISION_z) || defined(PRECISION_c)
     profiling_display_zhemm_info();
@@ -69,6 +70,7 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
 {
     switch( kernel ) {
         /* Blas 3 */
+    case TASK_GEADD:       profiling_display_zgeadd_info(); break;
     case TASK_GEMM:         profiling_display_zgemm_info();         break;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     case TASK_HEMM:         profiling_display_zhemm_info();         break;
