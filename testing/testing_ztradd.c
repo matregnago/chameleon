@@ -2,7 +2,7 @@
  *
  * @file testing_ztradd.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -23,36 +23,6 @@
 #include "testings.h"
 #include "testing_zcheck.h"
 #include <chameleon/flops.h>
-
-static cham_fixdbl_t
-flops_ztradd( cham_uplo_t uplo, int _M, int _N )
-{
-    cham_fixdbl_t flops = 0.;
-    cham_fixdbl_t minMN = (cham_fixdbl_t)chameleon_min( _M, _N );
-    cham_fixdbl_t M     = _M;
-    cham_fixdbl_t N     = _N;
-
-    switch ( uplo ) {
-        case ChamUpper:
-            flops = ( minMN * ( minMN + 1 ) / 2 ) + M * (cham_fixdbl_t)chameleon_max( 0, _N - _M );
-            break;
-        case ChamLower:
-            flops = ( minMN * ( minMN + 1 ) / 2 ) + N * (cham_fixdbl_t)chameleon_max( 0, _M - _N );
-            break;
-        case ChamUpperLower:
-        default:
-            flops = M * N;
-    }
-
-#if defined(PRECISION_z) || defined(PRECISION_c)
-    /* 2 multiplications and 1 addition per element */
-    flops *= ( 2. * 6. + 2. );
-#else
-    flops *= ( 2. + 1. );
-#endif
-
-    return flops;
-}
 
 int
 testing_ztradd_desc( run_arg_list_t *args, int check )
