@@ -65,6 +65,7 @@ void RUNTIME_zlocality_allrestrict( uint32_t where )
     cl_zsymm_restrict_where( where );
     cl_zsyr2k_restrict_where( where );
     cl_zsyrk_restrict_where( where );
+    cl_ztradd_restrict_where( where );
     cl_ztrmm_restrict_where( where );
     cl_ztrsm_restrict_where( where );
 
@@ -125,7 +126,8 @@ void RUNTIME_zlocality_onerestrict( cham_tasktype_t kernel, uint32_t where )
 
     switch( kernel ) {
     /* Blas 3 */
-    case TASK_GEADD:  cl_zgeadd_restrict_where( where ); break;
+    case TASK_GEADD:  cl_zgeadd_restrict_where( where );
+                      cl_ztradd_restrict_where( where ); break;
     case TASK_GEMM:   cl_zgemm_restrict_where( where );  break;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     case TASK_HEMM:   cl_zhemm_restrict_where( where );  break;
@@ -205,6 +207,7 @@ void RUNTIME_zlocality_allrestore( )
     cl_zsymm_restore_where();
     cl_zsyr2k_restore_where();
     cl_zsyrk_restore_where();
+    cl_ztradd_restore_where();
     cl_ztrmm_restore_where();
     cl_ztrsm_restore_where();
 
@@ -261,7 +264,8 @@ void RUNTIME_zlocality_onerestore( cham_tasktype_t kernel )
 {
     switch( kernel ) {
     /* Blas 3 */
-    case TASK_GEADD:  cl_zgeadd_restore_where();  break;
+    case TASK_GEADD:  cl_zgeadd_restore_where();
+                      cl_ztradd_restore_where(); break;
     case TASK_GEMM:   cl_zgemm_restore_where();  break;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     case TASK_HEMM:   cl_zhemm_restore_where();  break;
