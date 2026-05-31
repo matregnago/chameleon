@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -40,6 +40,9 @@
 /*
  * Level 2 BLAS
  */
+#define FADDS_GEADD(__m, __n) (       (double)(__m) * (double)(__n) )
+#define FMULS_GEADD(__m, __n) ( 2.0 * (double)(__m) * (double)(__n) )
+
 #define FMULS_GEMV(__m, __n) ((double)(__m) * (double)(__n) + 2. * (double)(__m))
 #define FADDS_GEMV(__m, __n) ((double)(__m) * (double)(__n)                     )
 
@@ -184,6 +187,11 @@
 /*
  * Level 2 BLAS
  */
+static inline double flops_zgeadd( double __m, double __n ) { double flops = 6.0 * FMULS_GEADD((__m), (__n)) + 2.0 * FADDS_GEADD((__m), (__n)); return flops; }
+static inline double flops_cgeadd( double __m, double __n ) { double flops = 6.0 * FMULS_GEADD((__m), (__n)) + 2.0 * FADDS_GEADD((__m), (__n)); return flops; }
+static inline double flops_dgeadd( double __m, double __n ) { double flops =       FMULS_GEADD((__m), (__n)) +       FADDS_GEADD((__m), (__n)); return flops; }
+static inline double flops_sgeadd( double __m, double __n ) { double flops =       FMULS_GEADD((__m), (__n)) +       FADDS_GEADD((__m), (__n)); return flops; }
+
 static inline double flops_zgemv( double __m, double __n) { double flops =  (6. * FMULS_GEMV((__m), (__n)) + 2.0 * FADDS_GEMV((__m), (__n)) ); return flops; }
 static inline double flops_cgemv( double __m, double __n) { double flops =  (6. * FMULS_GEMV((__m), (__n)) + 2.0 * FADDS_GEMV((__m), (__n)) ); return flops; }
 static inline double flops_dgemv( double __m, double __n) { double flops =  (     FMULS_GEMV((__m), (__n)) +       FADDS_GEMV((__m), (__n)) ); return flops; }
