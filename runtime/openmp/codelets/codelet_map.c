@@ -2,7 +2,7 @@
  *
  * @file openmp/codelet_map.c
  *
- * @copyright 2018-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2018-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -1030,5 +1030,9 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
         omp_map_three[ data[0].access - 1 ][ data[1].access - 1 ][ data[2].access - 1 ](
             uplo, m, n, ndata, data, op_fcts, op_args );
         break;
+    }
+
+    if( op_fcts->synchronous ) {
+        #pragma omp taskwait
     }
 }
