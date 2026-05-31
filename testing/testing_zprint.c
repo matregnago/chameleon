@@ -2,7 +2,7 @@
  *
  * @file testing_zprint.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -50,7 +50,11 @@ testing_zprint_desc( run_arg_list_t *args, int check )
 
     CHAMELEON_Set( CHAMELEON_TILE_SIZE, nb );
 
-    fprintf( stdout, "--- Tile layout ---\n" );
+    int rank = CHAMELEON_Comm_rank();
+
+    if( rank == 0 ) {
+        fprintf( stdout, "--- Tile layout ---\n" );
+    }
     rc = CHAMELEON_Desc_Create(
         &descA, (void*)(-mtxfmt), ChamComplexDouble, nb, nb, nb * nb, LDA, N, 0, 0, M, N, P, Q );
 
@@ -58,13 +62,17 @@ testing_zprint_desc( run_arg_list_t *args, int check )
         CHAMELEON_Desc_Print( descA );
     }
     else {
-        fprintf( stdout, "--- Tile layout (FAILED)---\n" );
+        if( rank == 0 ) {
+            fprintf( stdout, "--- Tile layout (FAILED)---\n" );
+        }
         hres++;
     }
 
     CHAMELEON_Desc_Destroy( &descA );
 
-    fprintf( stdout, "--- Lapack layout ---\n" );
+    if( rank == 0 ) {
+        fprintf( stdout, "--- Lapack layout ---\n" );
+    }
     rc = CHAMELEON_Desc_Create_User(
         &descA, (void*)(-mtxfmt), ChamComplexDouble, nb, nb, nb * nb, LDA, N, 0, 0, M, N, P, Q,
         chameleon_getaddr_cm, chameleon_getblkldd_cm, NULL, NULL );
@@ -73,14 +81,18 @@ testing_zprint_desc( run_arg_list_t *args, int check )
         CHAMELEON_Desc_Print( descA );
     }
     else {
-        fprintf( stdout, "--- Lapack layout (FAILED)---\n" );
+        if( rank == 0 ) {
+            fprintf( stdout, "--- Lapack layout (FAILED)---\n" );
+        }
         hres++;
     }
     CHAMELEON_Desc_Destroy( &descA );
 
     if ( CHAMELEON_Comm_size() == 1 )
     {
-        fprintf( stdout, "--- Recursive layout (Tile)---\n" );
+        if( rank == 0 ) {
+            fprintf( stdout, "--- Recursive layout (Tile)---\n" );
+        }
         rc = CHAMELEON_Recursive_Desc_Create(
             &descA, CHAMELEON_MAT_ALLOC_GLOBAL, ChamComplexDouble,
             rec, rarg, list_mb, list_nb, LDA, N, M, N, P, Q,
@@ -91,7 +103,9 @@ testing_zprint_desc( run_arg_list_t *args, int check )
         }
         CHAMELEON_Desc_Destroy( &descA );
 
-        fprintf( stdout, "--- Recursive layout (Lapack) ---\n" );
+        if( rank == 0 ) {
+            fprintf( stdout, "--- Recursive layout (Lapack) ---\n" );
+        }
         rc = CHAMELEON_Recursive_Desc_Create(
             &descA, CHAMELEON_MAT_ALLOC_GLOBAL, ChamComplexDouble,
             rec, rarg, list_mb, list_nb, LDA, N, M, N, P, Q,
