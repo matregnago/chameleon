@@ -2,7 +2,7 @@
  *
  * @file testing_zgeadd.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -23,23 +23,6 @@
 #include "testings.h"
 #include "testing_zcheck.h"
 #include <chameleon/flops.h>
-
-static cham_fixdbl_t
-flops_zgeadd( int _M, int _N )
-{
-    cham_fixdbl_t flops = 0.;
-    cham_fixdbl_t M     = _M;
-    cham_fixdbl_t N     = _N;
-
-#if defined(PRECISION_z) || defined(PRECISION_c)
-    /* 2 multiplications and 1 addition per element */
-    flops = ( 2. * 6. + 2. ) * M * N;
-#else
-    flops = ( 2. + 1. ) * M * N;
-#endif
-
-    return flops;
-}
 
 int
 testing_zgeadd_desc( run_arg_list_t *args, int check )

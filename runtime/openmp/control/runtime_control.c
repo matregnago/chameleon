@@ -43,6 +43,8 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
     chamctxt->nworkers = ncpus;
     chamctxt->nthreads_per_worker = nthreads_per_worker;
 
+    omp_set_num_threads( ncpus );
+
     return CHAMELEON_SUCCESS;
 }
 

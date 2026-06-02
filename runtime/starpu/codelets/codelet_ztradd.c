@@ -216,7 +216,7 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         starpu_cham_task_set_options( options, task, nbdata, descrs, cl_ztradd_callback );
 
         /* Flops */
-        //task->flops = flops_ztradd( m, n );
+        task->flops = flops_ztradd( uplo, m, n );
 
         /* Refine name */
         task->name = chameleon_codelet_name( cl_name, 2,

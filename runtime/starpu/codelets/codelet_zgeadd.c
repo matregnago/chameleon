@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -188,7 +188,7 @@ void INSERT_TASK_zgeadd( const RUNTIME_option_t *options,
         starpu_cham_task_set_options( options, task, nbdata, descrs, cl_zgeadd_callback );
 
         /* Flops */
-        //task->flops = flops_zgeadd( m, n );
+        task->flops = flops_zgeadd( m, n );
 
         /* Refine name */
         task->name = chameleon_codelet_name( cl_name, 2,

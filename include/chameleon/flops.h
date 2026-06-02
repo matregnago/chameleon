@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -40,6 +40,9 @@
 /*
  * Level 2 BLAS
  */
+#define FADDS_GEADD(__m, __n) (       (double)(__m) * (double)(__n) )
+#define FMULS_GEADD(__m, __n) ( 2.0 * (double)(__m) * (double)(__n) )
+
 #define FMULS_GEMV(__m, __n) ((double)(__m) * (double)(__n) + 2. * (double)(__m))
 #define FADDS_GEMV(__m, __n) ((double)(__m) * (double)(__n)                     )
 
@@ -184,6 +187,11 @@
 /*
  * Level 2 BLAS
  */
+static inline double flops_zgeadd( double __m, double __n ) { double flops = 6.0 * FMULS_GEADD((__m), (__n)) + 2.0 * FADDS_GEADD((__m), (__n)); return flops; }
+static inline double flops_cgeadd( double __m, double __n ) { double flops = 6.0 * FMULS_GEADD((__m), (__n)) + 2.0 * FADDS_GEADD((__m), (__n)); return flops; }
+static inline double flops_dgeadd( double __m, double __n ) { double flops =       FMULS_GEADD((__m), (__n)) +       FADDS_GEADD((__m), (__n)); return flops; }
+static inline double flops_sgeadd( double __m, double __n ) { double flops =       FMULS_GEADD((__m), (__n)) +       FADDS_GEADD((__m), (__n)); return flops; }
+
 static inline double flops_zgemv( double __m, double __n) { double flops =  (6. * FMULS_GEMV((__m), (__n)) + 2.0 * FADDS_GEMV((__m), (__n)) ); return flops; }
 static inline double flops_cgemv( double __m, double __n) { double flops =  (6. * FMULS_GEMV((__m), (__n)) + 2.0 * FADDS_GEMV((__m), (__n)) ); return flops; }
 static inline double flops_dgemv( double __m, double __n) { double flops =  (     FMULS_GEMV((__m), (__n)) +       FADDS_GEMV((__m), (__n)) ); return flops; }
@@ -196,6 +204,31 @@ static inline double flops_zsymv( double __n) { double flops =  (6. * FMULS_SYMV
 static inline double flops_csymv( double __n) { double flops =  (6. * FMULS_SYMV((__n)) + 2.0 * FADDS_SYMV((__n)) ); return flops; }
 static inline double flops_dsymv( double __n) { double flops =  (     FMULS_SYMV((__n)) +       FADDS_SYMV((__n)) ); return flops; }
 static inline double flops_ssymv( double __n) { double flops =  (     FMULS_SYMV((__n)) +       FADDS_SYMV((__n)) ); return flops; }
+
+static inline double flops_tradd_nbelt( cham_uplo_t __uplo, int __m, int __n )
+{
+    double flops = 0.;
+    double minMN = (double)chameleon_min( __m, __n );
+
+    switch ( __uplo ) {
+    case ChamUpper:
+        flops = ( minMN * ( minMN + 1 ) / 2 ) + __m * (double)chameleon_max( 0, __n - __m );
+        break;
+    case ChamLower:
+        flops = ( minMN * ( minMN + 1 ) / 2 ) + __n * (double)chameleon_max( 0, __m - __n );
+        break;
+    case ChamUpperLower:
+    default:
+        flops = __m * __n;
+    }
+    return flops;
+}
+
+/* 2 multiplications and 1 addition per element */
+static inline double flops_ztradd( cham_uplo_t __uplo, int __m, int __n ) { return ( 14. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_ctradd( cham_uplo_t __uplo, int __m, int __n ) { return ( 14. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_dtradd( cham_uplo_t __uplo, int __m, int __n ) { return (  3. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_stradd( cham_uplo_t __uplo, int __m, int __n ) { return (  3. * flops_tradd_nbelt( __uplo, __m, __n ) ); }
 
 /*
  * Level 3 BLAS

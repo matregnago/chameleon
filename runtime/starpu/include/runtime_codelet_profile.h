@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -41,37 +41,47 @@
         if ( info == NULL ) return;                                                            \
         double duration = starpu_timing_timespec_delay_us(&info->start_time, &info->end_time); \
         double speed = flops/(1000.0*duration);                                                \
-        name##_perf[info->workerid].sum  += speed;                                             \
-        name##_perf[info->workerid].sum2 += speed*speed;                                       \
-        name##_perf[info->workerid].n    += 1;                                                 \
+        name##_perf[info->workerid].sum       += speed;                                        \
+        name##_perf[info->workerid].sum2      += speed*speed;                                  \
+        name##_perf[info->workerid].n         += 1;                                            \
+        name##_perf[info->workerid].duration  += duration;                                     \
+        name##_perf[info->workerid].duration2 += duration*duration;                            \
     }                                                                                          \
     void profiling_display_##name##_info(void)                                                 \
     {                                                                                          \
         unsigned worker;                                                                       \
         int header = 0;                                                                        \
         for (worker = 0; worker < starpu_worker_get_count(); worker++)                         \
+        {                                                                                      \
+            if (name##_perf[worker].n > 0)                                                     \
             {                                                                                  \
-                if (name##_perf[worker].n > 0)                                                 \
-                    {                                                                          \
-                        if ( !header ) {                                                       \
-                            fprintf(stderr, "Performance for kernel " #name "\n");             \
-                            fprintf(stderr, "\tWorker  Gflop/s  delta  Nb\n");                 \
-                            header = 1;                                                        \
-                        }                                                                      \
-                        char workername[128];                                                  \
-                        starpu_worker_get_name(worker, workername, 128);                       \
+                if ( !header ) {                                                               \
+                    fprintf( stderr, "Performance for kernel " #name "\n");                    \
+                    fprintf( stderr,                                                           \
+                             "\tWorker  GFlop/s  delta  Nb"                                    \
+                             " MeanTime(s) DeltaTime(s) TotalTime(s)\n" );                     \
+                    header = 1;                                                                \
+                }                                                                              \
+                char workername[128];                                                          \
+                starpu_worker_get_name(worker, workername, 128);                               \
                                                                                                \
-                        long   n    = name##_perf[worker].n;                                   \
-                        double sum  = name##_perf[worker].sum;                                 \
-                        double sum2 = name##_perf[worker].sum2;                                \
+                long   n         = name##_perf[worker].n;                                      \
+                double sum       = name##_perf[worker].sum;                                    \
+                double sum2      = name##_perf[worker].sum2;                                   \
+                double duration  = name##_perf[worker].duration;                               \
+                double duration2 = name##_perf[worker].duration2;                              \
                                                                                                \
-                        double avg = sum / n;                                                  \
-                        double sd  = sqrt((sum2 - (sum*sum)/n)/n);                             \
+                double flops_avg = sum / n;                                                    \
+                double flops_sd  = sqrt((sum2 - (sum*sum)/n)/n);                               \
+                double time      = duration * 1e-6;                                            \
+                double time_avg  = ( duration / n ) * 1e-6;                                    \
+                double time_sd   = ( sqrt((duration2 - (duration*duration)/n)/n) ) * 1e-6;     \
                                                                                                \
-                        fprintf(stderr, "\t%s\t%.2lf\t%.2lf\t%ld\n", workername, avg, sd, n);  \
-                    }                                                                          \
+                fprintf( stderr, "\t%s\t%.2lf\t%.2lf\t%ld\t%e\t%e\t%e\n",                      \
+                         workername, flops_avg, flops_sd, n, time_avg, time_sd, time );        \
             }                                                                                  \
-    }                                                                                          \
+        }                                                                                      \
+    }
 
 #define CHAMELEON_CL_CB_HEADER(name)                    \
     extern struct starpu_perfmodel*cl_##name##_save;    \

@@ -2,7 +2,7 @@
  *
  * @file testing_zlaswp.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -15,15 +15,12 @@
  * @precisions normal z -> c d s
  *
  */
-#include "chameleon/constants.h"
-#include "chameleon/struct.h"
+#include <chameleon.h>
+#include <chameleon_lapack.h>
 #include "testings.h"
-#include "chameleon/chameleon_z.h"
 #include "testing_zcheck.h"
 #include <chameleon/flops.h>
-#include <chameleon/getenv.h>
 #include <coreblas/lapacke.h>
-#include <chameleon/tasks.h>
 
 static cham_fixdbl_t
 flops_zlaswp( cham_fixdbl_t M, cham_fixdbl_t N )
