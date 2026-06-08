@@ -280,8 +280,12 @@ int CHAMELEON_zlacpy_Tile_Async( cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *
         return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
     /* Check input arguments */
-    if ((A->mb != B->mb) || (A->nb != B->nb) ){
+    if ( (A->mb != B->mb) || (A->nb != B->nb) ){
         chameleon_error("CHAMELEON_zlacpy_Tile_Async", "only matching tile sizes supported");
+        return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
+    }
+    if ( (uplo != ChamUpperLower) && (A->mb != A->nb) ){
+        chameleon_error("CHAMELEON_zlacpy_Tile_Async", "only square Tiles for Upper or Lower copy");
         return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
     /* Check input arguments */
