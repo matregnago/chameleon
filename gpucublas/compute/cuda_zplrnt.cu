@@ -57,8 +57,6 @@ void cuda_zplrnt_kernel( int m, int n, cuDoubleComplex *A, int lda,
         return;
     }
 
-    __syncthreads();
-
     tmp = A + x + y * lda;
     if ( full ) {
         /* full block-column */
@@ -70,7 +68,9 @@ void cuda_zplrnt_kernel( int m, int n, cuDoubleComplex *A, int lda,
     else {
         /* partial block-column */
         #pragma unroll
-        for( i=0; (i < BLK_X) && (x+i < m); ++i, tmp++ ) {
+        /* Don't need to check against BLK_X in this branch,
+           and needed for unroll */
+        for( i=0; x+i < m; ++i, tmp++ ) {
             *tmp = CUDA_zlaran( &ran );
         }
     }

@@ -98,7 +98,7 @@ if (NOT CHAMELEON_SIMULATION)
 
         if ( NOT ( ${gpus} EQUAL 0 ) )
           set( cat ${cat}_gpu )
-          list( REMOVE_ITEM TESTSTMP gram lacpy lanhe lange lansy lantr lascal plrnk print )
+          list( REMOVE_ITEM TESTSTMP gram lanhe lange lansy lantr lascal plrnk print )
         endif()
 
         if ( ${cat} STREQUAL "shm")
