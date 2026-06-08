@@ -27,13 +27,10 @@
 
 /* This could probably be done in a smarter way with subsitutions */
 #if defined( PRECISION_z )
-#define cudaConj( val ) cuConj( val )
 #define addToReal( val, bump ) make_cuDoubleComplex(cuCreal(val) + bump, 0.0)
 #elif defined( PRECISION_c )
-#define cudaConj( val ) cuConjf( val )
 #define addToReal( val, bump ) make_cuFloatComplex(cuCrealf(val) + bump, 0.0)
 #else
-#define cudaConj( val ) val
 #define addToReal( val, bump ) val + bump
 #endif
 
@@ -80,7 +77,7 @@ void cuda_zplghe_diag_kernel( double bump, int m, int n, cuDoubleComplex *A, int
         unsigned long long int diag_jump = jump + x + (unsigned long long int)x * (unsigned long long int)bigM;
         unsigned long long int ran = CUDA_rnd64_jump( NBELEM * (diag_jump + (y - x)), seed );
         cuDoubleComplex val = CUDA_zlaran( &ran );
-        A[x + y * lda] = cudaConj( val );
+        A[x + y * lda] = cuConj( val );
     }
 }
 
@@ -129,7 +126,7 @@ void cuda_zplghe_upper_kernel( int m, int n, cuDoubleComplex *A, int lda,
     unsigned long long int ran = CUDA_rnd64_jump( NBELEM * jump, seed );
 
     cuDoubleComplex val = CUDA_zlaran( &ran );
-    A[x + y * lda] = cudaConj( val );
+    A[x + y * lda] = cuConj( val );
 }
 
 /**

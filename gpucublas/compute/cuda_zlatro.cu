@@ -17,14 +17,6 @@
  */
 #include "gpucublas.h"
 
-#if defined( PRECISION_z )
-#define cudaConj( val ) cuConj( val )
-#elif defined( PRECISION_c )
-#define cudaConj( val ) cuConjf( val )
-#else
-#define cudaConj( val ) val
-#endif
-
 #define BLK_X 32
 #define BLK_Y 32
 
@@ -101,7 +93,7 @@ void CUDA_zlatro_upper_conjtrans( int m, int n,
 
     wA[ j + BLK_Y * i ] = A[ x + y*lda ];
     __syncthreads();
-    B[ y + ldb * x ] = cudaConj(wA[ j + BLK_Y * i ]);
+    B[ y + ldb * x ] = cuConj(wA[ j + BLK_Y * i ]);
 }
 
 __global__
@@ -126,7 +118,7 @@ void CUDA_zlatro_lower_conjtrans( int m, int n,
 
     wA[ j + BLK_Y * i ] = A[ x + y*lda ];
     __syncthreads();
-    B[ y + ldb * x ] = cudaConj(wA[ j + BLK_Y * i ]);
+    B[ y + ldb * x ] = cuConj(wA[ j + BLK_Y * i ]);
 }
 #endif
 
