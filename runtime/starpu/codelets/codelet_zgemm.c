@@ -110,19 +110,10 @@ cl_zgemm_hip_func( void *descr[], void *cl_arg )
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileC->format & CHAMELEON_TILE_FULLRANK );
-
-    HIP_zgemm(
-        clargs->transA, clargs->transB,
-        clargs->m, clargs->n, clargs->k,
-        (hipDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        (hipDoubleComplex*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    THIP_zgemm( clargs->transA, clargs->transB,
+                clargs->m, clargs->n, clargs->k,
+                (hipDoubleComplex *)&(clargs->alpha), tileA, tileB,
+                (hipDoubleComplex *)&(clargs->beta),  tileC, handle );
 
     return;
 }

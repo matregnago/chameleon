@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -60,19 +60,10 @@ cl_hgemm_hip_func( void *descr[], void *cl_arg )
     tileB = cti_interface_get(descr[1]);
     tileC = cti_interface_get(descr[2]);
 
-    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileB->format & CHAMELEON_TILE_FULLRANK );
-    assert( tileC->format & CHAMELEON_TILE_FULLRANK );
-
-    HIP_hgemm(
-        clargs->transA, clargs->transB,
-        clargs->m, clargs->n, clargs->k,
-        (CHAMELEON_Real16_t*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        tileB->mat, tileB->ld,
-        (CHAMELEON_Real16_t*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    THIP_hgemm( clargs->transA, clargs->transB,
+                clargs->m, clargs->n, clargs->k,
+                (CHAMELEON_Real16_t *)&(clargs->alpha), tileA, tileB,
+                (CHAMELEON_Real16_t *)&(clargs->beta),  tileC, handle );
 
     return;
 }

@@ -105,13 +105,9 @@ cl_zherk_hip_func(void *descr[], void *cl_arg)
     tileA = cti_interface_get(descr[0]);
     tileC = cti_interface_get(descr[1]);
 
-    HIP_zherk(
-        clargs->uplo, clargs->trans, clargs->n, clargs->k,
-        &(clargs->alpha),
-        tileA->mat, tileA->ld,
-        &(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    THIP_zherk( clargs->uplo, clargs->trans, clargs->n, clargs->k,
+                &(clargs->alpha), tileA,
+                &(clargs->beta),  tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

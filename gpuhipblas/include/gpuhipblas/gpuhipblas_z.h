@@ -15,6 +15,7 @@
  * @author Florent Pruvost
  * @author Mathieu Faverge
  * @author Loris Lucido
+ * @author Brieuc Nicolas
  * @date 2024-02-18
  * @precisions normal z -> c d s
  *
@@ -25,10 +26,13 @@
 /**
  *  Declarations of hip kernels - alphabetical order
  */
+int HIP_zgeadd( cham_trans_t trans, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *beta, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
 int HIP_zgemm(  cham_trans_t transa, cham_trans_t transb, int m, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
+#if defined(PRECISION_z) || defined(PRECISION_c)
 int HIP_zhemm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
 int HIP_zher2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const double *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
 int HIP_zherk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const double *alpha, const hipDoubleComplex *A, int lda, const double *beta, hipDoubleComplex *B, int ldb, hipblasHandle_t handle );
+#endif
 int HIP_zsymm(  cham_side_t side, cham_uplo_t uplo, int m, int n, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
 int HIP_zsyr2k( cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *B, int ldb, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );
 int HIP_zsyrk(  cham_uplo_t uplo, cham_trans_t trans, int n, int k, const hipDoubleComplex *alpha, const hipDoubleComplex *A, int lda, const hipDoubleComplex *beta, hipDoubleComplex *C, int ldc, hipblasHandle_t handle );

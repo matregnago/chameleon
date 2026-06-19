@@ -15,10 +15,54 @@
  * @author Mathieu Faverge
  * @author Loris Lucido
  * @author Florent Pruvost
+ * @author Brieuc Nicolas
  * @date 2024-02-18
  *
  */
 #include "gpuhipblas.h"
+#include <stdarg.h>
+#include <stdlib.h>
+#include "chameleon/getenv.h"
+
+int _gpuhipblas_silent = 0;
+
+__attribute__((unused)) __attribute__((constructor)) static void
+__gpuhipblas_lib_init()
+{
+    _gpuhipblas_silent = chameleon_getenv_get_value_int( "CHAMELEON_GPUHIPBLAS_SILENT", _gpuhipblas_silent );
+}
+
+#if defined(CHAMELEON_KERNELS_TRACE)
+void __gpuhipblas_kernel_trace( const char *func, ... )
+{
+    char output[1024];
+    int first = 1;
+    int size = 0;
+    int len = 1024;
+    va_list va_list;
+    const CHAM_tile_t *tile;
+
+    if (_gpuhipblas_silent) {
+        return;
+    }
+
+    size += snprintf( output, len, "[gpuhipblas] Execute %s(", func );
+
+    va_start( va_list, func );
+    while((tile = va_arg(va_list, const CHAM_tile_t*)) != 0) {
+        size += snprintf( output+size, len-size, "%s%s",
+                          first ? "" : ", ",
+                          tile->name );
+        size += snprintf( output+size, len-size, " / %p",
+                          CHAM_tile_get_ptr( tile ) );
+        first = 0;
+    }
+    va_end( va_list );
+
+    fprintf( stderr, "%s)\n", output );
+    fflush(stderr);
+}
+#endif
 
 /**
  *  LAPACK Constants

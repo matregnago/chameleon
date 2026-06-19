@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -68,12 +68,42 @@ cl_zgersum_redux_cuda_func( void *descr[], void *cl_arg )
     return;
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zgersum_redux_hip_func( void *descr[], void *cl_arg )
+{
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    hipDoubleComplex zone  = make_hipDoubleComplex(1.0, 0.0);
+#else
+    double zone  = 1.0;
+#endif /* defined(PRECISION_z) || defined(PRECISION_c) */
+    hipblasHandle_t handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t    *tileA;
+    CHAM_tile_t    *tileB;
+
+    tileA = cti_interface_get(descr[0]);
+    tileB = cti_interface_get(descr[1]);
+
+    assert( tileA->m == tileB->m );
+    assert( tileA->n == tileB->n );
+
+    THIP_zgeadd( ChamNoTrans, tileA->m, tileA->n, &zone, tileB, &zone, tileA, handle );
+
+    (void)cl_arg;
+    return;
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP)
+CODELETS_GPU( zgersum_redux, cl_zgersum_redux_cpu_func, cl_zgersum_redux_hip_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zgersum_redux, cl_zgersum_redux_cpu_func, cl_zgersum_redux_cuda_func, STARPU_CUDA_ASYNC )
+#endif
 
 #if !defined(CHAMELEON_SIMULATION)
 static void
@@ -92,25 +122,50 @@ cl_zgersum_init_cpu_func( void *descr[], void *cl_arg )
 static void
 cl_zgersum_init_cuda_func( void *descr[], void *cl_arg )
 {
-    CHAM_tile_t *tileA;
-    cublasStatus_t rc;
+    cublasHandle_t  handle = starpu_cublas_get_local_handle();
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    cuDoubleComplex zzero = make_cuDoubleComplex(0.0, 0.0);
+#else
+    double          zzero = 0.0;
+#endif /* defined(PRECISION_z) || defined(PRECISION_c) */
+    CHAM_tile_t    *tileA;
 
     tileA = cti_interface_get(descr[0]);
 
-    rc = cudaMemset2D( tileA->mat, sizeof(CHAMELEON_Complex64_t) * tileA->ld, 0,
+    TCUDA_zlaset( ChamUpperLower, tileA->m, tileA->n,
+                  &zzero, &zzero,
+                  tileA, handle );
+    (void)cl_arg;
+}
+#endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zgersum_init_hip_func( void *descr[], void *cl_arg )
+{
+    CHAM_tile_t *tileA;
+    hipError_t rc;
+
+    tileA = cti_interface_get(descr[0]);
+
+    rc = hipMemset2D( tileA->mat, sizeof(CHAMELEON_Complex64_t) * tileA->ld, 0,
                        sizeof(CHAMELEON_Complex64_t) * tileA->m, tileA->n );
-    assert( rc == CUBLAS_STATUS_SUCCESS );
+    assert( rc == hipSuccess );
 
     (void)cl_arg;
     (void)rc;
 }
-#endif /* defined(CHAMELEON_USE_CUDA) */
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP)
+CODELETS_GPU( zgersum_init, cl_zgersum_init_cpu_func, cl_zgersum_init_hip_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zgersum_init, cl_zgersum_init_cpu_func, cl_zgersum_init_cuda_func, STARPU_CUDA_ASYNC )
+#endif
 
 void
 RUNTIME_zgersum_set_methods( const CHAM_desc_t *A, int Am, int An )

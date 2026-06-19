@@ -106,13 +106,9 @@ cl_zsyrk_hip_func(void *descr[], void *cl_arg)
     tileA = cti_interface_get(descr[0]);
     tileC = cti_interface_get(descr[1]);
 
-    HIP_zsyrk(
-        clargs->uplo, clargs->trans, clargs->n, clargs->k,
-        (hipDoubleComplex*)&(clargs->alpha),
-        tileA->mat, tileA->ld,
-        (hipDoubleComplex*)&(clargs->beta),
-        tileC->mat, tileC->ld,
-        handle );
+    THIP_zsyrk( clargs->uplo, clargs->trans, clargs->n, clargs->k,
+                (hipDoubleComplex *)&(clargs->alpha), tileA,
+                (hipDoubleComplex *)&(clargs->beta),  tileC, handle );
 }
 #endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
