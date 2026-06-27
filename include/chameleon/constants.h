@@ -301,6 +301,16 @@ typedef enum chameleon_gemm_e {
 } cham_gemm_t;
 
 /**
+ * @brief Chameleon TRTRI algorithm variants
+ */
+typedef enum chameleon_trtri_e {
+    ChamTrtriAuto     = -1,
+    ChamTrtriVariant1 =  1,
+    ChamTrtriVariant2 =  2,
+    ChamTrtriVariant3 =  3,
+} cham_trtri_t;
+
+/**
  * @brief Chameleon GETRF algorithm variants
  */
 typedef enum chameleon_getrf_e {
