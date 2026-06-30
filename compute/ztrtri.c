@@ -299,7 +299,7 @@ int CHAMELEON_ztrtri_Tile_Async( cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t
      if (chameleon_max(N, 0) == 0)
      return CHAMELEON_SUCCESS;
      */
-    chameleon_pztrtri( uplo, diag, A, sequence, request );
+    chameleon_pztrtri( ChamTrtriAuto, uplo, diag, A, sequence, request );
 
     return CHAMELEON_SUCCESS;
 }

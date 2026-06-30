@@ -327,7 +327,7 @@ int CHAMELEON_zpoinv_Tile_Async( cham_uplo_t uplo, CHAM_desc_t *A,
         CHAMELEON_Desc_Change_Distribution_Async( uplo, A, chameleon_getrankof_custom, trtri_custom_get_rankof_arg, sequence );
     }
 
-    chameleon_pztrtri( uplo, ChamNonUnit, A, sequence, request );
+    chameleon_pztrtri( ChamTrtriAuto, uplo, ChamNonUnit, A, sequence, request );
 
     if ( change_distribution_for_trtri ) {
         CHAMELEON_Desc_Change_Distribution_Async( uplo, A, original_get_rankof, original_get_rankof_arg, sequence );

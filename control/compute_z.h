@@ -281,7 +281,7 @@ void chameleon_pztrsmpl(CHAM_desc_t *A, CHAM_desc_t *B, CHAM_desc_t *L, int *IPI
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pztrsmrv(cham_side_t side, cham_uplo_t uplo, cham_trans_t transA, cham_diag_t diag, CHAMELEON_Complex64_t alpha, CHAM_desc_t *A, CHAM_desc_t *W,
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
-void chameleon_pztrtri(cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
+void chameleon_pztrtri(cham_trtri_t variant, cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzungbr(cham_side_t side, CHAM_desc_t *A, CHAM_desc_t *O, CHAM_desc_t *T,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);

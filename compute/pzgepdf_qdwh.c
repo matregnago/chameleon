@@ -282,7 +282,7 @@ chameleon_pzgeqdwh_condest_qr( CHAM_context_t *chamctxt,
     /* Copy the R part */
     upperA = chameleon_desc_submatrix( A, 0, 0, A->n, A->n );
     chameleon_pzlacpy( ChamUpper, upperA, W, sequence, request );
-    chameleon_pztrtri( ChamUpper, ChamNonUnit, W, sequence, request );
+    chameleon_pztrtri( ChamTrtriAuto, ChamUpper, ChamNonUnit, W, sequence, request );
     chameleon_pzlange_generic( ChamOneNorm, ChamUpper, ChamNonUnit,
                                W, &Ainvnorm, sequence, request );
 

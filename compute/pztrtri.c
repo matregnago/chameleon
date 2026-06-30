@@ -387,12 +387,12 @@ chameleon_pztrtri_v3( CHAM_context_t *chamctxt, cham_uplo_t uplo, cham_diag_t di
  *  Parallel tile triangular matrix inverse wrapper.
  */
 void
-chameleon_pztrtri( cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
+chameleon_pztrtri( cham_trtri_t variant, cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
                    RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
 {
     CHAM_context_t   *chamctxt;
     RUNTIME_option_t  options;
-    cham_trtri_t      alg = ChamTrtriVariant3;
+    cham_trtri_t      alg = variant;
     char             *algostr;
 
     chamctxt = chameleon_context_self();
@@ -400,31 +400,36 @@ chameleon_pztrtri( cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
         return;
     }
 
-    algostr = chameleon_getenv( "CHAMELEON_TRTRI_ALGO" );
-    if ( algostr ) {
-        if ( strcasecmp( algostr, "1" ) == 0 ||
-             strcasecmp( algostr, "v1" ) == 0 ||
-             strcasecmp( algostr, "variant1" ) == 0 )
-        {
-            alg = ChamTrtriVariant1;
+    if ( alg == ChamTrtriAuto ) {
+        /* Set to the default value */
+        alg = ChamTrtriVariant3;
+
+        algostr = chameleon_getenv( "CHAMELEON_TRTRI_ALGO" );
+        if ( algostr ) {
+            if ( strcasecmp( algostr, "1" ) == 0 ||
+                 strcasecmp( algostr, "v1" ) == 0 ||
+                 strcasecmp( algostr, "variant1" ) == 0 )
+            {
+                alg = ChamTrtriVariant1;
+            }
+            else if ( strcasecmp( algostr, "2" ) == 0 ||
+                      strcasecmp( algostr, "v2" ) == 0 ||
+                      strcasecmp( algostr, "variant2" ) == 0 )
+            {
+                alg = ChamTrtriVariant2;
+            }
+            else if ( strcasecmp( algostr, "3" ) == 0 ||
+                      strcasecmp( algostr, "v3" ) == 0 ||
+                      strcasecmp( algostr, "variant3" ) == 0 )
+            {
+                alg = ChamTrtriVariant3;
+            }
+            else {
+                fprintf( stderr, "ERROR: CHAMELEON_TRTRI_ALGO is not one of 1, 2, 3, V1, V2, V3, VARIANT1, VARIANT2, VARIANT3 => Switch back to Variant 3\n" );
+            }
         }
-        else if ( strcasecmp( algostr, "2" ) == 0 ||
-                  strcasecmp( algostr, "v2" ) == 0 ||
-                  strcasecmp( algostr, "variant2" ) == 0 )
-        {
-            alg = ChamTrtriVariant2;
-        }
-        else if ( strcasecmp( algostr, "3" ) == 0 ||
-                  strcasecmp( algostr, "v3" ) == 0 ||
-                  strcasecmp( algostr, "variant3" ) == 0 )
-        {
-            alg = ChamTrtriVariant3;
-        }
-        else {
-            fprintf( stderr, "ERROR: CHAMELEON_TRTRI_ALGO is not one of 1, 2, 3, V1, V2, V3, VARIANT1, VARIANT2, VARIANT3 => Switch back to Variant 3\n" );
-        }
+        chameleon_cleanenv( algostr );
     }
-    chameleon_cleanenv( algostr );
 
     RUNTIME_options_init( &options, chamctxt, sequence, request );
 
