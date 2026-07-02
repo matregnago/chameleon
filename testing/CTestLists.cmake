@@ -130,8 +130,22 @@ if (NOT CHAMELEON_SIMULATION)
           endif()
           if( ${cat} STREQUAL "ooc" )
             set_tests_properties( test_${cat}_${prec}${test}
-                PROPERTIES ENVIRONMENT "STARPU_DISK_SWAP=/tmp;STARPU_DISK_SWAP_BACKEND=unistd;STARPU_LIMIT_CPU_MEM=1" )
+              PROPERTIES ENVIRONMENT "STARPU_DISK_SWAP=/tmp;STARPU_DISK_SWAP_BACKEND=unistd;STARPU_LIMIT_CPU_MEM=1" )
           endif()
+        endforeach()
+
+        set( trtri_test_cmd ${FULLPREFIX} -P ${NP} -f input/trtri.in )
+        foreach( trtri_variant 1 2 3 )
+          set( trtri_test_name test_${cat}_${prec}trtri_v${trtri_variant} )
+          add_test( ${trtri_test_name} ${trtri_test_cmd} )
+
+          set( trtri_env "CHAMELEON_TRTRI_ALGO=${trtri_variant}" )
+          if( ${cat} STREQUAL "ooc" )
+            set( trtri_env "${trtri_env};STARPU_DISK_SWAP=/tmp;STARPU_DISK_SWAP_BACKEND=unistd;STARPU_LIMIT_CPU_MEM=1" )
+          endif()
+
+          set_tests_properties( ${trtri_test_name}
+            PROPERTIES ENVIRONMENT "${trtri_env}" )
         endforeach()
 
         if ( CHAMELEON_SCHED_STARPU )

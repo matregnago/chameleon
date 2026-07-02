@@ -319,7 +319,7 @@ int CHAMELEON_zpotrimm_Tile_Async( cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t
      */
     chameleon_pzpotrimm( uplo, A, B, C, sequence, request );
     /*
-     chameleon_pztrtri( uplo, ChamNonUnit, A, sequence, request );
+     chameleon_pztrtri( ChamTrtriAuto, uplo, ChamNonUnit, A, sequence, request );
      chameleon_pzlauum( uplo, A, sequence, request );
      */
 

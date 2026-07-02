@@ -280,7 +280,7 @@ int CHAMELEON_zpotri_Tile_Async( cham_uplo_t uplo, CHAM_desc_t *A,
      */
     flush = request->flush;
     request->flush = CHAMELEON_FALSE;
-    chameleon_pztrtri( uplo, ChamNonUnit, A, sequence, request );
+    chameleon_pztrtri( ChamTrtriAuto, uplo, ChamNonUnit, A, sequence, request );
 
     request->flush = flush;
     chameleon_pzlauum( uplo, A, sequence, request );

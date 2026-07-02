@@ -47,7 +47,7 @@ cl_ztrtri_rectask_func( struct starpu_task *t, void *_args )
 
     starpu_cham_rectask_initrequest( t, &request );
 
-    chameleon_pztrtri( clargs->uplo, clargs->diag, rtargs->tiles[0]->mat,
+    chameleon_pztrtri( ChamTrtriAuto, clargs->uplo, clargs->diag, rtargs->tiles[0]->mat,
                        rtargs->sequence, &request );
 
     free( rtargs );
