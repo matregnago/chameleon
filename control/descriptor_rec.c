@@ -148,6 +148,11 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
             }
 
             tile   = desc->get_blktile( desc, m, n );
+            /* Recursive children describe storage owned by this rank only. */
+            if ( tile->rank != desc->myrank ) {
+                continue;
+            }
+
             tempmm = desc->get_blkdim( desc, m, DIM_m, desc->m );
             tempnn = desc->get_blkdim( desc, n, DIM_n, desc->n );
 
@@ -158,7 +163,7 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                                            rec, rarg, mb, nb,
                                            tile->ld, tempnn, /* Abuse as ln is not used */
                                            tempmm, tempnn,
-                                           1, 1,             /* can recurse only on local data */
+                                           1, 1,
                                            i, j,             /* Used when rec = diag */
                                            chameleon_getaddr_cm, chameleon_getblkldd_cm,
                                            NULL, NULL );
