@@ -127,6 +127,7 @@ void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, 
 int  chameleon_desc_init_storage( const CHAM_context_t *chamctxt, CHAM_desc_t *desc, void *mat );
 void chameleon_desc_register( CHAM_desc_t *desc );
 void chameleon_desc_register_with_offset( CHAM_desc_t *desc );
+int  chameleon_desc_create_recursive( CHAM_desc_t **desc, const CHAM_desc_create_t *args );
 
 static inline int
 chameleon_desc_init_2dtile( const CHAM_context_t *chamctxt,

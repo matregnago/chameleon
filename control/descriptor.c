@@ -820,8 +820,7 @@ int CHAMELEON_Desc_CreateEx( CHAM_desc_t **descptr, const CHAM_desc_create_t *ar
     }
 
     if ( args->recursive != NULL ) {
-        chameleon_error( "CHAMELEON_Desc_CreateEx", "recursive descriptors are not handled by this creation path yet" );
-        return CHAMELEON_ERR_NOT_SUPPORTED;
+        return chameleon_desc_create_recursive( descptr, args );
     }
 
     layout    = &(args->layout);
