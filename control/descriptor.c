@@ -743,6 +743,144 @@ int CHAMELEON_Desc_Create( CHAM_desc_t **descptr, void *mat, cham_flttype_t dtyp
 }
 
 /**
+ ******************************************************************************
+ *
+ * @ingroup Descriptor
+ *
+ * @brief Create a tiled matrix descriptor from structured creation
+ * parameters.
+ *
+ * This interface groups matrix layout, storage, data distribution, and
+ * optional recursive tiling parameters in a CHAM_desc_create_t structure.
+ * It is intended for descriptor configurations that would otherwise require
+ * extending the positional argument list of the legacy creation functions.
+ *
+ * When @p args->recursive is NULL, a classic tiled descriptor is created.
+ * Otherwise, creation is delegated to the recursive descriptor path using
+ * the parameters in @p args->recursive.
+ *
+ * The matrix layout is described by @p args->layout. The @c i and @c j fields
+ * are reserved for future submatrix support and must currently be zero.
+ *
+ * Storage is described by @p args->storage. Its @c mat field may be a
+ * user-provided matrix pointer or one of the CHAMELEON allocation modes.
+ * NULL callbacks select the standard address, leading-dimension, and rank
+ * functions where applicable.
+ *
+ * @p args->data_dist describes the process grid and data distribution. A NULL
+ * value selects a local 1-by-1 distribution. Currently, only the 2D
+ * block-cyclic distribution is supported.
+ *
+ ******************************************************************************
+ *
+ * @param[out] descptr
+ *          On success, descriptor of the matrix. The descriptor must
+ *          eventually be released with CHAMELEON_Desc_Destroy().
+ *
+ * @param[in] args
+ *          Descriptor creation parameters. The structure and all referenced
+ *          arrays must remain valid for the duration of this call. When a
+ *          custom rank callback uses @c storage.get_rankof_arg, that argument
+ *          must remain valid for the lifetime of the descriptor.
+ *
+ ******************************************************************************
+ *
+ * @retval CHAMELEON_SUCCESS
+ *          Descriptor successfully created.
+ * @retval CHAMELEON_ERR_NOT_INITIALIZED
+ *          CHAMELEON has not been initialized.
+ * @retval CHAMELEON_ERR_ILLEGAL_VALUE
+ *          @p descptr, @p args, or one of the descriptor parameters is
+ *          invalid.
+ * @retval CHAMELEON_ERR_NOT_SUPPORTED
+ *          The requested data distribution, storage mode, or recursive
+ *          configuration is not supported.
+ * @retval CHAMELEON_ERR_OUT_OF_RESOURCES
+ *          Memory allocation failed.
+ *
+ */
+int CHAMELEON_Desc_CreateEx( CHAM_desc_t **descptr, const CHAM_desc_create_t *args )
+{
+    CHAM_context_t *chamctxt;
+    CHAM_desc_t *desc = NULL;
+    const CHAM_desc_layout_t  *layout;
+    const CHAM_desc_storage_t *storage;
+    const cham_data_dist_t    *data_dist;
+    cham_data_dist_t           default_dist = {
+        .get_distrib = (datadist_access_fct_t)chameleon_get_2d_block_cyclic,
+        .distrib_array_size = 2,
+        .distrib = { 1, 1 }
+    };
+    int status;
+    int p, q;
+
+    if ( ( descptr == NULL ) || ( args == NULL ) ) {
+        chameleon_error( "CHAMELEON_Desc_CreateEx", "invalid descriptor creation arguments" );
+        return CHAMELEON_ERR_ILLEGAL_VALUE;
+    }
+
+    if ( args->recursive != NULL ) {
+        chameleon_error( "CHAMELEON_Desc_CreateEx", "recursive descriptors are not handled by this creation path yet" );
+        return CHAMELEON_ERR_NOT_SUPPORTED;
+    }
+
+    layout    = &(args->layout);
+    storage   = &(args->storage);
+    data_dist = args->data_dist ? args->data_dist : &default_dist;
+
+    assert( layout->i == 0 );
+    assert( layout->j == 0 );
+
+    chamctxt = chameleon_context_self();
+    if (chamctxt == NULL) {
+        chameleon_error("CHAMELEON_Desc_CreateEx", "CHAMELEON not initialized");
+        return CHAMELEON_ERR_NOT_INITIALIZED;
+    }
+
+    if ( ( data_dist->get_distrib != (datadist_access_fct_t)chameleon_get_2d_block_cyclic ) ||
+         ( data_dist->distrib_array_size < 2 ) )
+    {
+        chameleon_error( "CHAMELEON_Desc_CreateEx", "only 2D block-cyclic descriptor distributions are supported" );
+        return CHAMELEON_ERR_NOT_SUPPORTED;
+    }
+
+    p = data_dist->distrib[0];
+    q = data_dist->distrib[1];
+
+    /* Allocate memory and initialize the descriptor */
+    desc = (CHAM_desc_t*)malloc(sizeof(CHAM_desc_t));
+    if (desc == NULL) {
+        chameleon_error("CHAMELEON_Desc_CreateEx", "malloc() failed");
+        return CHAMELEON_ERR_OUT_OF_RESOURCES;
+    }
+
+    status = chameleon_desc_init( chamctxt, desc, args->name, storage->mat, layout->dtyp,
+                                  layout->mb, layout->nb,
+                                  layout->lm, layout->ln, layout->m, layout->n, p, q,
+                                  storage->get_blkaddr, storage->get_blkldd,
+                                  storage->get_rankof, storage->get_rankof_arg );
+    if (status != CHAMELEON_SUCCESS) {
+        if ( desc->name ) {
+            free( desc->name );
+        }
+        chameleon_desc_mat_free( desc );
+        free( desc );
+        return status;
+    }
+
+    status = chameleon_desc_check( desc );
+    if (status != CHAMELEON_SUCCESS) {
+        chameleon_error("CHAMELEON_Desc_CreateEx", "invalid descriptor");
+        CHAMELEON_Desc_Destroy( &desc );
+        return status;
+    }
+
+    *descptr = desc;
+
+    return CHAMELEON_SUCCESS;
+}
+
+/**
  *****************************************************************************
  *
  * @ingroup Descriptor
@@ -824,43 +962,40 @@ int CHAMELEON_Desc_Create_User( CHAM_desc_t **descptr, void *mat, cham_flttype_t
                                 blkrankof_fct_t get_rankof,
                                 void* get_rankof_arg )
 {
-    CHAM_context_t *chamctxt;
-    CHAM_desc_t *desc;
-    int status;
-
-    assert( i == 0 );
-    assert( j == 0 );
-
-    chamctxt = chameleon_context_self();
-    if (chamctxt == NULL) {
-        chameleon_error("CHAMELEON_Desc_Create_User", "CHAMELEON not initialized");
-        return CHAMELEON_ERR_NOT_INITIALIZED;
-    }
-
-    /* Allocate memory and initialize the descriptor */
-    desc = (CHAM_desc_t*)malloc(sizeof(CHAM_desc_t));
-    if (desc == NULL) {
-        chameleon_error("CHAMELEON_Desc_Create_User", "malloc() failed");
-        return CHAMELEON_ERR_OUT_OF_RESOURCES;
-    }
-
-    chameleon_desc_init( chamctxt, desc, NULL, mat, dtyp, mb, nb,
-                         lm, ln, m, n, p, q,
-                         get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
-
-    status = chameleon_desc_check( desc );
-    if (status != CHAMELEON_SUCCESS) {
-        chameleon_error("CHAMELEON_Desc_Create_User", "invalid descriptor");
-        CHAMELEON_Desc_Destroy( &desc );
-        return status;
-    }
-
-    *descptr = desc;
+    cham_data_dist_t dist = {
+        .get_distrib = (datadist_access_fct_t)chameleon_get_2d_block_cyclic,
+        .distrib_array_size = 2,
+        .distrib = { p, q }
+    };
+    CHAM_desc_create_t args = {
+        .name = NULL,
+        .layout = {
+            .dtyp = dtyp,
+            .mb = mb,
+            .nb = nb,
+            .lm = lm,
+            .ln = ln,
+            .i = i,
+            .j = j,
+            .m = m,
+            .n = n
+        },
+        .storage = {
+            .mat = mat,
+            .get_blkaddr = get_blkaddr,
+            .get_blkldd = get_blkldd,
+            .get_rankof = get_rankof,
+            .get_rankof_arg = get_rankof_arg
+        },
+        .data_dist = &dist,
+        .recursive = NULL
+    };
 
     (void)i;
     (void)j;
     (void)bsiz;
-    return CHAMELEON_SUCCESS;
+
+    return CHAMELEON_Desc_CreateEx( descptr, &args );
 }
 
 /**
