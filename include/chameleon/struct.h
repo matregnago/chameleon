@@ -153,21 +153,22 @@ typedef struct chameleon_desc_storage_s {
  * @brief User-provided recursive tiling parameters.
  */
 typedef struct chameleon_desc_recursion_s {
-    cham_rec_t kind;  /**> Recursive partitioning policy                                      */
-    int        arg;   /**> Policy-specific argument                                           */
-    const int *mbs;  /**> Zero-terminated list of row tile sizes for each recursive level    */
-    const int *nbs;  /**> Zero-terminated list of column tile sizes for each recursive level */
+    cham_rec_t kind;       /**> Recursive partitioning policy                                      */
+    int        arg;        /**> Policy-specific argument                                           */
+    const int *mbs;        /**> Zero-terminated list of row tile sizes for each recursive level    */
+    const int *nbs;        /**> Zero-terminated list of column tile sizes for each recursive level */
+    int        dist_level; /**> Level at which the descriptor data distribution applies            */
 } CHAM_desc_recursion_t;
 
 /**
  * @brief User-provided descriptor creation parameters.
  */
 typedef struct chameleon_desc_create_s {
-    const char                  *name;      /**> Name of the descriptor for debug purpose               */
-    CHAM_desc_layout_t           layout;    /**> Matrix layout parameters                               */
-    CHAM_desc_storage_t          storage;   /**> Matrix storage callbacks and pointer                   */
-    const cham_data_dist_t      *data_dist; /**> Data distribution parameters, or NULL for local data   */
-    const CHAM_desc_recursion_t *recursive; /**> Recursive tiling parameters, or NULL for classic tiles */
+    const char                  *name;      /**> Name of the descriptor for debug purpose                 */
+    CHAM_desc_layout_t           layout;    /**> Matrix layout parameters                                 */
+    CHAM_desc_storage_t          storage;   /**> Matrix storage callbacks and pointer                     */
+    const cham_data_dist_t      *data_dist; /**> Data distribution at recursive dist_level, or local data */
+    const CHAM_desc_recursion_t *recursive; /**> Recursive tiling parameters, or NULL for classic tiles   */
 } CHAM_desc_create_t;
 
 /**
