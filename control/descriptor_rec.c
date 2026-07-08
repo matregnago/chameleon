@@ -228,7 +228,8 @@ static int
 chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
                               const char *name, CHAM_desc_t *desc, void *mat, cham_flttype_t dtyp,
                               int mb, int nb, int lm, int ln, int m, int n, int p, int q,
-                              int dist_it, int dist_jt, int owner,
+                              int dist_it, int dist_jt, int dist_mstride, int dist_nstride,
+                              int owner,
                               blkaddr_fct_t get_blkaddr, blkldd_fct_t get_blkldd,
                               blkrankof_fct_t get_rankof, void* get_rankof_arg )
 {
@@ -256,6 +257,8 @@ chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
     }
     else {
         chameleon_desc_init_2d_distribution_with_offset( desc, p, q, dist_it, dist_jt );
+        desc->dist_mstride = dist_mstride;
+        desc->dist_nstride = dist_nstride;
 
         rc = chameleon_desc_init_storage( chamctxt, desc, mat );
         if ( rc != CHAMELEON_SUCCESS ) {
@@ -272,7 +275,8 @@ static int
 chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                           const char *name, CHAM_desc_t *desc, void *mat, cham_flttype_t dtyp,
                           cham_rec_t rec, int rarg, int *mb, int *nb,
-                          int lm, int ln, int m, int n, int p, int q, int i0, int j0, int owner,
+                          int lm, int ln, int m, int n, int p, int q,
+                          int level, int dist_level, int i0, int j0, int owner,
                           blkaddr_fct_t get_blkaddr, blkldd_fct_t get_blkldd,
                           blkrankof_fct_t get_rankof, void* get_rankof_arg )
 {
@@ -280,14 +284,25 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     CHAM_tile_t *tile;
     char        *subname;
     int          tempmm, tempnn;
+    int          child_p, child_q, child_owner;
+    int          dist_mstride, dist_nstride;
     int          rc, i, j, m, n;
 
     /* Let's make sure we have at least one couple (mb, nb) defined */
     assert( (mb[0] > 0) && (nb[0] > 0) );
 
+    dist_mstride = 1;
+    dist_nstride = 1;
+    if ( level < dist_level ) {
+        dist_mstride = mb[0] / mb[dist_level - level];
+        dist_nstride = nb[0] / nb[dist_level - level];
+    }
+
     /* Create the current layer descriptor */
     rc = chameleon_recdesc_init_level( chamctxt, name, desc, mat, dtyp, mb[0], nb[0],
-                                       lm, ln, m, n, p, q, i0, j0, owner,
+                                       lm, ln, m, n, p, q,
+                                       i0 * dist_mstride, j0 * dist_nstride,
+                                       dist_mstride, dist_nstride, owner,
                                        get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
     if ( rc != CHAMELEON_SUCCESS ) {
         return rc;
@@ -346,14 +361,26 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                 return CHAMELEON_ERR_OUT_OF_RESOURCES;
             }
 
+            if ( level < dist_level ) {
+                child_p     = p;
+                child_q     = q;
+                child_owner = -1;
+            }
+            else {
+                child_p     = 1;
+                child_q     = 1;
+                child_owner = tile->rank;
+            }
+
             rc = chameleon_recdesc_create( chamctxt, subname, tiledesc,
                                            ( tile->rank == desc->myrank ) ? tile->mat : NULL,
                                            desc->dtyp,
                                            rec, rarg, mb, nb,
                                            tile->ld, tempnn, /* Abuse as ln is not used */
                                            tempmm, tempnn,
-                                           1, 1,
-                                           i, j, tile->rank,
+                                           child_p, child_q,
+                                           level + 1, dist_level,
+                                           i, j, child_owner,
                                            chameleon_getaddr_cm, chameleon_getblkldd_cm,
                                            NULL, NULL );
             free( subname );
@@ -449,8 +476,9 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
     status = chameleon_recdesc_create( chamctxt, args->name, desc, storage->mat, layout->dtyp,
                                        recargs->kind, recargs->arg,
                                        (int*)recargs->mbs, (int*)recargs->nbs,
-                                       layout->lm, layout->ln, layout->m, layout->n,
-                                       p, q, 0, 0, CHAMELEON_RECDESC_OWNER_DISTRIBUTED,
+                                       layout->lm, layout->ln, layout->m, layout->n, p, q,
+                                       0, recargs->dist_level, 0, 0,
+                                       CHAMELEON_RECDESC_OWNER_DISTRIBUTED,
                                        storage->get_blkaddr, storage->get_blkldd,
                                        storage->get_rankof, storage->get_rankof_arg );
 
