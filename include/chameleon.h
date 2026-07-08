@@ -143,6 +143,9 @@ int CHAMELEON_Tile_to_Lapack( CHAM_desc_t *descA, void *A, int LDA ) __attribute
 /* Descriptor */
 ssize_t CHAMELEON_Element_Size( cham_flttype_t type );
 
+int CHAMELEON_Desc_CreateEx( CHAM_desc_t **desc,
+                             const CHAM_desc_create_t *args );
+
 int CHAMELEON_Desc_Create_User( CHAM_desc_t **desc, void *mat, cham_flttype_t dtyp, int mb, int nb, int bsiz,
                                 int lm, int ln, int i, int j, int m, int n, int p, int q,
                                 blkaddr_fct_t get_blkaddr, blkldd_fct_t get_blkldd,
