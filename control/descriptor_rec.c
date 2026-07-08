@@ -118,21 +118,35 @@ chameleon_recdesc_check_blocking( const int *mb, const int *nb )
 }
 
 /**
- * @brief Check recursive distribution level support.
+ * @brief Check that the distributed level exists in the recursive hierarchy.
  *
  * @param[in] recargs
  *          Recursive descriptor creation parameters.
  *
  * @retval CHAMELEON_SUCCESS on success.
+ * @retval CHAMELEON_ERR_ILLEGAL_VALUE if the requested distributed level does
+ *         not exist.
  * @retval CHAMELEON_ERR_NOT_SUPPORTED if the requested distributed level is not
  *         implemented yet.
  */
 static int
 chameleon_recdesc_check_dist_level( const CHAM_desc_recursion_t *recargs )
 {
+    int depth = 0;
+
     if ( recargs->dist_level < 0 ) {
         chameleon_error( "CHAMELEON_Desc_CreateEx",
                          "recursive distribution level must be non-negative" );
+        return CHAMELEON_ERR_ILLEGAL_VALUE;
+    }
+
+    while ( ( recargs->mbs[depth] > 0 ) && ( recargs->nbs[depth] > 0 ) ) {
+        depth++;
+    }
+
+    if ( recargs->dist_level >= depth ) {
+        chameleon_error( "CHAMELEON_Desc_CreateEx",
+                         "recursive distribution level exceeds the descriptor depth" );
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
@@ -356,6 +370,18 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     return CHAMELEON_SUCCESS;
 }
 
+/**
+ * @brief Create a recursive descriptor from the extended descriptor arguments.
+ *
+ * @retval CHAMELEON_SUCCESS on success.
+ * @retval CHAMELEON_ERR_ILLEGAL_VALUE if the recursive descriptor arguments
+ *         are invalid.
+ * @retval CHAMELEON_ERR_NOT_INITIALIZED if CHAMELEON is not initialized or the
+ *         selected runtime cannot support recursive descriptors.
+ * @retval CHAMELEON_ERR_NOT_SUPPORTED if the requested distributed recursive
+ *         storage mode is not supported yet.
+ * @retval CHAMELEON_ERR_OUT_OF_RESOURCES if descriptor allocation fails.
+ */
 int
 chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t *args )
 {
@@ -446,10 +472,11 @@ CHAMELEON_Recursive_Desc_Create( CHAM_desc_t **descptr, void *mat, cham_flttype_
         .distrib = { p, q }
     };
     CHAM_desc_recursion_t recargs = {
-        .kind = rec,
-        .arg = rarg,
-        .mbs = mb,
-        .nbs = nb
+        .kind       = rec,
+        .arg        = rarg,
+        .mbs        = mb,
+        .nbs        = nb,
+        .dist_level = 0
     };
     CHAM_desc_create_t args = {
         .name = name,
