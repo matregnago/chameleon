@@ -63,6 +63,16 @@ void RUNTIME_zdisplay_allprofile()
     profiling_display_zunmlq_info();
     profiling_display_zunmqr_info();
 
+            /* plrnt */
+    profiling_display_zplrnt_info();
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    profiling_display_zplghe_info();
+#endif
+    profiling_display_zplgsy_info();
+
+    /* auxiliary */
+    profiling_display_zlaset_info();
+    profiling_display_zlacpy_info();
     profiling_display_zlange_info();
     profiling_display_zlatro_info();
 }
@@ -109,6 +119,16 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
     case TASK_UNMLQ:        profiling_display_zunmlq_info();        break;
     case TASK_UNMQR:        profiling_display_zunmqr_info();        break;
 
+        /* plrnt */
+    case TASK_PLRNT:        profiling_display_zplrnt_info();        break;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    case TASK_PLGHE:        profiling_display_zplghe_info();        break;
+#endif
+    case TASK_PLGSY:        profiling_display_zplgsy_info();        break;
+
+    /* auxiliary */
+    case TASK_LASET:        profiling_display_zlaset_info();        break;
+    case TASK_LACPY:        profiling_display_zlacpy_info();        break;
     case TASK_LANGE:        profiling_display_zlange_info();        break;
     case TASK_LATRO:        profiling_display_zlatro_info();        break;
 
