@@ -218,8 +218,25 @@ struct chameleon_desc_s {
 
     /* Distributed case */
     cham_data_dist_t *data_dist; /**> data distribution type used to retrieve the distributed layout       */
+
+    /**
+     * Coordinates of this descriptor in the tile grid where data_dist
+     * applies. Tile (m, n) is mapped to the distributed coordinates:
+     *
+     *   (dist_it + m * dist_mstride, dist_jt + n * dist_nstride).
+     *
+     * Classic descriptors and descriptors at the distributed recursive
+     * level use unit strides. For a descriptor above that level, each stride
+     * is the number of distributed tiles covered by one of its tiles. The
+     * resulting coordinates identify its first distributed descendant,
+     * whose MPI owner also owns the parent recursive task. Descriptors below
+     * the distributed level are private to that owner and do not use these
+     * fields to redistribute their tiles.
+     */
     int dist_it;                 /**> global tile row corresponding to tile row 0 of this descriptor       */
     int dist_jt;                 /**> global tile column corresponding to tile column 0 of this descriptor */
+    int dist_mstride;            /**> stride between tile rows in the global data distribution             */
+    int dist_nstride;            /**> stride between tile columns in the global data distribution          */
     int llm;                     /**> local number of rows         of the full matrix - derived parameter  */
     int lln;                     /**> local number of columns      of the full matrix - derived parameter  */
     int llm1;                    /**> local number of tile rows    of the A11  matrix - derived parameter  */

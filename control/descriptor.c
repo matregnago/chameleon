@@ -80,7 +80,9 @@ void chameleon_desc_init_tiles_with_offset( CHAM_desc_t *desc, blkrankof_fct_t r
     tile = desc->tiles;
     for( jj=0; jj<desc->lnt; jj++ ) {
         for( ii=0; ii<desc->lmt; ii++, tile++ ) {
-            int rank = rankof( desc, dist_it + ii, dist_jt + jj );
+            int rank = rankof( desc,
+                               dist_it + ii * desc->dist_mstride,
+                               dist_jt + jj * desc->dist_nstride );
             tile->format  = CHAMELEON_TILE_FULLRANK;
             tile->flttype = flttype;
             tile->rank    = rank;
@@ -251,6 +253,8 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
     /* Global tile origin in the data distribution */
     desc->dist_it = 0;
     desc->dist_jt = 0;
+    desc->dist_mstride = 1;
+    desc->dist_nstride = 1;
 
     /* Matrix stride parameters */
     desc->lm = lm;
@@ -342,6 +346,8 @@ void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, 
 
     desc->dist_it = dist_it;
     desc->dist_jt = dist_jt;
+    desc->dist_mstride = 1;
+    desc->dist_nstride = 1;
 
     /* Local dimensions in tiles */
     if ( desc->myrank < (p*q) ) {
