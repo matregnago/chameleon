@@ -40,6 +40,33 @@
 
 static int nbdesc = 0;
 
+/**
+ * @brief Generate a default descriptor name for unnamed descriptors.
+ */
+static char *
+chameleon_desc_get_name( void )
+{
+    static int counter = 0;
+    char      *name    = malloc( sizeof(char) * 4 );
+    int        idx     = 0;
+
+    name[idx] = 'x';
+    idx++;
+
+    if ( counter > 26 ) {
+        name[idx] = 'A' + ( ( counter / 26 ) % 26 );
+        idx++;
+    }
+
+    name[idx] = 'A' + counter % 26;
+    idx++;
+
+    name[idx] = '\0';
+
+    counter++;
+    return name;
+}
+
 void chameleon_desc_init_tiles( CHAM_desc_t *desc, blkrankof_fct_t rankof )
 {
     CHAM_tile_t *tile;
@@ -171,7 +198,7 @@ int chameleon_desc_init( const CHAM_context_t *chamctxt,
         desc->name = strdup( name );
     }
     else {
-        desc->name = __chamdesc_get_name();
+        desc->name = chameleon_desc_get_name();
     }
 
     /* If one of the function get_* is NULL, we switch back to the default */
