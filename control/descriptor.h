@@ -43,32 +43,6 @@ extern "C" {
 #endif
 
 /**
- * Generate a automatic name startix by 'w' and then alphabetical order for non named matrices.
- */
-static inline char *
-__chamdesc_get_name() {
-    static int counter = 0;
-    char      *name    = malloc( sizeof(char) * 4 );
-    int        idx     = 0;
-
-    name[idx] = 'x';
-    idx++;
-
-    if ( counter > 26 ) {
-        name[idx] = 'A' + ( ( counter / 26 ) % 26 );
-        idx++;
-    }
-
-    name[idx] = 'A' + counter % 26;
-    idx++;
-
-    name[idx] = '\0';
-
-    counter++;
-    return name;
-}
-
-/**
  *
  */
 static inline int chameleon_desc_mat_alloc( CHAM_desc_t *desc )
