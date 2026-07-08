@@ -402,6 +402,8 @@ typedef enum chameleon_desc_acccess_e {
 #define CHAMELEON_MAT_ALLOC_GLOBAL NULL
 #define CHAMELEON_MAT_ALLOC_TILE   ((void*)-1)
 #define CHAMELEON_MAT_OOC          ((void*)-2)
+#define CHAMELEON_MAT_IS_RUNTIME_ALLOC(_mat_) \
+    ( ((_mat_) == CHAMELEON_MAT_ALLOC_TILE) || ((_mat_) == CHAMELEON_MAT_OOC) )
 
 /**
  * @brief Integer constant matching the previous ones for case values

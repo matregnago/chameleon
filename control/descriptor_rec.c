@@ -126,8 +126,6 @@ chameleon_recdesc_check_blocking( const int *mb, const int *nb )
  * @retval CHAMELEON_SUCCESS on success.
  * @retval CHAMELEON_ERR_ILLEGAL_VALUE if the requested distributed level does
  *         not exist.
- * @retval CHAMELEON_ERR_NOT_SUPPORTED if the requested distributed level is not
- *         implemented yet.
  */
 static int
 chameleon_recdesc_check_dist_level( const CHAM_desc_recursion_t *recargs )
@@ -148,12 +146,6 @@ chameleon_recdesc_check_dist_level( const CHAM_desc_recursion_t *recargs )
         chameleon_error( "CHAMELEON_Desc_CreateEx",
                          "recursive distribution level exceeds the descriptor depth" );
         return CHAMELEON_ERR_ILLEGAL_VALUE;
-    }
-
-    if ( recargs->dist_level != 0 ) {
-        chameleon_error( "CHAMELEON_Desc_CreateEx",
-                         "recursive distribution below the first level is not supported yet" );
-        return CHAMELEON_ERR_NOT_SUPPORTED;
     }
 
     return CHAMELEON_SUCCESS;
@@ -218,6 +210,26 @@ chameleon_recdesc_init_single_owner_level( CHAM_desc_t *desc, void *mat, int own
 }
 
 /**
+ * @brief Initialize a hierarchy-only descriptor level without physical data.
+ *
+ * Levels above the distributed level describe recursive task decomposition.
+ * Their tiles are parent handles whose storage is provided by their children.
+ *
+ * @param[inout] desc
+ *          Descriptor to initialize.
+ */
+static void
+chameleon_recdesc_init_hierarchy_storage( CHAM_desc_t *desc )
+{
+    desc->alloc_mat    = 0;
+    desc->use_mat      = 0;
+    desc->register_mat = 0;
+    desc->ooc          = 0;
+    desc->mat          = NULL;
+    desc->get_blkaddr  = chameleon_getaddr_null;
+}
+
+/**
  * @brief Initialize and register one level of a recursive descriptor.
  *
  * This mirrors chameleon_desc_init(), but keeps the distribution and tile-rank
@@ -229,7 +241,7 @@ chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
                               const char *name, CHAM_desc_t *desc, void *mat, cham_flttype_t dtyp,
                               int mb, int nb, int lm, int ln, int m, int n, int p, int q,
                               int dist_it, int dist_jt, int dist_mstride, int dist_nstride,
-                              int owner,
+                              int level, int dist_level, int owner,
                               blkaddr_fct_t get_blkaddr, blkldd_fct_t get_blkldd,
                               blkrankof_fct_t get_rankof, void* get_rankof_arg )
 {
@@ -260,9 +272,14 @@ chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
         desc->dist_mstride = dist_mstride;
         desc->dist_nstride = dist_nstride;
 
-        rc = chameleon_desc_init_storage( chamctxt, desc, mat );
-        if ( rc != CHAMELEON_SUCCESS ) {
-            return rc;
+        if ( level < dist_level ) {
+            chameleon_recdesc_init_hierarchy_storage( desc );
+        }
+        else {
+            rc = chameleon_desc_init_storage( chamctxt, desc, mat );
+            if ( rc != CHAMELEON_SUCCESS ) {
+                return rc;
+            }
         }
     }
 
@@ -283,6 +300,7 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     CHAM_desc_t *tiledesc;
     CHAM_tile_t *tile;
     char        *subname;
+    void        *child_mat;
     int          tempmm, tempnn;
     int          child_p, child_q, child_owner;
     int          dist_mstride, dist_nstride;
@@ -302,7 +320,8 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     rc = chameleon_recdesc_init_level( chamctxt, name, desc, mat, dtyp, mb[0], nb[0],
                                        lm, ln, m, n, p, q,
                                        i0 * dist_mstride, j0 * dist_nstride,
-                                       dist_mstride, dist_nstride, owner,
+                                       dist_mstride, dist_nstride,
+                                       level, dist_level, owner,
                                        get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
     if ( rc != CHAMELEON_SUCCESS ) {
         return rc;
@@ -372,9 +391,17 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                 child_owner = tile->rank;
             }
 
+            /*
+             * Hierarchy levels forward the requested allocation mode until it
+             * is applied at dist_level. Below that level, StarPU partition
+             * handles provide views into the parent tile.
+             */
+            child_mat = ( level < dist_level )
+                      ? mat
+                      : ( ( tile->rank == desc->myrank ) ? tile->mat : NULL );
+
             rc = chameleon_recdesc_create( chamctxt, subname, tiledesc,
-                                           ( tile->rank == desc->myrank ) ? tile->mat : NULL,
-                                           desc->dtyp,
+                                           child_mat, desc->dtyp,
                                            rec, rarg, mb, nb,
                                            tile->ld, tempnn, /* Abuse as ln is not used */
                                            tempmm, tempnn,
@@ -426,12 +453,6 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
     storage = &(args->storage);
     recargs = args->recursive;
 
-    /*
-     * The first layer must be allocated, otherwise we will give unitialized
-     * pointers to the lower layers
-     */
-    assert( (storage->mat != CHAMELEON_MAT_ALLOC_TILE) &&
-            (storage->mat != CHAMELEON_MAT_OOC) );
     assert( args->layout.i == 0 );
     assert( args->layout.j == 0 );
 
@@ -448,6 +469,14 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
     status = chameleon_recdesc_check_dist_level( recargs );
     if ( status != CHAMELEON_SUCCESS ) {
         return status;
+    }
+
+    if ( ( recargs->dist_level > 0 ) &&
+         !CHAMELEON_MAT_IS_RUNTIME_ALLOC( storage->mat ) )
+    {
+        chameleon_error( "CHAMELEON_Desc_CreateEx",
+                         "recursive distribution below level 0 requires tile or OOC allocation" );
+        return CHAMELEON_ERR_NOT_SUPPORTED;
     }
 
     status = chameleon_recdesc_get_2d_grid( args->data_dist, &p, &q );
