@@ -67,8 +67,8 @@ chameleon_desc_get_name( void )
     return name;
 }
 
-void chameleon_desc_init_tiles_with_rank_offset( CHAM_desc_t *desc, blkrankof_fct_t rankof,
-                                                 int rowtile0, int coltile0 )
+void chameleon_desc_init_tiles_with_offset( CHAM_desc_t *desc, blkrankof_fct_t rankof,
+                                            int dist_it, int dist_jt )
 {
     CHAM_tile_t *tile;
     int8_t flttype = cham_get_flttype( desc->dtyp );
@@ -80,7 +80,7 @@ void chameleon_desc_init_tiles_with_rank_offset( CHAM_desc_t *desc, blkrankof_fc
     tile = desc->tiles;
     for( jj=0; jj<desc->lnt; jj++ ) {
         for( ii=0; ii<desc->lmt; ii++, tile++ ) {
-            int rank = rankof( desc, rowtile0 + ii, coltile0 + jj );
+            int rank = rankof( desc, dist_it + ii, dist_jt + jj );
             tile->format  = CHAMELEON_TILE_FULLRANK;
             tile->flttype = flttype;
             tile->rank    = rank;
@@ -97,7 +97,7 @@ void chameleon_desc_init_tiles_with_rank_offset( CHAM_desc_t *desc, blkrankof_fc
 
 void chameleon_desc_init_tiles( CHAM_desc_t *desc, blkrankof_fct_t rankof )
 {
-    chameleon_desc_init_tiles_with_rank_offset( desc, rankof, 0, 0 );
+    chameleon_desc_init_tiles_with_offset( desc, rankof, 0, 0 );
 }
 
 /* Get access to data dist */
@@ -248,6 +248,10 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
     desc->m = m;
     desc->n = n;
 
+    /* Global tile origin in the data distribution */
+    desc->dist_it = 0;
+    desc->dist_jt = 0;
+
     /* Matrix stride parameters */
     desc->lm = lm;
     desc->ln = ln;
@@ -288,20 +292,22 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
  * @return Number of local tiles for that process coordinate.
  */
 static int
-chameleon_desc_count_2d_local_tiles( int nt, int p, int myp, int tile0 )
+chameleon_desc_count_local_tiles_1d( int nt, int p, int myp, int dist_it )
 {
     int shifted_myp;
 
     assert( p > 0 );
     assert( ( myp >= 0 ) && ( myp < p ) );
-    assert( tile0 >= 0 );
+    assert( dist_it >= 0 );
 
     if ( nt <= 0 ) {
         return 0;
     }
 
-    shifted_myp = ( myp - ( tile0 % p ) + p ) % p;
+    /* Shift p based on the index of the first tile at the distributed level */
+    shifted_myp = ( myp - ( dist_it % p ) + p ) % p;
 
+    /* Returns the local number of tiles while using cyclic distribution over p */
     return ( nt / p ) + ( ( nt % p ) > shifted_myp );
 }
 
@@ -318,14 +324,14 @@ chameleon_desc_count_2d_local_tiles( int nt, int p, int myp, int tile0 )
  * @param[in] q
  *          Number of process columns in the 2D block-cyclic distribution.
  *
- * @param[in] rowtile0
+ * @param[in] dist_it
  *          Global row tile index corresponding to local tile row 0.
  *
- * @param[in] coltile0
+ * @param[in] dist_jt
  *          Global column tile index corresponding to local tile column 0.
  */
 void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, int q,
-                                                     int rowtile0, int coltile0 )
+                                                      int dist_it, int dist_jt )
 {
     /* Grid size */
     cham_data_dist_t dist = {
@@ -334,16 +340,19 @@ void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, 
         .distrib = {p, q} };
     chameleon_desc_set_datadist( desc, &dist );
 
+    desc->dist_it = dist_it;
+    desc->dist_jt = dist_jt;
+
     /* Local dimensions in tiles */
     if ( desc->myrank < (p*q) ) {
         int myp = desc->myrank / q;
         int myq = desc->myrank % q;
-        int lastm = rowtile0 + desc->lmt - 1;
-        int lastn = coltile0 + desc->lnt - 1;
+        int lastm = desc->dist_it + desc->lmt - 1;
+        int lastn = desc->dist_jt + desc->lnt - 1;
 
         /* Compute the total number of local tiles */
-        desc->llmt = chameleon_desc_count_2d_local_tiles( desc->lmt, p, myp, rowtile0 );
-        desc->llnt = chameleon_desc_count_2d_local_tiles( desc->lnt, q, myq, coltile0 );
+        desc->llmt = chameleon_desc_count_local_tiles_1d( desc->lmt, p, myp, desc->dist_it );
+        desc->llnt = chameleon_desc_count_local_tiles_1d( desc->lnt, q, myq, desc->dist_jt );
         desc->llm1 = desc->llmt;
         desc->lln1 = desc->llnt;
 
@@ -455,15 +464,12 @@ int chameleon_desc_init_storage( const CHAM_context_t *chamctxt, CHAM_desc_t *de
  * @param[inout] desc
  *          Descriptor to register.
  *
- * @param[in] rowtile0
- *          Global row tile index corresponding to local tile row 0.
- *
- * @param[in] coltile0
- *          Global column tile index corresponding to local tile column 0.
+ * The global tile origin is taken from desc->dist_it and desc->dist_jt.
  */
-void chameleon_desc_register_with_rank_offset( CHAM_desc_t *desc, int rowtile0, int coltile0 )
+void chameleon_desc_register_with_offset( CHAM_desc_t *desc )
 {
-    chameleon_desc_init_tiles_with_rank_offset( desc, desc->get_rankof_init, rowtile0, coltile0 );
+    chameleon_desc_init_tiles_with_offset( desc, desc->get_rankof_init,
+                                           desc->dist_it, desc->dist_jt );
 
     /* Create runtime specific structure like registering data */
     RUNTIME_desc_create( desc );
@@ -471,7 +477,7 @@ void chameleon_desc_register_with_rank_offset( CHAM_desc_t *desc, int rowtile0, 
 
 void chameleon_desc_register( CHAM_desc_t *desc )
 {
-    chameleon_desc_register_with_rank_offset( desc, 0, 0 );
+    chameleon_desc_register_with_offset( desc );
 }
 
 /**
@@ -527,7 +533,11 @@ CHAM_desc_t* chameleon_desc_submatrix( CHAM_desc_t *descA, int i, int j, int m, 
     memcpy( descB, descA, sizeof(CHAM_desc_t) );
     mb = descA->mb;
     nb = descA->nb;
-    // Submatrix parameters
+    /*
+     * Submatrix parameters. dist_it and dist_jt are inherited from descA:
+     * this is a view into the parent's storage and runtime descriptor, not a
+     * new descriptor in the global data distribution.
+     */
     descB->i = descA->i + i;
     descB->j = descA->j + j;
     descB->m = m;

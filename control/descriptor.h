@@ -123,10 +123,10 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
 
 void chameleon_desc_init_2d_distribution( CHAM_desc_t *desc, int p, int q );
 void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, int q,
-                                                     int rowtile0, int coltile0 );
+                                                      int dist_it, int dist_jt );
 int  chameleon_desc_init_storage( const CHAM_context_t *chamctxt, CHAM_desc_t *desc, void *mat );
 void chameleon_desc_register( CHAM_desc_t *desc );
-void chameleon_desc_register_with_rank_offset( CHAM_desc_t *desc, int rowtile0, int coltile0 );
+void chameleon_desc_register_with_offset( CHAM_desc_t *desc );
 
 static inline int
 chameleon_desc_init_2dtile( const CHAM_context_t *chamctxt,

@@ -169,13 +169,15 @@ struct chameleon_desc_s {
     int lnt;          /**> number of tile columns of the entire matrix - derived parameter */
 
     /* Distributed case */
-    cham_data_dist_t *data_dist; /**> data distribution type used to retrieve the distributed layout      */
-    int llm;                     /**> local number of rows         of the full matrix - derived parameter */
-    int lln;                     /**> local number of columns      of the full matrix - derived parameter */
-    int llm1;                    /**> local number of tile rows    of the A11  matrix - derived parameter */
-    int lln1;                    /**> local number of tile columns of the A11  matrix - derived parameter */
-    int llmt;                    /**> local number of tile rows    of the full matrix - derived parameter */
-    int llnt;                    /**> local number of tile columns of the full matrix - derived parameter */
+    cham_data_dist_t *data_dist; /**> data distribution type used to retrieve the distributed layout       */
+    int dist_it;                 /**> global tile row corresponding to tile row 0 of this descriptor       */
+    int dist_jt;                 /**> global tile column corresponding to tile column 0 of this descriptor */
+    int llm;                     /**> local number of rows         of the full matrix - derived parameter  */
+    int lln;                     /**> local number of columns      of the full matrix - derived parameter  */
+    int llm1;                    /**> local number of tile rows    of the A11  matrix - derived parameter  */
+    int lln1;                    /**> local number of tile columns of the A11  matrix - derived parameter  */
+    int llmt;                    /**> local number of tile rows    of the full matrix - derived parameter  */
+    int llnt;                    /**> local number of tile columns of the full matrix - derived parameter  */
 
     int id;           /**> identification number of the descriptor                            */
     int occurences;   /**> identify main matrix desc (occurences=1) or                        */

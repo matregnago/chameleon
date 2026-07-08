@@ -32,7 +32,7 @@ static int
 chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
                               const char *name, CHAM_desc_t *desc, void *mat, cham_flttype_t dtyp,
                               int mb, int nb, int lm, int ln, int m, int n, int p, int q,
-                              int rowtile0, int coltile0,
+                              int dist_it, int dist_jt,
                               blkaddr_fct_t get_blkaddr, blkldd_fct_t get_blkldd,
                               blkrankof_fct_t get_rankof, void* get_rankof_arg )
 {
@@ -45,14 +45,14 @@ chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
         return rc;
     }
 
-    chameleon_desc_init_2d_distribution_with_offset( desc, p, q, rowtile0, coltile0 );
+    chameleon_desc_init_2d_distribution_with_offset( desc, p, q, dist_it, dist_jt );
 
     rc = chameleon_desc_init_storage( chamctxt, desc, mat );
     if ( rc != CHAMELEON_SUCCESS ) {
         return rc;
     }
 
-    chameleon_desc_register_with_rank_offset( desc, rowtile0, coltile0 );
+    chameleon_desc_register_with_offset( desc );
 
     return CHAMELEON_SUCCESS;
 }
