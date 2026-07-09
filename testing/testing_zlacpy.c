@@ -28,39 +28,6 @@
 #include <coreblas.h>
 #endif
 
-static cham_fixdbl_t
-flops_zlacpy( cham_uplo_t uplo, int _M, int _N )
-{
-    cham_fixdbl_t flops;
-    cham_fixdbl_t M = _M;
-    cham_fixdbl_t N = _N;
-
-    switch ( uplo ) {
-        case ChamUpper:
-            if ( N > M ) {
-                flops = ( M * ( M + 1 ) / 2 ) + M * ( N - M );
-            }
-            else {
-                flops = N * ( N + 1 ) / 2;
-            }
-            break;
-        case ChamLower:
-            if ( M > N ) {
-                flops = ( N * ( N + 1 ) / 2 ) + N * ( M - N );
-            }
-            else {
-                flops = M * ( M + 1 ) / 2;
-            }
-            break;
-        case ChamUpperLower:
-        default:
-            flops = M * N;
-    }
-    flops *= sizeof( CHAMELEON_Complex64_t );
-
-    return flops;
-}
-
 int
 testing_zlacpy_desc( run_arg_list_t *args, int check )
 {

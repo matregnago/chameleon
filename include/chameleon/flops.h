@@ -393,6 +393,40 @@ static inline double flops_cscal( double __m ) { double flops =  (6. * (double)(
 static inline double flops_dscal( double __m ) { double flops =  (     (double)(__m)); return flops; }
 static inline double flops_sscal( double __m ) { double flops =  (     (double)(__m)); return flops; }
 
+static inline double flops_lacpy_nbelt( cham_uplo_t __uplo, int __m, int __n )
+{
+    double flops;
+
+    switch ( __uplo ) {
+        case ChamUpper:
+            if ( __n > __m ) {
+                flops = ( __m * ( __m + 1 ) / 2 ) + __m * ( __n - __m );
+            }
+            else {
+                flops = __n * ( __n + 1 ) / 2;
+            }
+            break;
+        case ChamLower:
+            if ( __m > __n ) {
+                flops = ( __n * ( __n + 1 ) / 2 ) + __n * ( __m - __n );
+            }
+            else {
+                flops = __m * ( __m + 1 ) / 2;
+            }
+            break;
+        case ChamUpperLower:
+        default:
+            flops = __m * __n;
+    }
+    return flops;
+}
+
+/* sizeof( elt ) copies */
+static inline double flops_zlacpy( cham_uplo_t __uplo, int __m, int __n ) { return ( sizeof( CHAMELEON_Complex64_t ) * flops_lacpy_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_clacpy( cham_uplo_t __uplo, int __m, int __n ) { return ( sizeof( CHAMELEON_Complex32_t ) * flops_lacpy_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_dlacpy( cham_uplo_t __uplo, int __m, int __n ) { return ( sizeof( double ) * flops_lacpy_nbelt( __uplo, __m, __n ) ); }
+static inline double flops_slacpy( cham_uplo_t __uplo, int __m, int __n ) { return ( sizeof( float ) * flops_lacpy_nbelt( __uplo, __m, __n ) ); }
+
 /*
  * Norms
  */
