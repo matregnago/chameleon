@@ -580,6 +580,9 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
     int64_t               child_ind;
     int                   child_count;
     int                   owner;
+#if defined(CHAMELEON_USE_MPI)
+    int                   parent_owner = STARPU_MPI_MULTIPLE_NODE_WITHOUT_ME;
+#endif
 
     assert( child_desc != NULL );
 
@@ -605,6 +608,7 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 
 #if defined(CHAMELEON_USE_MPI)
         if ( owner == A->myrank ) {
+            parent_owner = STARPU_MPI_MULTIPLE_NODE_WITH_ME;
             starpu_subdata_ptr_register( *child_handle, STARPU_MAIN_RAM );
         }
         starpu_mpi_data_register( *child_handle, child_desc->mpitag + child_ind, owner );
@@ -614,7 +618,7 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 #if defined(CHAMELEON_USE_MPI)
     starpu_mpi_register_hierarchy( *ptrtile, child_count,
                                    (starpu_data_handle_t *)(child_desc->schedopt) );
-    starpu_mpi_data_register( *ptrtile, tag, STARPU_MPI_GUESS_WHO );
+    starpu_mpi_data_register( *ptrtile, tag, parent_owner );
 #else
     (void)tag;
 #endif
