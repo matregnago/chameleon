@@ -111,6 +111,119 @@ THIP_zherk( cham_uplo_t        uplo,
 #endif
 
 int
+THIP_zlacpy( cham_uplo_t        uplo,
+             int                M,
+             int                N,
+             const CHAM_tile_t *A,
+             CHAM_tile_t       *B,
+             hipblasHandle_t    handle )
+{
+    gpuhipblas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+    return 0;
+}
+
+int
+THIP_zlacpyx( cham_uplo_t        uplo,
+              int                M,
+              int                N,
+              int                displA,
+              const CHAM_tile_t *A,
+              int                LDA,
+              int                displB,
+              CHAM_tile_t       *B,
+              int                LDB,
+              hipblasHandle_t    handle )
+{
+    gpuhipblas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+
+    const hipDoubleComplex *Aptr = (const hipDoubleComplex *)A->mat;
+    hipDoubleComplex       *Bptr = (hipDoubleComplex *)B->mat;
+    return 0;
+}
+
+int
+THIP_zlaset( cham_uplo_t             uplo,
+             int                     m,
+             int                     n,
+             const hipDoubleComplex *alpha,
+             const hipDoubleComplex *beta,
+             CHAM_tile_t            *A,
+             hipblasHandle_t         handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return 0;
+}
+
+int
+THIP_zlatro( cham_uplo_t        uplo,
+             cham_trans_t       trans,
+             int                M,
+             int                N,
+             const CHAM_tile_t *A,
+             CHAM_tile_t       *B,
+             hipblasHandle_t    handle )
+{
+    gpuhipblas_kernel_trace( A, B );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    assert( B->format & CHAMELEON_TILE_FULLRANK );
+    return 0;
+}
+
+#if defined( PRECISION_z ) || defined( PRECISION_c )
+int
+THIP_zplghe( const double          *bump,
+             int                    m,
+             int                    n,
+             CHAM_tile_t           *A,
+             int                    bigM,
+             int                    m0,
+             int                    n0,
+             unsigned long long int seed,
+             hipblasHandle_t        handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return 0;
+}
+#endif
+
+int
+THIP_zplgsy( const hipDoubleComplex *bump,
+             int                     m,
+             int                     n,
+             CHAM_tile_t            *A,
+             int                     bigM,
+             int                     m0,
+             int                     n0,
+             unsigned long long int  seed,
+             hipblasHandle_t         handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return 0;
+}
+
+int
+THIP_zplrnt( int                    m,
+             int                    n,
+             CHAM_tile_t           *A,
+             int                    bigM,
+             int                    m0,
+             int                    n0,
+             unsigned long long int seed,
+             hipblasHandle_t        handle )
+{
+    gpuhipblas_kernel_trace( A );
+    assert( A->format & CHAMELEON_TILE_FULLRANK );
+    return 0;
+}
+
+int
 THIP_zsymm( cham_side_t             side,
             cham_uplo_t             uplo,
             int                     m,

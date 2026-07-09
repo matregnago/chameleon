@@ -183,14 +183,54 @@ cl_zlacpyx_cuda_func(void *descr[], void *cl_arg)
                    tileA, clargs->lda, clargs->displB, tileB, clargs->ldb, handle );
 }
 #endif /* !defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zlacpy_hip_func(void *descr[], void *cl_arg)
+{
+    struct cl_zlacpy_args_s *clargs = (struct cl_zlacpy_args_s *)cl_arg;
+    hipblasHandle_t          handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileB;
+
+    tileA = cti_interface_get(descr[0]);
+    tileB = cti_interface_get(descr[1]);
+
+    assert( clargs->displA == 0 );
+    assert( clargs->displB == 0 );
+
+    THIP_zlacpy( clargs->uplo, clargs->m, clargs->n, tileA, tileB, handle );
+}
+
+static void
+cl_zlacpyx_hip_func(void *descr[], void *cl_arg)
+{
+    struct cl_zlacpy_args_s *clargs = (struct cl_zlacpy_args_s *)cl_arg;
+    hipblasHandle_t          handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t *tileA;
+    CHAM_tile_t *tileB;
+
+    tileA = cti_interface_get(descr[0]);
+    tileB = cti_interface_get(descr[1]);
+
+    THIP_zlacpyx( clargs->uplo, clargs->m, clargs->n, clargs->displA,
+                  tileA, clargs->lda, clargs->displB, tileB, clargs->ldb, handle );
+}
+#endif /* !defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+ #if defined(CHAMELEON_USE_HIP)
+CODELETS_GPU( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_hip_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_hip_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_cuda_func, STARPU_CUDA_ASYNC )
 CODELETS( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_cuda_func, STARPU_CUDA_ASYNC )
 CODELETS( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARPU_CUDA_ASYNC )
+#endif
 
 static inline void
 insert_task_zlacpy_on_local_node( const RUNTIME_option_t *options,

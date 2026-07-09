@@ -42,6 +42,7 @@ precisions_rules_py(
 # --------------------------
 set(GPUHIPBLAS_HDRS
     gpuhipblas.h
+    gpuhipblas/gpuhipblas_random.h
     )
 
 # Add generated headers

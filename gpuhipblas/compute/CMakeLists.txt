@@ -43,6 +43,12 @@ set(ZSRC
     hip_zsyrk.c
     hip_ztrmm.c
     hip_ztrsm.c
+    hip_zlacpy.hip
+    hip_zlaset.hip
+    hip_zlatro.hip
+    hip_zplghe.hip
+    hip_zplgsy.hip
+    hip_zplrnt.hip
     )
 
 if ( CHAMELEON_NO_KERNELS )
