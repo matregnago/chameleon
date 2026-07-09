@@ -1,6 +1,6 @@
 /**
  *
- * @file hip_zplgsy.cpp
+ * @file hip_zplgsy.hip
  *
  * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
