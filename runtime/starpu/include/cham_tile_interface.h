@@ -44,6 +44,11 @@ void starpu_cham_tile_register( starpu_data_handle_t *handleptr,
                                 CHAM_tile_t          *tile,
                                 cham_flttype_t        flttype );
 
+void starpu_cham_tile_child_set( starpu_data_handle_t *handleptr,
+                                 int                   home_node,
+                                 CHAM_tile_t          *tile,
+                                 cham_flttype_t        flttype );
+
 int    cti_handle_get_m        ( starpu_data_handle_t handle );
 int    cti_handle_get_n        ( starpu_data_handle_t handle );
 size_t cti_handle_get_allocsize( starpu_data_handle_t handle );

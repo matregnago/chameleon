@@ -107,4 +107,25 @@ starpu_cham_rectask_initrequest( struct starpu_task *task,
     return;
 }
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static inline void
+chameleon_recursive_tile_filter( void                      *parent_interface,
+                                 void                      *child_interface,
+                                 struct starpu_data_filter *f,
+                                 unsigned                   id,
+                                 unsigned                   nchunks )
+{
+    starpu_cham_tile_interface_t *parent = (starpu_cham_tile_interface_t *)parent_interface;
+    starpu_cham_tile_interface_t *child  = (starpu_cham_tile_interface_t *)child_interface;
+
+    child->id         = parent->id;
+    child->dev_handle = parent->dev_handle;
+    child->flttype    = parent->flttype;
+
+    (void)f;
+    (void)id;
+    (void)nchunks;
+}
+#endif
+
 #endif /* _runtime_rectasks_h_ */

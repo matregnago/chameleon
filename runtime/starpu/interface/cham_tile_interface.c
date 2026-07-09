@@ -680,24 +680,89 @@ struct starpu_data_interface_ops starpu_interface_cham_tile_ops =
     .name                  = "STARPU_CHAM_TILE_INTERFACE"
 };
 
+static void
+starpu_cham_tile_interface_set( starpu_cham_tile_interface_t *cham_tile_interface,
+                                CHAM_tile_t                  *tile,
+                                cham_flttype_t                flttype )
+{
+    size_t elemsize = CHAMELEON_Element_Size( flttype );
+
+    cham_tile_interface->id         = STARPU_CHAM_TILE_INTERFACE_ID;
+    cham_tile_interface->flttype    = flttype;
+    cham_tile_interface->dev_handle = (intptr_t)(tile->mat);
+    cham_tile_interface->allocsize  = -1;
+    cham_tile_interface->tilesize   = elemsize * (size_t)(tile->m) * (size_t)(tile->n);
+
+    memcpy( &(cham_tile_interface->tile), tile, sizeof(CHAM_tile_t) );
+
+    /* Overwrite the flttype in case it comes from a data conversion */
+    cham_tile_interface->tile.flttype = flttype;
+}
+
+/**
+ * @brief Initialize the interface of an existing recursive child handle.
+ *
+ * Recursive tiles are first created as StarPU child handles by
+ * starpu_data_partition_plan(). This helper does not register a new handle;
+ * it retrieves the interface attached to @p handleptr on @p home_node and
+ * fills it from @p tile so the child handle can be used as a Chameleon tile.
+ *
+ * @param[inout] handleptr
+ *          Existing StarPU child handle to initialize.
+ *
+ * @param[in] home_node
+ *          StarPU memory node on which the child interface is initialized.
+ *
+ * @param[in] tile
+ *          Chameleon child tile used to initialize the StarPU interface.
+ *
+ * @param[in] flttype
+ *          Floating-point type exposed by the child interface.
+ */
+void
+starpu_cham_tile_child_set( starpu_data_handle_t *handleptr,
+                            int                   home_node,
+                            CHAM_tile_t          *tile,
+                            cham_flttype_t        flttype )
+{
+    starpu_cham_tile_interface_t *cham_tile_interface;
+
+    cham_tile_interface = starpu_data_get_interface_on_node( *handleptr, home_node );
+    starpu_cham_tile_interface_set( cham_tile_interface, tile, flttype );
+
+    /* Report tilesize as allocated size */
+    cham_tile_interface->allocsize = cham_tile_interface->tilesize;
+}
+
+/**
+ * @brief Register a Chameleon tile as a new StarPU data handle.
+ *
+ * This initializes a StarPU Chameleon tile interface from @p tile and calls
+ * starpu_data_register() to create the handle stored in @p handleptr. It is
+ * used for regular descriptor tiles whose handle does not exist yet.
+ *
+ * @param[out] handleptr
+ *          Location where the newly registered StarPU handle is stored.
+ *
+ * @param[in] home_node
+ *          StarPU memory node that owns the tile data, or -1 if no local data
+ *          is available.
+ *
+ * @param[in] tile
+ *          Chameleon tile used to initialize the StarPU interface.
+ *
+ * @param[in] flttype
+ *          Floating-point type exposed by the registered interface.
+ */
 void
 starpu_cham_tile_register( starpu_data_handle_t *handleptr,
                            int                   home_node,
                            CHAM_tile_t          *tile,
                            cham_flttype_t        flttype )
 {
-    size_t elemsize = CHAMELEON_Element_Size( flttype );
-    starpu_cham_tile_interface_t cham_tile_interface =
-        {
-            .id         = STARPU_CHAM_TILE_INTERFACE_ID,
-            .flttype    = flttype,
-            .dev_handle = (intptr_t)(tile->mat),
-            .allocsize  = -1,
-            .tilesize   = elemsize * (size_t)(tile->m) * (size_t)(tile->n),
-        };
-    memcpy( &(cham_tile_interface.tile), tile, sizeof( CHAM_tile_t ) );
-    /* Overwrite the flttype in case it comes from a data conversion */
-    cham_tile_interface.tile.flttype = flttype;
+    starpu_cham_tile_interface_t cham_tile_interface;
+
+    starpu_cham_tile_interface_set( &cham_tile_interface, tile, flttype );
 
     if ( tile->format & CHAMELEON_TILE_FULLRANK ) {
         cham_tile_interface.allocsize = cham_tile_interface.tilesize;
