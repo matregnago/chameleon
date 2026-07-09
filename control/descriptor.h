@@ -112,6 +112,22 @@ int chameleon_desc_init( const CHAM_context_t *chamctxt,
                          int   (*get_rankof) ( const CHAM_desc_t*, int, int ),
                          void* get_rankof_arg );
 
+int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
+                              CHAM_desc_t *desc, const char *name, void *mat,
+                              cham_flttype_t dtyp, int mb, int nb,
+                              int lm, int ln, int m, int n,
+                              void* (*get_blkaddr)( const CHAM_desc_t*, int, int ),
+                              int   (*get_blkldd) ( const CHAM_desc_t*, int      ),
+                              int   (*get_rankof) ( const CHAM_desc_t*, int, int ),
+                              void* get_rankof_arg );
+
+void chameleon_desc_init_2d_distribution( CHAM_desc_t *desc, int p, int q );
+void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, int q,
+                                                      int dist_it, int dist_jt );
+int  chameleon_desc_init_storage( const CHAM_context_t *chamctxt, CHAM_desc_t *desc, void *mat );
+void chameleon_desc_register( CHAM_desc_t *desc );
+void chameleon_desc_register_with_offset( CHAM_desc_t *desc );
+
 static inline int
 chameleon_desc_init_2dtile( const CHAM_context_t *chamctxt,
                             CHAM_desc_t *desc, const char *name,

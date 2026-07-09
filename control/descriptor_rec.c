@@ -21,6 +21,42 @@
 #include "control/common.h"
 #include "chameleon/runtime.h"
 
+/**
+ * @brief Initialize and register one level of a recursive descriptor.
+ *
+ * This mirrors chameleon_desc_init(), but keeps the distribution and tile-rank
+ * registration offset-aware so children can later be distributed with their
+ * global tile coordinates.
+ */
+static int
+chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
+                              const char *name, CHAM_desc_t *desc, void *mat, cham_flttype_t dtyp,
+                              int mb, int nb, int lm, int ln, int m, int n, int p, int q,
+                              int dist_it, int dist_jt,
+                              blkaddr_fct_t get_blkaddr, blkldd_fct_t get_blkldd,
+                              blkrankof_fct_t get_rankof, void* get_rankof_arg )
+{
+    int rc;
+
+    rc = chameleon_desc_init_base( chamctxt, desc, name, mat, dtyp, mb, nb,
+                                   lm, ln, m, n,
+                                   get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
+    if ( rc != CHAMELEON_SUCCESS ) {
+        return rc;
+    }
+
+    chameleon_desc_init_2d_distribution_with_offset( desc, p, q, dist_it, dist_jt );
+
+    rc = chameleon_desc_init_storage( chamctxt, desc, mat );
+    if ( rc != CHAMELEON_SUCCESS ) {
+        return rc;
+    }
+
+    chameleon_desc_register_with_offset( desc );
+
+    return CHAMELEON_SUCCESS;
+}
+
 static int
 chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                           const char *name, CHAM_desc_t *desc, void *mat, cham_flttype_t dtyp,
@@ -39,9 +75,9 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     assert( (mb[0] > 0) && (nb[0] > 0) );
 
     /* Create the current layer descriptor */
-    rc = chameleon_desc_init( chamctxt, desc, name, mat, dtyp, mb[0], nb[0],
-                              lm, ln, m, n, p, q,
-                              get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
+    rc = chameleon_recdesc_init_level( chamctxt, name, desc, mat, dtyp, mb[0], nb[0],
+                                       lm, ln, m, n, p, q, i0, j0,
+                                       get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
     if ( rc != CHAMELEON_SUCCESS ) {
         return rc;
     }
