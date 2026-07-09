@@ -514,6 +514,78 @@ void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
 #define STARPU_MAIN_RAM 0
 #endif
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+runtime_data_register_desc_tile( const CHAM_desc_t    *A,
+                                 int                   m,
+                                 int                   n,
+                                 starpu_data_handle_t *ptrtile,
+                                 CHAM_tile_t          *tile,
+                                 int64_t               tag,
+                                 cham_flttype_t        flttype )
+{
+    struct starpu_data_filter filter_tile = {
+        .filter_func = chameleon_recursive_tile_filter,
+    };
+    CHAM_desc_t          *child_desc = (CHAM_desc_t *)tile->mat;
+    starpu_data_handle_t *child_handle;
+    int64_t               child_ind;
+    int                   child_count;
+    int                   owner;
+
+    assert( child_desc != NULL );
+
+    filter_tile.nchildren = child_desc->lmt * child_desc->lnt;
+    child_count  = filter_tile.nchildren;
+    child_handle = (starpu_data_handle_t *)(child_desc->schedopt);
+
+    starpu_cham_tile_register( ptrtile, STARPU_MAIN_RAM, tile, flttype );
+    starpu_data_partition_plan( *ptrtile, &filter_tile, child_handle );
+
+    for ( child_ind = 0; child_ind < child_count; child_ind++, child_handle++ ) {
+        int child_m = child_ind % child_desc->lmt;
+        int child_n = child_ind / child_desc->lmt;
+        CHAM_tile_t *child_tile = child_desc->get_blktile( child_desc, child_m, child_n );
+
+        owner = child_desc->get_rankof( child_desc, child_m, child_n );
+        starpu_cham_tile_child_set( child_handle, STARPU_MAIN_RAM,
+                                    child_tile, flttype );
+
+#if defined(CHAMELEON_KERNELS_TRACE)
+        starpu_data_set_name( *child_handle, child_tile->name );
+#endif
+
+#if defined(CHAMELEON_USE_MPI)
+        if ( owner == A->myrank ) {
+            starpu_subdata_ptr_register( *child_handle, STARPU_MAIN_RAM );
+        }
+        starpu_mpi_data_register( *child_handle, child_desc->mpitag + child_ind, owner );
+#endif
+    }
+
+#if defined(CHAMELEON_USE_MPI)
+    starpu_mpi_register_hierarchy( *ptrtile, child_count,
+                                   (starpu_data_handle_t *)(child_desc->schedopt) );
+    starpu_mpi_data_register( *ptrtile, tag, STARPU_MPI_GUESS_WHO );
+#else
+    (void)tag;
+#endif
+
+#if defined(HAVE_STARPU_DATA_SET_OOC_FLAG)
+    if ( A->ooc == 0 ) {
+        starpu_data_set_ooc_flag( *ptrtile, 0 );
+    }
+#endif
+
+#if defined(HAVE_STARPU_DATA_SET_COORDINATES)
+    starpu_data_set_coordinates( *ptrtile, 2, m, n );
+#else
+    (void)m;
+    (void)n;
+#endif
+}
+#endif
+
 void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
 {
     int64_t mm = m + (A->i / A->mb);
@@ -530,6 +602,18 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
     int myrank = A->myrank;
     int owner  = A->get_rankof( A, m, n );
     CHAM_tile_t *tile = A->get_blktile( A, m, n );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( tile->format & CHAMELEON_TILE_DESC ) {
+        int64_t block_ind = A->lmt * nn + mm;
+
+        runtime_data_register_desc_tile( A, m, n, ptrtile, tile,
+                                         A->mpitag + block_ind,
+                                         cham_get_flttype( A->dtyp ) );
+        assert( *ptrtile );
+        return (void*)(*ptrtile);
+    }
+#endif
 
     if ( myrank == owner ) {
         if ( (tile->format & CHAMELEON_TILE_HMAT) ||
@@ -605,6 +689,15 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
     if ( *ptrtile != NULL ) {
         return (void*)(*ptrtile);
     }
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( ( tile->format & CHAMELEON_TILE_DESC ) && ( fltshift == 0 ) ) {
+        runtime_data_register_desc_tile( A, m, n, ptrtile, tile,
+                                         A->mpitag + shift, flttype );
+        assert( *ptrtile );
+        return (void*)(*ptrtile);
+    }
+#endif
 
     int home_node = -1;
     int myrank = A->myrank;
