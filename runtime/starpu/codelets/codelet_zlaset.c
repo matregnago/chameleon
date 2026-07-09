@@ -81,12 +81,33 @@ cl_zlaset_cuda_func( void *descr[], void *cl_arg )
                   tileA, handle );
 }
 #endif /* defined(CHAMELEON_USE_CUDA) */
+
+#if defined(CHAMELEON_USE_HIP)
+static void
+cl_zlaset_hip_func( void *descr[], void *cl_arg )
+{
+    struct cl_zlaset_args_s *clargs = (struct cl_zlaset_args_s *)cl_arg;
+    hipblasHandle_t          handle = starpu_hipblas_get_local_handle();
+    CHAM_tile_t *tileA;
+
+    tileA = cti_interface_get(descr[0]);
+
+    THIP_zlaset( clargs->uplo, clargs->m, clargs->n,
+                  (const hipDoubleComplex *)&(clargs->alpha),
+                  (const hipDoubleComplex *)&(clargs->beta),
+                  tileA, handle );
+}
+#endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */
 
 /*
  * Codelet definition
  */
+#if defined(CHAMELEON_USE_HIP)
+CODELETS_GPU( zlaset, cl_zlaset_cpu_func, cl_zlaset_hip_func, STARPU_HIP_ASYNC )
+#else
 CODELETS( zlaset, cl_zlaset_cpu_func, cl_zlaset_cuda_func, STARPU_CUDA_ASYNC )
+#endif
 
 void INSERT_TASK_zlaset( const RUNTIME_option_t *options,
                          cham_uplo_t uplo, int m, int n,
