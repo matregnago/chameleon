@@ -108,7 +108,7 @@ cl_zplgsy_hip_func(void *descr[], void *cl_arg)
  * Codelet definition
  */
 #if defined(CHAMELEON_USE_HIP)
-CODELETS( zplgsy, cl_zplgsy_cpu_func, cl_zplgsy_hip_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zplgsy, cl_zplgsy_cpu_func, cl_zplgsy_hip_func, STARPU_HIP_ASYNC )
 #else
 CODELETS( zplgsy, cl_zplgsy_cpu_func, cl_zplgsy_cuda_func, STARPU_CUDA_ASYNC )
 #endif

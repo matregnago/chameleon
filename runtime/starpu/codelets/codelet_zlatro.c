@@ -108,7 +108,7 @@ cl_zlatro_hip_func( void *descr[], void *cl_arg )
  * Codelet definition
  */
 #if defined(CHAMELEON_USE_HIP)
-CODELETS( zlatro, cl_zlatro_cpu_func, cl_zlatro_hip_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zlatro, cl_zlatro_cpu_func, cl_zlatro_hip_func, STARPU_HIP_ASYNC )
 #else
 CODELETS( zlatro, cl_zlatro_cpu_func, cl_zlatro_cuda_func, STARPU_CUDA_ASYNC )
 #endif

@@ -223,9 +223,9 @@ cl_zlacpyx_hip_func(void *descr[], void *cl_arg)
  * Codelet definition
  */
  #if defined(CHAMELEON_USE_HIP)
-CODELETS( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_hip_func, STARPU_HIP_ASYNC )
-CODELETS( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_hip_func, STARPU_HIP_ASYNC )
-CODELETS( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_hip_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_hip_func, STARPU_HIP_ASYNC )
+CODELETS_GPU( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARPU_HIP_ASYNC )
 #else
 CODELETS( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_cuda_func, STARPU_CUDA_ASYNC )
 CODELETS( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_cuda_func, STARPU_CUDA_ASYNC )
