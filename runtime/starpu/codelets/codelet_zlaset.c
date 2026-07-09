@@ -93,9 +93,9 @@ cl_zlaset_hip_func( void *descr[], void *cl_arg )
     tileA = cti_interface_get(descr[0]);
 
     THIP_zlaset( clargs->uplo, clargs->m, clargs->n,
-                  (const hipDoubleComplex *)&(clargs->alpha),
-                  (const hipDoubleComplex *)&(clargs->beta),
-                  tileA, handle );
+                 (const hipDoubleComplex *)&(clargs->alpha),
+                 (const hipDoubleComplex *)&(clargs->beta),
+                 tileA, handle );
 }
 #endif /* defined(CHAMELEON_USE_HIP) */
 #endif /* !defined(CHAMELEON_SIMULATION) */

@@ -63,7 +63,7 @@ void RUNTIME_zdisplay_allprofile()
     profiling_display_zunmlq_info();
     profiling_display_zunmqr_info();
 
-            /* plrnt */
+    /* plrnt */
     profiling_display_zplrnt_info();
 #if defined(PRECISION_z) || defined(PRECISION_c)
     profiling_display_zplghe_info();
@@ -119,7 +119,7 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
     case TASK_UNMLQ:        profiling_display_zunmlq_info();        break;
     case TASK_UNMQR:        profiling_display_zunmqr_info();        break;
 
-        /* plrnt */
+    /* plrnt */
     case TASK_PLRNT:        profiling_display_zplrnt_info();        break;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     case TASK_PLGHE:        profiling_display_zplghe_info();        break;
