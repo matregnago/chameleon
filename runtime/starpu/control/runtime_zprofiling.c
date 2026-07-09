@@ -80,7 +80,7 @@ void RUNTIME_zdisplay_allprofile()
 void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
 {
     switch( kernel ) {
-        /* Blas 3 */
+    /* Blas 3 */
     case TASK_GEADD:        profiling_display_zgeadd_info();
                             profiling_display_ztradd_info();        break;
     case TASK_GEMM:         profiling_display_zgemm_info();         break;
@@ -95,7 +95,7 @@ void RUNTIME_zdisplay_oneprofile( cham_tasktype_t kernel )
     case TASK_TRMM:         profiling_display_ztrmm_info();         break;
     case TASK_TRSM:         profiling_display_ztrsm_info();         break;
 
-        /* Lapack */
+    /* Lapack */
     case TASK_GELQT:        profiling_display_zgelqt_info();        break;
     case TASK_GEQRT:        profiling_display_zgeqrt_info();        break;
     case TASK_GESSM:        profiling_display_zgessm_info();        break;
