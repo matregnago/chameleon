@@ -26,6 +26,12 @@
  */
 #include "chameleon_starpu_internal.h"
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+runtime_data_clean_desc_tile( starpu_data_handle_t handle,
+                              CHAM_tile_t         *tile );
+#endif
+
 /**
  *  Malloc/Free of the data
  */
@@ -187,6 +193,15 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
     for (m = 0; m < nbtiles; m++, handle++)
     {
         if ( *handle != NULL ) {
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+            if ( m < ( lmt * lnt ) ) {
+                CHAM_tile_t *tile = desc->get_blktile( desc, m % lmt, m / lmt );
+
+                if ( tile->format & CHAMELEON_TILE_DESC ) {
+                    runtime_data_clean_desc_tile( *handle, tile );
+                }
+            }
+#endif
             starpu_data_unregister_submit(*handle);
             /* StarPU has marked the handle for unregistering,
              * We don't need it anymore, put to NULL for later destroy
@@ -228,6 +243,15 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
 
     for (m = 0; m < nbtiles; m++, handle++) {
         if ( *handle != NULL ) {
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+            if ( m < ( lmt * lnt ) ) {
+                CHAM_tile_t *tile = desc->get_blktile( desc, m % lmt, m / lmt );
+
+                if ( tile->format & CHAMELEON_TILE_DESC ) {
+                    runtime_data_clean_desc_tile( *handle, tile );
+                }
+            }
+#endif
             starpu_data_unregister(*handle);
             *handle = NULL;
         }
@@ -515,6 +539,30 @@ void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
 #endif
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static void
+runtime_data_clean_desc_tile( starpu_data_handle_t handle,
+                              CHAM_tile_t         *tile )
+{
+    CHAM_desc_t *child_desc = (CHAM_desc_t *)tile->mat;
+    unsigned     child_count;
+
+    assert( child_desc != NULL );
+
+    child_count = child_desc->lmt * child_desc->lnt;
+
+#if defined(CHAMELEON_USE_MPI)
+    starpu_mpi_data_partition_clean_node( handle, child_count,
+                                          (starpu_data_handle_t *)(child_desc->schedopt),
+                                          STARPU_MAIN_RAM, MPI_COMM_WORLD );
+#else
+    starpu_data_partition_clean_node( handle, child_count,
+                                      (starpu_data_handle_t *)(child_desc->schedopt),
+                                      STARPU_MAIN_RAM );
+#endif
+
+    memset( child_desc->schedopt, 0, child_count * sizeof(starpu_data_handle_t) );
+}
+
 static void
 runtime_data_register_desc_tile( const CHAM_desc_t    *A,
                                  int                   m,

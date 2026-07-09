@@ -552,6 +552,8 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
 {
     int m, n;
 
+    RUNTIME_desc_destroy_submit( desc, sequence );
+
     for ( n=0; n<desc->nt; n++ ) {
         for ( m=0; m<desc->mt; m++ ) {
             CHAM_tile_t *tile;
@@ -565,8 +567,6 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
         }
     }
 
-    RUNTIME_desc_destroy_submit( desc, sequence );
-
     /*
      * Note that global free operation can't be done here, since the data can
      * still be used until the next call to wait
@@ -576,6 +576,11 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
 void chameleon_desc_destroy( CHAM_desc_t *desc )
 {
     int m, n;
+
+    /* Decrease the number of occurences using the descriptor */
+    desc->occurences--;
+
+    RUNTIME_desc_destroy( desc );
 
     for ( n=0; n<desc->nt; n++ ) {
         for ( m=0; m<desc->mt; m++ ) {
@@ -593,10 +598,6 @@ void chameleon_desc_destroy( CHAM_desc_t *desc )
         }
     }
 
-    /* Decrease the number of occurences using the descrptor */
-    desc->occurences--;
-
-    RUNTIME_desc_destroy( desc );
     chameleon_desc_mat_free( desc );
     if ( ( desc->occurences == 0 ) && desc->name ) {
         free( desc->name );
