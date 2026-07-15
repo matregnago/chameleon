@@ -94,7 +94,7 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     CHAM_tile_t *tile;
     char        *subname;
     int          tempmm, tempnn;
-    int          rc, i, j;
+    int          rc, i, j, m, n;
 
     /* Let's make sure we have at least one couple (mb, nb) defined */
     assert( (mb[0] > 0) && (nb[0] > 0) );
@@ -179,8 +179,7 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
 int
 chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t *args )
 {
-    CHAM_context_t *chamctxt;
-    const CHAM_desc_layout_t    *layout;
+    CHAM_context_t              *chamctxt;
     const CHAM_desc_storage_t   *storage;
     const CHAM_desc_recursion_t *recargs;
     CHAM_desc_t *desc;
@@ -191,7 +190,6 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
-    layout  = &(args->layout);
     storage = &(args->storage);
     recargs = args->recursive;
 
@@ -201,8 +199,8 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
      */
     assert( (storage->mat != CHAMELEON_MAT_ALLOC_TILE) &&
             (storage->mat != CHAMELEON_MAT_OOC) );
-    assert( layout->i == 0 );
-    assert( layout->j == 0 );
+    assert( args->layout.i == 0 );
+    assert( args->layout.j == 0 );
 
     if ( ( recargs->mbs == NULL ) || ( recargs->nbs == NULL ) ) {
         chameleon_error( "CHAMELEON_Desc_CreateEx", "invalid recursive blocking parameters" );
