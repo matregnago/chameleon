@@ -54,6 +54,37 @@ functions to control the overall process, see \ref sec_auxiliary
 - @ref Auxiliary : to get some extra information such as the version,
   the data byte size, the mpi rank
 
+@section sec_recursive_descriptors Recursive descriptor distribution
+
+Recursive descriptors describe a hierarchy of tiled views. The data
+distribution may be attached to one level of this hierarchy through
+CHAM_desc_recursion_t::dist_level. Above that level, descriptors are
+only used to express the recursive task tree. At the distributed level,
+CHAM_desc_create_t::data_dist gives the MPI owner of each tile. Below
+that level, child descriptors refine one distributed tile and are
+private to the MPI rank that owns that parent tile.
+
+The descriptor stores the coordinates of its tile grid in the
+distributed grid with the fields CHAM_desc_t::dist_it,
+CHAM_desc_t::dist_jt, CHAM_desc_t::dist_mstride, and
+CHAM_desc_t::dist_nstride. Tile `(m, n)` of the descriptor is mapped
+to the distributed tile coordinates:
+
+@code
+( dist_it + m * dist_mstride, dist_jt + n * dist_nstride )
+@endcode
+
+For classic descriptors, and for recursive descriptors exactly at the
+distributed level, both strides are equal to 1. For recursive
+descriptors above the distributed level, one descriptor tile covers
+several tiles of the distributed level. In that case,
+CHAM_desc_t::dist_mstride and CHAM_desc_t::dist_nstride are the number
+of distributed tiles covered in each direction by one tile of the
+current descriptor. For descriptors below the distributed level, the
+data is no longer redistributed: all tiles belong to the owner rank of
+the parent distributed tile.
+
+@image html recursive_descriptor_strides.svg "Recursive descriptor distribution strides"
 
 @section sec_src_code_structure Libraries and source code organization
 

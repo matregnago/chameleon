@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700" role="img" aria-labelledby="title desc">
+  <title id="title">Recursive descriptor distribution strides</title>
+  <desc id="desc">Example showing how recursive descriptor levels map their tile coordinates to the distributed level through dist_it, dist_jt, dist_mstride, and dist_nstride.</desc>
+  <defs>
+    <style>
+      .title { font: 700 22px sans-serif; fill: #172033; }
+      .heading { font: 700 16px sans-serif; fill: #172033; }
+      .text { font: 13px sans-serif; fill: #273043; }
+      .small { font: 12px sans-serif; fill: #273043; }
+      .mono { font: 12px monospace; fill: #172033; }
+      .muted { fill: #657085; }
+      .box { fill: #ffffff; stroke: #334155; stroke-width: 1.4; rx: 6; }
+      .level0 { fill: #e8f3ff; stroke: #1d5f99; }
+      .level1 { fill: #eaf7ef; stroke: #2f7d48; }
+      .level2 { fill: #fff3dd; stroke: #a36516; }
+      .private { fill: #f6eefe; stroke: #7a4ab0; }
+      .grid { stroke: #64748b; stroke-width: 1; }
+      .heavy { stroke-width: 2; }
+      .dash { stroke-dasharray: 6 5; }
+      .distributed { stroke: #2f7d48; }
+      .recursive { stroke: #a36516; stroke-width: 0.8; stroke-dasharray: 3 3; opacity: 0.8; }
+      .arrow { fill: none; stroke: #334155; stroke-width: 1.8; marker-end: url(#arrow); }
+      .owner0 { fill: #d7ebff; }
+      .owner1 { fill: #dff4e6; }
+      .owner2 { fill: #ffe9c2; }
+      .owner3 { fill: #eadcfb; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect x="14" y="14" width="952" height="672" fill="#fbfcfe" stroke="#d7dee8"/>
+  <text x="34" y="48" class="title">Recursive descriptor distribution strides</text>
+  <text x="34" y="74" class="text">Example: mbs = {240, 80, 20, 0}, nbs = {160, 80, 20, 0}, dist_level = 1</text>
+
+  <g transform="translate(34,105)">
+    <rect x="0" y="0" width="250" height="210" class="box level0"/>
+    <text x="14" y="24" class="heading">Level 0 descriptor</text>
+    <text x="14" y="47" class="mono">level &lt; dist_level</text>
+    <text x="14" y="66" class="mono">mb = 240, nb = 160</text>
+    <text x="14" y="87" class="mono">dist_mstride = 240 / 80 = 3</text>
+    <text x="14" y="106" class="mono">dist_nstride = 160 / 80 = 2</text>
+    <text x="14" y="129" class="text">Tile (m,n) maps to distributed</text>
+    <text x="14" y="148" class="text">coordinates:</text>
+    <text x="14" y="170" class="mono">(dist_it + 3*m, dist_jt + 2*n)</text>
+    <text x="14" y="193" class="small muted">A parent tile covers 3 x 2 distributed tiles.</text>
+  </g>
+
+  <g transform="translate(350,105)">
+    <rect x="0" y="0" width="318" height="98" class="box level1"/>
+    <text x="14" y="24" class="heading">Level 1: distributed level</text>
+    <text x="14" y="47" class="mono">level = dist_level = 1</text>
+    <text x="14" y="66" class="mono">mb = nb = 80</text>
+    <text x="14" y="87" class="mono">dist_mstride = dist_nstride = 1</text>
+    <g transform="translate(63,112)">
+      <g>
+        <rect x="0" y="0" width="48" height="48" class="owner0"/>
+        <rect x="48" y="0" width="48" height="48" class="owner1"/>
+        <rect x="96" y="0" width="48" height="48" class="owner0"/>
+        <rect x="144" y="0" width="48" height="48" class="owner1"/>
+        <rect x="0" y="48" width="48" height="48" class="owner2"/>
+        <rect x="48" y="48" width="48" height="48" class="owner3"/>
+        <rect x="96" y="48" width="48" height="48" class="owner2"/>
+        <rect x="144" y="48" width="48" height="48" class="owner3"/>
+        <rect x="0" y="96" width="48" height="48" class="owner0"/>
+        <rect x="48" y="96" width="48" height="48" class="owner1"/>
+        <rect x="96" y="96" width="48" height="48" class="owner0"/>
+        <rect x="144" y="96" width="48" height="48" class="owner1"/>
+        <rect x="0" y="144" width="48" height="48" class="owner2"/>
+        <rect x="48" y="144" width="48" height="48" class="owner3"/>
+        <rect x="96" y="144" width="48" height="48" class="owner2"/>
+        <rect x="144" y="144" width="48" height="48" class="owner3"/>
+      </g>
+      <path d="M12 0 V192 M24 0 V192 M36 0 V192 M60 0 V192 M72 0 V192 M84 0 V192 M108 0 V192 M120 0 V192 M132 0 V192 M156 0 V192 M168 0 V192 M180 0 V192 M0 12 H192 M0 24 H192 M0 36 H192 M0 60 H192 M0 72 H192 M0 84 H192 M0 108 H192 M0 120 H192 M0 132 H192 M0 156 H192 M0 168 H192 M0 180 H192" fill="none" class="recursive"/>
+      <path d="M48 0 V192 M96 0 V192 M144 0 V192 M0 48 H192 M0 96 H192 M0 144 H192" class="grid distributed"/>
+      <rect x="0" y="0" width="192" height="192" fill="none" class="grid heavy distributed"/>
+      <rect x="0" y="0" width="144" height="96" fill="none" stroke="#1d5f99" stroke-width="3"/>
+      <text x="15" y="31" class="small">P0</text>
+      <text x="63" y="31" class="small">P1</text>
+      <text x="111" y="31" class="small">P0</text>
+      <text x="159" y="31" class="small">P1</text>
+      <text x="15" y="79" class="small">P2</text>
+      <text x="63" y="79" class="small">P3</text>
+      <text x="111" y="79" class="small">P2</text>
+      <text x="159" y="79" class="small">P3</text>
+      <text x="15" y="127" class="small">P0</text>
+      <text x="63" y="127" class="small">P1</text>
+      <text x="111" y="127" class="small">P0</text>
+      <text x="159" y="127" class="small">P1</text>
+      <text x="15" y="175" class="small">P2</text>
+      <text x="63" y="175" class="small">P3</text>
+      <text x="111" y="175" class="small">P2</text>
+      <text x="159" y="175" class="small">P3</text>
+    </g>
+    <text x="14" y="324" class="small muted">Blue outline: one level-0 tile expanded into 3 x 2 distributed tiles.</text>
+  </g>
+
+  <path d="M286 145 H348" class="arrow"/>
+  <text x="290" y="126" class="small muted">scale by</text>
+  <text x="300" y="140" class="small muted">strides</text>
+
+  <g transform="translate(720,110)">
+    <rect x="0" y="0" width="220" height="155" class="box level2"/>
+    <text x="14" y="24" class="heading">Level 2 child</text>
+    <text x="14" y="47" class="mono">level &gt; dist_level</text>
+    <text x="14" y="68" class="mono">mb = nb = 20</text>
+    <text x="14" y="91" class="text">Created below one distributed</text>
+    <text x="14" y="110" class="text">tile. It is private to the owner</text>
+    <text x="14" y="129" class="text">rank selected at level 1.</text>
+  </g>
+
+  <path d="M670 145 H718" class="arrow"/>
+  <text x="674" y="126" class="small muted">refine</text>
+  <text x="674" y="140" class="small muted">locally</text>
+
+  <g transform="translate(34,440)">
+    <rect x="0" y="0" width="450" height="220" class="box"/>
+    <text x="16" y="26" class="heading">Descriptor fields</text>
+    <text x="16" y="55" class="mono">dist_level</text>
+    <text x="135" y="55" class="text">recursion level where data_dist applies</text>
+    <text x="16" y="82" class="mono">dist_it, dist_jt</text>
+    <text x="135" y="82" class="text">distributed coordinates of local tile (0,0)</text>
+    <text x="16" y="109" class="mono">dist_mstride</text>
+    <text x="135" y="109" class="text">distributed tile rows between two tile rows</text>
+    <text x="16" y="136" class="mono">dist_nstride</text>
+    <text x="135" y="136" class="text">distributed tile columns between two tile columns</text>
+    <text x="16" y="163" class="mono">owner</text>
+    <text x="135" y="163" class="text">distributed sentinel above dist_level, rank below it</text>
+    <text x="16" y="190" class="mono">rankof(m,n) uses (dist_it + m*dist_mstride,</text>
+    <text x="135" y="208" class="mono">dist_jt + n*dist_nstride)</text>
+  </g>
+
+  <g transform="translate(510,455)">
+    <rect x="0" y="0" width="430" height="180" class="box private"/>
+    <text x="16" y="26" class="heading">Ownership rule</text>
+    <text x="16" y="55" class="text">Above dist_level: descriptors are hierarchy-only.</text>
+    <text x="16" y="78" class="text">At dist_level: data_dist gives the MPI owner of each tile.</text>
+    <text x="16" y="101" class="text">Below dist_level: a child descriptor is private to the</text>
+    <text x="16" y="120" class="text">owner of the distributed parent tile.</text>
+    <text x="16" y="151" class="mono">level 0 tile (0,0) -> distributed tile (0,0) -> P0</text>
+  </g>
+</svg>
