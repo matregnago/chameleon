@@ -153,21 +153,22 @@ typedef struct chameleon_desc_storage_s {
  * @brief User-provided recursive tiling parameters.
  */
 typedef struct chameleon_desc_recursion_s {
-    cham_rec_t kind;  /**> Recursive partitioning policy                                      */
-    int        arg;   /**> Policy-specific argument                                           */
-    const int *mbs;  /**> Zero-terminated list of row tile sizes for each recursive level    */
-    const int *nbs;  /**> Zero-terminated list of column tile sizes for each recursive level */
+    cham_rec_t kind;       /**> Recursive partitioning policy                                      */
+    int        arg;        /**> Policy-specific argument                                           */
+    const int *mbs;        /**> Zero-terminated list of row tile sizes for each recursive level    */
+    const int *nbs;        /**> Zero-terminated list of column tile sizes for each recursive level */
+    int        dist_level; /**> Level at which the descriptor data distribution applies            */
 } CHAM_desc_recursion_t;
 
 /**
  * @brief User-provided descriptor creation parameters.
  */
 typedef struct chameleon_desc_create_s {
-    const char                  *name;      /**> Name of the descriptor for debug purpose               */
-    CHAM_desc_layout_t           layout;    /**> Matrix layout parameters                               */
-    CHAM_desc_storage_t          storage;   /**> Matrix storage callbacks and pointer                   */
-    const cham_data_dist_t      *data_dist; /**> Data distribution parameters, or NULL for local data   */
-    const CHAM_desc_recursion_t *recursive; /**> Recursive tiling parameters, or NULL for classic tiles */
+    const char                  *name;      /**> Name of the descriptor for debug purpose                 */
+    CHAM_desc_layout_t           layout;    /**> Matrix layout parameters                                 */
+    CHAM_desc_storage_t          storage;   /**> Matrix storage callbacks and pointer                     */
+    const cham_data_dist_t      *data_dist; /**> Data distribution at recursive dist_level, or local data */
+    const CHAM_desc_recursion_t *recursive; /**> Recursive tiling parameters, or NULL for classic tiles   */
 } CHAM_desc_create_t;
 
 /**
@@ -217,8 +218,25 @@ struct chameleon_desc_s {
 
     /* Distributed case */
     cham_data_dist_t *data_dist; /**> data distribution type used to retrieve the distributed layout       */
+
+    /**
+     * Coordinates of this descriptor in the tile grid where data_dist
+     * applies. Tile (m, n) is mapped to the distributed coordinates:
+     *
+     *   (dist_it + m * dist_mstride, dist_jt + n * dist_nstride).
+     *
+     * Classic descriptors and descriptors at the distributed recursive
+     * level use unit strides. For a descriptor above that level, each stride
+     * is the number of distributed tiles covered by one of its tiles. The
+     * resulting coordinates identify its first distributed descendant,
+     * whose MPI owner also owns the parent recursive task. Descriptors below
+     * the distributed level are private to that owner and do not use these
+     * fields to redistribute their tiles.
+     */
     int dist_it;                 /**> global tile row corresponding to tile row 0 of this descriptor       */
     int dist_jt;                 /**> global tile column corresponding to tile column 0 of this descriptor */
+    int dist_mstride;            /**> stride between tile rows in the global data distribution             */
+    int dist_nstride;            /**> stride between tile columns in the global data distribution          */
     int llm;                     /**> local number of rows         of the full matrix - derived parameter  */
     int lln;                     /**> local number of columns      of the full matrix - derived parameter  */
     int llm1;                    /**> local number of tile rows    of the A11  matrix - derived parameter  */

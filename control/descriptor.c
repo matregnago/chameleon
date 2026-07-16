@@ -80,7 +80,9 @@ void chameleon_desc_init_tiles_with_offset( CHAM_desc_t *desc, blkrankof_fct_t r
     tile = desc->tiles;
     for( jj=0; jj<desc->lnt; jj++ ) {
         for( ii=0; ii<desc->lmt; ii++, tile++ ) {
-            int rank = rankof( desc, dist_it + ii, dist_jt + jj );
+            int rank = rankof( desc,
+                               dist_it + ii * desc->dist_mstride,
+                               dist_jt + jj * desc->dist_nstride );
             tile->format  = CHAMELEON_TILE_FULLRANK;
             tile->flttype = flttype;
             tile->rank    = rank;
@@ -134,62 +136,32 @@ void chameleon_desc_set_datadist( CHAM_desc_t *to, cham_data_dist_t *from )
  *
  ******************************************************************************
  *
+ * @param[inout] desc
+ *          Descriptor to initialize.
+ *
+ * @param[in] myrank
+ *          MPI rank of the calling process in the descriptor communicator.
+ *
  * @param[in] name
  *          Name of the descriptor for debug purpose.
  *
- * @param[in] dtyp
- *          Data type of the matrix:
- *          @arg ChamRealFloat:     single precision real (S),
- *          @arg ChamRealDouble:    double precision real (D),
- *          @arg ChamComplexFloat:  single precision complex (C),
- *          @arg ChamComplexDouble: double precision complex (Z).
+ * @param[in] storage
+ *          Matrix storage pointer and callbacks.
  *
- * @param[in] mb
- *          Number of rows in a tile.
- *
- * @param[in] nb
- *          Number of columns in a tile.
- *
- * @param[in] lm
- *          Number of rows of the entire matrix.
- *
- * @param[in] ln
- *          Number of columns of the entire matrix.
- *
- * @param[in] m
- *          Number of rows of the submatrix.
- *
- * @param[in] n
- *          Number of columns of the submatrix.
- *
- * @param[in] get_blkaddr
- *          A function which return the address of the data corresponding to
- *          the tile A(m,n).
- *
- * @param[in] get_blkldd
- *          A function that return the leading dimension of the tile A(m,*).
- *
- * @param[in] get_rankof
- *          A function that return the MPI rank of the tile A(m,n).
- *
- * @param[in] get_rankof_arg
- *          A pointer to custom data that can be used by the get_rankof function
+ * @param[in] layout
+ *          Matrix layout and tiling parameters.
  *
  ******************************************************************************
  *
  * @return  The descriptor with the common matrix description parameters set.
  *
  */
-int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
-                              CHAM_desc_t *desc, const char *name, void *mat,
-                              cham_flttype_t dtyp, int mb, int nb,
-                              int lm, int ln, int m, int n,
-                              blkaddr_fct_t   get_blkaddr,
-                              blkldd_fct_t    get_blkldd,
-                              blkrankof_fct_t get_rankof,
-                              void           *get_rankof_arg )
+int chameleon_desc_init_base( CHAM_desc_t *desc, int myrank, const char *name,
+                              const CHAM_desc_storage_t *storage,
+                              const CHAM_desc_layout_t  *layout )
 {
-    assert( chamctxt );
+    void *mat = storage->mat;
+
     memset( desc, 0, sizeof(CHAM_desc_t) );
 
     if ( name ) {
@@ -204,8 +176,8 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
     desc->get_blkdim  = chameleon_getblkdim;
 
     /* Data addresses */
-    if ( get_blkaddr ) {
-        desc->get_blkaddr = get_blkaddr;
+    if ( storage->get_blkaddr ) {
+        desc->get_blkaddr = storage->get_blkaddr;
     }
     else {
         if ( (intptr_t)mat > 0 ) {
@@ -217,8 +189,8 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
     }
 
     /* Data leading dimensions */
-    if ( get_blkldd ) {
-        desc->get_blkldd = get_blkldd;
+    if ( storage->get_blkldd ) {
+        desc->get_blkldd = storage->get_blkldd;
     }
     else {
         if ( (intptr_t)mat > 0 ) {
@@ -231,42 +203,46 @@ int chameleon_desc_init_base( const CHAM_context_t *chamctxt,
 
     /* Data distribution */
     desc->get_rankof          = chameleon_getrankof_tile;
-    desc->get_rankof_init     = get_rankof ? get_rankof : chameleon_getrankof_2d;
-    desc->get_rankof_init_arg = get_rankof_arg;
+    desc->get_rankof_init     = storage->get_rankof ? storage->get_rankof
+                                                    : chameleon_getrankof_2d;
+    desc->get_rankof_init_arg = storage->get_rankof_arg;
 
     /* Matrix properties */
-    desc->dtyp = dtyp;
+    desc->dtyp = layout->dtyp;
     /* Should be given as parameter to follow get_blkaddr (unused) */
-    desc->styp = (get_blkaddr == chameleon_getaddr_cm ) ? ChamCM : ChamCCRB;
-    desc->mb   = mb;
-    desc->nb   = nb;
-    desc->bsiz = mb * nb;
+    desc->styp = (storage->get_blkaddr == chameleon_getaddr_cm ) ? ChamCM
+                                                                 : ChamCCRB;
+    desc->mb   = layout->mb;
+    desc->nb   = layout->nb;
+    desc->bsiz = layout->mb * layout->nb;
 
     /* Matrix parameters */
     desc->i = 0;
     desc->j = 0;
-    desc->m = m;
-    desc->n = n;
+    desc->m = layout->m;
+    desc->n = layout->n;
 
     /* Global tile origin in the data distribution */
     desc->dist_it = 0;
     desc->dist_jt = 0;
+    desc->dist_mstride = 1;
+    desc->dist_nstride = 1;
 
     /* Matrix stride parameters */
-    desc->lm = lm;
-    desc->ln = ln;
+    desc->lm = layout->lm;
+    desc->ln = layout->ln;
 
     /* Matrix derived parameters */
-    desc->mt  = chameleon_ceil( m, mb );
-    desc->nt  = chameleon_ceil( n, nb );
-    desc->lmt = chameleon_ceil( lm, mb );
-    desc->lnt = chameleon_ceil( ln, nb );
+    desc->mt  = chameleon_ceil( layout->m,  layout->mb );
+    desc->nt  = chameleon_ceil( layout->n,  layout->nb );
+    desc->lmt = chameleon_ceil( layout->lm, layout->mb );
+    desc->lnt = chameleon_ceil( layout->ln, layout->nb );
 
     desc->id = nbdesc;
     nbdesc++;
     desc->occurences = 0;
 
-    desc->myrank = RUNTIME_comm_rank( chamctxt );
+    desc->myrank = myrank;
 
     return CHAMELEON_SUCCESS;
 }
@@ -342,6 +318,8 @@ void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, 
 
     desc->dist_it = dist_it;
     desc->dist_jt = dist_jt;
+    desc->dist_mstride = 1;
+    desc->dist_nstride = 1;
 
     /* Local dimensions in tiles */
     if ( desc->myrank < (p*q) ) {
@@ -492,11 +470,28 @@ int chameleon_desc_init( const CHAM_context_t *chamctxt,
                          blkrankof_fct_t get_rankof,
                          void           *get_rankof_arg )
 {
+    CHAM_desc_layout_t layout = {
+        .dtyp = dtyp,
+        .mb   = mb,
+        .nb   = nb,
+        .lm   = lm,
+        .ln   = ln,
+        .i    = 0,
+        .j    = 0,
+        .m    = m,
+        .n    = n
+    };
+    CHAM_desc_storage_t storage = {
+        .mat            = mat,
+        .get_blkaddr    = get_blkaddr,
+        .get_blkldd     = get_blkldd,
+        .get_rankof     = get_rankof,
+        .get_rankof_arg = get_rankof_arg
+    };
     int rc;
 
-    rc = chameleon_desc_init_base( chamctxt, desc, name, mat, dtyp, mb, nb,
-                                   lm, ln, m, n,
-                                   get_blkaddr, get_blkldd, get_rankof, get_rankof_arg );
+    rc = chameleon_desc_init_base( desc, RUNTIME_comm_rank( chamctxt ),
+                                   name, &storage, &layout );
     if ( rc != CHAMELEON_SUCCESS ) {
         return rc;
     }
@@ -557,6 +552,8 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
 {
     int m, n;
 
+    RUNTIME_desc_destroy_submit( desc, sequence );
+
     for ( n=0; n<desc->nt; n++ ) {
         for ( m=0; m<desc->mt; m++ ) {
             CHAM_tile_t *tile;
@@ -570,8 +567,6 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
         }
     }
 
-    RUNTIME_desc_destroy_submit( desc, sequence );
-
     /*
      * Note that global free operation can't be done here, since the data can
      * still be used until the next call to wait
@@ -581,6 +576,11 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
 void chameleon_desc_destroy( CHAM_desc_t *desc )
 {
     int m, n;
+
+    /* Decrease the number of occurences using the descriptor */
+    desc->occurences--;
+
+    RUNTIME_desc_destroy( desc );
 
     for ( n=0; n<desc->nt; n++ ) {
         for ( m=0; m<desc->mt; m++ ) {
@@ -598,10 +598,6 @@ void chameleon_desc_destroy( CHAM_desc_t *desc )
         }
     }
 
-    /* Decrease the number of occurences using the descrptor */
-    desc->occurences--;
-
-    RUNTIME_desc_destroy( desc );
     chameleon_desc_mat_free( desc );
     if ( ( desc->occurences == 0 ) && desc->name ) {
         free( desc->name );
