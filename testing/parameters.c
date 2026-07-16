@@ -495,6 +495,8 @@ parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dt
     custom_dist_t *custom_args = NULL;
     const char    *custom = parameters_getvalue_str( "custom" );
     intptr_t       mtxfmt = parameters_getvalue_int( "mtxfmt" );
+    int            P;
+    int            Q;
     int            rc;
 
     mtxfmt = -mtxfmt; /* Inverse sign to get the defined values */
@@ -505,38 +507,55 @@ parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dt
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
-    if ( !custom ) {
-        int P = parameters_getvalue_int( "P" );
-        int Q = parameters_compute_q( P );
-        rc = CHAMELEON_Desc_Create(
-            descptr, (void*)mtxfmt, dtyp, mb, nb, mb * nb, lm, ln, 0, 0, m, n, P, Q );
-        /* Dirty hack to name the decriptor as wanted by the testing, should be modified in the future */
-        if ( (*descptr)->name ) {
-            free( (*descptr)->name );
+    if ( custom ) {
+        if ( ((void*)mtxfmt) == CHAMELEON_MAT_ALLOC_GLOBAL ) {
+            fprintf( stderr, "In parameters_desc_create, cannot use custom distributions with global matrix allocation (Use --mtxfmt=1)\n" );
+            return CHAMELEON_ERR_ILLEGAL_VALUE;
         }
-        (*descptr)->name = strdup(id);
-        return rc;
+
+        rc = chameleon_getrankof_custom_init( &custom_args, custom );
+        if ( rc != CHAMELEON_SUCCESS ) {
+            return rc;
+        }
+
+        P = CHAMELEON_Comm_size();
+        Q = 1;
+    }
+    else {
+        P = parameters_getvalue_int( "P" );
+        Q = parameters_compute_q( P );
     }
 
-    if ( ((void*)mtxfmt) == CHAMELEON_MAT_ALLOC_GLOBAL ) {
-        fprintf( stderr, "In parameters_desc_create, cannot use custom distributions with global matrix allocation (Use --mtxfmt=1)\n" );
-        return CHAMELEON_ERR_ILLEGAL_VALUE;
-    }
+    cham_data_dist_t data_dist = {
+        .get_distrib       = (datadist_access_fct_t)chameleon_get_2d_block_cyclic,
+        .distrib_array_size = 2,
+        .distrib            = { P, Q }
+    };
+    CHAM_desc_create_t args = {
+        .name = id,
+        .layout = {
+            .dtyp = dtyp,
+            .mb   = mb,
+            .nb   = nb,
+            .lm   = lm,
+            .ln   = ln,
+            .i    = 0,
+            .j    = 0,
+            .m    = m,
+            .n    = n
+        },
+        .storage = {
+            .mat            = (void*)mtxfmt,
+            .get_blkaddr    = NULL,
+            .get_blkldd     = NULL,
+            .get_rankof     = custom ? chameleon_getrankof_custom : NULL,
+            .get_rankof_arg = custom_args
+        },
+        .data_dist = &data_dist,
+        .recursive = NULL
+    };
 
-    rc = chameleon_getrankof_custom_init( &custom_args, custom );
-    if ( rc != CHAMELEON_SUCCESS ) {
-        return rc;
-    }
-
-    rc = CHAMELEON_Desc_Create_User(
-        descptr, (void*)mtxfmt, dtyp, mb, nb, mb * nb, lm, ln, 0, 0, m, n, CHAMELEON_Comm_size(), 1,
-        NULL, NULL, chameleon_getrankof_custom, custom_args );
-    /* Dirty hack to name the decriptor as wanted by the testing, should be modified in the future */
-    if ( (*descptr)->name ) {
-        free( (*descptr)->name );
-    }
-    (*descptr)->name = strdup(id);
-    return rc;
+    return CHAMELEON_Desc_CreateEx( descptr, &args );
 }
 
 /**
