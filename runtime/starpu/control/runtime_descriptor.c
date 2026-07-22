@@ -172,7 +172,11 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
 }
 
 /**
- *  Submit unregistration of the handles of a descriptor
+ *  Unregister the handles of a descriptor
+ *
+ *  Keep this operation synchronous with StarPU: MPI tag ranges may be
+ *  released by the subsequent descriptor destruction and must not be reused
+ *  while an old handle is still registered.
  */
 void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
                                   const RUNTIME_sequence_t *sequence )
@@ -202,10 +206,7 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
                 }
             }
 #endif
-            starpu_data_unregister_submit(*handle);
-            /* StarPU has marked the handle for unregistering,
-             * We don't need it anymore, put to NULL for later destroy
-             */
+            starpu_data_unregister(*handle); /* _submit */
             *handle = NULL;
         }
     }
@@ -498,7 +499,7 @@ void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
             continue;
         }
 
-        starpu_data_unregister_submit( *handlebis );
+        starpu_data_unregister( *handlebis );
         *handlebis = NULL;
     }
     (void)sequence;
