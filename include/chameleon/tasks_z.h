@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -260,10 +260,12 @@ void INSERT_TASK_zlauum( const RUNTIME_option_t *options,
                          cham_uplo_t uplo, int n, int nb,
                          const CHAM_desc_t *A, int Am, int An );
 void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
-                         double bump, int m, int n, const CHAM_desc_t *A, int Am, int An,
+                         double bump, cham_uplo_t uplo,
+                         int m, int n, const CHAM_desc_t *A, int Am, int An,
                          int bigM, int m0, int n0, unsigned long long int seed );
 void INSERT_TASK_zplgsy( const RUNTIME_option_t *options,
-                         CHAMELEON_Complex64_t bump, int m, int n, const CHAM_desc_t *A, int Am, int An,
+                         CHAMELEON_Complex64_t bump, cham_uplo_t uplo,
+                         int m, int n, const CHAM_desc_t *A, int Am, int An,
                          int bigM, int m0, int n0, unsigned long long int seed );
 void INSERT_TASK_zplrnt( const RUNTIME_option_t *options,
                          int m, int n, const CHAM_desc_t *A, int Am, int An,
@@ -1012,4 +1014,3 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
 #endif /* defined(CHAMELEON_USE_MPI) */
 
 #endif /* _chameleon_tasks_z_h_ */
-

@@ -50,7 +50,7 @@ cl_zplghe_rectask_func( struct starpu_task *t, void *_args )
 
     starpu_cham_rectask_initrequest( t, &request );
 
-    chameleon_pzplghe( clargs->bump, ChamUpperLower, rtargs->tiles[0]->mat,
+    chameleon_pzplghe( clargs->bump, clargs->uplo, rtargs->tiles[0]->mat,
                        clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
                        rtargs->sequence, &request );
 
@@ -59,7 +59,8 @@ cl_zplghe_rectask_func( struct starpu_task *t, void *_args )
 #endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
-static void cl_zplghe_cpu_func(void *descr[], void *cl_arg)
+static void
+cl_zplghe_cpu_func(void *descr[], void *cl_arg)
 {
     struct cl_zplghe_args_s *clargs = (struct cl_zplghe_args_s *)cl_arg;
     CHAM_tile_t *tileA;
@@ -117,7 +118,8 @@ CODELETS( zplghe, cl_zplghe_cpu_func, cl_zplghe_cuda_func, STARPU_CUDA_ASYNC )
 #endif
 
 void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
-                         double bump, int m, int n, const CHAM_desc_t *A, int Am, int An,
+                         double bump, cham_uplo_t uplo,
+                         int m, int n, const CHAM_desc_t *A, int Am, int An,
                          int bigM, int m0, int n0, unsigned long long int seed )
 {
     struct cl_zplghe_args_s *clargs = NULL;
@@ -149,7 +151,7 @@ void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
     if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zplghe_args_s ) );
         clargs->bump = bump;
-        clargs->uplo = ChamUpperLower;
+        clargs->uplo = uplo;
         clargs->m    = m;
         clargs->n    = n;
         clargs->bigM = bigM;

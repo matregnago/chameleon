@@ -50,7 +50,7 @@ cl_zplgsy_rectask_func( struct starpu_task *t, void *_args )
 
     starpu_cham_rectask_initrequest( t, &request );
 
-    chameleon_pzplgsy( clargs->bump, ChamUpperLower, rtargs->tiles[0]->mat,
+    chameleon_pzplgsy( clargs->bump, clargs->uplo, rtargs->tiles[0]->mat,
                        clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
                        rtargs->sequence, &request );
 
@@ -81,6 +81,8 @@ cl_zplgsy_cuda_func(void *descr[], void *cl_arg)
 
     tileA = cti_interface_get(descr[0]);
 
+    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
+
     TCUDA_zplgsy( (cuDoubleComplex*)&(clargs->bump), clargs->m, clargs->n, tileA,
                   clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
                   handle );
@@ -96,6 +98,8 @@ cl_zplgsy_hip_func(void *descr[], void *cl_arg)
     CHAM_tile_t *tileA;
 
     tileA = cti_interface_get(descr[0]);
+
+    assert( tileA->format & CHAMELEON_TILE_FULLRANK );
 
     THIP_zplgsy( (hipDoubleComplex*)&(clargs->bump), clargs->m, clargs->n, tileA,
                   clargs->bigM, clargs->m0, clargs->n0, clargs->seed,
@@ -114,7 +118,8 @@ CODELETS( zplgsy, cl_zplgsy_cpu_func, cl_zplgsy_cuda_func, STARPU_CUDA_ASYNC )
 #endif
 
 void INSERT_TASK_zplgsy( const RUNTIME_option_t *options,
-                         CHAMELEON_Complex64_t bump, int m, int n, const CHAM_desc_t *A, int Am, int An,
+                         CHAMELEON_Complex64_t bump, cham_uplo_t uplo,
+                         int m, int n, const CHAM_desc_t *A, int Am, int An,
                          int bigM, int m0, int n0, unsigned long long int seed )
 {
     struct cl_zplgsy_args_s *clargs = NULL;
@@ -146,7 +151,7 @@ void INSERT_TASK_zplgsy( const RUNTIME_option_t *options,
     if ( is_rectask || exec ) {
         clargs = malloc( sizeof( struct cl_zplgsy_args_s ) );
         clargs->bump = bump;
-        clargs->uplo = ChamUpperLower;
+        clargs->uplo = uplo;
         clargs->m    = m;
         clargs->n    = n;
         clargs->bigM = bigM;
