@@ -264,7 +264,8 @@ int CHAMELEON_zplghe_Tile_Async( double                 bump,
         return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
     /* Check input arguments */
-    if (A->mb != A->nb) {
+    if ( ( A->mb != A->nb ) && !chameleon_desc_has_recursive_tiles( A ) )
+    {
         chameleon_error("CHAMELEON_zplghe_Tile", "only square tiles supported");
         return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
