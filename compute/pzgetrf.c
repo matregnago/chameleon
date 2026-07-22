@@ -738,6 +738,7 @@ chameleon_pzgetrf_panel_permute_update( struct chameleon_pzgetrf_s *ws,
     chameleon_data_flush( options->sequence, A(k, n), request->flush );
     (void)reduce;
     (void)chamctxt;
+    (void)sequence;
 }
 
 /**

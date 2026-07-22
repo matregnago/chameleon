@@ -2,7 +2,7 @@
  *
  * @file starpu/cpui_interface.c
  *
- * @copyright 2023-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2023-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -515,6 +515,9 @@ cpui_register( starpu_data_handle_t *handleptr,
 
 #if defined(CHAMELEON_USE_MPI)
     starpu_mpi_data_register( *handleptr, data_tag, data_rank );
+#else
+    (void)data_tag;
+    (void)data_rank;
 #endif /* defined(CHAMELEON_USE_MPI) */
 }
 

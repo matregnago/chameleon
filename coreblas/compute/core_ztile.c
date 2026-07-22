@@ -1136,6 +1136,8 @@ TCORE_zprint( FILE *file, const char *header,
     rc = asprintf( &s, "%s (%2d, %2d)", header, Am, An );
 #else
     rc = asprintf( &s, "%s %s", header, A->name );
+    (void)Am;
+    (void)An;
 #endif
     assert( rc != -1 );
     CORE_zprint( file, s, uplo, M, N, CHAM_tile_get_ptr( A ), A->ld );

@@ -2,7 +2,7 @@
  *
  * @file starpu/runtime_perm.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -115,6 +115,10 @@ RUNTIME_perm_flush( RUNTIME_sequence_t *sequence,
                     int                 m,
                     int                 n )
 {
+#if !defined(CHAMELEON_USE_MPI)
+    (void)sequence;
+    (void)rank;
+#endif
     starpu_data_handle_t *handle;
     int                   ws_idx = ( ws->side == ChamLeft ) ? m + n * ws->NP :
                                                               n + m * ws->NP;

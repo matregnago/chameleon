@@ -2,7 +2,7 @@
  *
  * @file starpu/runtime_ipiv.c
  *
- * @copyright 2022-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2022-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -196,6 +196,9 @@ void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
                           int                *ipiv,
                           int                 node )
 {
+#if !defined(CHAMELEON_USE_MPI)
+    (void)sequence;
+#endif
     int64_t mt   = desc->mt;
     int64_t mb   = desc->mb;
     int64_t tag  = chameleon_starpu_tag_book( (int64_t)(desc->mt) );
@@ -230,4 +233,3 @@ void RUNTIME_ipiv_gather( RUNTIME_sequence_t *sequence,
 
     chameleon_starpu_tag_release( tag );
 }
-
