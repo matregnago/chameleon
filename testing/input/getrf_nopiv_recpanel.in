@@ -1,0 +1,10 @@
+# No-pivot GETRF with recursive panels
+#
+# Both tile sizes produce more panels than the default lookahead, including
+# partial last panels, while keeping the numerical checks inexpensive.
+
+op = getrf_nopiv
+nb = 5, 7
+m = 31
+n = 23
+lda = 37

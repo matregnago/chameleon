@@ -2,7 +2,7 @@
  *
  * @file testing_zgetrf_nopiv.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -39,14 +39,50 @@ testing_zgetrf_nopiv_desc( run_arg_list_t *args, int check )
     int                   LDA   = run_arg_get_int( args, "LDA", M );
     int                   seedA = run_arg_get_int( args, "seedA", testing_ialea() );
     CHAMELEON_Complex64_t bump  = run_arg_get_complex64( args, "bump", (CHAMELEON_Complex64_t)N );
+    cham_rec_t            rec   = run_arg_get_rec( args, "rec", ChamRecNone );
+    int                   rarg  = run_arg_get_int( args, "rarg", 1 );
+    int                   l1    = run_arg_get_int( args, "l1", 0 );
+    int                   leaf  = nb;
 
     /* Descriptors */
-    CHAM_desc_t *descA;
+    CHAM_desc_t *descA = NULL;
 
     CHAMELEON_Set( CHAMELEON_TILE_SIZE, nb );
 
     /* Creates the matrices */
-    parameters_desc_create( "A", &descA, ChamComplexDouble, nb, nb, LDA, N, M, N );
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( rec != ChamRecNone ) {
+        int list_mb[] = { M,  nb, 0 };
+        int list_nb[] = { nb, nb, 0 };
+        CHAM_desc_recursion_t recursion = {
+            .kind       = rec,
+            .arg        = rarg,
+            .mbs        = list_mb,
+            .nbs        = list_nb,
+            .dist_level = 1
+        };
+
+        if ( l1 > 0 ) {
+            list_mb[0]          = nb;
+            list_mb[1]          = l1;
+            list_nb[1]          = l1;
+            recursion.dist_level = 0;
+            leaf                 = l1;
+        }
+
+        hres = parameters_recdesc_create( "A", &descA, ChamComplexDouble,
+                                          LDA, N, M, N,
+                                          &recursion );
+    }
+    else
+#endif
+    {
+        hres = parameters_desc_create( "A", &descA, ChamComplexDouble,
+                                       nb, nb, LDA, N, M, N );
+    }
+    if ( hres != CHAMELEON_SUCCESS ) {
+        return 1;
+    }
 
     /* Fills the matrix with random values */
     CHAMELEON_zplgtr_Tile( 0,    ChamUpper, descA, seedA   );
@@ -67,17 +103,42 @@ testing_zgetrf_nopiv_desc( run_arg_list_t *args, int check )
 
     /* Checks the factorisation and residue */
     if ( ( hres == CHAMELEON_SUCCESS ) && check ) {
-        CHAM_desc_t *descA0 = CHAMELEON_Desc_Copy( descA, CHAMELEON_MAT_ALLOC_TILE );
-        CHAMELEON_zplgtr_Tile( 0,    ChamUpper, descA0, seedA   );
-        CHAMELEON_zplgtr_Tile( bump, ChamLower, descA0, seedA+1 );
+        CHAM_desc_t *descA0 = NULL;
+        CHAM_desc_t *descLU = descA;
 
-        hres += check_zxxtrf( args, ChamGeneral, ChamUpperLower, descA0, descA );
+        hres = parameters_desc_create( "A0", &descA0, ChamComplexDouble,
+                                       leaf, leaf, LDA, N, M, N );
+        if ( hres == CHAMELEON_SUCCESS ) {
+            CHAMELEON_zplgtr_Tile( 0,    ChamUpper, descA0, seedA   );
+            CHAMELEON_zplgtr_Tile( bump, ChamLower, descA0, seedA+1 );
+        }
 
-        CHAMELEON_Desc_Destroy( &descA0 );
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+        if ( ( hres == CHAMELEON_SUCCESS ) && ( rec != ChamRecNone ) ) {
+            hres = CHAMELEON_Desc_Create_FlatView( &descLU, descA, leaf, leaf, "LU" );
+        }
+#endif
+
+        if ( hres == CHAMELEON_SUCCESS ) {
+            hres += check_zxxtrf( args, ChamGeneral, ChamUpperLower, descA0, descLU );
+        }
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+        if ( ( descLU != descA ) && ( descLU != NULL ) ) {
+            CHAMELEON_Desc_Destroy( &descLU );
+        }
+#endif
+        if ( descA0 != NULL ) {
+            CHAMELEON_Desc_Destroy( &descA0 );
+        }
     }
 
     parameters_desc_destroy( &descA );
 
+    (void)rec;
+    (void)rarg;
+    (void)l1;
+    (void)leaf;
     return hres;
 }
 
@@ -131,7 +192,9 @@ testing_zgetrf_nopiv_std( run_arg_list_t *args, int check )
 }
 
 testing_t   test_zgetrf_nopiv;
-const char *zgetrf_nopiv_params[] = { "mtxfmt", "nb", "m", "n", "lda", "seedA", "bump", NULL };
+const char *zgetrf_nopiv_params[] = {
+    "mtxfmt", "nb", "m", "n", "lda", "seedA", "bump", "rec", "rarg", "l1", NULL
+};
 const char *zgetrf_nopiv_output[] = { NULL };
 const char *zgetrf_nopiv_outchk[] = { "||A||", "||A-fact(A)||", "RETURN", NULL };
 

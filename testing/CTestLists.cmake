@@ -177,6 +177,28 @@ if (NOT CHAMELEON_SIMULATION)
               add_test( test_${cat}_${prec}print_recursive_${recursive_mtxfmt}
                 ${FULLPREFIX} -P 1 -f input/print_recursive.in
                 --rec=full --mtxfmt=${recursive_mtxfmt} )
+
+              add_test( test_${cat}_${prec}getrf_nopiv_rectile_${recursive_mtxfmt}
+                ${FULLPREFIX} -P 1 -f input/getrf_nopiv_rectile.in
+                --mtxfmt=${recursive_mtxfmt} --rec=full )
+
+              add_test( test_${cat}_${prec}getrf_nopiv_recpanel_${recursive_mtxfmt}
+                ${FULLPREFIX} -P 1 -f input/getrf_nopiv_recpanel.in
+                --mtxfmt=${recursive_mtxfmt} --rec=full )
+
+              set( getrf_nopiv_recpanel_la2_test
+                test_${cat}_${prec}getrf_nopiv_recpanel_la2_${recursive_mtxfmt} )
+              add_test( ${getrf_nopiv_recpanel_la2_test}
+                ${FULLPREFIX} -P 1 -f input/getrf_nopiv_recpanel.in
+                --mtxfmt=${recursive_mtxfmt} --rec=full )
+              set_tests_properties( ${getrf_nopiv_recpanel_la2_test}
+                PROPERTIES ENVIRONMENT "CHAMELEON_LOOKAHEAD=2" )
+
+              if ( ${cat} STREQUAL "mpi" )
+                add_test( test_${cat}_${prec}getrf_nopiv_recpanel_p${NP}_${recursive_mtxfmt}
+                  ${FULLPREFIX} -P ${NP} -f input/getrf_nopiv_recpanel.in
+                  --mtxfmt=${recursive_mtxfmt} --rec=full )
+              endif()
             endforeach()
           endif()
         endif()
