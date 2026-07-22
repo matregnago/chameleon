@@ -2,7 +2,7 @@
  *
  * @file testings.h
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  ***
  *
@@ -257,6 +257,9 @@ void        run_list_destroy( run_list_elt_t *run );
 
 int parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dtyp,
                             int mb, int nb, int lm, int ln, int m, int n );
+int parameters_recdesc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dtyp,
+                               int lm, int ln, int m, int n,
+                               const CHAM_desc_recursion_t *recursive );
 int parameters_desc_destroy( CHAM_desc_t **descptr );
 
 /**
