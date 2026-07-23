@@ -136,7 +136,7 @@ insert_task_zperm_reduce_init( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zperm_reduce_init ),
         0 );
 }
 
@@ -157,7 +157,7 @@ insert_task_zperm_reduce_send( const RUNTIME_option_t *options,
         STARPU_R,               RUNTIME_perm_getaddr( ws, m, n ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zperm_reduce ),
         0 );
 
     (void)me;
@@ -183,7 +183,7 @@ insert_task_zperm_reduce_recv( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zperm_reduce ),
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, cpui_handle );
 }

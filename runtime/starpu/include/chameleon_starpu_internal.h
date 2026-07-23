@@ -127,13 +127,25 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
     starpu_insert_task( (_codelet_), ##__VA_ARGS__ )
 #endif
 
-#define INSERT_TASK_COMMON_TASK_PARAMS_NOCB             \
-    STARPU_PRIORITY,          options->priority,        \
-    STARPU_EXECUTE_ON_WORKER, options->workerid,        \
-    STARPU_POSSIBLY_PARALLEL, options->parallel
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+#define INSERT_TASK_DAG_COLOR( _options_, _name_ ) ,                                    \
+    STARPU_TASK_COLOR, CHAMELEON_DAG_TASK_GET_COLOR( _options_, CHAMELEON_DAG_TASK_COLOR_NAME( _name_ ) )
+/* Preserve the resolved color while the codelet name token is still available. */
+#define INSERT_TASK_DAG_COLOR_DECL( _options_, _name_ )                                  \
+    const int cl_color = CHAMELEON_DAG_TASK_GET_COLOR( _options_, CHAMELEON_DAG_TASK_COLOR_NAME( _name_ ) );
+#else
+#define INSERT_TASK_DAG_COLOR( _options_, _name_ )
+#define INSERT_TASK_DAG_COLOR_DECL( _options_, _name_ )
+#endif
+
+#define INSERT_TASK_COMMON_TASK_PARAMS_NOCB( _name_ ) \
+    STARPU_PRIORITY,          options->priority,       \
+    STARPU_EXECUTE_ON_WORKER, options->workerid,       \
+    STARPU_POSSIBLY_PARALLEL, options->parallel        \
+    INSERT_TASK_DAG_COLOR( options, _name_ )
 
 #define INSERT_TASK_COMMON_TASK_PARAMS( _name_ )        \
-    INSERT_TASK_COMMON_TASK_PARAMS_NOCB,                \
+    INSERT_TASK_COMMON_TASK_PARAMS_NOCB( _name_ ),      \
     STARPU_CALLBACK,          options->profiling ? cl_##_name_##_callback : NULL
 
 /*
@@ -258,6 +270,7 @@ chameleon_starpu_data_iscached(const CHAM_desc_t *A, int m, int n)
     struct cl_##_name_##_args_s *clargs  = NULL;                \
     struct starpu_codelet       *cl      = &cl_##_name_;        \
     const char                  *cl_name = #_name_;             \
+    INSERT_TASK_DAG_COLOR_DECL( options, _name_ )               \
     int                          nbdata  = 0;
 
 #define INSERT_TASK_COMMON_PARAMETERS_EXTENDED( _name_task_, _name_cl_, _name_arg_, _nbuffer_ ) \
@@ -266,6 +279,7 @@ chameleon_starpu_data_iscached(const CHAM_desc_t *A, int m, int n)
     struct cl_##_name_arg_##_args_s *clargs  = NULL;                                            \
     struct starpu_codelet           *cl      = &cl_##_name_cl_;                                 \
     const char                      *cl_name = #_name_task_;                                    \
+    INSERT_TASK_DAG_COLOR_DECL( options, _name_cl_ )                                            \
     int                              nbdata  = 0;
 
 #define INSERT_TASK_COMMON_PARAMETERS_CLNULL( _name_, _nbuffer_ ) \
@@ -273,6 +287,7 @@ chameleon_starpu_data_iscached(const CHAM_desc_t *A, int m, int n)
     struct starpu_mpi_task_exchange_params params;                \
     struct starpu_codelet           *cl      = NULL;              \
     const char                      *cl_name = #_name_;           \
+    INSERT_TASK_DAG_COLOR_DECL( options, _name_ )                 \
     int                              nbdata  = 0;
 
 /**
@@ -585,11 +600,11 @@ starpu_cham_task_exchange_data_after_execution( const RUNTIME_option_t          
  *
  */
 static inline void
-starpu_cham_task_set_options( const RUNTIME_option_t   *options,
-                              struct starpu_task       *task,
-                              int                       nbdata,
-                              struct starpu_data_descr *descrs,
-                              callback_fct_t            callback )
+starpu_cham_task_set_options_internal( const RUNTIME_option_t   *options,
+                                       struct starpu_task       *task,
+                                       int                       nbdata,
+                                       struct starpu_data_descr *descrs,
+                                       callback_fct_t            callback )
 {
     int allocated_buffers = 0;
     int i;
@@ -630,6 +645,17 @@ starpu_cham_task_set_options( const RUNTIME_option_t   *options,
         STARPU_TASK_SET_MODE( task, mode, i );
     }
 }
+
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+#define starpu_cham_task_set_options(_options_, _task_, _nbdata_, _descrs_, _callback_) \
+    do {                                                                \
+        starpu_cham_task_set_options_internal( (_options_), (_task_), (_nbdata_), (_descrs_), (_callback_) ); \
+        (_task_)->color = cl_color;                                      \
+    } while (0)
+#else
+#define starpu_cham_task_set_options starpu_cham_task_set_options_internal
+#endif
+
 #endif /* !defined(CHAMELEON_STARPU_USE_INSERT) */
 
 /* Disable STARPU_COMMUTE if CHAMELEON_STARPU_COMMUTE is OFF */

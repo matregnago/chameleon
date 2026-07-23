@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_ipiv.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -128,7 +128,6 @@ void INSERT_TASK_ipiv_to_perm( const RUNTIME_option_t *options,
         STARPU_W, RUNTIME_ipiv_getinvp( ipivdesc, ipivk ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( ipiv_to_perm ),
         0 );
 }
-

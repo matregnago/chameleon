@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_zlaswp_batched.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -191,7 +191,7 @@ void INSERT_TASK_zlaswp_batched_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY,     clargs->handle_mode, nhandles,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_batched ),
         0 );
 
     /* clargs is freed by starpu. */
@@ -421,7 +421,7 @@ void INSERT_TASK_zlaswp_get_batched_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY,     clargs->handle_mode, nhandles,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_get_batched ),
         0 );
 
     /* clargs is freed by starpu. */
@@ -641,7 +641,7 @@ void INSERT_TASK_zlaswp_set_batched_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY,     clargs->handle_mode, nhandles,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_set_batched ),
         0 );
 
     /* clargs is freed by starpu. */

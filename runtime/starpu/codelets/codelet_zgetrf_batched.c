@@ -173,7 +173,7 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
         access_ppiv,              RUNTIME_pivot_getaddr( pivot, rankA, clargs->h-1 ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zgetrf_panel_offdiag_batched ),
         STARPU_NAME,              clargs->cl_name,
         0 );
 
@@ -414,7 +414,7 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
         accessU,                  RTBLKADDR(U, CHAMELEON_Complex64_t, Um, Un ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zgetrf_panel_blocked_batched ),
         STARPU_NAME,              clargs->cl_name,
         0 );
 

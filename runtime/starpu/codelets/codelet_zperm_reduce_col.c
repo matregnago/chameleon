@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_zperm_reduce_col.c
  *
- * @copyright 2014-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2014-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -79,7 +79,7 @@ INSERT_TASK_zperm_reduce_col_send( const RUNTIME_option_t *options,
         STARPU_R,               RTBLKADDR(U, CHAMELEON_Complex64_t, m, me),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zperm_reduce_col ),
         0 );
 }
 
@@ -123,7 +123,7 @@ INSERT_TASK_zperm_reduce_col_recv( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zperm_reduce_col ),
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, RTBLKADDR(U, CHAMELEON_Complex64_t, m, src) );
 }
