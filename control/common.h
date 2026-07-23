@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -73,6 +73,8 @@
 #include "control/global.h"
 #include "control/auxiliary.h"
 #include "control/context.h"
+#include "control/dag_colors.h"
+#include "control/dag_task_colors.h"
 #include "control/descriptor.h"
 #include "control/async.h"
 #include "chameleon/getenv.h"
