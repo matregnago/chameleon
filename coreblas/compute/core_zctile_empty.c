@@ -19,7 +19,8 @@
 #include "coreblas/coreblas_zctile.h"
 
 void
-TCORE_clag2z( int M, int N,
+TCORE_clag2z( __attribute__((unused)) int M,
+              __attribute__((unused)) int N,
               const CHAM_tile_t *A,
               CHAM_tile_t       *B )
 {
@@ -29,9 +30,11 @@ TCORE_clag2z( int M, int N,
 }
 
 void
-TCORE_zlag2c( int M, int N,
+TCORE_zlag2c( __attribute__((unused)) int M,
+              __attribute__((unused)) int N,
               const CHAM_tile_t *A,
-              CHAM_tile_t       *B, int *info )
+              CHAM_tile_t       *B,
+              __attribute__((unused)) int *info )
 {
     coreblas_kernel_trace( A, B );
     assert( A->format & CHAMELEON_TILE_FULLRANK );
