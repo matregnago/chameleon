@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -34,6 +34,10 @@ void RUNTIME_options_init( RUNTIME_option_t     *options,
     options->workerid  = -1;
     options->forcesub  = 0;
     options->withlacpy = 0;
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+    options->taskcolor = CHAMELEON_DAG_COLOR_MISC;
+    options->dag_color_mode = chamctxt->dag_color_mode;
+#endif
     options->ws_wsize  = 0;
     options->ws_hsize  = 0;
     options->ws_worker = NULL;
