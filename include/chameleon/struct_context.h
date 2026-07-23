@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -49,6 +49,9 @@ typedef struct chameleon_context_s {
 
     cham_householder_t householder;        /**< "domino" (flat) or tree-based (reduction) Householder */
     cham_translation_t translation;        /**< In place or Out of place layout conversion            */
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+    cham_dag_color_t   dag_color_mode;     /**< DAG task color policy                                 */
+#endif
 
     int                nb;
     int                ib;
