@@ -104,6 +104,9 @@ starpu_cham_rectask_initrequest( struct starpu_task *task,
     /* Propagate the rectask priority to subtasks if needed */
     request->priority = task->priority;
 
+    /* The outer task owns the data lifetime while its partition is active. */
+    request->flush = 0;
+
     return;
 }
 
