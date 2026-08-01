@@ -432,6 +432,7 @@ chameleon_pztrtri( cham_trtri_t variant, cham_uplo_t uplo, cham_diag_t diag, CHA
     }
 
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( trtri ) );
 
     switch( alg ) {
     case ChamTrtriVariant1:

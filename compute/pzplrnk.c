@@ -189,6 +189,7 @@ chameleon_pzplrnk( int                         K,
         return;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( plrnk ) );
 
     P = chameleon_desc_datadist_get_iparam( C, 0 );
     Q = chameleon_desc_datadist_get_iparam( C, 1 );

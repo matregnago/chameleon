@@ -2,7 +2,7 @@
  *
  * @file pmap.c
  *
- * @copyright 2018-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2018-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -11,6 +11,7 @@
  *
  * @version 1.4.0
  * @author Mathieu Faverge
+ * @author Florent Pruvost
  * @date 2024-03-14
  *
  */
@@ -34,6 +35,7 @@ void chameleon_pmap( cham_uplo_t uplo, int ndata, cham_map_data_t *data,
     if (sequence->status != CHAMELEON_SUCCESS)
         return;
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( map ) );
 
     minmn = chameleon_min( A->mt, A->nt );
 

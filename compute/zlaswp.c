@@ -566,6 +566,7 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
 
     if ( IPIV->data != NULL ) {
         RUNTIME_options_init( &options, chamctxt, sequence, request );
+        RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( laswp ) );
         if ( side == ChamLeft ) {
             int tempkm, m0;
 

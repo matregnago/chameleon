@@ -44,6 +44,7 @@ void chameleon_pclag2z( CHAM_desc_t *A, CHAM_desc_t *B,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( lag2c ) );
 
     for(m = 0; m < A->mt; m++) {
         tempmm = A->get_blkdim( A, m, DIM_m, A->m );
@@ -81,6 +82,7 @@ void chameleon_pzlag2c( CHAM_desc_t *A, CHAM_desc_t *B,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( lag2c ) );
 
     for(m = 0; m < A->mt; m++) {
         tempmm = A->get_blkdim( A, m, DIM_m, A->m );

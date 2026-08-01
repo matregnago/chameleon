@@ -51,6 +51,7 @@ void chameleon_pzplgsy_generic( CHAMELEON_Complex64_t  bump,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( plgsy ) );
 
     minmn = chameleon_min( A->mt, A->nt );
     switch ( uplo ) {

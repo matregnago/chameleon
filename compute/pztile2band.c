@@ -46,6 +46,7 @@ void chameleon_pztile2band( cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( tile2band ) );
 
     /*
      *  ChamLower => Lower Band

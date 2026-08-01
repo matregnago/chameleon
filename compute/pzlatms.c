@@ -95,6 +95,7 @@ void chameleon_pzlatms( cham_dist_t idist, unsigned long long int seed, cham_sym
     ib = CHAMELEON_IB;
 
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( latms ) );
 
     /* Start initialiazing A */
     chameleon_pzlaset( ChamUpperLower, 0., 0., A, sequence, request );

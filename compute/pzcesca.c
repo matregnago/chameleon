@@ -232,6 +232,7 @@ void chameleon_pzcesca( struct chameleon_pzcesca_s *ws, int center, int scale, c
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( cesca ) );
 
     /* Initialize Wgcol */
     for(m = 0; m < Wgcol->mt; m++) {

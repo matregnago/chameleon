@@ -2,7 +2,7 @@
  *
  * @file pztpgqrt_param.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  * @copyright 2016-2020 KAUST. All rights reserved.
  *
@@ -58,6 +58,7 @@ void chameleon_pztpgqrt_param( int genD, cham_uplo_t uplo, int K,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( tpgqrt_param ) );
 
     ib = CHAMELEON_IB;
 

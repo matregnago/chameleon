@@ -45,6 +45,7 @@ chameleon_pzgebrd_ge2gb( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *
         return;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gebrd ) );
 
     if ( D == NULL ) {
         D    = A;
@@ -189,6 +190,7 @@ chameleon_pzgebrd_gb2bd( cham_job_t jobu, cham_job_t jobvt, CHAM_desc_t *A,
         return sequence->status;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gebrd ) );
 
     M     = A->m;
     N     = A->n;
@@ -274,6 +276,7 @@ int chameleon_pzgebrd( int genD, cham_job_t jobu, cham_job_t jobvt,
         return sequence->status;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gebrd ) );
 
     chameleon_pzgebrd_ge2gb( genD, A, T, D, sequence, request );
     chameleon_pzgebrd_gb2bd( jobu, jobvt, A, U, LDU, VT, LDVT, E, S, sequence, request );

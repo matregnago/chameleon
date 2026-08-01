@@ -48,6 +48,7 @@ void chameleon_pzsytrf(cham_uplo_t uplo, CHAM_desc_t *A,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( sytrf ) );
 
     RUNTIME_options_ws_alloc( &options, 0, ws_host );
 

@@ -59,6 +59,7 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( getrf_nopiv ) );
 
     ib = CHAMELEON_IB;
 
@@ -176,6 +177,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( getrf_nopiv ) );
 
     ib = CHAMELEON_IB;
     lookahead = chamctxt->lookahead;

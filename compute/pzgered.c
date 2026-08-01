@@ -176,6 +176,7 @@ void chameleon_pzgered( cham_uplo_t         uplo,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gered ) );
 
     P = chameleon_desc_datadist_get_iparam( A, 0 );
     Q = chameleon_desc_datadist_get_iparam( A, 1 );
