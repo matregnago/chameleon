@@ -10,6 +10,6 @@ preliminary_checks:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   parallel:
     matrix:
-      - TEST: [rebase, draft, header]
+      - TEST: [rebase, draft, header, dag_colors]
   script:
     - .gitlab/check_ci.sh $TEST
