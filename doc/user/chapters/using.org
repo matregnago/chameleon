@@ -106,6 +106,11 @@
        in-place translation to avoid copies. *2*, *Out*,
        *ChamOutOfPlace* sets the out-of-place translation that uses a
        copy of the matrix. The default is *ChamInPlace*.
+     * *CHAMELEON_DAG_COLOR_MODE* selects one color per algorithm with
+       *0*, *Alg*, *Algorithm*, or *ChamDagColorAlgorithm*, and one color
+       per task type with *1*, *Task*, *Tasks*, or *ChamDagColorTask*.
+       The default is *ChamDagColorAlgorithm*. This variable is available
+       when Chameleon is built with *CHAMELEON_ENABLE_DAG_COLORS=ON*.
      * *CHAMELEON_GENERIC*, if ON all algorithms using specialized
        algorithms specific to data distributions are disabled.
      * *CHAMELEON_AUTOMINMAX*, if ON the minimal/maximal limits of
@@ -1024,6 +1029,8 @@
      * *CHAMELEON_HOUSEHOLDER_SIZE*: size of the groups in householder trees,
      * *CHAMELEON_TRANSLATION_MODE*: related to the *CHAMELEON_Lap2Desc*, see ztile.c.
      * *CHAMELEON_LOOKAHEAD*: lookahead size used in some algorithms (GEMM summa_c, symm/hemm, getrf, getrf_nopiv).
+     * *CHAMELEON_DAG_COLOR_MODE*: use *ChamDagColorAlgorithm* or *ChamDagColorTask*
+       when Chameleon is built with *CHAMELEON_ENABLE_DAG_COLORS=ON*.
 
      Get value of CHAMELEON parameter.
      #+begin_src

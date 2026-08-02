@@ -400,6 +400,9 @@ and [[sec:ug:brew][Brew]] on macOS.
         enables Hmat-OSS kernels.
       * *CHAMELEON_RUNTIME_SYNC* (default OFF):
         enables synchronous task submission when available to debug the code without parallelism.
+      * *CHAMELEON_ENABLE_DAG_COLORS* (default OFF):
+        enables runtime selection between colors per algorithm and colors per task
+        in traces and generated DAGs.
       * *CHAMELEON_KERNELS_TRACE* (default OFF):
         enables kernel traces to debug the task execution order.
       * *CHAMELEON_KERNELS_MT* (default OFF):
