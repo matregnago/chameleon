@@ -14,6 +14,11 @@ chameleon-2.0.0
  - gpucublas: Add lacpy kernel for tiles copies not directly handled by StarPU (available with StarPU)
  - gpucublas: Add GPU matrix generation kernels: plrnt, plgsy, plghe (available with StarPU)
  - hip: Add hipsolver support and especially xpotrf kernels support with StarPU
+ - tracing: Add optional DAG colors controlled by CHAMELEON_ENABLE_DAG_COLORS
+ - tracing: Add shared color palettes for algorithms and task families, selectable through CHAMELEON_DAG_COLOR_MODE
+ - runtime: Propagate DAG color metadata through the runtime task options and StarPU/Quark DAG generation paths
+ - tools: Add consistency checks for DAG color mappings
+ - tools: Add a StarPU FxT DAG cleanup helper for Chameleon testings, with task contraction, rank markers, kernel-only labels, and DAG color mode selection
 
 chameleon-1.4.0
 ------------------------------------------------------------------------
