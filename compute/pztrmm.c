@@ -50,6 +50,7 @@ void chameleon_pztrmm(cham_side_t side, cham_uplo_t uplo,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( trmm ) );
     /*
      *  ChamLeft / ChamUpper / ChamNoTrans
      */

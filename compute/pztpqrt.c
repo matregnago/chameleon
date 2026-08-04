@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2016 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  * @copyright 2016-2018 KAUST. All rights reserved.
  *
@@ -15,6 +15,7 @@
  * @version 1.4.0
  * @author Mathieu Faverge
  * @author Samuel Thibault
+ * @author Florent Pruvost
  * @date 2025-01-24
  * @precisions normal z -> s d c
  *
@@ -49,6 +50,7 @@ void chameleon_pztpqrt( int L, CHAM_desc_t *A, CHAM_desc_t *B, CHAM_desc_t *T,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( tpqrt ) );
 
     ib = CHAMELEON_IB;
 

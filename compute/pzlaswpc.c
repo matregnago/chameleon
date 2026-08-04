@@ -292,6 +292,7 @@ chameleon_pzlaswpc( struct chameleon_pzlaswp_s *ws,
         return;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( laswpc ) );
 
     if ( dir == ChamDirForward ) {
         for ( k = 0; k < IPIV->mt; k++ ) {

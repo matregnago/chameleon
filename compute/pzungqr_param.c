@@ -173,6 +173,7 @@ void chameleon_pzungqr_param( int genD, int K,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( ungqr_param ) );
 
     ib = CHAMELEON_IB;
 

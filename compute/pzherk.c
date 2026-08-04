@@ -50,6 +50,7 @@ void chameleon_pzherk(cham_uplo_t uplo, cham_trans_t trans,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( herk ) );
 
     for (n = 0; n < C->nt; n++) {
         tempnn = C->get_blkdim( C, n, DIM_n, C->n );

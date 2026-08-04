@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_zlaswp.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -121,7 +121,7 @@ void INSERT_TASK_zlaswp_get( const RUNTIME_option_t *options,
         STARPU_RW | STARPU_COMMUTE, RTBLKADDR(WAP, ChamComplexDouble, WAPm, WAPn),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_get ),
         STARPU_NAME, cl_name,
         0 );
 }
@@ -311,7 +311,7 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
         STARPU_RW, RTBLKADDR(A,  ChamComplexDouble, Am,  An ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_set ),
         STARPU_NAME, cl_name,
         0 );
 }
@@ -465,7 +465,7 @@ void INSERT_TASK_zlaswp_ret( const RUNTIME_option_t *options,
         STARPU_R, RUNTIME_perm_getaddr( ws, Wm, Wn ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_ret ),
         0 );
 }
 

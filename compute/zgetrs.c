@@ -2,7 +2,7 @@
  *
  * @file zgetrs.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -370,6 +370,7 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
 
     if ( IPIV->data != NULL ) {
         RUNTIME_options_init( &options, chamctxt, sequence, request );
+        RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( laswp ) );
         for ( k = 0; k < A->mt; k++ ) {
             tempkm = A->get_blkdim( A, k, DIM_m, A->m );
             INSERT_TASK_ipiv_to_perm( &options, k * A->mb, tempkm, tempkm,

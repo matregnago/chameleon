@@ -2,7 +2,7 @@
  *
  * @file starpu/codelet_zgetrf_blocked_trsm.c
  *
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -98,7 +98,7 @@ void INSERT_TASK_zgetrf_cpy_pivrow_in_Up( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   Up->myrank,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zgetrf_cpy_pivrow_in_Up ),
         0 );
 
     (void)k;

@@ -113,6 +113,7 @@ void chameleon_pzlatro( cham_uplo_t uplo, cham_trans_t trans,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( latro ) );
 
     switch( uplo ) {
         case ChamUpperLower:

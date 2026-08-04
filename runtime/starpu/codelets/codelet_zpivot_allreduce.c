@@ -99,7 +99,7 @@ INSERT_TASK_zpivot_allreduce_send( const RUNTIME_option_t *options,
         STARPU_R,               RUNTIME_pivot_getaddr( pivot, me, h ),
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zpivot_allreduce ),
         0 );
 
     (void)k;
@@ -127,7 +127,7 @@ INSERT_TASK_zpivot_allreduce_recv( const RUNTIME_option_t *options,
         STARPU_EXECUTE_ON_NODE,   me,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zpivot_allreduce ),
         0 );
     starpu_mpi_cache_flush( options->sequence->comm, RUNTIME_pivot_getaddr( pivot, src, h ) );
 

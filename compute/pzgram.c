@@ -150,6 +150,7 @@ void chameleon_pzgram( struct chameleon_pzgram_s *ws, cham_uplo_t uplo, CHAM_des
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gram ) );
 
     /* Initialize Wcol */
     for(m = 0; m < Wcol->mt; m++) {

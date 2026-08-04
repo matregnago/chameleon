@@ -35,6 +35,7 @@ void chameleon_pzgerst( cham_uplo_t         uplo,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gerst ) );
 
     for(m = 0; m < A->mt; m++) {
         int tempmm = A->get_blkdim( A, m, DIM_m, A->m );

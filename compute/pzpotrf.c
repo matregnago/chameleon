@@ -53,6 +53,7 @@ void chameleon_pzpotrf( cham_uplo_t         uplo,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( potrf ) );
 
     /* Allocation of temporary (scratch) working space */
 #if !defined(CHAMELEON_SIMULATION)

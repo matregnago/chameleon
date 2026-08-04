@@ -327,6 +327,14 @@ typedef enum chameleon_getrf_allreduce_e {
     ChamStarPUTasks = 0,
 } cham_getrf_allreduce_t;
 
+/**
+ * @brief DAG task color policy
+ */
+typedef enum chameleon_dag_color_e {
+    ChamDagColorAlgorithm = 0, /**< Use one color for all tasks of an algorithm */
+    ChamDagColorTask      = 1, /**< Use the color associated with each task type */
+} cham_dag_color_t;
+
 #define ChameleonTrd            1001
 #define ChameleonBrd            1002
 
@@ -370,6 +378,7 @@ typedef enum chameleon_getrf_allreduce_e {
 #define CHAMELEON_TRANSLATION_MODE  7
 #define CHAMELEON_LOOKAHEAD         8
 #define CHAMELEON_RUNTIME           9
+#define CHAMELEON_DAG_COLOR_MODE   10
 
 /**
  * @brief QR/LQ factorization trees

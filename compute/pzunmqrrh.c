@@ -58,6 +58,7 @@ void chameleon_pzunmqrrh( int genD, int BS, cham_side_t side, cham_trans_t trans
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( unmqrrh ) );
 
     ib = CHAMELEON_IB;
 

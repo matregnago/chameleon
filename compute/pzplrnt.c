@@ -48,6 +48,7 @@ void chameleon_pzplrnt_generic( CHAM_desc_t            *A,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( plrnt ) );
 
     for (m = 0; m < A->mt; m++) {
         tempmm = A->get_blkdim( A, m, DIM_m, A->m );

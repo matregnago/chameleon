@@ -241,6 +241,7 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
         return;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( laswp ) );
 
     assert( A->get_rankof_init == chameleon_getrankof_2d );
 

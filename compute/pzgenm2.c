@@ -57,6 +57,7 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
 
     chamctxt = chameleon_context_self();
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( genm2 ) );
 
     /* Initialize the result */
     *result = 0.0;

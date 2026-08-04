@@ -118,12 +118,33 @@ typedef struct runtime_option_s {
     int                 forcesub;  /**< Force task submission if true                            */
     int                 withlacpy; /**< Flag to force the use of lacpy copies                    */
     int                 withcuda;  /**< Flag to know if cuda is enabled/disabled                 */
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+    int                 taskcolor; /**< Set a default task color for a set of tasks              */
+    cham_dag_color_t    dag_color_mode; /**< DAG task color policy                              */
+#endif
     size_t              ws_wsize;  /**< Define the worker workspace size                         */
     size_t              ws_hsize;  /**< Define the host workspace size for hybrid CPU/GPU kernel */
     void               *ws_worker; /**< Pointer to the worker workspace (structure)              */
     void               *ws_host;   /**< Pointer to the host workspace (structure)                */
     void               *schedopt;  /**< Specific runtime data pointer to handle the sequence     */
 } RUNTIME_option_t;
+
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+/** Set the algorithm color copied into each task in ChamDagColorAlgorithm mode. */
+static inline void
+RUNTIME_options_set_taskcolor( RUNTIME_option_t *options, int color )
+{
+    options->taskcolor = color;
+}
+#else
+/** Compile algorithm color assignments out of performance-oriented builds. */
+static inline void
+RUNTIME_options_set_taskcolor( RUNTIME_option_t *options, int color )
+{
+    (void)options;
+    (void)color;
+}
+#endif
 
 END_C_DECLS
 

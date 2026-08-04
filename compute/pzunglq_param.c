@@ -50,6 +50,7 @@ void chameleon_pzunglq_param( int genD, const libhqr_tree_t *qrtree, CHAM_desc_t
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( unglq_param ) );
 
     ib = CHAMELEON_IB;
 

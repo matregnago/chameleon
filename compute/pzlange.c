@@ -398,6 +398,7 @@ void chameleon_pzlange_generic( cham_normtype_t norm, cham_uplo_t uplo, cham_dia
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( lange ) );
 
     workmt = chameleon_max( A->mt, P );
     worknt = chameleon_max( A->nt, Q );

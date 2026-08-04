@@ -45,6 +45,7 @@ void chameleon_pzlacpy_generic( cham_uplo_t         uplo,
         return;
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( lacpy ) );
 
     switch (uplo) {
     /*

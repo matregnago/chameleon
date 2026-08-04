@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -106,6 +106,39 @@ chameleon_getenv_translation(char * string, cham_translation_t default_value) {
     return default_value;
 }
 
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+static inline cham_dag_color_t
+chameleon_getenv_dag_color_mode(char * string, cham_dag_color_t default_value) {
+    long int ret;
+    char *str = chameleon_getenv(string);
+    if (str == NULL) return default_value;
+
+    if ( sscanf( str, "%ld", &ret ) == 1 ) {
+        switch (ret) {
+        case ChamDagColorAlgorithm:
+            return ChamDagColorAlgorithm;
+        case ChamDagColorTask:
+            return ChamDagColorTask;
+        default:
+            chameleon_error( "chameleon_getenv_dag_color_mode", "Incorrect DAG color mode value" );
+            return default_value;
+        }
+    }
+
+    if(0 == strcasecmp("chamdagcoloralgorithm", str)) { return ChamDagColorAlgorithm; }
+    if(0 == strcasecmp("algorithm", str)) { return ChamDagColorAlgorithm; }
+    if(0 == strcasecmp("alg", str)) { return ChamDagColorAlgorithm; }
+
+    if(0 == strcasecmp("chamdagcolortask", str)) { return ChamDagColorTask; }
+    if(0 == strcasecmp("task", str)) { return ChamDagColorTask; }
+    if(0 == strcasecmp("tasks", str)) { return ChamDagColorTask; }
+
+    chameleon_error( "chameleon_getenv_dag_color_mode", "Incorrect DAG color mode type" );
+
+    return default_value;
+}
+#endif
+
 /**
  *  Create new context
  */
@@ -148,6 +181,9 @@ CHAM_context_t *chameleon_context_create()
 
     chamctxt->householder = chameleon_getenv_householder( "CHAMELEON_HOUSEHOLDER_MODE", ChamFlatHouseholder );
     chamctxt->translation = chameleon_getenv_translation( "CHAMELEON_TRANSLATION_MODE", ChamInPlace );
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+    chamctxt->dag_color_mode = chameleon_getenv_dag_color_mode( "CHAMELEON_DAG_COLOR_MODE", ChamDagColorAlgorithm );
+#endif
 
     /* First and last step for main algorithms to get partial traces for example */
     chamctxt->first_step = chameleon_getenv_get_value_int( "CHAMELEON_FIRST_STEP", 0       );
@@ -342,7 +378,8 @@ int CHAMELEON_Disable(int option)
  *          Feature to be enabled:
  *          @arg CHAMELEON_TILE_SIZE:        size matrix tile,
  *          @arg CHAMELEON_INNER_BLOCK_SIZE: size of tile inner block,
- *          @arg CHAMELEON_LOOKAHEAD:        depth of the look ahead in algorithms
+ *          @arg CHAMELEON_LOOKAHEAD:        depth of the look ahead in algorithms,
+ *          @arg CHAMELEON_DAG_COLOR_MODE:   ChamDagColorAlgorithm or ChamDagColorTask
  *
  * @param[in] value
  *          Value of the parameter.
@@ -420,6 +457,17 @@ int CHAMELEON_Set( int param, int value )
             }
             chamctxt->lookahead = value;
             break;
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+        case CHAMELEON_DAG_COLOR_MODE:
+            if ( ( value != ChamDagColorAlgorithm ) &&
+                 ( value != ChamDagColorTask ) )
+            {
+                chameleon_error("CHAMELEON_Set", "illegal value of CHAMELEON_DAG_COLOR_MODE");
+                return CHAMELEON_ERR_ILLEGAL_VALUE;
+            }
+            chamctxt->dag_color_mode = value;
+            break;
+#endif
         default:
             chameleon_error("CHAMELEON_Set", "unknown parameter");
             return CHAMELEON_ERR_ILLEGAL_VALUE;
@@ -445,7 +493,8 @@ int CHAMELEON_Set( int param, int value )
  *          @arg CHAMELEON_HOUSEHOLDER_SIZE: Size of the Householder tree,
  *          @arg CHAMELEON_TRANSLATION_MODE: ChamInPlace or ChamOutOfPlace,
  *          @arg CHAMELEON_LOOKAHEAD:        Size of the look-ahead,
- *          @arg CHAMELEON_RUNTIME:          Runtime used by the library (See RUNTIME_id_t)
+ *          @arg CHAMELEON_RUNTIME:          Runtime used by the library (See RUNTIME_id_t),
+ *          @arg CHAMELEON_DAG_COLOR_MODE:   ChamDagColorAlgorithm or ChamDagColorTask
  *
  * @param[out] value
  *          Value of the parameter.
@@ -486,6 +535,11 @@ int CHAMELEON_Get( int param, int *value )
         case CHAMELEON_RUNTIME:
             *value = chamctxt->scheduler;
             return CHAMELEON_SUCCESS;
+#if defined(CHAMELEON_ENABLE_DAG_COLORS)
+        case CHAMELEON_DAG_COLOR_MODE:
+            *value = chamctxt->dag_color_mode;
+            return CHAMELEON_SUCCESS;
+#endif
         default:
             chameleon_error("CHAMELEON_Get", "unknown parameter");
             return CHAMELEON_ERR_ILLEGAL_VALUE;

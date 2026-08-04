@@ -200,7 +200,7 @@ void INSERT_TASK_zlaswp_gemm_flush( const RUNTIME_option_t *options,
         STARPU_DATA_MODE_ARRAY, clargs->handle_mode, nhandles,
 
         /* Common task arguments */
-        INSERT_TASK_COMMON_TASK_PARAMS_NOCB,
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlaswp_gemm ),
         0 );
 
     /* clargs is freed by starpu. */

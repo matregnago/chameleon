@@ -240,6 +240,11 @@ if (CHAMELEON_RUNTIME_SYNC)
     message("-- ${BoldGreen}CHAMELEON_RUNTIME_SYNC is set to ON, turn it OFF to avoid synchronisation in the tasks submission${ColourReset}")
 endif()
 
+option(CHAMELEON_ENABLE_DAG_COLORS "Enable runtime selection of DAG colors in traces and DAGs" OFF)
+if (CHAMELEON_ENABLE_DAG_COLORS)
+    message("-- ${BoldGreen}CHAMELEON_ENABLE_DAG_COLORS is set to ON, turn it OFF to avoid runtime DAG color selection overhead${ColourReset}")
+endif()
+
 option(CHAMELEON_KERNELS_TRACE "Enable kernel traces to debug the task execution order" OFF)
 if (CHAMELEON_KERNELS_TRACE)
     message("-- ${BoldGreen}CHAMELEON_KERNELS_TRACE is set to ON, turn it OFF to get better perfomance${ColourReset}")

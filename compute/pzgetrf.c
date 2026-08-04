@@ -762,6 +762,7 @@ void chameleon_pzgetrf( struct chameleon_pzgetrf_s *ws,
         return;
     }
     RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( getrf ) );
 
     kmin = chameleon_max( 0,       chamctxt->first_step );
     kmax = chameleon_min( min_mnt, chamctxt->last_step  );

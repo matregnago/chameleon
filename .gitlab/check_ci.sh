@@ -67,9 +67,25 @@ check_header()
     fi
 }
 
+check_dag_colors()
+{
+    echo " Checking DAG color mappings: "
+    TOOLSDIR=$(dirname "$0")/../tools
+
+    "$TOOLSDIR/check_dag_colors.py"
+    rc=$?
+    if [ $rc -eq 0 ]
+    then
+        echo "Check DAG colors: SUCCESS"
+    else
+        echo "Check DAG colors: FAILED"
+        success=0
+    fi
+}
+
 if [ $# -lt 1 ]
 then
-    echo "Usage: $0 [rebase|draft|header]"
+    echo "Usage: $0 [rebase|draft|header|dag_colors]"
     exit 1
 fi
 
@@ -85,8 +101,11 @@ case $1 in
     header)
 	check_header
 	;;
+    dag_colors)
+	check_dag_colors
+	;;
     *)
-        echo "Usage: $0 [rebase|draft|header]"
+        echo "Usage: $0 [rebase|draft|header|dag_colors]"
 	exit 1
 	;;
 esac
