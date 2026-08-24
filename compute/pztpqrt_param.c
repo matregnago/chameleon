@@ -95,7 +95,7 @@ void chameleon_pztpqrt_param( int genD, cham_uplo_t uplo, int K,
         RUNTIME_iteration_push(chamctxt, k);
 
         p = chameleon_pzgeqrf_param_step( genD, uplo, k, ib, qrtree, tiles,
-                                          A, TS, TT, D, &options, sequence );
+                                          A, TS, TT, D, &options );
 
         /* Combine with ATop and A by merging last pivot with A(k,k) */
         {

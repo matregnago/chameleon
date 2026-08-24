@@ -40,9 +40,10 @@
  */
 int chameleon_pzgeqrf_step( int genD, int k, int ib,
                             CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D,
-                            RUNTIME_option_t *options, RUNTIME_sequence_t *sequence )
+                            RUNTIME_option_t *options )
 {
-    RUNTIME_request_t *request = options->request;
+    RUNTIME_sequence_t *sequence = options->sequence;
+    RUNTIME_request_t  *request  = options->request;
     int m, n;
     int tempkm, tempkn, tempnn, tempmm;
 
@@ -186,7 +187,7 @@ void chameleon_pzgeqrf( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D
         RUNTIME_iteration_push(chamctxt, k);
 
         chameleon_pzgeqrf_step( genD, k, ib,
-                                A, T, D, &options, sequence );
+                                A, T, D, &options );
 
         /* Restore the original location of the tiles */
         for (n = k; n < A->nt; n++) {
