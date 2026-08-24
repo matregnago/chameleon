@@ -47,6 +47,32 @@ struct rectask_args_s {
 typedef struct rectask_args_s rectask_args_t;
 
 /**
+ * @brief Allocate and initialize arguments shared by recursive codelets.
+ *
+ * @param[in] options
+ *          Runtime options whose sequence, parent, and priority are inherited.
+ *
+ * @param[in] ntiles
+ *          Number of entries required in the trailing tile array.
+ *
+ * @return Initialized recursive-task arguments.
+ */
+static inline rectask_args_t *
+starpu_cham_rectask_args_create( const RUNTIME_option_t *options, int ntiles )
+{
+    rectask_args_t *rtargs;
+
+    assert( ntiles > 0 );
+    rtargs = malloc( sizeof(*rtargs) + ( ntiles - 1 ) * sizeof(rtargs->tiles[0]) );
+    assert( rtargs != NULL );
+
+    rtargs->sequence = options->sequence;
+    rtargs->parent   = options->request->parent;
+    rtargs->priority = options->priority;
+    return rtargs;
+}
+
+/**
  * @brief Macro to specify the parent task and improve profiling information.
  */
 #if defined(CHAMELEON_RECURSIVE_TASKS_PROFILE)
