@@ -101,4 +101,9 @@
 # endif
 #endif
 
+/* For older revision of StarPU, STARPU_MAIN_RAM is not defined */
+#ifndef STARPU_MAIN_RAM
+#define STARPU_MAIN_RAM 0
+#endif
+
 #endif /* _chameleon_starpu_h_ */

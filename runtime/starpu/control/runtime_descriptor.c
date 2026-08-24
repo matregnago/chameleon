@@ -533,14 +533,6 @@ void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
 }
 #endif
 
-/**
- *  Get data addr
- */
-/* For older revision of StarPU, STARPU_MAIN_RAM is not defined */
-#ifndef STARPU_MAIN_RAM
-#define STARPU_MAIN_RAM 0
-#endif
-
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
 static void
 runtime_data_clean_desc_tile( starpu_data_handle_t handle,
@@ -641,6 +633,9 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 }
 #endif
 
+/**
+ *  Get data addr
+ */
 void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
 {
     int64_t mm = m + (A->i / A->mb);
