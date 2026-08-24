@@ -7,7 +7,7 @@
  *
  ***
  *
- * @brief Chameleon StarPU wont use implementations to flush pieces of data
+ * @brief Chameleon StarPU recursive-task support
  *
  * @version 1.4.0
  * @author Mathieu Faverge
@@ -22,15 +22,14 @@
  */
 struct rectask_args_s {
     /**
-     * @brief Defines the context in which the tasks are submitted, it
-     * will be destroyed only after a synchronization that guaranties the
-     * execution of all tasks. Thus, we can hold here a pointer to sumbit rectask
-     * tasks within the same context.
+     * @brief Context in which the subtasks are submitted. It is destroyed only
+     * after a synchronization that guarantees execution of every task, so a
+     * recursive task may safely retain this pointer for subtask submission.
      */
     RUNTIME_sequence_t *sequence;
     /**
-     * @brief Parent task of all the tasks that will be submited within
-     * this rectask. Used for profiling information.
+     * @brief Parent task of all tasks submitted within this recursive task.
+     * Used for profiling information.
      */
     struct starpu_task *parent;
     /**
@@ -40,15 +39,15 @@ struct rectask_args_s {
     int priority;
     /**
      * @brief List of tiles used to submit the tasks. Each codelet uses a
-     * different amount of tiles, thus we store at the end of the structure a
-     * variadic size field to store the list of the tiles.
+     * different number of tiles, so the structure ends with a variable-length
+     * tile array.
      */
     CHAM_tile_t *tiles[1];
 };
 typedef struct rectask_args_s rectask_args_t;
 
 /**
- * @brief Macro to specify the parent tasks to improve profiling informations
+ * @brief Macro to specify the parent task and improve profiling information.
  */
 #if defined(CHAMELEON_RECURSIVE_TASKS_PROFILE)
 #define INSERT_TASK_RECTASK_PROFILE_PARAM STARPU_RECURSIVE_TASK_PARENT, (rtargs ? rtargs->parent : NULL ),
@@ -57,7 +56,7 @@ typedef struct rectask_args_s rectask_args_t;
 #endif
 
 /**
- * @brief Macro to insert and factorize the recursive task arguments passed to the rt_starpu_insert_task function.
+ * @brief Add recursive-task arguments to an rt_starpu_insert_task() call.
  */
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
 #define INSERT_TASK_RECTASK_PARAMS(__name__)                              \
