@@ -102,9 +102,7 @@ void INSERT_TASK_ztrtri( const RUNTIME_option_t *options,
     /* Check if this is a rectask */
     is_rectask = ( tileA->format & CHAMELEON_TILE_DESC );
     if ( is_rectask ) {
-        rtargs = malloc( sizeof(rectask_args_t) );
-        rtargs->sequence = options->sequence;
-        rtargs->parent   = options->request->parent;
+        rtargs = starpu_cham_rectask_args_create( options, 1 );
         rtargs->tiles[0] = tileA;
         cl_name = "ztrtri_rectask";
     }

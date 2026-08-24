@@ -261,10 +261,7 @@ void INSERT_TASK_zgemm( const RUNTIME_option_t *options,
                    ( tileB->format & CHAMELEON_TILE_DESC ) &&
                    ( tileC->format & CHAMELEON_TILE_DESC ) );
     if ( is_rectask ) {
-        rtargs = malloc( sizeof(rectask_args_t) + 2 * sizeof(CHAM_tile_t*) );
-        rtargs->sequence = options->sequence;
-        rtargs->parent   = options->request->parent;
-        rtargs->priority = options->priority;
+        rtargs = starpu_cham_rectask_args_create( options, 3 );
         rtargs->tiles[0] = tileA;
         rtargs->tiles[1] = tileB;
         rtargs->tiles[2] = tileC;
