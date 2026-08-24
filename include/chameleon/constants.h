@@ -198,9 +198,10 @@ typedef enum chameleon_normtype_e {
  * @brief Recursive algorithm used to partition the matrix
  */
 typedef enum chameleon_rec_e {
+    ChamRecNone   = 180, /**< Non-recursive matrix */
     ChamRecFull   = 181, /**< Fully partitioned matrix */
     ChamRecRandom = 182, /**< Randomly partitioned matrix */
-    ChamRecDiag   = 183, /**< Diagonaly partitioned matrix */
+    ChamRecDiag   = 183, /**< Diagonally partitioned matrix */
     ChamRecSmart  = 184, /**< Partitioning optimized for GEMM */
 } cham_rec_t;
 
@@ -420,6 +421,12 @@ typedef enum chameleon_desc_acccess_e {
 #define CHAMELEON_MAT_CASE_ALLOC_GLOBAL  0
 #define CHAMELEON_MAT_CASE_ALLOC_TILE   -1
 #define CHAMELEON_MAT_CASE_OOC          -2
+
+/**
+ * @brief Rank markers for recursive parent tiles spanning several MPI ranks.
+ */
+#define CHAMELEON_MPI_WITH_ME    -4 /**< Parent includes data owned by this rank. */
+#define CHAMELEON_MPI_WITHOUT_ME -5 /**< Parent has no data owned by this rank.   */
 
 /**
  *  CHAMELEON constants - success & error codes
