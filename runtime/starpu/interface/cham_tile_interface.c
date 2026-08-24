@@ -730,6 +730,15 @@ starpu_cham_tile_child_set( starpu_data_handle_t *handleptr,
     cham_tile_interface = starpu_data_get_interface_on_node( *handleptr, home_node );
     starpu_cham_tile_interface_set( cham_tile_interface, tile, flttype );
 
+    /*
+     * Children without an application pointer are allocated by StarPU. The
+     * runtime allocation is compact, so the runtime tile must not keep a
+     * leading dimension inherited from a parent column-major layout.
+     */
+    if ( tile->mat == NULL ) {
+        cham_tile_interface->tile.ld = cham_tile_interface->tile.m;
+    }
+
     /* Report tilesize as allocated size */
     cham_tile_interface->allocsize = cham_tile_interface->tilesize;
 }
