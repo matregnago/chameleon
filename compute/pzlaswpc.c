@@ -187,12 +187,12 @@ chameleon_pzlaswpc_panel( struct chameleon_pzlaswp_s *ws,
                           CHAM_ipiv_t                *ipiv,
                           int                         m,
                           int                         k,
-                          RUNTIME_option_t           *options,
-                          RUNTIME_sequence_t         *sequence )
+                          RUNTIME_option_t           *options )
 {
-    const RUNTIME_request_t *request = options->request;
-    CHAM_reduce_t           *reduce  = &(ws->reduce);
-    int                      tempmm, tempkn;
+    RUNTIME_sequence_t *sequence = options->sequence;
+    RUNTIME_request_t  *request = options->request;
+    CHAM_reduce_t      *reduce  = &(ws->reduce);
+    int                 tempmm, tempkn;
 
 #if defined(CHAMELEON_USE_MPI)
     /* Initizalize the list of nodes invovlved in the row panel m */
@@ -299,7 +299,7 @@ chameleon_pzlaswpc( struct chameleon_pzlaswp_s *ws,
             for ( m = 0; m < A->mt; m++ ) {
                 options.priority = A->mt-m;
 
-                chameleon_pzlaswpc_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, m, k, &options, sequence );
+                chameleon_pzlaswpc_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, m, k, &options );
             }
             RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
@@ -308,7 +308,7 @@ chameleon_pzlaswpc( struct chameleon_pzlaswp_s *ws,
         for ( k = IPIV->mt - 1; k > -1; k-- ) {
             for ( m = 0; m < A->mt; m++ ) {
                 options.priority = A->mt-m;
-                chameleon_pzlaswpc_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, m, k, &options, sequence );
+                chameleon_pzlaswpc_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, m, k, &options );
             }
             RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }

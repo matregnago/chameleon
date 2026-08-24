@@ -91,7 +91,7 @@ chameleon_pzgebrd_ge2gb( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *
         for ( k = 0; k < A->nt; k++ ) {
             RUNTIME_iteration_push(chamctxt, k);
 
-            chameleon_pzgeqrf_step( genD, k, ib, A, T, D, &options, sequence );
+            chameleon_pzgeqrf_step( genD, k, ib, A, T, D, &options );
 
             /* Restore the original location of the tiles */
             for (n = k; n < A->nt; n++) {
@@ -100,7 +100,7 @@ chameleon_pzgebrd_ge2gb( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *
             }
 
             if ( k+1 < A->nt ) {
-                chameleon_pzgelqf_step( genD, k, ib, Abis, Tbis, Dbis, &options, sequence );
+                chameleon_pzgelqf_step( genD, k, ib, Abis, Tbis, Dbis, &options );
 
                 /* Restore the original location of the tiles */
                 for (m = k; m < A->mt; m++) {
@@ -127,7 +127,7 @@ chameleon_pzgebrd_ge2gb( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *
         for ( k = 0; k < A->mt; k++ ) {
             RUNTIME_iteration_push(chamctxt, k);
 
-            chameleon_pzgelqf_step( genD, k, ib, A, T, D, &options, sequence );
+            chameleon_pzgelqf_step( genD, k, ib, A, T, D, &options );
 
             /* Restore the original location of the tiles */
             for (m = k; m < A->mt; m++) {
@@ -136,7 +136,7 @@ chameleon_pzgebrd_ge2gb( int genD, CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *
             }
 
             if ( k+1 < A->mt ) {
-                chameleon_pzgeqrf_step( genD, k, ib, Abis, Tbis, Dbis, &options, sequence );
+                chameleon_pzgeqrf_step( genD, k, ib, Abis, Tbis, Dbis, &options );
 
                 /* Restore the original location of the tiles */
                 for (n = k; n < A->nt; n++) {

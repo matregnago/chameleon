@@ -155,6 +155,7 @@ static int chameleon_starpu_init( MPI_Comm comm, struct starpu_conf *conf )
     starpu_fxt_stop_profiling();
 #endif
 
+    (void)comm;
     return hres;
 }
 

@@ -58,7 +58,7 @@ struct chameleon_pzlaswp_s {
 struct chameleon_pzgetrf_s;
 
 typedef void (*chameleon_zgetrf_update_fct_t) (
-    struct chameleon_pzgetrf_s *, CHAM_desc_t *, CHAM_ipiv_t *, int, int, RUNTIME_option_t *, RUNTIME_sequence_t * );
+    struct chameleon_pzgetrf_s *, CHAM_desc_t *, CHAM_ipiv_t *, int, int, RUNTIME_option_t * );
 
 /**
  * @brief Data structure to handle the GETRF workspaces with partial pivoting
@@ -196,15 +196,13 @@ void chameleon_pzgetrf_panel_permute_update( struct chameleon_pzgetrf_s *ws,
                                              CHAM_ipiv_t                *ipiv,
                                              int                         k,
                                              int                         n,
-                                             RUNTIME_option_t           *options,
-                                             RUNTIME_sequence_t         *sequence );
+                                             RUNTIME_option_t           *options );
 void chameleon_pzgetrf_panel_update( struct chameleon_pzgetrf_s *ws,
                                      CHAM_desc_t                *A,
                                      CHAM_ipiv_t                *ipiv,
                                      int                         k,
                                      int                         n,
-                                     RUNTIME_option_t           *options,
-                                     RUNTIME_sequence_t         *sequence );
+                                     RUNTIME_option_t           *options );
 void chameleon_pzhegst(int itype, cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzhemm( struct chameleon_pzgemm_s *ws,cham_side_t side, cham_uplo_t uplo, CHAMELEON_Complex64_t alpha, CHAM_desc_t *A, CHAM_desc_t *B, CHAMELEON_Complex64_t beta, CHAM_desc_t *C,
@@ -234,7 +232,7 @@ void chameleon_pzlaset2(cham_uplo_t uplo, CHAMELEON_Complex64_t alpha,          
 void chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws, cham_dir_t dir, CHAM_desc_t *A, CHAM_ipiv_t *IPIV,
                         RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 void chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws, cham_bool_t inplace, cham_dir_t dir, CHAM_desc_t *A, CHAM_ipiv_t *ipiv,
-                              int k, int n, RUNTIME_option_t *options, RUNTIME_sequence_t *sequence );
+                              int k, int n, RUNTIME_option_t *options );
 void chameleon_pzlaswpc( struct chameleon_pzlaswp_s *ws, cham_dir_t dir, CHAM_desc_t *A, CHAM_ipiv_t *IPIV,
                          RUNTIME_sequence_t *sequence, RUNTIME_request_t *request );
 void chameleon_pzlatms( cham_dist_t idist, unsigned long long int seed, cham_sym_t sym, double *D, int mode, double cond, double dmax, CHAM_desc_t *A,
@@ -308,28 +306,24 @@ void chameleon_pzunmlqrh( int genD, int BS, cham_side_t side, cham_trans_t trans
 
 int chameleon_pzgelqf_step( int genD, int k, int ib,
                             CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D,
-                            RUNTIME_option_t *options,
-                            RUNTIME_sequence_t *sequence );
+                            RUNTIME_option_t *options );
 int chameleon_pzgeqrf_step( int genD, int k, int ib,
                             CHAM_desc_t *A, CHAM_desc_t *T, CHAM_desc_t *D,
-                            RUNTIME_option_t *options,
-                            RUNTIME_sequence_t *sequence );
+                            RUNTIME_option_t *options );
 int  chameleon_pzgelqf_param_step( int genD, cham_uplo_t uplo, int k, int ib,
                                    const libhqr_tree_t *qrtree, int *tiles,
                                    CHAM_desc_t *A, CHAM_desc_t *TS, CHAM_desc_t *TT, CHAM_desc_t *D,
-                                   RUNTIME_option_t *options,
-                                   RUNTIME_sequence_t *sequence );
+                                   RUNTIME_option_t *options );
 int  chameleon_pzgeqrf_param_step( int genD, cham_uplo_t uplo, int k, int ib,
                                    const libhqr_tree_t *qrtree, int *tiles,
                                    CHAM_desc_t *A, CHAM_desc_t *TS, CHAM_desc_t *TT, CHAM_desc_t *D,
-                                   RUNTIME_option_t *options,
-                                   RUNTIME_sequence_t *sequence );
+                                   RUNTIME_option_t *options );
 void chameleon_pzungqr_param_step( int genD, cham_uplo_t uplo, int k, int ib,
                                    const libhqr_tree_t *qrtree, int nbtiles, int *tiles,
                                    CHAM_desc_t *A, CHAM_desc_t *Q,
                                    CHAM_desc_t *TS, CHAM_desc_t *TT, CHAM_desc_t *D,
-                                   RUNTIME_option_t *options,
-                                   RUNTIME_sequence_t *sequence );
+                                   RUNTIME_option_t *options );
+
 void chameleon_pzgelqf_param( int genD, int K, const libhqr_tree_t *qrtree,
                               CHAM_desc_t *A, CHAM_desc_t *TS, CHAM_desc_t *TT, CHAM_desc_t *D,
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);

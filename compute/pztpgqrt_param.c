@@ -128,7 +128,7 @@ void chameleon_pztpgqrt_param( int genD, cham_uplo_t uplo, int K,
         chameleon_pzungqr_param_step( genD, uplo, k, ib,
                                       qrtree, nbtiles, tiles,
                                       A, Q, TS, TT, D,
-                                      &options, sequence );
+                                      &options );
 
         RUNTIME_iteration_pop(chamctxt);
     }

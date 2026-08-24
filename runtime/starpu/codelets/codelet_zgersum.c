@@ -177,6 +177,10 @@ RUNTIME_zgersum_set_methods( const CHAM_desc_t *A, int Am, int An )
     starpu_data_set_reduction_methods( RTBLKADDR(A, ChamComplexDouble, Am, An),
                                        &cl_zgersum_redux,
                                        &cl_zgersum_init );
+#else
+    (void)A;
+    (void)Am;
+    (void)An;
 #endif
 }
 

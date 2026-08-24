@@ -41,9 +41,10 @@
 int chameleon_pzgelqf_param_step( int genD, cham_uplo_t uplo, int k, int ib,
                                   const libhqr_tree_t *qrtree, int *tiles,
                                   CHAM_desc_t *A, CHAM_desc_t *TS, CHAM_desc_t *TT, CHAM_desc_t *D,
-                                  RUNTIME_option_t *options, RUNTIME_sequence_t *sequence )
+                                  RUNTIME_option_t *options )
 {
-    RUNTIME_request_t *request = options->request;
+    RUNTIME_sequence_t *sequence = options->sequence;
+    RUNTIME_request_t  *request = options->request;
     CHAM_desc_t *T;
     int m, n, i, p;
     int L, nbgelqt;
@@ -229,7 +230,7 @@ void chameleon_pzgelqf_param( int genD, int K,
         RUNTIME_iteration_push(chamctxt, k);
 
         chameleon_pzgelqf_param_step( genD, ChamUpper, k, ib, qrtree, tiles,
-                                      A, TS, TT, D, &options, sequence );
+                                      A, TS, TT, D, &options );
 
         /* Restore the original location of the tiles */
         for (m = k; m < A->mt; m++) {

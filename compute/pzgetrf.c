@@ -505,8 +505,7 @@ chameleon_pzgetrf_panel_update( struct chameleon_pzgetrf_s *ws,
                                 CHAM_ipiv_t                *ipiv,
                                 int                         k,
                                 int                         n,
-                                RUNTIME_option_t           *options,
-                                RUNTIME_sequence_t         *sequence )
+                                RUNTIME_option_t           *options )
 {
     const CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
     const CHAMELEON_Complex64_t mzone = (CHAMELEON_Complex64_t)-1.0;
@@ -520,7 +519,7 @@ chameleon_pzgetrf_panel_update( struct chameleon_pzgetrf_s *ws,
     tempnn = A->get_blkdim( A, n, DIM_n, A->n );
 
     chameleon_pzlaswp_panel( ws->laswp, CHAMELEON_FALSE, ChamDirForward,
-                             A, ipiv, k, n, options, sequence );
+                             A, ipiv, k, n, options );
 
 #if defined(CHAMELEON_USE_MPI)
     if ( RUNTIME_comm_size( chamctxt ) > 1 ) {
@@ -597,8 +596,7 @@ chameleon_pzgetrf_panel_permute_update( struct chameleon_pzgetrf_s *ws,
                                         CHAM_ipiv_t                *ipiv,
                                         int                         k,
                                         int                         n,
-                                        RUNTIME_option_t           *options,
-                                        RUNTIME_sequence_t         *sequence )
+                                        RUNTIME_option_t           *options )
 {
     const CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
     CHAM_context_t             *chamctxt = chameleon_context_self();
@@ -675,7 +673,7 @@ chameleon_pzgetrf_panel_permute_update( struct chameleon_pzgetrf_s *ws,
         if ( reduce->alg_allreduce == ChamStarPUTasks ) {
             INSERT_TASK_zlaswp_ret( options, Ws(A->myrank, n), Wu(A->myrank, n) );
         }
-        RUNTIME_perm_flush( sequence, A->myrank, Ws(A->myrank, n) );
+        RUNTIME_perm_flush( options->sequence, A->myrank, Ws(A->myrank, n) );
     }
 
     if ( RUNTIME_comm_size( chamctxt ) > 1 ) {
@@ -791,7 +789,7 @@ void chameleon_pzgetrf( struct chameleon_pzgetrf_s *ws,
             if ( chameleon_involved_in_panelk_2dbc( A, k ) ||
                  chameleon_involved_in_panelk_2dbc( A, n ) )
             {
-                ws->panel_permute_update( ws, A, IPIV, k, n, &options, sequence );
+                ws->panel_permute_update( ws, A, IPIV, k, n, &options );
             }
         }
 
@@ -823,7 +821,7 @@ void chameleon_pzgetrf( struct chameleon_pzgetrf_s *ws,
                      chameleon_involved_in_panelk_2dbc( A, n ) )
                 {
                     chameleon_pzlaswp_panel( ws->laswp, CHAMELEON_TRUE, ChamDirForward,
-                                             A, IPIV, k, n, &options, sequence );
+                                             A, IPIV, k, n, &options );
                 }
                 chameleon_data_flush( sequence, Wu(A->myrank, n), request->flush );
             }

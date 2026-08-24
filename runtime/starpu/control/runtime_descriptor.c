@@ -338,6 +338,8 @@ void RUNTIME_flush( CHAM_context_t *chamctxt )
 {
 #if defined(CHAMELEON_USE_MPI)
     starpu_mpi_cache_flush_all_data( chamctxt->comm );
+#else
+    (void)chamctxt;
 #endif
 }
 

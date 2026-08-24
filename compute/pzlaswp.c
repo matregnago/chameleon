@@ -136,8 +136,7 @@ chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws,
                          CHAM_ipiv_t                *ipiv,
                          int                         k,
                          int                         n,
-                         RUNTIME_option_t           *options,
-                         RUNTIME_sequence_t         *sequence )
+                         RUNTIME_option_t           *options )
 {
     const RUNTIME_request_t *request = options->request;
     CHAM_reduce_t           *reduce  = &(ws->reduce);
@@ -204,11 +203,11 @@ chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws,
                  * Let's copy the final version of A to its final position
                  */
                 INSERT_TASK_zlaswp_ret( options, Ws(A->myrank, n), A(k, n) );
-                RUNTIME_perm_flush( sequence, A->myrank, Ws(A->myrank, n) );
+                RUNTIME_perm_flush( options->sequence, A->myrank, Ws(A->myrank, n) );
             }
         }
 #endif
-        chameleon_data_flush( sequence, A(k, n), request->flush );
+        chameleon_data_flush( options->sequence, A(k, n), request->flush );
     }
 #if defined(CHAMELEON_USE_MPI)
     else { /* Outofplace with replication */
@@ -216,7 +215,7 @@ chameleon_pzlaswp_panel( struct chameleon_pzlaswp_s *ws,
             if ( reduce->alg_allreduce == ChamStarPUTasks ) {
                 INSERT_TASK_zlaswp_ret( options, Ws(A->myrank, n), Wu(A->myrank, n) );
             }
-            RUNTIME_perm_flush( sequence, A->myrank, Ws(A->myrank, n) );
+            RUNTIME_perm_flush( options->sequence, A->myrank, Ws(A->myrank, n) );
         }
     }
 #endif
@@ -250,7 +249,7 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
             for ( n = 0; n < A->nt; n++ ) {
                 options.priority = A->nt-n;
 
-                chameleon_pzlaswp_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, k, n, &options, sequence );
+                chameleon_pzlaswp_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, k, n, &options );
             }
             RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
@@ -259,7 +258,7 @@ chameleon_pzlaswp( struct chameleon_pzlaswp_s *ws,
         for ( k = IPIV->mt - 1; k > -1; k-- ) {
             for ( n = 0; n < A->nt; n++ ) {
                 options.priority = A->nt-n;
-                chameleon_pzlaswp_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, k, n, &options, sequence );
+                chameleon_pzlaswp_panel( ws, CHAMELEON_TRUE, dir, A, IPIV, k, n, &options );
             }
             RUNTIME_ipiv_flushone( sequence, CHAMIPIV_PERM | CHAMIPIV_INVP, IPIV, k );
         }
