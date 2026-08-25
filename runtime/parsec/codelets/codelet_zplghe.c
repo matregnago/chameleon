@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2015 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -14,6 +14,7 @@
  * @version 1.4.0
  * @author Reazul Hoque
  * @author Mathieu Faverge
+ * @author Florent Pruvost
  * @date 2024-02-18
  * @precisions normal z -> c
  *
@@ -46,7 +47,8 @@ CORE_zplghe_parsec( parsec_execution_stream_t *context,
 }
 
 void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
-                        double bump, int m, int n, const CHAM_desc_t *A, int Am, int An,
+                        double bump, cham_uplo_t uplo,
+                        int m, int n, const CHAM_desc_t *A, int Am, int An,
                         int bigM, int m0, int n0, unsigned long long int seed )
 {
     parsec_taskpool_t* PARSEC_dtd_taskpool = (parsec_taskpool_t *)(options->sequence->schedopt);
@@ -64,4 +66,6 @@ void INSERT_TASK_zplghe( const RUNTIME_option_t *options,
         sizeof(int),       &n0,                            VALUE,
         sizeof(unsigned long long int),       &seed,       VALUE,
         PARSEC_DTD_ARG_END );
+
+    (void)uplo;
 }

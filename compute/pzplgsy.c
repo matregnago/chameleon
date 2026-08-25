@@ -27,23 +27,22 @@
 
 /**
  * @brief Generic tile algorithm to generate a symmetric random matrix
- *
- * This is the version to use by default.
  */
-void chameleon_pzplgsy_generic( CHAMELEON_Complex64_t  bump,
-                                cham_uplo_t            uplo,
-                                CHAM_desc_t           *A,
-                                int                    bigM,
-                                int                    m0,
-                                int                    n0,
-                                unsigned long long int seed,
-                                RUNTIME_sequence_t    *sequence,
-                                RUNTIME_request_t     *request )
+void chameleon_pzplgsy( CHAMELEON_Complex64_t  bump,
+                        cham_uplo_t            uplo,
+                        CHAM_desc_t           *A,
+                        int                    bigM,
+                        int                    m0,
+                        int                    n0,
+                        unsigned long long int seed,
+                        RUNTIME_sequence_t    *sequence,
+                        RUNTIME_request_t     *request )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_option_t options;
 
-    int m, n, minmn;
+    int m, n;
+    int tile_m0, tile_n0;
     int tempmm, tempnn;
 
     chamctxt = chameleon_context_self();
@@ -53,64 +52,31 @@ void chameleon_pzplgsy_generic( CHAMELEON_Complex64_t  bump,
     RUNTIME_options_init(&options, chamctxt, sequence, request);
     RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( plgsy ) );
 
-    minmn = chameleon_min( A->mt, A->nt );
-    switch ( uplo ) {
-    case ChamLower:
-        for (n = 0; n < minmn; n++) {
-            tempnn = A->get_blkdim( A, n, DIM_n, A->n );
+    for (m = 0; m < A->mt; m++) {
+        tempmm  = A->get_blkdim( A, m, DIM_m, A->m );
+        tile_m0 = m * A->mb + m0;
 
-            for (m = n; m < A->mt; m++) {
-                tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        for (n = 0; n < A->nt; n++) {
+            tempnn  = A->get_blkdim( A, n, DIM_n, A->n );
+            tile_n0 = n * A->nb + n0;
 
-                options.priority = m + n;
-                INSERT_TASK_zplgsy(
-                    &options,
-                    bump, tempmm, tempnn, A(m, n),
-                    bigM, m*A->mb + m0, n*A->nb + n0, seed );
+            /* Let's skip the upper part */
+            if ( ( uplo == ChamLower ) && ( tile_n0 >= (tile_m0 + tempmm) ) ) {
+                continue;
             }
-        }
-        break;
-
-    case ChamUpper:
-        for (m = 0; m < minmn; m++) {
-            tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-
-            for (n = m; n < A->nt; n++) {
-                tempnn = A->get_blkdim( A, n, DIM_n, A->n );
-
-                options.priority = m + n;
-                INSERT_TASK_zplgsy(
-                    &options,
-                    bump, tempmm, tempnn, A(m, n),
-                    bigM, m*A->mb + m0, n*A->nb + n0, seed );
+            /* Let's skip the lower part */
+            else if ( ( uplo == ChamUpper ) && (tile_m0 >= (tile_n0 + tempnn) ) ) {
+                continue;
             }
-        }
-        break;
 
-    case ChamUpperLower:
-    default:
-        for (m = 0; m < A->mt; m++) {
-            tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-
-            for (n = 0; n < A->nt; n++) {
-                tempnn = A->get_blkdim( A, n, DIM_n, A->n );
-
-                options.priority = m + n;
-                INSERT_TASK_zplgsy(
-                    &options,
-                    bump, tempmm, tempnn, A(m, n),
-                    bigM, m*A->mb + m0, n*A->nb + n0, seed );
-            }
+            INSERT_TASK_zplgsy(
+                &options,
+                bump, uplo, tempmm, tempnn, A(m, n),
+                bigM, tile_m0, tile_n0, seed );
         }
     }
     RUNTIME_options_finalize(&options, chamctxt);
-}
 
-void chameleon_pzplgsy( CHAMELEON_Complex64_t bump, cham_uplo_t uplo, CHAM_desc_t *A,
-                        int bigM, int m0, int n0, unsigned long long int seed,
-                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
-{
-    chameleon_pzplgsy_generic( bump, uplo, A, bigM, m0, n0, seed, sequence, request );
     /* Mark written data for synchronization */
     A->sync = 1;
 }

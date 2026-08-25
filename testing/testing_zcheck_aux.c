@@ -852,6 +852,7 @@ int check_zgenerate_std( run_arg_list_t *args, cham_mtxtype_t matrix_type, cham_
         break;
     default:
         fprintf(stderr, "check_zgenerate: matrix_type(%d) unsupported\n", matrix_type );
+        free( B );
         return 1;
     }
 
