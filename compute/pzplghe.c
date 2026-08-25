@@ -27,18 +27,16 @@
 
 /**
  * @brief Generic tile algorithm to generate an hermitian random matrix
- *
- * This is the version to use by default.
  */
-void chameleon_pzplghe_generic( double                 bump,
-                                cham_uplo_t            uplo,
-                                CHAM_desc_t           *A,
-                                int                    bigM,
-                                int                    m0,
-                                int                    n0,
-                                unsigned long long int seed,
-                                RUNTIME_sequence_t    *sequence,
-                                RUNTIME_request_t     *request )
+void chameleon_pzplghe( double                 bump,
+                        cham_uplo_t            uplo,
+                        CHAM_desc_t           *A,
+                        int                    bigM,
+                        int                    m0,
+                        int                    n0,
+                        unsigned long long int seed,
+                        RUNTIME_sequence_t    *sequence,
+                        RUNTIME_request_t     *request )
 {
     CHAM_context_t *chamctxt;
     RUNTIME_option_t options;
@@ -78,13 +76,7 @@ void chameleon_pzplghe_generic( double                 bump,
         }
     }
     RUNTIME_options_finalize(&options, chamctxt);
-}
 
-void chameleon_pzplghe( double bump, cham_uplo_t uplo, CHAM_desc_t *A,
-                        int bigM, int m0, int n0, unsigned long long int seed,
-                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request )
-{
-    chameleon_pzplghe_generic( bump, uplo, A, bigM, m0, n0, seed, sequence, request );
     /* Mark written data for synchronization */
     A->sync = 1;
 }
