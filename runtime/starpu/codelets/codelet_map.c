@@ -305,10 +305,7 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     /* Check if this is a rectask */
     if ( is_rectask ) {
-        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t*) * (ndata-1) );
-        rtargs->sequence = options->sequence;
-        rtargs->parent   = options->request->parent;
-        rtargs->priority = options->priority;
+        rtargs = starpu_cham_rectask_args_create( options, ndata );
         memcpy( rtargs->tiles, tiles, ndata * sizeof(CHAM_tile_t*) );
     }
 #endif

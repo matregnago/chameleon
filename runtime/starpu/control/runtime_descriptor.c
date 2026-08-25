@@ -172,7 +172,11 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
 }
 
 /**
- *  Submit unregistration of the handles of a descriptor
+ *  Unregister the handles of a descriptor
+ *
+ *  Keep this operation synchronous with StarPU: MPI tag ranges may be
+ *  released by the subsequent descriptor destruction and must not be reused
+ *  while an old handle is still registered.
  */
 void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
                                   const RUNTIME_sequence_t *sequence )
@@ -202,10 +206,7 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
                 }
             }
 #endif
-            starpu_data_unregister_submit(*handle);
-            /* StarPU has marked the handle for unregistering,
-             * We don't need it anymore, put to NULL for later destroy
-             */
+            starpu_data_unregister(*handle); /* _submit */
             *handle = NULL;
         }
     }
@@ -498,7 +499,7 @@ void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
             continue;
         }
 
-        starpu_data_unregister_submit( *handlebis );
+        starpu_data_unregister( *handlebis );
         *handlebis = NULL;
     }
     (void)sequence;
@@ -530,14 +531,6 @@ void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
     (void)sequence; (void)A; (void)Am; (void)An; (void)new_rank;
 #endif
 }
-#endif
-
-/**
- *  Get data addr
- */
-/* For older revision of StarPU, STARPU_MAIN_RAM is not defined */
-#ifndef STARPU_MAIN_RAM
-#define STARPU_MAIN_RAM 0
 #endif
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
@@ -640,6 +633,9 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 }
 #endif
 
+/**
+ *  Get data addr
+ */
 void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
 {
     int64_t mm = m + (A->i / A->mb);

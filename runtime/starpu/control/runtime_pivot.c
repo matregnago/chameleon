@@ -49,7 +49,7 @@ void RUNTIME_pivot_create( CHAM_desc_pivot_t *pivot )
 }
 
 /**
- *  Asynchronously destroy ws_pivot runtime structures
+ *  Destroy ws_pivot runtime structures
  */
 void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
                                    CHAM_desc_pivot_t  *pivot )
@@ -64,7 +64,7 @@ void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
 
     for ( i = 0; i < nbhandles; i++ ) {
         if ( *handle != NULL ) {
-            starpu_data_unregister_submit( *handle );
+            starpu_data_unregister( *handle );
             *handle = NULL;
         }
         handle++;
@@ -75,10 +75,7 @@ void RUNTIME_pivot_destroy_submit( RUNTIME_sequence_t *sequence,
     pivot->prevpiv = NULL;
     (void)sequence;
 
-    /*
-     * WARNING: tags are not released in submit as they may always been used by
-     * the runtime it can only be done by the synchronous destroy
-     */
+    /* Tags are released by the final synchronous destroy. */
 }
 
 /**

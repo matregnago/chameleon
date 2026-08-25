@@ -97,7 +97,7 @@ RUNTIME_perm_destroy( CHAM_perm_t *ws )
 
     for( i = 0; i < nbhandles; i++ ) {
         if ( *handle != NULL ) {
-            starpu_data_unregister_submit( *handle );
+            starpu_data_unregister( *handle );
             *handle = NULL;
         }
         handle++;

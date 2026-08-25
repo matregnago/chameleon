@@ -160,10 +160,7 @@ void INSERT_TASK_zherk( const RUNTIME_option_t *options,
     is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
                    ( tileC->format & CHAMELEON_TILE_DESC ) );
     if ( is_rectask ) {
-        rtargs = malloc( sizeof(rectask_args_t) + sizeof(CHAM_tile_t*) );
-        rtargs->sequence = options->sequence;
-        rtargs->parent   = options->request->parent;
-        rtargs->priority = options->priority ;
+        rtargs = starpu_cham_rectask_args_create( options, 2 );
         rtargs->tiles[0] = tileA;
         rtargs->tiles[1] = tileC;
         cl_name = "zherk_rectask";

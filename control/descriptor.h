@@ -243,7 +243,8 @@ inline static void* chameleon_geteltaddr(const CHAM_desc_t *A, int m, int n, int
 inline static int chameleon_desc_islocal( const CHAM_desc_t *A, int m, int n )
 {
 #if defined(CHAMELEON_USE_MPI)
-    return (A->myrank == A->get_rankof(A, m, n));
+    int rank = A->get_rankof(A, m, n);
+    return ( ( rank == A->myrank ) || ( rank == CHAMELEON_MPI_WITH_ME ) );
 #else
     (void)A; (void)m; (void)n;
     return 1;
