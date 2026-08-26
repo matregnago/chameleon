@@ -205,6 +205,10 @@ int          chameleon_desc_check    ( const CHAM_desc_t *desc );
 void         chameleon_desc_destroy  ( CHAM_desc_t *desc );
 void         chameleon_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence );
 
+int chameleon_desc_has_recursive_tiles( const CHAM_desc_t *desc );
+int chameleon_desc_has_square_recursive_tiling( const CHAM_desc_t *desc );
+int chameleon_desc_is_recursive_panel( const CHAM_desc_t *desc );
+
 int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
                          int withidx, int max_m, int max_mt,
                          int p, int np, void *data,
