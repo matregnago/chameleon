@@ -136,6 +136,14 @@ starpu_cham_rectask_initrequest( struct starpu_task *task,
 }
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+/**
+ * @brief Build a child tile interface as a view into a recursive parent tile.
+ *
+ * The filter argument points to the child descriptor. The child identifier is
+ * converted to column-major tile coordinates, then the dimensions of preceding
+ * tiles are accumulated to locate the child data within the parent allocation.
+ * Offsets are counted in elements and converted to bytes for @c dev_handle.
+ */
 static inline void
 chameleon_recursive_tile_filter( void                      *parent_interface,
                                  void                      *child_interface,
@@ -145,13 +153,32 @@ chameleon_recursive_tile_filter( void                      *parent_interface,
 {
     starpu_cham_tile_interface_t *parent = (starpu_cham_tile_interface_t *)parent_interface;
     starpu_cham_tile_interface_t *child  = (starpu_cham_tile_interface_t *)child_interface;
+    CHAM_desc_t                  *child_desc = (CHAM_desc_t *)f->filter_arg_ptr;
+    size_t                        elemsize;
+    size_t                        offset = 0;
+    unsigned                      child_m;
+    unsigned                      child_n;
+    unsigned                      i;
+
+    assert( child_desc != NULL );
+    child_m = id % child_desc->lmt;
+    child_n = id / child_desc->lmt;
+    elemsize = CHAMELEON_Element_Size( parent->flttype );
+
+    for ( i = 0; i < child_m; i++ ) {
+        offset += child_desc->get_blktile( child_desc, i, child_n )->m;
+    }
+    for ( i = 0; i < child_n; i++ ) {
+        offset += (size_t)child_desc->get_blktile( child_desc, child_m, i )->n *
+                  parent->tile.ld;
+    }
 
     child->id         = parent->id;
-    child->dev_handle = parent->dev_handle;
+    child->dev_handle = parent->dev_handle + offset * elemsize;
     child->flttype    = parent->flttype;
+    child->tile.mat   = (void *)(uintptr_t)child->dev_handle;
+    child->tile.ld    = parent->tile.ld;
 
-    (void)f;
-    (void)id;
     (void)nchunks;
 }
 #endif
