@@ -110,6 +110,25 @@ chameleon_recdesc_tag_layout_init( chameleon_recdesc_dist_t *dist,
     return CHAMELEON_SUCCESS;
 }
 
+/**
+ * @brief Check that the active runtime can manage recursive descriptors.
+ */
+static int
+chameleon_recdesc_check_runtime( const CHAM_context_t *chamctxt, const char *funcname )
+{
+#if !defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    (void)chamctxt;
+    chameleon_error( funcname, "recursive descriptors require recursive-task support" );
+    return CHAMELEON_ERR_NOT_SUPPORTED;
+#else
+    if ( chamctxt->scheduler != RUNTIME_SCHED_STARPU ) {
+        chameleon_error( funcname, "recursive descriptors are only available with StarPU" );
+        return CHAMELEON_ERR_NOT_SUPPORTED;
+    }
+    return CHAMELEON_SUCCESS;
+#endif
+}
+
 static int
 chameleon_recdesc_get_2d_grid( const cham_data_dist_t *data_dist, int *p, int *q )
 {
@@ -165,6 +184,9 @@ chameleon_recdesc_getrankof_single_owner( const CHAM_desc_t *desc, int m, int n 
 /**
  * @brief Check that all declared recursive tile sizes are exact refinements.
  *
+ * @param[in] layout
+ *          Matrix layout parameters.
+ *
  * @param[in] mb
  *          Zero-terminated list of row tile sizes.
  *
@@ -176,19 +198,28 @@ chameleon_recdesc_getrankof_single_owner( const CHAM_desc_t *desc, int m, int n 
  *         the next one.
  */
 static int
-chameleon_recdesc_check_blocking( const int *mb, const int *nb )
+chameleon_recdesc_check_blocking( const CHAM_desc_layout_t *layout,
+                                  const int *mb, const int *nb )
 {
     int k;
 
+    assert( layout != NULL );
     assert( mb != NULL );
     assert( nb != NULL );
 
     for ( k = 0; ( mb[k] > 0 ) && ( nb[k] > 0 ); k++ ) {
         if ( ( mb[k+1] <= 0 ) || ( nb[k+1] <= 0 ) ) {
+            if ( ( mb[k+1] <= 0 ) != ( nb[k+1] <= 0 ) ) {
+                chameleon_error( "CHAMELEON_Desc_CreateEx",
+                                 "recursive row and column tile lists must end together" );
+                return CHAMELEON_ERR_ILLEGAL_VALUE;
+            }
             break;
         }
 
-        if ( ( mb[k] % mb[k+1] ) || ( nb[k] % nb[k+1] ) ) {
+        if ( ( ( mb[k] % mb[k+1] ) && ( mb[k] != layout->m ) ) ||
+             ( ( nb[k] % nb[k+1] ) && ( nb[k] != layout->n ) ) )
+        {
             chameleon_error( "CHAMELEON_Desc_CreateEx",
                              "recursive tile sizes must be multiples of the next level" );
             return CHAMELEON_ERR_ILLEGAL_VALUE;
@@ -197,7 +228,7 @@ chameleon_recdesc_check_blocking( const int *mb, const int *nb )
 
     if ( mb[k] != nb[k] ) {
         chameleon_error( "CHAMELEON_Desc_CreateEx",
-                         "recursive row and column tile lists must end together" );
+                         "finest recursive tiles must be square" );
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
@@ -236,6 +267,65 @@ chameleon_recdesc_check_dist_level( const CHAM_desc_recursion_t *recargs )
     }
 
     return CHAMELEON_SUCCESS;
+}
+
+/**
+ * @brief Validate storage modes supported by recursive descriptors.
+ */
+static int
+chameleon_recdesc_check_storage( const CHAM_desc_storage_t   *storage,
+                                 const CHAM_desc_recursion_t *recargs )
+{
+#if !defined(CHAMELEON_USE_MPI)
+    if ( CHAMELEON_MAT_IS_RUNTIME_ALLOC( storage->mat ) ) {
+        chameleon_error( "CHAMELEON_Desc_CreateEx",
+                         "runtime-allocated recursive descriptors require MPI support" );
+        return CHAMELEON_ERR_NOT_SUPPORTED;
+    }
+#endif
+
+    if ( ( recargs->dist_level > 0 ) &&
+         !CHAMELEON_MAT_IS_RUNTIME_ALLOC( storage->mat ) &&
+         ( storage->mat != CHAMELEON_MAT_ALLOC_GLOBAL ) )
+    {
+        chameleon_error( "CHAMELEON_Desc_CreateEx",
+                         "recursive distribution below level 0 requires global, tile, or OOC allocation" );
+        return CHAMELEON_ERR_NOT_SUPPORTED;
+    }
+
+    return CHAMELEON_SUCCESS;
+}
+
+/**
+ * @brief Validate a recursive partitioning policy and its argument.
+ */
+static int
+chameleon_recdesc_check_policy( const CHAM_desc_recursion_t *recargs )
+{
+    switch ( recargs->kind ) {
+    case ChamRecFull:
+        return CHAMELEON_SUCCESS;
+
+    case ChamRecRandom:
+        if ( recargs->arg > 0 ) {
+            return CHAMELEON_SUCCESS;
+        }
+        break;
+
+    case ChamRecDiag:
+    case ChamRecSmart:
+        if ( recargs->arg >= 0 ) {
+            return CHAMELEON_SUCCESS;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    chameleon_error( "CHAMELEON_Desc_CreateEx",
+                     "invalid recursive partitioning policy or argument" );
+    return CHAMELEON_ERR_ILLEGAL_VALUE;
 }
 
 /**
@@ -544,10 +634,9 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
  * @retval CHAMELEON_SUCCESS on success.
  * @retval CHAMELEON_ERR_ILLEGAL_VALUE if the recursive descriptor arguments
  *         are invalid.
- * @retval CHAMELEON_ERR_NOT_INITIALIZED if CHAMELEON is not initialized or the
- *         selected runtime cannot support recursive descriptors.
- * @retval CHAMELEON_ERR_NOT_SUPPORTED if the requested distributed recursive
- *         storage mode is not supported yet.
+ * @retval CHAMELEON_ERR_NOT_INITIALIZED if CHAMELEON is not initialized.
+ * @retval CHAMELEON_ERR_NOT_SUPPORTED if recursive-task support is unavailable
+ *         or the requested distributed storage mode is unsupported.
  * @retval CHAMELEON_ERR_OUT_OF_RESOURCES if descriptor allocation fails.
  */
 int
@@ -566,9 +655,9 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
         return CHAMELEON_ERR_NOT_INITIALIZED;
     }
 
-    if ( chamctxt->scheduler != RUNTIME_SCHED_STARPU ) {
-        chameleon_error( "CHAMELEON_Desc_CreateEx", "CHAMELEON Recursive descriptors only available with StaRPU" );
-        return CHAMELEON_ERR_NOT_INITIALIZED;
+    status = chameleon_recdesc_check_runtime( chamctxt, "CHAMELEON_Desc_CreateEx" );
+    if ( status != CHAMELEON_SUCCESS ) {
+        return status;
     }
 
     if ( ( descptr == NULL ) || ( args == NULL ) || ( args->recursive == NULL ) ) {
@@ -587,7 +676,12 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
         return CHAMELEON_ERR_ILLEGAL_VALUE;
     }
 
-    status = chameleon_recdesc_check_blocking( recargs->mbs, recargs->nbs );
+    status = chameleon_recdesc_check_policy( recargs );
+    if ( status != CHAMELEON_SUCCESS ) {
+        return status;
+    }
+
+    status = chameleon_recdesc_check_blocking( &(args->layout), recargs->mbs, recargs->nbs );
     if ( status != CHAMELEON_SUCCESS ) {
         return status;
     }
@@ -597,12 +691,9 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
         return status;
     }
 
-    if ( ( recargs->dist_level > 0 ) &&
-         !CHAMELEON_MAT_IS_RUNTIME_ALLOC( storage->mat ) )
-    {
-        chameleon_error( "CHAMELEON_Desc_CreateEx",
-                         "recursive distribution below level 0 requires tile or OOC allocation" );
-        return CHAMELEON_ERR_NOT_SUPPORTED;
+    status = chameleon_recdesc_check_storage( storage, recargs );
+    if ( status != CHAMELEON_SUCCESS ) {
+        return status;
     }
 
     status = chameleon_recdesc_get_2d_grid( args->data_dist, &p, &q );
