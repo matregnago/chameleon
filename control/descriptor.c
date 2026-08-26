@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -766,6 +766,10 @@ int CHAMELEON_Desc_Create( CHAM_desc_t **descptr, void *mat, cham_flttype_t dtyp
  * @p args->data_dist describes the process grid and data distribution. A NULL
  * value selects a local 1-by-1 distribution. Currently, only the 2D
  * block-cyclic distribution is supported.
+ *
+ * Recursive descriptors currently require the StarPU runtime with recursive
+ * task support enabled. Other runtimes return CHAMELEON_ERR_NOT_SUPPORTED
+ * when @p args->recursive is non-NULL.
  *
  ******************************************************************************
  *
