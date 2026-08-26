@@ -4,7 +4,7 @@
  *
  * @copyright 2012-2017 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -291,6 +291,13 @@ void RUNTIME_desc_create( CHAM_desc_t *mdesc )
     /* mdesc->llm = mdesc->mb * mdesc->lmt; */
     /* mdesc->lln = mdesc->nb * mdesc->lnt; */
     return;
+}
+
+int RUNTIME_desc_create_flatview( CHAM_desc_t *desc, const CHAM_desc_t *recdesc )
+{
+    (void)desc;
+    (void)recdesc;
+    return CHAMELEON_ERR_NOT_SUPPORTED;
 }
 
 void RUNTIME_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence )

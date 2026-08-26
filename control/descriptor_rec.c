@@ -965,3 +965,155 @@ CHAMELEON_Recursive_Desc_Create( CHAM_desc_t **descptr, void *mat, cham_flttype_
 
     return chameleon_desc_create_recursive( descptr, &args );
 }
+
+/**
+ * @brief Return the owner of the recursive leaf covering a flat-view tile.
+ */
+static int
+chameleon_recdesc_flatview_getrankof( const CHAM_desc_t *desc, int m, int n )
+{
+    const CHAM_desc_t *recdesc = desc->get_rankof_init_arg;
+    int                i       = m * desc->mb;
+    int                j       = n * desc->nb;
+
+    while ( 1 ) {
+        int                rm   = i / recdesc->mb;
+        int                rn   = j / recdesc->nb;
+        const CHAM_tile_t *tile = recdesc->get_blktile( recdesc, rm, rn );
+
+        if ( !( tile->format & CHAMELEON_TILE_DESC ) ) {
+            return tile->rank;
+        }
+
+        i      -= rm * recdesc->mb;
+        j      -= rn * recdesc->nb;
+        recdesc = tile->mat;
+    }
+}
+
+/**
+ *******************************************************************************
+ *
+ * @ingroup Descriptor
+ *
+ * @brief Create a classic tiled view over the leaves of a recursive descriptor.
+ *
+ * The returned descriptor borrows the StarPU handles of the selected leaves
+ * of @p recdesc. It owns only an array of handle references: neither matrix
+ * storage nor StarPU data handles are allocated or copied. Destroying the view
+ * releases that reference array without unregistering the borrowed handles.
+ *
+ * The recursive descriptor, its matrix storage, and its runtime handles must
+ * remain valid until the flat view has been destroyed. The view may be used by
+ * algorithms expecting a classic tiled descriptor, but it must not be used
+ * after its source descriptor is destroyed.
+ *
+ * @p mb and @p nb must identify a uniform initialized leaf blocking. Every
+ * requested flat tile must map exactly to one recursive leaf handle; recursive
+ * layouts that stop before that blocking are not supported.
+ *
+ * @note Flat views currently require StarPU recursive-task support.
+ *
+ *******************************************************************************
+ *
+ * @param[out] descptr
+ *          On exit, descriptor of the flattened tile view.
+ *
+ * @param[in] recdesc
+ *          Recursive descriptor to expose as a classic tiled matrix.
+ *
+ * @param[in] mb
+ *          Number of rows in a tile of the flattened view.
+ *
+ * @param[in] nb
+ *          Number of columns in a tile of the flattened view.
+ *
+ * @param[in] name
+ *          Name of the new descriptor for debugging purposes. May be NULL.
+ *
+ *******************************************************************************
+ *
+ * @retval CHAMELEON_SUCCESS successful exit.
+ * @retval CHAMELEON_ERR_NOT_INITIALIZED CHAMELEON has not been initialized.
+ * @retval CHAMELEON_ERR_ILLEGAL_VALUE invalid descriptor argument.
+ * @retval CHAMELEON_ERR_NOT_SUPPORTED the active runtime does not support flat
+ *         views, or recursive leaves do not form the requested uniform grid.
+ * @retval CHAMELEON_ERR_OUT_OF_RESOURCES allocation failed.
+ *
+ */
+int
+CHAMELEON_Desc_Create_FlatView( CHAM_desc_t **descptr,
+                                const CHAM_desc_t *recdesc,
+                                int mb, int nb, const char *name )
+{
+    CHAM_context_t      *chamctxt;
+    CHAM_desc_t         *desc;
+    CHAM_desc_layout_t   layout;
+    CHAM_desc_storage_t  storage = {
+        .mat            = CHAMELEON_MAT_ALLOC_TILE,
+        .get_rankof     = chameleon_recdesc_flatview_getrankof,
+        .get_rankof_arg = (void *)recdesc
+    };
+    int                  p, q, rc;
+
+    chamctxt = chameleon_context_self();
+    if ( chamctxt == NULL ) {
+        chameleon_error( "CHAMELEON_Desc_Create_FlatView", "CHAMELEON not initialized" );
+        return CHAMELEON_ERR_NOT_INITIALIZED;
+    }
+
+    if ( ( descptr == NULL ) || ( recdesc == NULL ) || ( mb <= 0 ) || ( nb <= 0 ) ) {
+        chameleon_error( "CHAMELEON_Desc_Create_FlatView", "invalid descriptor argument" );
+        return CHAMELEON_ERR_ILLEGAL_VALUE;
+    }
+    *descptr = NULL;
+
+    rc = chameleon_recdesc_check_runtime( chamctxt, "CHAMELEON_Desc_Create_FlatView" );
+    if ( rc != CHAMELEON_SUCCESS ) {
+        return rc;
+    }
+
+    desc = malloc( sizeof(CHAM_desc_t) );
+    if ( desc == NULL ) {
+        chameleon_error( "CHAMELEON_Desc_Create_FlatView", "malloc() failed" );
+        return CHAMELEON_ERR_OUT_OF_RESOURCES;
+    }
+
+    p = chameleon_desc_datadist_get_iparam( recdesc, 0 );
+    q = chameleon_desc_datadist_get_iparam( recdesc, 1 );
+    layout.dtyp = recdesc->dtyp;
+    layout.mb   = mb;
+    layout.nb   = nb;
+    layout.lm   = recdesc->m;
+    layout.ln   = recdesc->n;
+    layout.i    = 0;
+    layout.j    = 0;
+    layout.m    = recdesc->m;
+    layout.n    = recdesc->n;
+
+    rc = chameleon_desc_init_base( desc, RUNTIME_comm_rank( chamctxt ),
+                                   name, &storage, &layout );
+    if ( rc != CHAMELEON_SUCCESS ) {
+        free( desc );
+        return rc;
+    }
+
+    chameleon_desc_init_2d_distribution( desc, p, q );
+    rc = chameleon_desc_init_storage( chamctxt, desc, CHAMELEON_MAT_ALLOC_TILE );
+    if ( rc == CHAMELEON_SUCCESS ) {
+        chameleon_desc_init_tiles( desc, desc->get_rankof_init );
+        rc = RUNTIME_desc_create_flatview( desc, recdesc );
+    }
+
+    if ( rc != CHAMELEON_SUCCESS ) {
+        chameleon_error( "CHAMELEON_Desc_Create_FlatView",
+                         "requested blocking does not match initialized recursive leaf handles" );
+        chameleon_desc_mat_free( desc );
+        free( desc->name );
+        free( desc );
+        return rc;
+    }
+
+    *descptr = desc;
+    return CHAMELEON_SUCCESS;
+}

@@ -160,6 +160,7 @@ int chameleon_desc_init_base( CHAM_desc_t *desc, int myrank, const char *name,
                               const CHAM_desc_storage_t *storage,
                               const CHAM_desc_layout_t  *layout );
 
+void chameleon_desc_init_tiles( CHAM_desc_t *desc, blkrankof_fct_t rankof );
 void chameleon_desc_init_2d_distribution( CHAM_desc_t *desc, int p, int q );
 void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, int q,
                                                       int dist_it, int dist_jt );

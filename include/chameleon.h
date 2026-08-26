@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -165,6 +165,9 @@ int CHAMELEON_Desc_Create_OOC( CHAM_desc_t **desc, cham_flttype_t dtyp,
 
 CHAM_desc_t *CHAMELEON_Desc_Copy( const CHAM_desc_t *descin, void *mat );
 CHAM_desc_t *CHAMELEON_Desc_CopyOnZero( const CHAM_desc_t *descin, void *mat );
+int CHAMELEON_Desc_Create_FlatView( CHAM_desc_t **descptr,
+                                    const CHAM_desc_t *recdesc,
+                                    int mb, int nb, const char *name );
 CHAM_desc_t *CHAMELEON_Desc_SubMatrix( CHAM_desc_t *descA, int i, int j, int m, int n );
 
 int CHAMELEON_Desc_Destroy( CHAM_desc_t **desc );

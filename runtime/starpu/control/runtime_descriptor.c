@@ -200,6 +200,97 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
 #endif
 }
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+/**
+ * @brief Return the existing StarPU leaf handle covering (@p i, @p j).
+ */
+static starpu_data_handle_t
+runtime_desc_get_leaf_handle( const CHAM_desc_t *desc,
+                              int i, int j, int mb, int nb )
+{
+    starpu_data_handle_t *handles;
+    CHAM_tile_t          *tile;
+    int64_t               ind;
+    int                   m, n;
+
+    m    = i / desc->mb;
+    n    = j / desc->nb;
+    tile = desc->get_blktile( desc, m, n );
+
+    if ( tile->format & CHAMELEON_TILE_DESC ) {
+        RUNTIME_data_getaddr( desc, m, n );
+        return runtime_desc_get_leaf_handle( tile->mat,
+                                             i - m * desc->mb,
+                                             j - n * desc->nb,
+                                             mb, nb );
+    }
+
+    if ( ( desc->mb != mb ) || ( desc->nb != nb ) ||
+         ( i % mb ) || ( j % nb ) )
+    {
+        return NULL;
+    }
+
+    ind     = (int64_t)desc->lmt * n + m;
+    handles = chameleon_starpu_desc_get_handles( desc );
+    if ( handles[ind] == NULL ) {
+        if ( tile->rank == desc->myrank ) {
+            return NULL;
+        }
+        handles[ind] = RUNTIME_data_getaddr( desc, m, n );
+    }
+    return handles[ind];
+}
+#endif
+
+int
+RUNTIME_desc_create_flatview( CHAM_desc_t       *desc,
+                              const CHAM_desc_t *recdesc )
+{
+#if !defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    (void)desc;
+    (void)recdesc;
+    return CHAMELEON_ERR_NOT_SUPPORTED;
+#else
+    starpu_cham_schedopt_t *schedopt;
+    starpu_data_handle_t *handles;
+    size_t                nbhandles;
+    int                   m, n;
+
+    nbhandles = (size_t)desc->lmt * (size_t)desc->lnt;
+    if ( cham_is_mixed( desc->dtyp ) ) {
+        nbhandles *= 3;
+    }
+
+    schedopt = runtime_desc_schedopt_create( nbhandles );
+    if ( schedopt == NULL ) {
+        return CHAMELEON_ERR_OUT_OF_RESOURCES;
+    }
+    handles = schedopt->handles;
+
+    for ( n = 0; n < desc->nt; n++ ) {
+        for ( m = 0; m < desc->mt; m++ ) {
+            int64_t ind = (int64_t)desc->lmt * n + m;
+
+            handles[ind] = runtime_desc_get_leaf_handle( recdesc,
+                                                          m * desc->mb,
+                                                          n * desc->nb,
+                                                          desc->mb,
+                                                          desc->nb );
+            if ( handles[ind] == NULL ) {
+                free( schedopt );
+                return CHAMELEON_ERR_NOT_SUPPORTED;
+            }
+        }
+    }
+
+    desc->occurences   = 1;
+    desc->runtime_view = 1;
+    desc->schedopt     = schedopt;
+    return CHAMELEON_SUCCESS;
+#endif
+}
+
 /**
  *  Unregister the handles of a descriptor
  *
@@ -217,6 +308,10 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
     int64_t                 tile_count = lmt * lnt;
     int64_t                 nbtiles;
     int64_t                 m;
+
+    if ( desc->runtime_view ) {
+        return;
+    }
 
     /*
      * If this is the last descriptor using the matrix, we release the handle
@@ -269,6 +364,12 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
      * and unregister the GPU data
      */
     if ( desc->occurences > 0 ) {
+        return;
+    }
+
+    if ( desc->runtime_view ) {
+        free( desc->schedopt );
+        desc->schedopt = NULL;
         return;
     }
 
@@ -948,6 +1049,11 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
     int64_t               nn = n + ( A->j / A->nb );
 
     ptrtile += ((int64_t)A->lmt) * nn + mm;
+
+    if ( A->runtime_view ) {
+        assert( *ptrtile != NULL );
+        return (void*)(*ptrtile);
+    }
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     if ( ( *ptrtile != NULL ) &&
