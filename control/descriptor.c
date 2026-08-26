@@ -1387,8 +1387,23 @@ int CHAMELEON_Desc_Flush( CHAM_desc_t              *desc,
     return CHAMELEON_SUCCESS;
 }
 
+/**
+ * @brief Print one descriptor level and its locally available descendants.
+ *
+ * Shared hierarchy levels are traversed collectively to keep their barriers
+ * balanced. Once a recursive tile has a single owner, only that rank descends
+ * into the hierarchy and no inner barrier is issued.
+ *
+ * @param[in] desc
+ *          Descriptor level to print.
+ * @param[in] shift
+ *          Indentation applied to this level.
+ * @param[in] collective
+ *          1 when all ranks traverse this descriptor level, or 0 when only its
+ *          owner does.
+ */
 static void
-chameleon_desc_print( const CHAM_desc_t *desc, int shift )
+chameleon_desc_print( const CHAM_desc_t *desc, int shift, int collective )
 {
     intptr_t base = (intptr_t)desc->mat;
     int m, n, rank;
@@ -1396,34 +1411,42 @@ chameleon_desc_print( const CHAM_desc_t *desc, int shift )
 
     rank = CHAMELEON_Comm_rank();
 
-    for ( n=0; n<desc->nt; n++ ) {
-        for ( m=0; m<desc->mt; m++ ) {
+    for ( n = 0; n < desc->nt; n++ ) {
+        for ( m = 0; m < desc->mt; m++ ) {
             const CHAM_tile_t *tile;
-            const CHAM_desc_t *tiledesc;
+            const CHAM_desc_t *tiledesc = NULL;
             intptr_t ptr;
-            int      trank;
+            int      local, shared, trank;
 
-            trank    = desc->get_rankof( desc, m, n );
-            tile     = desc->get_blktile( desc, m, n );
-            tiledesc = tile->mat;
+            trank = desc->get_rankof( desc, m, n );
+            tile  = desc->get_blktile( desc, m, n );
             assert( trank == tile->rank );
 
-            ptr = ( tile->format == CHAMELEON_TILE_DESC ) ? (intptr_t)(tiledesc->mat) : (intptr_t)(tile->mat);
+            local  = ( trank == rank ) || ( trank == CHAMELEON_MPI_WITH_ME );
+            shared = ( trank == CHAMELEON_MPI_WITH_ME ) ||
+                     ( trank == CHAMELEON_MPI_WITHOUT_ME );
 
-            if ( trank == rank ) {
-                fprintf( stdout, "[%2d]%*s%s(%3d,%3d): %d * %d / ld = %d / offset= %ld\n",
-                         rank, shift, " ", desc->name, m, n, tile->m, tile->n, tile->ld, ptr - base );
-
-                if ( tile->format == CHAMELEON_TILE_DESC ) {
-                    chameleon_desc_print( tiledesc, shift+2 );
+            if ( tile->format == CHAMELEON_TILE_DESC ) {
+                if ( local || shared ) {
+                    tiledesc = tile->mat;
                 }
+                ptr = ( tiledesc != NULL ) ? (intptr_t)(tiledesc->mat) : 0;
             }
             else {
-                assert( ptr == 0 );
+                ptr = (intptr_t)(tile->mat);
             }
 
-            if ( chamctxt->scheduler != RUNTIME_SCHED_OPENMP ) {
-                RUNTIME_barrier(chamctxt);
+            if ( local ) {
+                fprintf( stdout, "[%2d]%*s%s(%3d,%3d): %d * %d / ld = %d / offset= %ld\n",
+                         rank, shift, " ", desc->name, m, n, tile->m, tile->n, tile->ld, ptr - base );
+            }
+
+            if ( tiledesc != NULL ) {
+                chameleon_desc_print( tiledesc, shift + 2, shared );
+            }
+
+            if ( collective && ( chamctxt->scheduler != RUNTIME_SCHED_OPENMP ) ) {
+                RUNTIME_barrier( chamctxt );
             }
         }
     }
@@ -1434,17 +1457,17 @@ chameleon_desc_print( const CHAM_desc_t *desc, int shift )
  *
  * @ingroup Descriptor
  *
- *  @brief Print descriptor structure for debug purpose
+ * @brief Print a descriptor hierarchy for debugging purposes.
  *
  ******************************************************************************
  *
  * @param[in] desc
- *          The input desc for which to describe to print the tile structure
+ *          Descriptor hierarchy to print.
  */
 void
 CHAMELEON_Desc_Print( const CHAM_desc_t *desc )
 {
-    chameleon_desc_print( desc, 2 );
+    chameleon_desc_print( desc, 2, 1 );
 }
 
 /**
