@@ -153,11 +153,11 @@ typedef struct chameleon_desc_storage_s {
  * @brief User-provided recursive tiling parameters.
  */
 typedef struct chameleon_desc_recursion_s {
-    cham_rec_t kind;       /**> Recursive partitioning policy                                      */
-    int        arg;        /**> Policy-specific argument                                           */
-    const int *mbs;        /**> Zero-terminated list of row tile sizes for each recursive level    */
-    const int *nbs;        /**> Zero-terminated list of column tile sizes for each recursive level */
-    int        dist_level; /**> Level at which the descriptor data distribution applies            */
+    cham_rec_t kind;       /**> Recursive policy; ChamRecNone requires a NULL recursion structure   */
+    int        arg;        /**> Policy argument: >0 for Random, >=0 for Diag/Smart, ignored by Full */
+    const int *mbs;        /**> Zero-terminated list of row tile sizes for each recursive level     */
+    const int *nbs;        /**> Zero-terminated list of column tile sizes for each recursive level  */
+    int        dist_level; /**> Level at which the descriptor data distribution applies             */
 } CHAM_desc_recursion_t;
 
 /**
