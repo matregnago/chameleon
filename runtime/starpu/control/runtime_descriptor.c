@@ -391,10 +391,20 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
     }
 
 #if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_cache_flush( sequence->comm, handle );
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( tile->format & CHAMELEON_TILE_DESC ) {
+        /* Flush the parent handle and every child registered below it. */
+        starpu_mpi_cache_flush_recursive( /* sequence->comm, */ handle );
+    }
+    else
+#endif
+    {
+        starpu_mpi_cache_flush( sequence->comm, handle );
+    }
 #endif
 
-    if ( sequence->myrank != tile->rank )
+    if ( ( tile->rank != CHAMELEON_MPI_WITH_ME ) &&
+         ( tile->rank != sequence->myrank ) )
     {
         return;
     }
