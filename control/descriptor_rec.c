@@ -674,6 +674,149 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
 }
 
 /**
+ * @brief Initialize a recursive descriptor from validated extended arguments.
+ *
+ * This internal entry point builds recursive workspaces without repeating the
+ * public context lookup and descriptor validation performed by
+ * CHAMELEON_Desc_CreateEx(). The caller must provide a valid initialized
+ * context and mutually consistent descriptor parameters.
+ *
+ * @param[in] chamctxt
+ *          Initialized CHAMELEON context.
+ * @param[inout] desc
+ *          Descriptor storage to initialize.
+ * @param[in] name
+ *          Descriptor name used for debugging.
+ * @param[in] mat
+ *          Matrix pointer or CHAMELEON allocation mode.
+ * @param[in] dtyp
+ *          Matrix precision.
+ * @param[in] rec
+ *          Recursive partitioning policy.
+ * @param[in] rarg
+ *          Policy-specific recursive partitioning argument.
+ * @param[in] mbs
+ *          Zero-terminated row tile sizes for each recursive level.
+ * @param[in] nbs
+ *          Zero-terminated column tile sizes for each recursive level.
+ * @param[in] lm
+ *          Number of rows in the complete matrix storage.
+ * @param[in] ln
+ *          Number of columns in the complete matrix storage.
+ * @param[in] m
+ *          Number of rows in the described matrix.
+ * @param[in] n
+ *          Number of columns in the described matrix.
+ * @param[in] p
+ *          Number of process rows in the 2D distribution.
+ * @param[in] q
+ *          Number of process columns in the 2D distribution.
+ * @param[in] dist_level
+ *          Recursive level at which the 2D distribution applies.
+ * @param[in] get_blkaddr
+ *          Optional tile-address callback.
+ * @param[in] get_blkldd
+ *          Optional tile-leading-dimension callback.
+ * @param[in] get_rankof
+ *          Optional tile-rank callback.
+ * @param[in] get_rankof_arg
+ *          Argument passed to @p get_rankof.
+ *
+ * @retval CHAMELEON_SUCCESS on success.
+ * @retval CHAMELEON_ERR_ILLEGAL_VALUE if the recursive descriptor arguments
+ *         are invalid.
+ * @retval CHAMELEON_ERR_NOT_SUPPORTED if the requested storage mode is not
+ *         supported by the active runtime.
+ * @retval CHAMELEON_ERR_OUT_OF_RESOURCES if descriptor allocation fails.
+ */
+int
+chameleon_recdesc_init( const CHAM_context_t *chamctxt,
+                        CHAM_desc_t *desc, const char *name, void *mat,
+                        cham_flttype_t dtyp, cham_rec_t rec, int rarg,
+                        const int *mbs, const int *nbs,
+                        int lm, int ln, int m, int n,
+                        int p, int q, int dist_level,
+                        blkaddr_fct_t    get_blkaddr,
+                        blkldd_fct_t     get_blkldd,
+                        blkrankof_fct_t  get_rankof,
+                        void            *get_rankof_arg )
+{
+    cham_data_dist_t data_dist = {
+        .get_distrib        = (datadist_access_fct_t)chameleon_get_2d_block_cyclic,
+        .distrib_array_size = 2,
+        .distrib            = { p, q }
+    };
+    CHAM_desc_recursion_t recursion = {
+        .kind       = rec,
+        .arg        = rarg,
+        .mbs        = mbs,
+        .nbs        = nbs,
+        .dist_level = dist_level
+    };
+    CHAM_desc_create_t args = {
+        .name = name,
+        .layout = {
+            .dtyp = dtyp,
+            .mb   = mbs[0],
+            .nb   = nbs[0],
+            .lm   = lm,
+            .ln   = ln,
+            .i    = 0,
+            .j    = 0,
+            .m    = m,
+            .n    = n
+        },
+        .storage = {
+            .mat            = mat,
+            .get_blkaddr    = get_blkaddr,
+            .get_blkldd     = get_blkldd,
+            .get_rankof     = get_rankof,
+            .get_rankof_arg = get_rankof_arg
+        },
+        .data_dist = &data_dist,
+        .recursive = &recursion
+    };
+    chameleon_recdesc_dist_t dist = {
+        .myrank     = RUNTIME_comm_rank( chamctxt ),
+        .p          = p,
+        .q          = q,
+        .dist_level = dist_level,
+        .level      = 0,
+        .i          = 0,
+        .j          = 0,
+        .owner      = CHAMELEON_RECDESC_OWNER_DISTRIBUTED
+    };
+    int rc;
+
+    {
+        rc = chameleon_recdesc_check_storage( &(args.storage), &recursion );
+
+        if ( rc != CHAMELEON_SUCCESS ) {
+            return rc;
+        }
+    }
+#if !defined(NDEBUG)
+    {
+        rc = chameleon_recdesc_check_blocking( &(args.layout), mbs, nbs );
+
+        if ( rc != CHAMELEON_SUCCESS ) {
+            return rc;
+        }
+    }
+#endif
+
+    rc = chameleon_recdesc_tag_layout_init( &dist, dtyp, m, n, mbs, nbs );
+    if ( rc != CHAMELEON_SUCCESS ) {
+        return rc;
+    }
+
+    rc = chameleon_recdesc_create( chamctxt, &args, desc, &dist );
+    free( dist.tag_tree_spans );
+
+    return rc;
+}
+
+/**
  * @brief Create a recursive descriptor from the extended descriptor arguments.
  *
  * @retval CHAMELEON_SUCCESS on success.
