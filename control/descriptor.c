@@ -163,6 +163,7 @@ int chameleon_desc_init_base( CHAM_desc_t *desc, int myrank, const char *name,
     void *mat = storage->mat;
 
     memset( desc, 0, sizeof(CHAM_desc_t) );
+    desc->mpitag = -1;
 
     if ( name ) {
         desc->name = strdup( name );
@@ -237,6 +238,14 @@ int chameleon_desc_init_base( CHAM_desc_t *desc, int myrank, const char *name,
     desc->nt  = chameleon_ceil( layout->n,  layout->nb );
     desc->lmt = chameleon_ceil( layout->lm, layout->mb );
     desc->lnt = chameleon_ceil( layout->ln, layout->nb );
+
+    /* A classic descriptor is a one-level distributed MPI-tag hierarchy. */
+    desc->mpitag_tile_span = cham_is_mixed( desc->dtyp ) ? 3 : 1;
+    desc->mpitag_tree_span = 1;
+    desc->mpitag_ld        = desc->lmt;
+    desc->mpitag_size      = (int64_t)desc->lmt * desc->lnt * desc->mpitag_tile_span;
+    desc->mpitag_use       = 1;
+    desc->mpitag_dist      = 1;
 
     desc->id = nbdesc;
     nbdesc++;

@@ -230,8 +230,8 @@ struct chameleon_desc_s {
      * is the number of distributed tiles covered by one of its tiles. The
      * resulting coordinates identify its first distributed descendant,
      * whose MPI owner also owns the parent recursive task. Descriptors below
-     * the distributed level are private to that owner and do not use these
-     * fields to redistribute their tiles.
+     * the distributed level have a single owner and do not use these fields
+     * to redistribute their tiles.
      */
     int dist_it;                 /**> global tile row corresponding to tile row 0 of this descriptor       */
     int dist_jt;                 /**> global tile column corresponding to tile column 0 of this descriptor */
@@ -254,8 +254,18 @@ struct chameleon_desc_s {
     int register_mat; /**> 1 if we have to register mat - else 0 (handled by the application) */
     int myrank;       /**> MPI rank of the descriptor                                         */
     int ooc;          /**> 1 if the matrix is not to fit in memory                            */
-    int64_t mpitag;   /**> First MPI tag used by the descriptor                               */
-    void *schedopt;   /**> scheduler (QUARK|StarPU) specific structure                        */
+
+    /* Runtime MPI-tag layout and ownership. */
+    int64_t      mpitag;           /**> First MPI tag visible from this descriptor level              */
+    int64_t      mpitag_size;      /**> Number of tags reserved by the owning root descriptor         */
+    int64_t      mpitag_tile_span; /**> Tag range reserved for one tile and its descendants           */
+    int64_t      mpitag_tree_span; /**> Primary-handle tags per tile, including its descendants       */
+    int          mpitag_ld;        /**> Leading dimension of the MPI-tag tile grid                    */
+    unsigned int mpitag_owner : 1; /**> 1 if this descriptor owns and releases the reserved tag range */
+    unsigned int mpitag_use   : 1; /**> 1 if handles at this level require MPI tags                   */
+    unsigned int mpitag_dist  : 1; /**> 1 if this is the distributed recursive level                  */
+
+    void *schedopt; /**> scheduler (QUARK|StarPU) specific structure */
 };
 
 typedef struct chameleon_ipiv_s CHAM_ipiv_t;

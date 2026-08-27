@@ -32,7 +32,81 @@ typedef struct chameleon_recdesc_dist_s {
     int i;          /**< Global row tile coordinate at the current level.       */
     int j;          /**< Global column tile coordinate at the current level.    */
     int owner;      /**< Owning rank, or CHAMELEON_RECDESC_OWNER_DISTRIBUTED.   */
+    int64_t tag_root;      /**< First tag reserved for the complete hierarchy.  */
+    int64_t tag_base;      /**< First tag assigned to the current subtree.       */
+    int64_t tag_count;     /**< Total number of tags reserved by the root.       */
+    int64_t tag_span;      /**< Tags reserved for one distributed tile subtree. */
+    int64_t tag_tree_span; /**< Tags used by the hierarchy below one tile.       */
+    int64_t *tag_tree_spans; /**< Precomputed hierarchy span for every level.    */
+    int     tag_ld;        /**< Leading dimension of the distributed tag grid.   */
 } chameleon_recdesc_dist_t;
+
+/**
+ * @brief Precompute hierarchy tags reserved below one tile at every level.
+ *
+ * A leaf consumes one tag. Each parent consumes one tag for its own handle and
+ * reserves one complete child span for every tile in its exact refinement.
+ */
+static int
+chameleon_recdesc_tag_tree_spans_init( chameleon_recdesc_dist_t *dist,
+                                       const int *mb, const int *nb )
+{
+    int64_t span = 1;
+    int     depth = 0;
+    int     level;
+
+    while ( ( mb[depth] > 0 ) && ( nb[depth] > 0 ) ) {
+        depth++;
+    }
+    assert( depth > 0 );
+
+    dist->tag_tree_spans = malloc( (size_t)depth * sizeof(int64_t) );
+    if ( dist->tag_tree_spans == NULL ) {
+        chameleon_error( "CHAMELEON_Desc_CreateEx", "malloc() failed" );
+        return CHAMELEON_ERR_OUT_OF_RESOURCES;
+    }
+
+    dist->tag_tree_spans[depth-1] = span;
+    for ( level = depth - 2; level >= 0; level-- ) {
+        span = 1 + (int64_t)( mb[level] / mb[level+1] ) *
+                           ( nb[level] / nb[level+1] ) * span;
+        dist->tag_tree_spans[level] = span;
+    }
+    return CHAMELEON_SUCCESS;
+}
+
+/**
+ * @brief Initialize the deterministic MPI-tag layout of a recursive hierarchy.
+ *
+ * Each tile at the distributed level receives an equally sized contiguous
+ * range. The primary hierarchy occupies @c tag_tree_span entries in that
+ * range; mixed-precision descriptors reserve two additional conversion tags.
+ * The root books all distributed-tile ranges in one operation.
+ */
+static int
+chameleon_recdesc_tag_layout_init( chameleon_recdesc_dist_t *dist,
+                                   cham_flttype_t dtyp, int m, int n,
+                                   const int *mbs, const int *nbs )
+{
+    int dist_level = dist->dist_level;
+    int tag_lnt;
+    int rc;
+
+    rc = chameleon_recdesc_tag_tree_spans_init( dist, mbs, nbs );
+    if ( rc != CHAMELEON_SUCCESS ) {
+        return rc;
+    }
+
+    dist->tag_root      = -1;
+    dist->tag_base      = -1;
+    dist->tag_ld        = ( m + mbs[dist_level] - 1 ) / mbs[dist_level];
+    dist->tag_tree_span = dist->tag_tree_spans[dist_level];
+    dist->tag_span      = dist->tag_tree_span + ( cham_is_mixed( dtyp ) ? 2 : 0 );
+
+    tag_lnt         = ( n + nbs[dist_level] - 1 ) / nbs[dist_level];
+    dist->tag_count = (int64_t)dist->tag_ld * tag_lnt * dist->tag_span;
+    return CHAMELEON_SUCCESS;
+}
 
 static int
 chameleon_recdesc_get_2d_grid( const cham_data_dist_t *data_dist, int *p, int *q )
@@ -274,6 +348,21 @@ chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
         return rc;
     }
 
+    desc->mpitag           = ( dist->level < dist->dist_level ) ? dist->tag_root
+                                                                : dist->tag_base;
+    desc->mpitag_size      = 0;
+    desc->mpitag_tile_span = dist->tag_span;
+    desc->mpitag_tree_span = dist->tag_tree_span;
+    desc->mpitag_ld        = ( dist->level == dist->dist_level ) ? dist->tag_ld
+                                                                 : desc->mt;
+    desc->mpitag_use       = ( dist->level >= dist->dist_level );
+    desc->mpitag_dist      = ( dist->level == dist->dist_level );
+    if ( dist->level == 0 ) {
+        desc->mpitag_size  = dist->tag_count;
+        desc->mpitag_owner = 1;
+        desc->mpitag       = -1;
+    }
+
     if ( dist->owner != CHAMELEON_RECDESC_OWNER_DISTRIBUTED ) {
         chameleon_recdesc_init_single_owner_level( desc, storage->mat, dist->owner );
     }
@@ -301,7 +390,7 @@ chameleon_recdesc_init_level( const CHAM_context_t *chamctxt,
 static int
 chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                           const CHAM_desc_create_t *args, CHAM_desc_t *desc,
-                          const chameleon_recdesc_dist_t *dist )
+                          chameleon_recdesc_dist_t *dist )
 {
     const CHAM_desc_storage_t   *storage = &(args->storage);
     const CHAM_desc_recursion_t *recargs = args->recursive;
@@ -335,6 +424,10 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                                        dist_mstride, dist_nstride );
     if ( rc != CHAMELEON_SUCCESS ) {
         return rc;
+    }
+
+    if ( dist->level == 0 ) {
+        dist->tag_root = desc->mpitag;
     }
 
     /* Move to the next tile size to recurse */
@@ -417,6 +510,16 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
             child_dist.j     = j;
             child_dist.owner = ( dist->level < dist->dist_level )
                              ? CHAMELEON_RECDESC_OWNER_DISTRIBUTED : tile->rank;
+            child_dist.tag_root      = dist->tag_root;
+            child_dist.tag_tree_span = dist->tag_tree_spans[child_dist.level];
+            child_dist.tag_span      = child_dist.tag_tree_span;
+            if ( child_dist.level == child_dist.dist_level ) {
+                child_dist.tag_span += cham_is_mixed( desc->dtyp ) ? 2 : 0;
+                child_dist.tag_base  = dist->tag_root;
+            }
+            else if ( child_dist.level > child_dist.dist_level ) {
+                child_dist.tag_base = chameleon_desc_get_mpi_tag( desc, m, n, 0 ) + 1;
+            }
 
             rc = chameleon_recdesc_create( chamctxt, &child_args, tiledesc, &child_dist );
             free( subname );
@@ -513,15 +616,23 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
     dist.i          = 0;
     dist.j          = 0;
     dist.owner      = CHAMELEON_RECDESC_OWNER_DISTRIBUTED;
+    status = chameleon_recdesc_tag_layout_init( &dist, args->layout.dtyp,
+                                                args->layout.m, args->layout.n,
+                                                recargs->mbs, recargs->nbs );
+    if ( status != CHAMELEON_SUCCESS ) {
+        return status;
+    }
 
     /* Create the current layer descriptor */
     desc = (CHAM_desc_t*)malloc(sizeof(CHAM_desc_t));
     if (desc == NULL) {
+        free( dist.tag_tree_spans );
         chameleon_error("CHAMELEON_Desc_CreateEx", "malloc() failed");
         return CHAMELEON_ERR_OUT_OF_RESOURCES;
     }
 
     status = chameleon_recdesc_create( chamctxt, args, desc, &dist );
+    free( dist.tag_tree_spans );
 
     *descptr = desc;
     return status;
