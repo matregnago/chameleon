@@ -288,8 +288,9 @@ chameleon_recdesc_check_storage( const CHAM_desc_storage_t   *storage,
          !CHAMELEON_MAT_IS_RUNTIME_ALLOC( storage->mat ) &&
          ( storage->mat != CHAMELEON_MAT_ALLOC_GLOBAL ) )
     {
-        chameleon_error( "CHAMELEON_Desc_CreateEx",
-                         "recursive distribution below level 0 requires global, tile, or OOC allocation" );
+        chameleon_error(
+            "CHAMELEON_Desc_CreateEx",
+            "recursive distribution below level 0 requires global, tile, or OOC allocation" );
         return CHAMELEON_ERR_NOT_SUPPORTED;
     }
 
@@ -326,6 +327,36 @@ chameleon_recdesc_check_policy( const CHAM_desc_recursion_t *recargs )
     chameleon_error( "CHAMELEON_Desc_CreateEx",
                      "invalid recursive partitioning policy or argument" );
     return CHAMELEON_ERR_ILLEGAL_VALUE;
+}
+
+/**
+ * @brief Return whether a descriptor contains data owned by the calling rank.
+ *
+ * Shared tiles marked with @c CHAMELEON_MPI_WITH_ME also count as local.
+ *
+ * @param[in] desc
+ *          Descriptor level to inspect.
+ *
+ * @return 1 if at least one tile is local, or 0 otherwise.
+ */
+static int
+chameleon_recdesc_contains_local_tile( const CHAM_desc_t *desc )
+{
+    int m, n;
+
+    for ( n = 0; n < desc->nt; n++ ) {
+        for ( m = 0; m < desc->mt; m++ ) {
+            int rank = desc->get_rankof( desc, m, n );
+
+            if ( ( rank == desc->myrank ) ||
+                 ( rank == CHAMELEON_MPI_WITH_ME ) )
+            {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 /**
@@ -498,8 +529,8 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
     int          dist_mstride, dist_nstride;
     int          rc, i, j, m, n;
 
-    /* Let's make sure we have at least one couple (mb, nb) defined */
-    assert( (mb[0] > 0) && (nb[0] > 0) );
+    /* At least one pair of recursive tile sizes is required. */
+    assert( ( mb[0] > 0 ) && ( nb[0] > 0 ) );
 
     dist_mstride = 1;
     dist_nstride = 1;
@@ -522,37 +553,39 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
         dist->tag_root = desc->mpitag;
     }
 
-    /* Move to the next tile size to recurse */
-    if ( (mb[1] <= 0) || (nb[1] <= 0) ) {
+    /* Stop once the finest recursive level has been initialized. */
+    if ( ( mb[1] <= 0 ) || ( nb[1] <= 0 ) ) {
         return CHAMELEON_SUCCESS;
     }
 
-    for ( n=0; n<desc->nt; n++ ) {
-        j = dist->j * desc->nt + n; /* Used when rec = diag */
+    for ( n = 0; n < desc->nt; n++ ) {
+        /* Coordinate of the first child tile, used by ChamRecDiag. */
+        j = ( dist->j + n ) * ( nb[0] / nb[1] );
 
-        for ( m=0; m<desc->mt; m++ ) {
-            i = dist->i * desc->mt + m; /* Used when rec = diag */
+        for ( m = 0; m < desc->mt; m++ ) {
+            /* Coordinate of the first child tile, used by ChamRecDiag. */
+            i = ( dist->i + m ) * ( mb[0] / mb[1] );
 
-            switch (recargs->kind) {
+            switch ( recargs->kind ) {
             case ChamRecFull:
                 break;
             case ChamRecRandom:
                 /*
-                 * rarg = 1: equivalent to ChamRecFull
-                 * rarg = n: every n-th tiles are partitionned
+                 * arg = 1: equivalent to ChamRecFull
+                 * arg = n: every n-th tile is partitioned
                  */
                 if ( random() % recargs->arg ) continue;
                 break;
             case ChamRecDiag:
                 /*
-                 * rarg = n: the first n tiles under and above the diagonal will
-                 * be partitionned
+                 * arg = n: the first n tiles under and above the diagonal will
+                 * be partitioned
                  */
                 if ( abs( i - j ) > recargs->arg ) continue;
                 break;
             case ChamRecSmart:
                 /*
-                 * rarg defines the number of tiles that needs to be partitionned
+                 * arg defines the number of tiles to partition
                  */
                 if ( n*desc->mt + m >= recargs->arg ) continue;
                 break;
@@ -566,10 +599,10 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
 
             chameleon_asprintf( &subname, "%s[%d,%d]", desc->name, m, n );
 
-            tiledesc = (CHAM_desc_t*)malloc(sizeof(CHAM_desc_t));
+            tiledesc = (CHAM_desc_t*)malloc( sizeof(CHAM_desc_t) );
             if ( tiledesc == NULL ) {
                 free( subname );
-                chameleon_error("CHAMELEON_Desc_CreateEx", "malloc() failed");
+                chameleon_error( "CHAMELEON_Desc_CreateEx", "malloc() failed" );
                 return CHAMELEON_ERR_OUT_OF_RESOURCES;
             }
 
@@ -587,12 +620,17 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
             child_args.layout.mb  = mb[1];
             child_args.layout.nb  = nb[1];
             child_args.layout.lm  = tile->ld;
-            child_args.layout.ln  = tempnn; /* Abuse as ln is not used */
+            child_args.layout.ln  = tempnn;
             child_args.layout.m   = tempmm;
             child_args.layout.n   = tempnn;
             child_args.storage.mat            = child_mat;
-            child_args.storage.get_blkaddr    = chameleon_getaddr_cm;
-            child_args.storage.get_blkldd     = chameleon_getblkldd_cm;
+            child_args.storage.get_blkaddr    = ( (intptr_t)child_mat > 0 )
+                                              ? chameleon_getaddr_cm
+                                              : ( ( dist->level >= dist->dist_level )
+                                                ? chameleon_getaddr_null
+                                                : NULL );
+            child_args.storage.get_blkldd     = ( (intptr_t)child_mat > 0 )
+                                              ? chameleon_getblkldd_cm : NULL;
             child_args.storage.get_rankof     = NULL;
             child_args.storage.get_rankof_arg = NULL;
 
@@ -616,11 +654,18 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
             rc = chameleon_recdesc_create( chamctxt, &child_args, tiledesc, &child_dist );
             free( subname );
 
-            tile->format = CHAMELEON_TILE_DESC;
-            tile->mat    = tiledesc;
-
             if ( rc != CHAMELEON_SUCCESS ) {
                 return rc;
+            }
+
+            tile->format = CHAMELEON_TILE_DESC;
+            tile->mat    = tiledesc;
+            if ( dist->level < dist->dist_level ) {
+                tile->rank = chameleon_recdesc_contains_local_tile( tiledesc )
+                           ? CHAMELEON_MPI_WITH_ME
+                           : CHAMELEON_MPI_WITHOUT_ME;
+                assert( ( tile->rank == CHAMELEON_MPI_WITH_ME ) ||
+                        ( tile->rank == CHAMELEON_MPI_WITHOUT_ME ) );
             }
         }
     }
@@ -717,10 +762,10 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
     }
 
     /* Create the current layer descriptor */
-    desc = (CHAM_desc_t*)malloc(sizeof(CHAM_desc_t));
-    if (desc == NULL) {
+    desc = (CHAM_desc_t*)malloc( sizeof(CHAM_desc_t) );
+    if ( desc == NULL ) {
         free( dist.tag_tree_spans );
-        chameleon_error("CHAMELEON_Desc_CreateEx", "malloc() failed");
+        chameleon_error( "CHAMELEON_Desc_CreateEx", "malloc() failed" );
         return CHAMELEON_ERR_OUT_OF_RESOURCES;
     }
 
