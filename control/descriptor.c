@@ -569,7 +569,7 @@ void chameleon_desc_destroy_submit( CHAM_desc_t              *desc,
 
             tile = desc->get_blktile( desc, m, n );
 
-            if ( tile->format == CHAMELEON_TILE_DESC ) {
+            if ( tile->format & CHAMELEON_TILE_DESC ) {
                 CHAM_desc_t *tiledesc = tile->mat;
                 chameleon_desc_destroy_submit( tiledesc, sequence );
             }
@@ -597,7 +597,7 @@ void chameleon_desc_destroy( CHAM_desc_t *desc )
 
             tile = desc->get_blktile( desc, m, n );
 
-            if ( tile->format == CHAMELEON_TILE_DESC ) {
+            if ( tile->format & CHAMELEON_TILE_DESC ) {
                 CHAM_desc_t *tiledesc = tile->mat;
 
                 chameleon_desc_destroy( tiledesc );
@@ -1426,7 +1426,7 @@ chameleon_desc_print( const CHAM_desc_t *desc, int shift, int collective )
             shared = ( trank == CHAMELEON_MPI_WITH_ME ) ||
                      ( trank == CHAMELEON_MPI_WITHOUT_ME );
 
-            if ( tile->format == CHAMELEON_TILE_DESC ) {
+            if ( tile->format & CHAMELEON_TILE_DESC ) {
                 if ( local || shared ) {
                     tiledesc = tile->mat;
                 }
