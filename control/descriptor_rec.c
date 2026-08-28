@@ -32,20 +32,22 @@ typedef struct chameleon_recdesc_dist_s {
     int i;          /**< Global row tile coordinate at the current level.       */
     int j;          /**< Global column tile coordinate at the current level.    */
     int owner;      /**< Owning rank, or CHAMELEON_RECDESC_OWNER_DISTRIBUTED.   */
-    int64_t tag_root;      /**< First tag reserved for the complete hierarchy.  */
-    int64_t tag_base;      /**< First tag assigned to the current subtree.       */
-    int64_t tag_count;     /**< Total number of tags reserved by the root.       */
-    int64_t tag_span;      /**< Tags reserved for one distributed tile subtree. */
-    int64_t tag_tree_span; /**< Tags used by the hierarchy below one tile.       */
-    int64_t *tag_tree_spans; /**< Precomputed hierarchy span for every level.    */
-    int     tag_ld;        /**< Leading dimension of the distributed tag grid.   */
+
+    int64_t  tag_root;       /**< First tag reserved for the complete hierarchy.    */
+    int64_t  tag_base;       /**< First tag assigned to the current descriptor.     */
+    int64_t  tag_count;      /**< Total number of tags reserved by the root.        */
+    int64_t  tag_span;       /**< Tags reserved for one tile at the current level.  */
+    int64_t  tag_tree_span;  /**< Primary-handle tags below one current-level tile. */
+    int64_t *tag_tree_spans; /**< Primary-handle subtree span at every level.       */
+    int      tag_ld;         /**< Leading dimension of the distributed tag grid.    */
 } chameleon_recdesc_dist_t;
 
 /**
- * @brief Precompute hierarchy tags reserved below one tile at every level.
+ * @brief Precompute the maximum subtree tag span at every recursive level.
  *
- * A leaf consumes one tag. Each parent consumes one tag for its own handle and
- * reserves one complete child span for every tile in its exact refinement.
+ * A leaf consumes one tag. At every coarser level, one tag is used by the
+ * current tile handle and a complete child span is reserved for each tile in
+ * its exact refinement. Partial recursion policies may leave some tags unused.
  */
 static int
 chameleon_recdesc_tag_tree_spans_init( chameleon_recdesc_dist_t *dist,
@@ -79,9 +81,9 @@ chameleon_recdesc_tag_tree_spans_init( chameleon_recdesc_dist_t *dist,
  * @brief Initialize the deterministic MPI-tag layout of a recursive hierarchy.
  *
  * Each tile at the distributed level receives an equally sized contiguous
- * range. The primary hierarchy occupies @c tag_tree_span entries in that
- * range; mixed-precision descriptors reserve two additional conversion tags.
- * The root books all distributed-tile ranges in one operation.
+ * range. Its primary-handle subtree occupies @c tag_tree_span entries, and a
+ * mixed-precision descriptor reserves two additional conversion tags. The root
+ * reserves all distributed-tile ranges in one operation.
  */
 static int
 chameleon_recdesc_tag_layout_init( chameleon_recdesc_dist_t *dist,
