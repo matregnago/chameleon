@@ -599,6 +599,7 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 
     assert( child_desc != NULL );
 
+    filter_tile.filter_arg_ptr = child_desc;
     filter_tile.nchildren = child_desc->lmt * child_desc->lnt;
     child_count  = filter_tile.nchildren;
     child_handle = (starpu_data_handle_t *)(child_desc->schedopt);
