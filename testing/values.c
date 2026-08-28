@@ -2,7 +2,7 @@
  *
  * @file values.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  ***
  *
@@ -15,6 +15,7 @@
  * @author Florent Pruvost
  * @author Philippe Swartvagher
  * @author Matteo Marcos
+ * @author Brieuc Nicolas
  * @date 2025-12-19
  *
  */
@@ -437,30 +438,46 @@ val_t pread_norm( const char *str )
 val_t pread_rec( const char *str )
 {
     val_t val;
-    val.rec = ChamRecFull;
-    if ( strcasecmp("full", str) == 0 )
+    val.rec = ChamRecNone;
+    if ( strcasecmp( "none", str ) == 0 )
+    {
+        val.rec = ChamRecNone;
+    }
+    else if ( strcasecmp( "full", str ) == 0 )
     {
         val.rec = ChamRecFull;
     }
-    else if ( strcasecmp("random", str) == 0 )
+    else if ( strcasecmp( "random", str ) == 0 )
     {
         val.rec = ChamRecRandom;
     }
-    else if ( strcasecmp("diag", str) == 0 )
+    else if ( strcasecmp( "diag", str ) == 0 )
     {
         val.rec = ChamRecDiag;
     }
-    else if ( strcasecmp("smart", str) == 0 )
+    else if ( strcasecmp( "smart", str ) == 0 )
     {
         val.rec = ChamRecSmart;
     }
     else {
         int v = atoi( str );
-        if ( (v == ChamRecRandom) || (v == (ChamRecRandom-ChamRecFull)) ) {
+        if ( ( v == ChamRecNone ) || ( v == ( ChamRecNone - ChamRecNone ) ) ) {
+            val.rec = ChamRecNone;
+        }
+        else if ( ( v == ChamRecFull ) || ( v == ( ChamRecFull - ChamRecNone ) ) ) {
+            val.rec = ChamRecFull;
+        }
+        else if ( ( v == ChamRecRandom ) || ( v == ( ChamRecRandom - ChamRecNone ) ) ) {
             val.rec = ChamRecRandom;
         }
-        else if ( (v == ChamRecDiag) || (v == (ChamRecDiag-ChamRecFull)) ) {
+        else if ( ( v == ChamRecDiag ) || ( v == ( ChamRecDiag - ChamRecNone ) ) ) {
             val.rec = ChamRecDiag;
+        }
+        else if ( ( v == ChamRecSmart ) || ( v == ( ChamRecSmart - ChamRecNone ) ) ) {
+            val.rec = ChamRecSmart;
+        }
+        else {
+            val.rec = ChamRecNone;
         }
     }
     return val;
@@ -763,6 +780,9 @@ char *sprint_rec( val_t val, int human, int nbchar, char *str_in )
     if ( human ) {
         char *name;
         switch( val.rec ) {
+        case ChamRecNone:
+            name = "None";
+            break;
         case ChamRecFull:
             name = "Full";
             break;
@@ -772,13 +792,16 @@ char *sprint_rec( val_t val, int human, int nbchar, char *str_in )
         case ChamRecDiag:
             name = "Diag";
             break;
+        case ChamRecSmart:
+            name = "Smart";
+            break;
         default:
             name = "ERR";
         }
         rc = sprintf( str_in, " %-*s", nbchar, name );
     }
     else {
-        rc = sprintf( str_in, ";%d", val.ntype );
+        rc = sprintf( str_in, ";%d", val.rec );
     }
     return str_in+rc;
 }

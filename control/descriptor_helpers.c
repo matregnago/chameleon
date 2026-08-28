@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -31,12 +31,6 @@
  *
  */
 #include "control/common.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include "control/descriptor.h"
-#include "chameleon/runtime.h"
 
 /**
  * @brief Return the rank of the tile A( m, n ) in a classic 2D Block Cyclic
@@ -605,4 +599,109 @@ int chameleon_getblkldd_cm( const CHAM_desc_t *A, int m )
 {
     (void)m;
     return A->llm;
+}
+
+/**
+ * @brief Return whether a descriptor contains at least one recursive tile.
+ *
+ * @param[in] desc
+ *          Descriptor level to inspect.
+ *
+ * @return 1 if at least one tile contains a child descriptor, or 0 otherwise.
+ */
+int
+chameleon_desc_has_recursive_tiles( const CHAM_desc_t *desc )
+{
+    int m, n;
+
+    if ( desc == NULL ) {
+        return CHAMELEON_FALSE;
+    }
+
+    for ( n = 0; n < desc->nt; n++ ) {
+        for ( m = 0; m < desc->mt; m++ ) {
+            const CHAM_tile_t *tile = desc->get_blktile( desc, m, n );
+
+            if ( tile->format & CHAMELEON_TILE_DESC ) {
+                return CHAMELEON_TRUE;
+            }
+        }
+    }
+
+    return CHAMELEON_FALSE;
+}
+
+/**
+ * @brief Return whether a descriptor and all its descendants use square
+ *        tiles.
+ *
+ * @param[in] desc
+ *          Root of the descriptor hierarchy to inspect.
+ *
+ * @return 1 if every descriptor level uses square tiles, or 0 otherwise.
+ */
+int
+chameleon_desc_has_square_recursive_tiling( const CHAM_desc_t *desc )
+{
+    int m, n;
+
+    if ( ( desc == NULL ) || ( desc->mb != desc->nb ) ) {
+        return CHAMELEON_FALSE;
+    }
+
+    for ( n = 0; n < desc->nt; n++ ) {
+        for ( m = 0; m < desc->mt; m++ ) {
+            const CHAM_tile_t *tile = desc->get_blktile( desc, m, n );
+
+            if ( ( tile->format & CHAMELEON_TILE_DESC ) &&
+                 !chameleon_desc_has_square_recursive_tiling( tile->mat ) )
+            {
+                return CHAMELEON_FALSE;
+            }
+        }
+    }
+
+    return CHAMELEON_TRUE;
+}
+
+/**
+ * @brief Return whether a descriptor matches the recursive-panel layout.
+ *
+ * The root must be a fully recursive, one-tile-row panel above the distributed
+ * level. Every child must be at the distributed level, and every level from
+ * those children downward must use square tiles.
+ *
+ * @param[in] desc
+ *          Descriptor hierarchy to inspect.
+ *
+ * @return 1 if the hierarchy has the recursive-panel layout, or 0 otherwise.
+ */
+int
+chameleon_desc_is_recursive_panel( const CHAM_desc_t *desc )
+{
+    int n;
+
+    if ( ( desc == NULL ) || desc->mpitag_dist ||
+         ( desc->mt != 1 ) || ( desc->nt == 0 ) )
+    {
+        return CHAMELEON_FALSE;
+    }
+
+    for ( n = 0; n < desc->nt; n++ ) {
+        const CHAM_tile_t *tile = desc->get_blktile( desc, 0, n );
+        const CHAM_desc_t *child;
+
+        if ( !( tile->format & CHAMELEON_TILE_DESC ) ) {
+            return CHAMELEON_FALSE;
+        }
+
+        child = tile->mat;
+        if ( !child->mpitag_dist ||
+             !chameleon_desc_has_square_recursive_tiling( child ) )
+        {
+            return CHAMELEON_FALSE;
+        }
+    }
+
+    return CHAMELEON_TRUE;
 }

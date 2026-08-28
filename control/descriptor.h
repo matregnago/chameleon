@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -103,6 +103,50 @@ static inline int chameleon_getrankof_tile(const CHAM_desc_t *desc, int m, int n
     return tile->rank;
 }
 
+/**
+ * @brief Compute the deterministic MPI tag of a descriptor tile handle.
+ *
+ * @param[in] desc
+ *          Descriptor owning the tile handle.
+ *
+ * @param[in] mm
+ *          Tile row in the full tile grid represented by @p desc. This is not
+ *          necessarily the row in the distributed MPI-tag grid.
+ *
+ * @param[in] nn
+ *          Tile column in the full tile grid represented by @p desc. This is
+ *          not necessarily the column in the distributed MPI-tag grid.
+ *
+ * @param[in] fltshift
+ *          Precision-copy index: zero selects the primary handle, while one
+ *          and two select the conversion handles.
+ *
+ * The descriptor MPI-tag origin lifts the input coordinates into the tag grid.
+ * Classic descriptors and distributed recursive levels use the global tile
+ * grid. Levels below the distributed level use a compact grid local to their
+ * single-owner subtree.
+ *
+ * @return The MPI tag, or -1 when handles at this level do not use MPI tags.
+ */
+static inline int64_t
+chameleon_desc_get_mpi_tag( const CHAM_desc_t *desc, int64_t mm, int64_t nn,
+                            int fltshift )
+{
+    int64_t index;
+    int64_t tag;
+
+    if ( !desc->mpitag_use ) {
+        return -1;
+    }
+    assert( desc->mpitag_ld > 0 );
+    index = ( desc->dist_jt + nn ) * desc->mpitag_ld + desc->dist_it + mm;
+    tag = desc->mpitag + index * desc->mpitag_tile_span;
+    if ( fltshift != 0 ) {
+        tag += desc->mpitag_tree_span + fltshift - 1;
+    }
+    return tag;
+}
+
 int chameleon_desc_init( const CHAM_context_t *chamctxt,
                          CHAM_desc_t *desc, const char *name, void *mat,
                          cham_flttype_t dtyp, int mb, int nb,
@@ -160,6 +204,10 @@ CHAM_desc_t* chameleon_desc_submatrix( CHAM_desc_t *descA, int i, int j, int m, 
 int          chameleon_desc_check    ( const CHAM_desc_t *desc );
 void         chameleon_desc_destroy  ( CHAM_desc_t *desc );
 void         chameleon_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence );
+
+int chameleon_desc_has_recursive_tiles( const CHAM_desc_t *desc );
+int chameleon_desc_has_square_recursive_tiling( const CHAM_desc_t *desc );
+int chameleon_desc_is_recursive_panel( const CHAM_desc_t *desc );
 
 int chameleon_ipiv_init( CHAM_ipiv_t *ipiv, cham_side_t side, int mb, int m,
                          int withidx, int max_m, int max_mt,

@@ -156,12 +156,18 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
     }
 
 #if defined(CHAMELEON_USE_MPI)
-    /*
-     * Book the number of tags required to describe this matrix
-     */
+    /* Reserve the MPI-tag range once, on the descriptor that owns it. */
     {
         chameleon_starpu_tag_init( );
-        desc->mpitag = chameleon_starpu_tag_book( nbtiles );
+        if ( desc->mpitag < 0 ) {
+            size_t tag_count = ( desc->mpitag_size > 0 )
+                             ? (size_t)desc->mpitag_size
+                             : nbtiles;
+
+            desc->mpitag       = chameleon_starpu_tag_book( tag_count );
+            desc->mpitag_size  = tag_count;
+            desc->mpitag_owner = 1;
+        }
 
         if ( desc->mpitag == -1 ) {
             chameleon_fatal_error("RUNTIME_desc_create", "Can't pursue computation since no more tags are available");
@@ -277,7 +283,9 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
     }
 #endif
 #endif
-    chameleon_starpu_tag_release( desc->mpitag );
+    if ( desc->mpitag_owner ) {
+        chameleon_starpu_tag_release( desc->mpitag );
+    }
 
     free( desc->schedopt );
 }
@@ -391,10 +399,20 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
     }
 
 #if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_cache_flush( sequence->comm, handle );
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( tile->format & CHAMELEON_TILE_DESC ) {
+        /* Flush the parent handle and every child registered below it. */
+        starpu_mpi_cache_flush_recursive( /* sequence->comm, */ handle );
+    }
+    else
+#endif
+    {
+        starpu_mpi_cache_flush( sequence->comm, handle );
+    }
 #endif
 
-    if ( sequence->myrank != tile->rank )
+    if ( ( tile->rank != CHAMELEON_MPI_WITH_ME ) &&
+         ( tile->rank != sequence->myrank ) )
     {
         return;
     }
@@ -581,6 +599,7 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 
     assert( child_desc != NULL );
 
+    filter_tile.filter_arg_ptr = child_desc;
     filter_tile.nchildren = child_desc->lmt * child_desc->lnt;
     child_count  = filter_tile.nchildren;
     child_handle = (starpu_data_handle_t *)(child_desc->schedopt);
@@ -606,7 +625,9 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
             parent_owner = STARPU_MPI_MULTIPLE_NODE_WITH_ME;
             starpu_subdata_ptr_register( *child_handle, STARPU_MAIN_RAM );
         }
-        starpu_mpi_data_register( *child_handle, child_desc->mpitag + child_ind, owner );
+        starpu_mpi_data_register(
+            *child_handle,
+            chameleon_desc_get_mpi_tag( child_desc, child_m, child_n, 0 ), owner );
 #endif
     }
 
@@ -655,10 +676,8 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     if ( tile->format & CHAMELEON_TILE_DESC ) {
-        int64_t block_ind = A->lmt * nn + mm;
-
         runtime_data_register_desc_tile( A, m, n, ptrtile, tile,
-                                         A->mpitag + block_ind,
+                                         chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
                                          cham_get_flttype( A->dtyp ) );
         assert( *ptrtile );
         return (void*)(*ptrtile);
@@ -686,14 +705,13 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
 #endif
 
 #if defined(CHAMELEON_USE_MPI)
-    {
-        int64_t block_ind = A->lmt * nn + mm;
-        starpu_mpi_data_register( *ptrtile, A->mpitag + block_ind, owner );
-    }
+    starpu_mpi_data_register( *ptrtile,
+                              chameleon_desc_get_mpi_tag( A, mm, nn, 0 ), owner );
 #endif /* defined(CHAMELEON_USE_MPI) */
 
     CHAMELEON_DEBUG( "starpu", "%s - %p registered with tag %ld\n",
-                     tile->name, (void*)(*ptrtile), A->mpitag + A->lmt * nn + mm );
+                     tile->name, (void*)(*ptrtile),
+                     chameleon_desc_get_mpi_tag( A, mm, nn, 0 ) );
 
     assert( *ptrtile );
     return (void*)(*ptrtile);
@@ -743,7 +761,8 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     if ( ( tile->format & CHAMELEON_TILE_DESC ) && ( fltshift == 0 ) ) {
         runtime_data_register_desc_tile( A, m, n, ptrtile, tile,
-                                         A->mpitag + shift, flttype );
+                                         chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
+                                         flttype );
         assert( *ptrtile );
         return (void*)(*ptrtile);
     }
@@ -774,12 +793,14 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
 #endif
 
 #if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_data_register( *ptrtile, A->mpitag + shift, owner );
+    starpu_mpi_data_register(
+        *ptrtile, chameleon_desc_get_mpi_tag( A, mm, nn, fltshift ), owner );
 #endif /* defined(CHAMELEON_USE_MPI) */
 
 #if defined(CHAMELEON_KERNELS_TRACE)
     fprintf( stderr, "%s - %p registered with tag %ld\n",
-             tile->name, (void*)(*ptrtile), A->mpitag + shift );
+             tile->name, (void*)(*ptrtile),
+             chameleon_desc_get_mpi_tag( A, mm, nn, fltshift ) );
 #endif
     assert( *ptrtile );
 

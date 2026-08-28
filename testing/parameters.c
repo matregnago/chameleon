@@ -2,7 +2,7 @@
  *
  * @file parameters.c
  *
- * @copyright 2019-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2019-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  ***
  *
@@ -478,19 +478,47 @@ parameters_compute_q( int p )
 /**
  ********************************************************************************
  *
- * @brief Helper function to generate the testing descriptors with the right
- * data distrbution.
+ * @brief Internal helper to generate testing descriptors with the right data
+ * distribution and optional recursive tiling parameters.
  *
  *******************************************************************************
  *
- * @param[in] filename
- *          The name of the input file.
+ * @param[in] id
+ *          Name of the descriptor.
+ *
+ * @param[out] descptr
+ *          The created descriptor.
+ *
+ * @param[in] dtyp
+ *          Data precision.
+ *
+ * @param[in] mb
+ *          Number of rows in a tile at the outermost descriptor level.
+ *
+ * @param[in] nb
+ *          Number of columns in a tile at the outermost descriptor level.
+ *
+ * @param[in] lm
+ *          Number of rows of the full matrix.
+ *
+ * @param[in] ln
+ *          Number of columns of the full matrix.
+ *
+ * @param[in] m
+ *          Number of rows of the submatrix.
+ *
+ * @param[in] n
+ *          Number of columns of the submatrix.
+ *
+ * @param[in] recursive
+ *          Recursive descriptor parameters, or NULL for a classic descriptor.
  *
  *******************************************************************************
  */
-int
-parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dtyp,
-                        int mb, int nb, int lm, int ln, int m, int n )
+static int
+parameters_desc_create_internal( const char *id, CHAM_desc_t **descptr, cham_flttype_t dtyp,
+                                 int mb, int nb, int lm, int ln, int m, int n,
+                                 const CHAM_desc_recursion_t *recursive )
 {
     custom_dist_t *custom_args = NULL;
     const char    *custom = parameters_getvalue_str( "custom" );
@@ -531,6 +559,10 @@ parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dt
         .distrib_array_size = 2,
         .distrib            = { P, Q }
     };
+
+    assert( ( recursive == NULL ) || ( mb == recursive->mbs[0] ) );
+    assert( ( recursive == NULL ) || ( nb == recursive->nbs[0] ) );
+
     CHAM_desc_create_t args = {
         .name = id,
         .layout = {
@@ -552,10 +584,108 @@ parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dt
             .get_rankof_arg = custom_args
         },
         .data_dist = &data_dist,
-        .recursive = NULL
+        .recursive = recursive
     };
 
     return CHAMELEON_Desc_CreateEx( descptr, &args );
+}
+
+/**
+ ********************************************************************************
+ *
+ * @brief Helper function to generate recursive testing descriptors.
+ *
+ *******************************************************************************
+ *
+ * @param[in] id
+ *          Name of the descriptor.
+ *
+ * @param[out] descptr
+ *          The created descriptor.
+ *
+ * @param[in] dtyp
+ *          Data precision.
+ *
+ * @param[in] lm
+ *          Number of rows of the full matrix.
+ *
+ * @param[in] ln
+ *          Number of columns of the full matrix.
+ *
+ * @param[in] m
+ *          Number of rows of the submatrix.
+ *
+ * @param[in] n
+ *          Number of columns of the submatrix.
+ *
+ * @param[in] recursive
+ *          Recursive tiling parameters.
+ *
+ *******************************************************************************
+ *
+ * @return CHAMELEON_SUCCESS on success, or a negative error code otherwise.
+ *
+ *******************************************************************************
+ */
+int
+parameters_recdesc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dtyp,
+                           int lm, int ln, int m, int n,
+                           const CHAM_desc_recursion_t *recursive )
+{
+    if ( ( recursive == NULL ) ||
+         ( recursive->mbs == NULL ) || ( recursive->nbs == NULL ) )
+    {
+        return CHAMELEON_ERR_ILLEGAL_VALUE;
+    }
+
+    return parameters_desc_create_internal( id, descptr, dtyp,
+                                            recursive->mbs[0], recursive->nbs[0],
+                                            lm, ln, m, n, recursive );
+}
+
+/**
+ ********************************************************************************
+ *
+ * @brief Helper function to generate the testing descriptors with the right
+ * data distribution.
+ *
+ *******************************************************************************
+ *
+ * @param[in] id
+ *          Name of the descriptor.
+ *
+ * @param[out] descptr
+ *          The created descriptor.
+ *
+ * @param[in] dtyp
+ *          Data precision.
+ *
+ * @param[in] mb
+ *          Number of rows in a tile.
+ *
+ * @param[in] nb
+ *          Number of columns in a tile.
+ *
+ * @param[in] lm
+ *          Number of rows of the full matrix.
+ *
+ * @param[in] ln
+ *          Number of columns of the full matrix.
+ *
+ * @param[in] m
+ *          Number of rows of the submatrix.
+ *
+ * @param[in] n
+ *          Number of columns of the submatrix.
+ *
+ *******************************************************************************
+ */
+int
+parameters_desc_create( const char *id, CHAM_desc_t **descptr, cham_flttype_t dtyp,
+                        int mb, int nb, int lm, int ln, int m, int n )
+{
+    return parameters_desc_create_internal( id, descptr, dtyp, mb, nb, lm, ln, m, n,
+                                            NULL );
 }
 
 /**
