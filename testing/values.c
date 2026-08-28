@@ -801,7 +801,7 @@ char *sprint_rec( val_t val, int human, int nbchar, char *str_in )
         rc = sprintf( str_in, " %-*s", nbchar, name );
     }
     else {
-        rc = sprintf( str_in, ";%d", val.ntype );
+        rc = sprintf( str_in, ";%d", val.rec );
     }
     return str_in+rc;
 }
