@@ -33,6 +33,23 @@ runtime_data_clean_desc_tile( starpu_data_handle_t handle,
 #endif
 
 /**
+ * @brief Allocate the StarPU-specific state and its handle slots.
+ */
+static starpu_cham_schedopt_t *
+runtime_desc_schedopt_create( size_t nhandles )
+{
+    starpu_cham_schedopt_t *schedopt;
+    size_t                  size;
+
+    size = sizeof(*schedopt) + nhandles * sizeof(schedopt->handles[0]);
+    schedopt = calloc( 1, size );
+    if ( schedopt != NULL ) {
+        schedopt->nhandles = nhandles;
+    }
+    return schedopt;
+}
+
+/**
  *  Malloc/Free of the data
  */
 #ifdef STARPU_MALLOC_SIMULATION_FOLDED
@@ -91,22 +108,28 @@ void RUNTIME_free( void  *ptr,
  */
 void RUNTIME_desc_create( CHAM_desc_t *desc )
 {
-    int64_t lmt = desc->lmt;
-    int64_t lnt = desc->lnt;
-    size_t  nbtiles = lmt * lnt;
+    starpu_cham_schedopt_t *schedopt;
+    int64_t                 lmt = desc->lmt;
+    int64_t                 lnt = desc->lnt;
+    size_t                  nbtiles = (size_t)lmt * (size_t)lnt;
 
     desc->occurences = 1;
 
     /*
-     * Allocate starpu_handle_t array (handlers are initialized on the fly when
-     * discovered by any algorithm to save space)
+     * Allocate all handle slots up front. Individual StarPU handles are
+     * created lazily when an algorithm first requests their tiles.
      */
     if ( cham_is_mixed( desc->dtyp ) ) {
         nbtiles *= 3;
     }
 
-    desc->schedopt = (void*)calloc( nbtiles, sizeof(starpu_data_handle_t) );
-    assert( desc->schedopt );
+    /*
+     * Keep descriptor-owned StarPU state and its flexible handle array in one
+     * typed allocation.
+     */
+    schedopt = runtime_desc_schedopt_create( nbtiles );
+    assert( schedopt != NULL );
+    desc->schedopt = schedopt;
 
 #if !defined(CHAMELEON_SIMULATION)
 #if defined(CHAMELEON_USE_CUDA) || defined(CHAMELEON_USE_HIP)
@@ -187,24 +210,26 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
 void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
                                   const RUNTIME_sequence_t *sequence )
 {
+    starpu_cham_schedopt_t *schedopt;
+    starpu_data_handle_t   *handle;
+    int64_t                 lmt = desc->lmt;
+    int64_t                 lnt = desc->lnt;
+    int64_t                 tile_count = lmt * lnt;
+    int64_t                 nbtiles;
+    int64_t                 m;
+
     /*
      * If this is the last descriptor using the matrix, we release the handle
      */
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(desc->schedopt);
-    int64_t lmt     = desc->lmt;
-    int64_t lnt     = desc->lnt;
-    int64_t nbtiles = lmt * lnt;
-    int64_t m;
-
-    if ( cham_is_mixed( desc->dtyp ) ) {
-        nbtiles *= 3;
-    }
+    schedopt = chameleon_starpu_desc_get_schedopt( desc );
+    handle   = schedopt->handles;
+    nbtiles  = (int64_t)schedopt->nhandles;
 
     for (m = 0; m < nbtiles; m++, handle++)
     {
         if ( *handle != NULL ) {
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
-            if ( m < ( lmt * lnt ) ) {
+            if ( m < tile_count ) {
                 CHAM_tile_t *tile = desc->get_blktile( desc, m % lmt, m / lmt );
 
                 if ( tile->format & CHAMELEON_TILE_DESC ) {
@@ -230,6 +255,14 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
  */
 void RUNTIME_desc_destroy( CHAM_desc_t *desc )
 {
+    starpu_cham_schedopt_t *schedopt;
+    starpu_data_handle_t   *handle;
+    int64_t                 lmt = desc->lmt;
+    int64_t                 lnt = desc->lnt;
+    int64_t                 tile_count = lmt * lnt;
+    int64_t                 nbtiles;
+    int64_t                 m;
+
     /*
      * If this is the last descriptor using the matrix, we release the handle
      * and unregister the GPU data
@@ -238,20 +271,14 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
         return;
     }
 
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(desc->schedopt);
-    int64_t lmt = desc->lmt;
-    int64_t lnt = desc->lnt;
-    int64_t nbtiles = lmt * lnt;
-    int64_t m;
-
-    if ( cham_is_mixed( desc->dtyp ) ) {
-        nbtiles *= 3;
-    }
+    schedopt = chameleon_starpu_desc_get_schedopt( desc );
+    handle   = schedopt->handles;
+    nbtiles  = (int64_t)schedopt->nhandles;
 
     for (m = 0; m < nbtiles; m++, handle++) {
         if ( *handle != NULL ) {
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
-            if ( m < ( lmt * lnt ) ) {
+            if ( m < tile_count ) {
                 CHAM_tile_t *tile = desc->get_blktile( desc, m % lmt, m / lmt );
 
                 if ( tile->format & CHAMELEON_TILE_DESC ) {
@@ -295,7 +322,7 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
  */
 int RUNTIME_desc_acquire( const CHAM_desc_t *desc )
 {
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(desc->schedopt);
+    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( desc );
     int lmt = desc->lmt;
     int lnt = desc->lnt;
     int m, n;
@@ -320,7 +347,7 @@ int RUNTIME_desc_acquire( const CHAM_desc_t *desc )
  */
 int RUNTIME_desc_release( const CHAM_desc_t *desc )
 {
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(desc->schedopt);
+    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( desc );
     int lmt = desc->lmt;
     int lnt = desc->lnt;
     int m, n;
@@ -436,7 +463,7 @@ void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
     CHAM_tile_t          *tile;
-    starpu_data_handle_t *handle = desc->schedopt;
+    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( desc );
     int imax = 1;
     int mt   = desc->mt;
     int nt   = desc->nt;
@@ -477,7 +504,7 @@ void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,
     int64_t shift   = ((int64_t)(A->lmt)) * nn + mm;
     int64_t nbtiles = ((int64_t)(A->lmt)) * ((int64_t)(A->lnt));
     CHAM_tile_t          *tile   = A->get_blktile( A, m, n );
-    starpu_data_handle_t *handle = A->schedopt;
+    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( A );
     handle += shift;
 
     if ( cham_is_mixed( A->dtyp ) ) {
@@ -501,7 +528,7 @@ void RUNTIME_data_unregister( const RUNTIME_sequence_t *sequence,
     int64_t nn      = An + (A->j / A->nb);
     int64_t shift   = ((int64_t)(A->lmt)) * nn + mm;
     int64_t nbtiles = ((int64_t)(A->lmt)) * ((int64_t)(A->lnt));
-    starpu_data_handle_t *handle = A->schedopt;
+    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( A );
     handle += shift;
 
     if ( cham_is_mixed( A->dtyp ) ) {
@@ -529,7 +556,7 @@ void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
 {
 #if defined(HAVE_STARPU_MPI_DATA_MIGRATE)
     int old_rank;
-    starpu_data_handle_t *handle = (starpu_data_handle_t*)(A->schedopt);
+    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( A );
     starpu_data_handle_t lhandle;
     handle += ((int64_t)(A->lmt) * (int64_t)An + (int64_t)Am);
 
@@ -565,15 +592,16 @@ runtime_data_clean_desc_tile( starpu_data_handle_t handle,
 
 #if defined(CHAMELEON_USE_MPI)
     starpu_mpi_data_partition_clean_node( handle, child_count,
-                                          (starpu_data_handle_t *)(child_desc->schedopt),
+                                          chameleon_starpu_desc_get_handles( child_desc ),
                                           STARPU_MAIN_RAM, MPI_COMM_WORLD );
 #else
     starpu_data_partition_clean_node( handle, child_count,
-                                      (starpu_data_handle_t *)(child_desc->schedopt),
+                                      chameleon_starpu_desc_get_handles( child_desc ),
                                       STARPU_MAIN_RAM );
 #endif
 
-    memset( child_desc->schedopt, 0, child_count * sizeof(starpu_data_handle_t) );
+    memset( chameleon_starpu_desc_get_handles( child_desc ), 0,
+            child_count * sizeof(starpu_data_handle_t) );
 }
 
 static void
@@ -602,7 +630,7 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
     filter_tile.filter_arg_ptr = child_desc;
     filter_tile.nchildren = child_desc->lmt * child_desc->lnt;
     child_count  = filter_tile.nchildren;
-    child_handle = (starpu_data_handle_t *)(child_desc->schedopt);
+    child_handle = chameleon_starpu_desc_get_handles( child_desc );
 
     starpu_cham_tile_register( ptrtile, STARPU_MAIN_RAM, tile, flttype );
     starpu_data_partition_plan( *ptrtile, &filter_tile, child_handle );
@@ -633,7 +661,7 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 
 #if defined(CHAMELEON_USE_MPI)
     starpu_mpi_register_hierarchy( *ptrtile, child_count,
-                                   (starpu_data_handle_t *)(child_desc->schedopt) );
+                                   chameleon_starpu_desc_get_handles( child_desc ) );
     starpu_mpi_data_register( *ptrtile, tag, parent_owner );
 #else
     (void)tag;
@@ -662,7 +690,7 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
     int64_t mm = m + (A->i / A->mb);
     int64_t nn = n + (A->j / A->nb);
 
-    starpu_data_handle_t *ptrtile = A->schedopt;
+    starpu_data_handle_t *ptrtile = chameleon_starpu_desc_get_handles( A );
     ptrtile += ((int64_t)A->lmt) * nn + mm;
 
     if ( *ptrtile != NULL ) {
@@ -725,7 +753,7 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
     int64_t nn = n + (A->j / A->nb);
 
     CHAM_tile_t *tile = A->get_blktile( A, m, n );
-    starpu_data_handle_t *ptrtile = A->schedopt;
+    starpu_data_handle_t *ptrtile = chameleon_starpu_desc_get_handles( A );
 
     int     fltshift = (cham_get_arith( tile->flttype ) - cham_get_arith( flttype ) + 3 ) % 3;
     int64_t shift = (int64_t)fltshift * ((int64_t)A->lmt * (int64_t)A->lnt);
@@ -806,7 +834,7 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
 
     /* Submit the data conversion */
     if (( fltshift != 0 ) && (access & ChamR) && (owner == myrank) ) {
-        starpu_data_handle_t *fromtile = A->schedopt;
+        starpu_data_handle_t *fromtile = chameleon_starpu_desc_get_handles( A );
         starpu_data_handle_t *totile = ptrtile;
 
         fromtile += ((int64_t)A->lmt) * nn + mm;
