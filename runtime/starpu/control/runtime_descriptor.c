@@ -428,8 +428,18 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
 #if defined(CHAMELEON_USE_MPI)
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
     if ( tile->format & CHAMELEON_TILE_DESC ) {
-        /* Flush the parent handle and every child registered below it. */
-        starpu_mpi_cache_flush_recursive( /* sequence->comm, */ handle );
+        int owner = starpu_mpi_data_get_rank( handle );
+
+        if ( ( owner == STARPU_MPI_MULTIPLE_NODE ) ||
+             ( owner == STARPU_MPI_MULTIPLE_NODE_WITH_ME ) ||
+             ( owner == STARPU_MPI_MULTIPLE_NODE_WITHOUT_ME ) )
+        {
+            /* Flush the parent handle and every child registered below it. */
+            starpu_mpi_cache_flush_recursive( /* sequence->comm, */ handle );
+        }
+        else {
+            starpu_mpi_cache_flush( sequence->comm, handle );
+        }
     }
     else
 #endif
@@ -462,13 +472,11 @@ runtime_data_flush_one( const RUNTIME_sequence_t *sequence,
 void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
-    CHAM_tile_t          *tile;
-    starpu_data_handle_t *handle = chameleon_starpu_desc_get_handles( desc );
-    int imax = 1;
-    int mt   = desc->mt;
-    int nt   = desc->nt;
-    int i, m, n;
-    int sync = desc->sync;
+    starpu_data_handle_t *handles = chameleon_starpu_desc_get_handles( desc );
+    int64_t               nbtiles = (int64_t)desc->lmt * desc->lnt;
+    int                   imax    = 1;
+    int                   sync    = desc->sync;
+    int                   i, m, n;
 
     /* Fallback if the matrix is allocated by the runtime */
     if ( !desc->use_mat ) {
@@ -479,17 +487,23 @@ void RUNTIME_desc_flush( CHAM_desc_t              *desc,
         imax = 3;
     }
 
-    for( i=0; i<imax; i++ )
+    for ( i = 0; i < imax; i++ )
     {
-        tile = desc->tiles;
-        for (n = 0; n < nt; n++)
+        for ( n = 0; n < desc->nt; n++ )
         {
-            for (m = 0; m < mt; m++, handle++, tile++)
+            int64_t nn = n + ( desc->j / desc->nb );
+
+            for ( m = 0; m < desc->mt; m++ )
             {
-                runtime_data_flush_one( sequence, tile, *handle, sync );
+                int64_t              mm     = m + ( desc->i / desc->mb );
+                CHAM_tile_t         *tile   = desc->get_blktile( desc, m, n );
+                starpu_data_handle_t handle =
+                    handles[i * nbtiles + nn * desc->lmt + mm];
+
+                runtime_data_flush_one( sequence, tile, handle, sync );
             }
         }
-         /* Only the main precision is synchronized */
+        /* Only the main precision is synchronized. */
         sync = 0;
     }
     desc->sync = 0;
