@@ -49,12 +49,16 @@ typedef struct CHAM_context_starpu_s
 /**
  * @brief StarPU-specific state attached to a Chameleon descriptor.
  *
- * The flexible array stores all handles owned by the descriptor.
+ * The flexible array stores all handles owned by the descriptor. Recursive
+ * descriptors additionally retain their partition filter in this state.
  */
 typedef struct starpu_cham_schedopt_s
 {
-    size_t nhandles; /**< Number of entries in @c handles */
-    starpu_data_handle_t handles[];
+    size_t                    nhandles; /**< Number of entries in @c handles */
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    struct starpu_data_filter filter;   /**< Persistent recursive partition filter  */
+#endif
+    starpu_data_handle_t      handles[];
 } starpu_cham_schedopt_t;
 
 static inline starpu_cham_schedopt_t *
@@ -68,6 +72,17 @@ chameleon_starpu_desc_get_handles( const CHAM_desc_t *desc )
 {
     return chameleon_starpu_desc_get_schedopt( desc )->handles;
 }
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+/**
+ * @brief Return the descriptor-owned persistent partition filter.
+ */
+static inline struct starpu_data_filter *
+runtime_desc_get_partition_filter( const CHAM_desc_t *desc )
+{
+    return &(chameleon_starpu_desc_get_schedopt( desc )->filter);
+}
+#endif
 
 typedef void (*callback_fct_t)(void *);
 

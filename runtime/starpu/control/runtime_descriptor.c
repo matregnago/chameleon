@@ -627,27 +627,28 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
                                  int64_t               tag,
                                  cham_flttype_t        flttype )
 {
-    struct starpu_data_filter filter_tile = {
-        .filter_func = chameleon_recursive_tile_filter,
-    };
-    CHAM_desc_t          *child_desc = (CHAM_desc_t *)tile->mat;
-    starpu_data_handle_t *child_handle;
-    int64_t               child_ind;
-    int                   child_count;
-    int                   owner;
+    struct starpu_data_filter *filter_tile;
+    CHAM_desc_t               *child_desc = (CHAM_desc_t *)tile->mat;
+    starpu_data_handle_t      *child_handle;
+    int64_t                    child_ind;
+    int                        child_count;
+    int                        owner;
 #if defined(CHAMELEON_USE_MPI)
     int                   parent_owner = STARPU_MPI_MULTIPLE_NODE_WITHOUT_ME;
 #endif
 
     assert( child_desc != NULL );
 
-    filter_tile.filter_arg_ptr = child_desc;
-    filter_tile.nchildren = child_desc->lmt * child_desc->lnt;
-    child_count  = filter_tile.nchildren;
+    child_count  = child_desc->lmt * child_desc->lnt;
     child_handle = chameleon_starpu_desc_get_handles( child_desc );
+    filter_tile  = runtime_desc_get_partition_filter( child_desc );
+    assert( filter_tile->filter_func == NULL );
+    filter_tile->filter_func    = chameleon_recursive_tile_filter;
+    filter_tile->nchildren      = child_count;
+    filter_tile->filter_arg_ptr = child_desc;
 
     starpu_cham_tile_register( ptrtile, STARPU_MAIN_RAM, tile, flttype );
-    starpu_data_partition_plan( *ptrtile, &filter_tile, child_handle );
+    starpu_data_partition_plan( *ptrtile, filter_tile, child_handle );
 
     for ( child_ind = 0; child_ind < child_count; child_ind++, child_handle++ ) {
         int child_m = child_ind % child_desc->lmt;
