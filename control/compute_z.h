@@ -215,6 +215,12 @@ void chameleon_pzhetrd_he2hb(cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *T, C
                              RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzlacpy(cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
+void chameleon_pzlacpy_panel( cham_uplo_t         uplo,
+                              int                 k,
+                              CHAM_desc_t        *A,
+                              CHAM_desc_t        *B,
+                              RUNTIME_sequence_t *sequence,
+                              RUNTIME_request_t  *request );
 void chameleon_pzlag2c(CHAM_desc_t *A, CHAM_desc_t *SB,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzlange_generic( cham_normtype_t norm, cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
@@ -368,6 +374,7 @@ void chameleon_pzgram( struct chameleon_pzgram_s *ws, cham_uplo_t uplo, CHAM_des
  * Specific functions called when option is already initialized
  */
 void chameleon_pzbcast_tile( cham_store_t dir, cham_bcast_t algo, const CHAM_desc_t *A, int Am, int An, const CHAM_desc_t *W, int Wm, int Wn, RUNTIME_option_t *options );
+void chameleon_pzbcast_panel( cham_store_t dir, cham_bcast_t algo, cham_uplo_t uplo, int k, const CHAM_desc_t *A, int Am, int An, const CHAM_desc_t *W, int Wm, int Wn, RUNTIME_option_t *options );
 
 /**
  *  Macro for matrix conversion / Lapack interface

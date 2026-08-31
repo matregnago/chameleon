@@ -150,6 +150,10 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
                          cham_uplo_t uplo, int m, int n,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn );
+void INSERT_TASK_zlacpy_panel( const RUNTIME_option_t *options,
+                               cham_uplo_t uplo, int k,
+                               const CHAM_desc_t *A, int Am, int An,
+                               const CHAM_desc_t *B, int Bm, int Bn );
 void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
                           cham_uplo_t uplo, int m, int n,
                           int displA, const CHAM_desc_t *A, int Am, int An, int lda,

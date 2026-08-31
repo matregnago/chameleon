@@ -93,6 +93,25 @@ cl_zlacpy_rectask_func( struct starpu_task *t, void *_args )
 
     free( rtargs );
 }
+
+static void
+cl_zlacpy_panel_rectask_func( struct starpu_task *t, void *_args )
+{
+    rectask_args_t    *rtargs  = (rectask_args_t *)_args;
+    RUNTIME_request_t  request = RUNTIME_REQUEST_INITIALIZER;
+    cham_uplo_t        uplo;
+    int                k;
+
+    starpu_codelet_unpack_args( t->cl_arg, &uplo, &k );
+    starpu_cham_rectask_initrequest( t, &request );
+
+    chameleon_pzlacpy_panel( uplo, k,
+                             rtargs->tiles[0]->mat,
+                             rtargs->tiles[1]->mat,
+                             rtargs->sequence, &request );
+
+    free( rtargs );
+}
 #endif /* defined(CHAMELEON_USE_RECURSIVE_TASKS) */
 
 #if !defined(CHAMELEON_SIMULATION)
@@ -230,6 +249,18 @@ CODELETS_GPU( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARP
 CODELETS( zlacpy,  cl_zlacpy_cpu_func, cl_zlacpy_cuda_func, STARPU_CUDA_ASYNC )
 CODELETS( zlacpyx, cl_zlacpyx_cpu_func, cl_zlacpyx_cuda_func, STARPU_CUDA_ASYNC )
 CODELETS( zlacpy_starpu, cl_zlacpy_starpu_func, cl_zlacpy_starpu_func, STARPU_CUDA_ASYNC )
+#endif
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+static struct starpu_codelet cl_zlacpy_panel = {
+    .nbuffers                    = 2,
+    .recursive_task_gen_dag_func = cl_zlacpy_panel_rectask_func,
+    .name                        = "zlacpy_panel",
+    .modes                       = { STARPU_R, STARPU_W },
+    .model                       = NULL,
+    .energy_model                = NULL,
+    .cpu_funcs                   = { (starpu_cpu_func_t)1 },
+};
 #endif
 
 static inline void
@@ -449,4 +480,60 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
         /* Recursive task management */
         INSERT_TASK_RECTASK_PARAMS( zlacpy )
         0 );
+}
+
+void INSERT_TASK_zlacpy_panel( const RUNTIME_option_t *options,
+                               cham_uplo_t uplo, int k,
+                               const CHAM_desc_t *A, int Am, int An,
+                               const CHAM_desc_t *B, int Bm, int Bn )
+{
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    CHAM_tile_t    *tileA      = A->get_blktile( A, Am, An );
+    CHAM_tile_t    *tileB      = B->get_blktile( B, Bm, Bn );
+    rectask_args_t *rtargs     = NULL;
+    int             is_rectask = ( ( tileA->format & CHAMELEON_TILE_DESC ) &&
+                                   ( tileB->format & CHAMELEON_TILE_DESC ) );
+    int             exec       = 0;
+
+    if ( !is_rectask ) {
+        INSERT_TASK_zlacpy( options, uplo, tileA->m, tileA->n,
+                            A, Am, An, B, Bm, Bn );
+        return;
+    }
+
+    exec = chameleon_desc_islocal( A, Am, An ) ||
+           chameleon_desc_islocal( B, Bm, Bn );
+    if ( exec == 0 ) {
+        return;
+    }
+
+    rtargs = starpu_cham_rectask_args_create( options, 2 );
+    rtargs->tiles[0] = tileA;
+    rtargs->tiles[1] = tileB;
+
+    rt_starpu_insert_task(
+        &cl_zlacpy_panel,
+
+        /* Task codelet arguments */
+        STARPU_VALUE, &uplo, sizeof(cham_uplo_t),
+        STARPU_VALUE, &k,    sizeof(int),
+
+        /* Task handles */
+        STARPU_R, RTBLKADDR(A, ChamComplexDouble, Am, An),
+        STARPU_W, RTBLKADDR(B, ChamComplexDouble, Bm, Bn),
+
+        /* Common task arguments */
+        INSERT_TASK_COMMON_TASK_PARAMS_NOCB( zlacpy ),
+        STARPU_NAME, "zlacpy_panel",
+
+        /* Recursive task management */
+        INSERT_TASK_RECTASK_PARAMS( zlacpy_panel )
+        0 );
+#else
+    CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
+
+    (void)k;
+    INSERT_TASK_zlacpy( options, uplo, tileA->m, tileA->n,
+                        A, Am, An, B, Bm, Bn );
+#endif
 }

@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2015 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -15,6 +15,7 @@
  * @author Reazul Hoque
  * @author Mathieu Faverge
  * @author Alycia Lisito
+ * @author Florent Pruvost
  * @date 2024-02-18
  * @precisions normal z -> c d s
  *
@@ -63,6 +64,18 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
         PASSED_BY_REF,       RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B ) | OUTPUT | AFFINITY,
         sizeof(int),         &(tileB->ld), VALUE,
         PARSEC_DTD_ARG_END );
+}
+
+void INSERT_TASK_zlacpy_panel( const RUNTIME_option_t *options,
+                               cham_uplo_t uplo, int k,
+                               const CHAM_desc_t *A, int Am, int An,
+                               const CHAM_desc_t *B, int Bm, int Bn )
+{
+    CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
+
+    (void)k;
+    INSERT_TASK_zlacpy( options, uplo, tileA->m, tileA->n,
+                        A, Am, An, B, Bm, Bn );
 }
 
 static inline int
