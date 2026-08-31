@@ -131,6 +131,10 @@ void RUNTIME_desc_create( CHAM_desc_t *desc )
     assert( schedopt != NULL );
     desc->schedopt = schedopt;
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    STARPU_PTHREAD_MUTEX_INIT( &(schedopt->registration_mutex), NULL );
+#endif
+
 #if !defined(CHAMELEON_SIMULATION)
 #if defined(CHAMELEON_USE_CUDA) || defined(CHAMELEON_USE_HIP)
     /*
@@ -461,7 +465,11 @@ void RUNTIME_desc_destroy( CHAM_desc_t *desc )
         chameleon_starpu_tag_release( desc->mpitag );
     }
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    STARPU_PTHREAD_MUTEX_DESTROY( chameleon_starpu_desc_get_mutex( desc ) );
+#endif
     free( desc->schedopt );
+    (void)tile_count;
 }
 
 /**
@@ -1101,6 +1109,15 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
     }
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    starpu_pthread_mutex_t *registration_mutex;
+
+    registration_mutex = chameleon_starpu_desc_get_mutex( A );
+
+    /*
+     * Protect both first-time handle registration and the lazy partitioning
+     * of handles that were created by an ancestor's partition plan.
+     */
+    STARPU_PTHREAD_MUTEX_LOCK( registration_mutex );
     if ( ( *ptrtile != NULL ) &&
          ( tile->format & CHAMELEON_TILE_DESC ) &&
          !runtime_data_desc_tile_is_planned( *ptrtile ) )
@@ -1128,6 +1145,9 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
     }
 
     assert( *ptrtile != NULL );
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    STARPU_PTHREAD_MUTEX_UNLOCK( registration_mutex );
+#endif
     return (void*)(*ptrtile);
 }
 
