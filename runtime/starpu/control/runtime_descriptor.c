@@ -877,6 +877,58 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
 #endif
 
 /**
+ * @brief Register and partition one non-recursive tile.
+ */
+static void
+runtime_data_register_tile( const CHAM_desc_t    *A,
+                            int                   m,
+                            int                   n,
+                            starpu_data_handle_t *ptrtile,
+                            CHAM_tile_t          *tile,
+                            int64_t               tag,
+                            cham_flttype_t        flttype,
+                            int                   is_main )
+{
+    int home_node = -1;
+    int myrank    = A->myrank;
+    int owner     = A->get_rankof( A, m, n );
+
+    assert( *ptrtile == NULL );
+    assert( !(tile->format & CHAMELEON_TILE_DESC ) );
+
+    if ( (myrank == owner) && is_main ) {
+        if ( (tile->format & CHAMELEON_TILE_HMAT) ||
+             (tile->mat != NULL) )
+        {
+            home_node = STARPU_MAIN_RAM;
+        }
+    }
+
+    starpu_cham_tile_register( ptrtile, home_node, tile, flttype );
+
+#if defined(HAVE_STARPU_DATA_SET_OOC_FLAG)
+    if ( A->ooc == 0 ) {
+        starpu_data_set_ooc_flag( *ptrtile, 0 );
+    }
+#endif
+
+#if defined(HAVE_STARPU_DATA_SET_COORDINATES)
+    starpu_data_set_coordinates( *ptrtile, 3, m, n, cham_get_arith( flttype ) );
+#endif
+
+#if defined(CHAMELEON_USE_MPI)
+    starpu_mpi_data_register( *ptrtile, tag, owner );
+#endif /* defined(CHAMELEON_USE_MPI) */
+
+    CHAMELEON_DEBUG( "starpu", "%s - %p registered with tag %ld\n",
+                     tile->name, (void*)(*ptrtile), tag );
+
+    assert( *ptrtile );
+
+    (void)tag;
+}
+
+/**
  *  Get data addr
  */
 void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
@@ -891,9 +943,6 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
         return (void*)(*ptrtile);
     }
 
-    int home_node = -1;
-    int myrank = A->myrank;
-    int owner  = A->get_rankof( A, m, n );
     CHAM_tile_t *tile = A->get_blktile( A, m, n );
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
@@ -906,36 +955,10 @@ void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
     }
 #endif
 
-    if ( myrank == owner ) {
-        if ( (tile->format & CHAMELEON_TILE_HMAT) ||
-             (tile->mat != NULL) )
-        {
-            home_node = STARPU_MAIN_RAM;
-        }
-    }
+    runtime_data_register_tile( A, m, n, ptrtile, tile,
+                                chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
+                                cham_get_flttype( A->dtyp ), 1 );
 
-    starpu_cham_tile_register( ptrtile, home_node, tile, cham_get_flttype( A->dtyp ) );
-
-#if defined(HAVE_STARPU_DATA_SET_OOC_FLAG)
-    if ( A->ooc == 0 ) {
-        starpu_data_set_ooc_flag( *ptrtile, 0 );
-    }
-#endif
-
-#if defined(HAVE_STARPU_DATA_SET_COORDINATES)
-    starpu_data_set_coordinates( *ptrtile, 2, m, n );
-#endif
-
-#if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_data_register( *ptrtile,
-                              chameleon_desc_get_mpi_tag( A, mm, nn, 0 ), owner );
-#endif /* defined(CHAMELEON_USE_MPI) */
-
-    CHAMELEON_DEBUG( "starpu", "%s - %p registered with tag %ld\n",
-                     tile->name, (void*)(*ptrtile),
-                     chameleon_desc_get_mpi_tag( A, mm, nn, 0 ) );
-
-    assert( *ptrtile );
     return (void*)(*ptrtile);
 }
 
@@ -990,52 +1013,24 @@ void *RUNTIME_data_getaddr_withconversion( const RUNTIME_option_t *options,
     }
 #endif
 
-    int home_node = -1;
-    int myrank = A->myrank;
-    int owner  = A->get_rankof( A, m, n );
-
-    if ( (myrank == owner) && (shift == 0) ) {
-        if ( (tile->format & CHAMELEON_TILE_HMAT) ||
-             (tile->mat != NULL) )
-        {
-            home_node = STARPU_MAIN_RAM;
-        }
-    }
-
-    starpu_cham_tile_register( ptrtile, home_node, tile, flttype );
-
-#if defined(HAVE_STARPU_DATA_SET_OOC_FLAG)
-    if ( A->ooc == 0 ) {
-        starpu_data_set_ooc_flag( *ptrtile, 0 );
-    }
-#endif
-
-#if defined(HAVE_STARPU_DATA_SET_COORDINATES)
-    starpu_data_set_coordinates( *ptrtile, 3, m, n, cham_get_arith( flttype ) );
-#endif
-
-#if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_data_register(
-        *ptrtile, chameleon_desc_get_mpi_tag( A, mm, nn, fltshift ), owner );
-#endif /* defined(CHAMELEON_USE_MPI) */
-
-#if defined(CHAMELEON_KERNELS_TRACE)
-    fprintf( stderr, "%s - %p registered with tag %ld\n",
-             tile->name, (void*)(*ptrtile),
-             chameleon_desc_get_mpi_tag( A, mm, nn, fltshift ) );
-#endif
-    assert( *ptrtile );
+    runtime_data_register_tile( A, m, n, ptrtile, tile,
+                                chameleon_desc_get_mpi_tag( A, mm, nn, fltshift ),
+                                cham_get_flttype( A->dtyp ), (shift == 0) );
 
     /* Submit the data conversion */
-    if (( fltshift != 0 ) && (access & ChamR) && (owner == myrank) ) {
-        starpu_data_handle_t *fromtile = chameleon_starpu_desc_get_handles( A );
-        starpu_data_handle_t *totile = ptrtile;
+    if (( fltshift != 0 ) && (access & ChamR) ) {
+        int myrank = A->myrank;
+        int owner  = A->get_rankof( A, m, n );
+        if ( owner == myrank ) {
+            starpu_data_handle_t *fromtile = chameleon_starpu_desc_get_handles( A );
+            starpu_data_handle_t *totile = ptrtile;
 
-        fromtile += ((int64_t)A->lmt) * nn + mm;
-        assert( fromtile != totile );
-        assert( tile->flttype != flttype );
-        if ( *fromtile != NULL ) {
-            insert_task_convert( options, tile->m, tile->n, tile->flttype, *fromtile, flttype, *totile );
+            fromtile += ((int64_t)A->lmt) * nn + mm;
+            assert( fromtile != totile );
+            assert( tile->flttype != flttype );
+            if ( *fromtile != NULL ) {
+                insert_task_convert( options, tile->m, tile->n, tile->flttype, *fromtile, flttype, *totile );
+            }
         }
     }
     return (void*)(*ptrtile);
