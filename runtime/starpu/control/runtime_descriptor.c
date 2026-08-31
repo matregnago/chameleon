@@ -673,6 +673,52 @@ runtime_data_clean_desc_tile( starpu_data_handle_t handle,
     free( child_handles );
 }
 
+/**
+ * @brief Build the full-rank tile interface exposed to StarPU.
+ *
+ * CHAMELEON_TILE_DESC describes the Chameleon hierarchy layered over a
+ * full-rank storage tile. StarPU must see the backing tile instead, so only
+ * the hierarchy bit is removed. The data pointer is selected separately once
+ * ownership is known.
+ */
+static CHAM_tile_t
+runtime_data_get_starpu_tile( const CHAM_tile_t *tile )
+{
+    CHAM_tile_t runtime_tile = *tile;
+
+    runtime_tile.mat = NULL;
+    if ( runtime_tile.format & CHAMELEON_TILE_DESC ) {
+        assert( runtime_tile.format & CHAMELEON_TILE_FULLRANK );
+        runtime_tile.format &= ~CHAMELEON_TILE_DESC;
+    }
+
+    return runtime_tile;
+}
+
+/**
+ * @brief Return the storage represented by a regular or recursive tile.
+ */
+static void *
+runtime_data_get_tile_storage( const CHAM_tile_t *tile )
+{
+    if ( tile->format & CHAMELEON_TILE_DESC ) {
+        const CHAM_desc_t *child_desc = (const CHAM_desc_t *)tile->mat;
+
+        assert( child_desc != NULL );
+        return child_desc->mat;
+    }
+
+    return tile->mat;
+}
+
+/**
+ * @brief Register and partition one recursive descriptor tile.
+ *
+ * The parent handle may be new or may already exist as a child of an ancestor
+ * partition plan. StarPU returns the new child handles in a compact @c mt by
+ * @c nt array; this routine copies them into the descriptor array, whose row
+ * stride is @c lmt, before registering their MPI ownership and hierarchy.
+ */
 static void
 runtime_data_register_desc_tile( const CHAM_desc_t    *A,
                                  int                   m,
@@ -683,46 +729,118 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
                                  cham_flttype_t        flttype )
 {
     struct starpu_data_filter *filter_tile;
+    CHAM_tile_t                runtime_tile;
     CHAM_desc_t               *child_desc = (CHAM_desc_t *)tile->mat;
-    starpu_data_handle_t      *child_handle;
+    starpu_data_handle_t      *child_handles;
+    void                      *tile_mat;
     int64_t                    child_ind;
     int                        child_count;
     int                        owner;
+    int                        home_node = -1;
 #if defined(CHAMELEON_USE_MPI)
-    int                   parent_owner = STARPU_MPI_MULTIPLE_NODE_WITHOUT_ME;
+    int                        parent_owner;
+    int                        parent_is_multiple;
+    int                        parent_registered = ( *ptrtile != NULL );
 #endif
 
     assert( child_desc != NULL );
 
-    child_count  = child_desc->lmt * child_desc->lnt;
-    child_handle = chameleon_starpu_desc_get_handles( child_desc );
+    owner = A->get_rankof( A, m, n );
+#if defined(CHAMELEON_USE_MPI)
+    parent_is_multiple =
+        ( child_desc->mat == NULL ) ||
+        ( owner == CHAMELEON_MPI_WITH_ME ) ||
+        ( owner == CHAMELEON_MPI_WITHOUT_ME );
+    parent_owner = parent_is_multiple ? STARPU_MPI_MULTIPLE_NODE_WITHOUT_ME
+                                      : owner;
+#endif
+    assert( tile->format & CHAMELEON_TILE_DESC );
+    runtime_tile = runtime_data_get_starpu_tile( tile );
+    tile_mat     = runtime_data_get_tile_storage( tile );
+    if ( ( ( owner == A->myrank )
+#if !defined(CHAMELEON_USE_MPI)
+           || ( owner == CHAMELEON_MPI_WITH_ME )
+#endif
+         ) &&
+         ( tile_mat != NULL ) )
+    {
+        home_node        = STARPU_MAIN_RAM;
+        runtime_tile.mat = tile_mat;
+    }
+
+    /* StarPU partition plans always return a compact array of child handles. */
+    child_count   = child_desc->mt * child_desc->nt;
+    child_handles = malloc( (size_t)child_count * sizeof(starpu_data_handle_t) );
+    assert( child_handles != NULL );
     filter_tile  = runtime_desc_get_partition_filter( child_desc );
-    assert( filter_tile->filter_func == NULL );
+    assert( ( filter_tile->filter_func == NULL ) ||
+            ( filter_tile->filter_func == chameleon_recursive_tile_filter ) );
     filter_tile->filter_func    = chameleon_recursive_tile_filter;
     filter_tile->nchildren      = child_count;
     filter_tile->filter_arg_ptr = child_desc;
 
-    starpu_cham_tile_register( ptrtile, STARPU_MAIN_RAM, tile, flttype );
-    starpu_data_partition_plan( *ptrtile, filter_tile, child_handle );
+    if ( *ptrtile == NULL ) {
+        starpu_cham_tile_register( ptrtile, home_node, &runtime_tile, flttype );
+    }
+    else if ( ( home_node == STARPU_MAIN_RAM ) &&
+              ( starpu_data_get_home_node( *ptrtile ) < 0 ) )
+    {
+        starpu_cham_tile_child_set( ptrtile, STARPU_MAIN_RAM,
+                                    &runtime_tile, flttype );
+        starpu_subdata_ptr_register( *ptrtile, STARPU_MAIN_RAM );
+    }
+    starpu_data_partition_plan( *ptrtile, filter_tile, child_handles );
 
-    for ( child_ind = 0; child_ind < child_count; child_ind++, child_handle++ ) {
-        int child_m = child_ind % child_desc->lmt;
-        int child_n = child_ind / child_desc->lmt;
-        CHAM_tile_t *child_tile = child_desc->get_blktile( child_desc, child_m, child_n );
+    for ( child_ind = 0; child_ind < child_count; child_ind++ ) {
+        int child_m = child_ind % child_desc->mt;
+        int child_n = child_ind / child_desc->mt;
+        CHAM_tile_t          *child_tile;
+        CHAM_tile_t           runtime_child_tile;
+        starpu_data_handle_t *child_handle =
+            child_handles + child_ind;
+        starpu_data_handle_t *desc_child_handle =
+            chameleon_starpu_data_gethandle( child_desc, child_m, child_n );
+        void                 *child_mat;
+
+        child_tile         = child_desc->get_blktile( child_desc, child_m, child_n );
+        runtime_child_tile = runtime_data_get_starpu_tile( child_tile );
+
+        assert( *desc_child_handle == NULL );
+        *desc_child_handle = *child_handle;
+
+        child_mat = runtime_data_get_tile_storage( child_tile );
 
         owner = child_desc->get_rankof( child_desc, child_m, child_n );
+        if ( ( owner == A->myrank ) ||
+             ( owner == CHAMELEON_MPI_WITH_ME ) )
+        {
+#if defined(CHAMELEON_USE_MPI)
+            if ( parent_is_multiple ) {
+                parent_owner = STARPU_MPI_MULTIPLE_NODE_WITH_ME;
+            }
+#endif
+            if ( ( child_desc->mat != NULL ) &&
+                 ( child_mat != NULL ) &&
+                 ( !( child_tile->format & CHAMELEON_TILE_DESC ) ||
+                   ( owner != CHAMELEON_MPI_WITH_ME ) ) )
+            {
+                runtime_child_tile.mat = child_mat;
+            }
+        }
+
         starpu_cham_tile_child_set( child_handle, STARPU_MAIN_RAM,
-                                    child_tile, flttype );
+                                    &runtime_child_tile, flttype );
+        if ( ( runtime_child_tile.mat != NULL ) &&
+             ( starpu_data_get_home_node( *child_handle ) < 0 ) )
+        {
+            starpu_subdata_ptr_register( *child_handle, STARPU_MAIN_RAM );
+        }
 
 #if defined(CHAMELEON_KERNELS_TRACE)
         starpu_data_set_name( *child_handle, child_tile->name );
 #endif
 
 #if defined(CHAMELEON_USE_MPI)
-        if ( owner == A->myrank ) {
-            parent_owner = STARPU_MPI_MULTIPLE_NODE_WITH_ME;
-            starpu_subdata_ptr_register( *child_handle, STARPU_MAIN_RAM );
-        }
         starpu_mpi_data_register(
             *child_handle,
             chameleon_desc_get_mpi_tag( child_desc, child_m, child_n, 0 ), owner );
@@ -730,12 +848,18 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
     }
 
 #if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_register_hierarchy( *ptrtile, child_count,
-                                   chameleon_starpu_desc_get_handles( child_desc ) );
-    starpu_mpi_data_register( *ptrtile, tag, parent_owner );
+    starpu_mpi_register_hierarchy( *ptrtile, child_count, child_handles );
+    if ( parent_registered ) {
+        starpu_mpi_data_set_rank( *ptrtile, parent_owner );
+    }
+    else {
+        starpu_mpi_data_register( *ptrtile, tag, parent_owner );
+    }
 #else
     (void)tag;
 #endif
+
+    free( child_handles );
 
 #if defined(HAVE_STARPU_DATA_SET_OOC_FLAG)
     if ( A->ooc == 0 ) {
