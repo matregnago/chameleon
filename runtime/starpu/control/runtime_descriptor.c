@@ -248,6 +248,7 @@ void RUNTIME_desc_destroy_submit( CHAM_desc_t              *desc,
      * the runtime it can only be done by the synchronous destroy
      */
     (void)sequence;
+    (void)tile_count;
 }
 
 /**
@@ -593,29 +594,83 @@ void RUNTIME_data_migrate( const RUNTIME_sequence_t *sequence,
 #endif
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+/**
+ * @brief Clean a recursive StarPU handle hierarchy from leaves to root.
+ *
+ * A StarPU partition plan owns its immediate child handles. Descendant plans
+ * must therefore be cleaned before the plan that created their parent handle.
+ */
 static void
 runtime_data_clean_desc_tile( starpu_data_handle_t handle,
                               CHAM_tile_t         *tile )
 {
-    CHAM_desc_t *child_desc = (CHAM_desc_t *)tile->mat;
-    unsigned     child_count;
+    CHAM_desc_t          *child_desc = (CHAM_desc_t *)tile->mat;
+    starpu_data_handle_t *child_handles;
+    unsigned              child_count;
+    unsigned              child_ind;
+    int                   plan_count;
 
     assert( child_desc != NULL );
 
-    child_count = child_desc->lmt * child_desc->lnt;
+    /* Recursively clean children first. */
+    child_count   = child_desc->mt * child_desc->nt;
+    child_handles = malloc( (size_t)child_count * sizeof(starpu_data_handle_t) );
+    assert( child_handles != NULL );
+    plan_count    = starpu_data_partition_get_nplans( handle );
 
+    for ( child_ind = 0; child_ind < child_count; child_ind++ ) {
+        starpu_data_handle_t *child_handle;
+        CHAM_tile_t          *child_tile;
+        int                   child_m = child_ind % child_desc->mt;
+        int                   child_n = child_ind / child_desc->mt;
+
+        child_handle = chameleon_starpu_desc_get_handles( child_desc ) +
+                       (size_t)child_n * child_desc->lmt + child_m;
+        child_handles[child_ind] = *child_handle;
+        child_tile   = child_desc->get_blktile( child_desc, child_m, child_n );
+
+        if ( ( *child_handle != NULL ) &&
+             ( child_tile->format & CHAMELEON_TILE_DESC ) )
+        {
+            runtime_data_clean_desc_tile( *child_handle, child_tile );
+        }
+    }
+
+    /*
+     * Recursive execution may already have cleaned the partition plan while
+     * descendant handles remain registered in the persistent descriptor
+     * arrays. Use StarPU's partition cleanup only for a live plan; otherwise,
+     * unregister those remaining handles explicitly.
+     */
+    if ( plan_count > 0 ) {
 #if defined(CHAMELEON_USE_MPI)
-    starpu_mpi_data_partition_clean_node( handle, child_count,
-                                          chameleon_starpu_desc_get_handles( child_desc ),
-                                          STARPU_MAIN_RAM, MPI_COMM_WORLD );
+        starpu_mpi_data_partition_clean_node( handle, child_count,
+                                              child_handles,
+                                              STARPU_MAIN_RAM, MPI_COMM_WORLD );
 #else
-    starpu_data_partition_clean_node( handle, child_count,
-                                      chameleon_starpu_desc_get_handles( child_desc ),
-                                      STARPU_MAIN_RAM );
+        starpu_data_partition_clean_node( handle, child_count,
+                                          child_handles,
+                                          STARPU_MAIN_RAM );
 #endif
+    }
+    else {
+        for ( child_ind = 0; child_ind < child_count; child_ind++ ) {
+            if ( child_handles[child_ind] != NULL ) {
+                starpu_data_unregister( child_handles[child_ind] );
+            }
+        }
+    }
 
-    memset( chameleon_starpu_desc_get_handles( child_desc ), 0,
-            child_count * sizeof(starpu_data_handle_t) );
+    for ( child_ind = 0; child_ind < child_count; child_ind++ ) {
+        int child_m = child_ind % child_desc->mt;
+        int child_n = child_ind / child_desc->mt;
+        starpu_data_handle_t *child_handle =
+            chameleon_starpu_desc_get_handles( child_desc ) +
+            (size_t)child_n * child_desc->lmt + child_m;
+
+        *child_handle = NULL;
+    }
+    free( child_handles );
 }
 
 static void
