@@ -1,0 +1,11 @@
+# Recursive descriptor and flat-view validation
+#
+# The rectangular dimensions exercise partial boundary tiles. The even tile
+# size provides two exact refinements below the distributed level, while the
+# prime tile size checks that repeated blocking across levels remains valid.
+
+op = print
+nb = 7, 8
+m = 19
+n = 23
+lda = 25
