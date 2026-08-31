@@ -813,6 +813,13 @@ chameleon_recdesc_init( const CHAM_context_t *chamctxt,
     rc = chameleon_recdesc_create( chamctxt, &args, desc, &dist );
     free( dist.tag_tree_spans );
 
+    /*
+     * Keep handle creation lazy. Workflows requiring eager registration may
+     * call RUNTIME_desc_register_recursive() explicitly after initialization.
+     */
+    /* if ( rc == CHAMELEON_SUCCESS ) { */
+    /*     RUNTIME_desc_register_recursive( desc, dist_level ); */
+    /* } */
     return rc;
 }
 
@@ -914,6 +921,14 @@ chameleon_desc_create_recursive( CHAM_desc_t **descptr, const CHAM_desc_create_t
 
     status = chameleon_recdesc_create( chamctxt, args, desc, &dist );
     free( dist.tag_tree_spans );
+
+    /*
+     * Keep handle creation lazy. Workflows requiring eager registration may
+     * call RUNTIME_desc_register_recursive() explicitly after creation.
+     */
+    /* if ( status == CHAMELEON_SUCCESS ) { */
+    /*     RUNTIME_desc_register_recursive( desc, recargs->dist_level ); */
+    /* } */
 
     *descptr = desc;
     return status;

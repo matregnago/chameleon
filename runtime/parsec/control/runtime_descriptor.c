@@ -300,6 +300,12 @@ int RUNTIME_desc_create_flatview( CHAM_desc_t *desc, const CHAM_desc_t *recdesc 
     return CHAMELEON_ERR_NOT_SUPPORTED;
 }
 
+void RUNTIME_desc_register_recursive( CHAM_desc_t *desc, int dist_level )
+{
+    (void)desc;
+    (void)dist_level;
+}
+
 void RUNTIME_desc_destroy_submit( CHAM_desc_t *desc, const RUNTIME_sequence_t *sequence )
 {
     (void)desc;

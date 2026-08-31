@@ -292,6 +292,51 @@ RUNTIME_desc_create_flatview( CHAM_desc_t       *desc,
 }
 
 /**
+ * @brief Register recursive handles through the requested final level.
+ */
+static void
+runtime_desc_register_recursive_level( CHAM_desc_t *desc, int level, int final_level )
+{
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    int m, n;
+
+    /*
+     * Registering a level creates its partition children. Thus, stopping at
+     * final_level registers the requested handles without planning their
+     * local descendants before StarPU has allocated the parent tile.
+     */
+    if ( level >= final_level ) {
+        return;
+    }
+
+    for ( n = 0; n < desc->nt; n++ ) {
+        for ( m = 0; m < desc->mt; m++ ) {
+            CHAM_tile_t *tile = desc->get_blktile( desc, m, n );
+
+            RUNTIME_data_getaddr( desc, m, n );
+
+            if ( ( level < final_level ) &&
+                 ( tile->format & CHAMELEON_TILE_DESC ) )
+            {
+                runtime_desc_register_recursive_level( tile->mat, level + 1,
+                                                        final_level );
+            }
+        }
+    }
+#else
+    (void)desc;
+    (void)level;
+    (void)final_level;
+#endif
+}
+
+void
+RUNTIME_desc_register_recursive( CHAM_desc_t *desc, int dist_level )
+{
+    runtime_desc_register_recursive_level( desc, 0, dist_level );
+}
+
+/**
  *  Unregister the handles of a descriptor
  *
  *  Keep this operation synchronous with StarPU: MPI tag ranges may be
