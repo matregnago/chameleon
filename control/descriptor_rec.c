@@ -658,7 +658,7 @@ chameleon_recdesc_create( const CHAM_context_t *chamctxt,
                 return rc;
             }
 
-            tile->format = CHAMELEON_TILE_DESC;
+            tile->format |= CHAMELEON_TILE_DESC;
             tile->mat    = tiledesc;
             if ( dist->level < dist->dist_level ) {
                 tile->rank = chameleon_recdesc_contains_local_tile( tiledesc )
