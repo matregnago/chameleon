@@ -874,6 +874,15 @@ runtime_data_register_desc_tile( const CHAM_desc_t    *A,
     (void)n;
 #endif
 }
+
+/**
+ * @brief Return whether a persistent StarPU partition plan has been created.
+ */
+static int
+runtime_data_desc_tile_is_planned( starpu_data_handle_t handle )
+{
+    return starpu_data_partition_get_nplans( handle ) > 0;
+}
 #endif
 
 /**
@@ -933,32 +942,41 @@ runtime_data_register_tile( const CHAM_desc_t    *A,
  */
 void *RUNTIME_data_getaddr( const CHAM_desc_t *A, int m, int n )
 {
-    int64_t mm = m + (A->i / A->mb);
-    int64_t nn = n + (A->j / A->nb);
-
+    CHAM_tile_t          *tile = A->get_blktile( A, m, n );
     starpu_data_handle_t *ptrtile = chameleon_starpu_desc_get_handles( A );
+    int64_t               mm = m + ( A->i / A->mb );
+    int64_t               nn = n + ( A->j / A->nb );
+
     ptrtile += ((int64_t)A->lmt) * nn + mm;
 
-    if ( *ptrtile != NULL ) {
-        return (void*)(*ptrtile);
-    }
-
-    CHAM_tile_t *tile = A->get_blktile( A, m, n );
-
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
-    if ( tile->format & CHAMELEON_TILE_DESC ) {
+    if ( ( *ptrtile != NULL ) &&
+         ( tile->format & CHAMELEON_TILE_DESC ) &&
+         !runtime_data_desc_tile_is_planned( *ptrtile ) )
+    {
         runtime_data_register_desc_tile( A, m, n, ptrtile, tile,
                                          chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
                                          cham_get_flttype( A->dtyp ) );
-        assert( *ptrtile );
-        return (void*)(*ptrtile);
     }
 #endif
 
-    runtime_data_register_tile( A, m, n, ptrtile, tile,
-                                chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
-                                cham_get_flttype( A->dtyp ), 1 );
+    if ( *ptrtile == NULL ) {
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+        if ( tile->format & CHAMELEON_TILE_DESC ) {
+            runtime_data_register_desc_tile( A, m, n, ptrtile, tile,
+                                             chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
+                                             cham_get_flttype( A->dtyp ) );
+        }
+        else
+#endif
+        {
+            runtime_data_register_tile( A, m, n, ptrtile, tile,
+                                        chameleon_desc_get_mpi_tag( A, mm, nn, 0 ),
+                                        cham_get_flttype( A->dtyp ), 1 );
+        }
+    }
 
+    assert( *ptrtile != NULL );
     return (void*)(*ptrtile);
 }
 
