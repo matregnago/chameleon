@@ -54,8 +54,9 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
 {
     CHAM_context_t                   *chamctxt;
     struct chameleon_pzgetrf_nopiv_s *options;
-    int is_recursive   = 0;
-    int wl_initialized = 0;
+    int is_recursive       = 0;
+    int is_recursive_panel = 0;
+    int wl_initialized     = 0;
     int P, Q;
     int lookahead;
     int rc = CHAMELEON_SUCCESS;
@@ -72,7 +73,8 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
     }
 
 #if defined(CHAMELEON_USE_RECURSIVE_TASKS)
-    is_recursive = chameleon_desc_has_recursive_tiles( A );
+    is_recursive       = chameleon_desc_has_recursive_tiles( A );
+    is_recursive_panel = chameleon_desc_is_recursive_panel( A );
 #endif
 
     options->use_workspace = 0;
@@ -91,7 +93,7 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
         return (void*)options;
     }
 
-    if ( is_recursive ) {
+    if ( is_recursive && !is_recursive_panel ) {
         /* Square recursive => No workspace (yet ?) */
         return (void*)options;
     }
@@ -99,6 +101,35 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
     lookahead = chamctxt->lookahead;
     rc = CHAMELEON_SUCCESS;
 
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( is_recursive_panel ) {
+        CHAM_tile_t *tileA = A->get_blktile( A, 0, 0 );
+        CHAM_desc_t *A_rec = (CHAM_desc_t *)(tileA->mat);
+        int active_p = chameleon_min( P, A_rec->mt );
+        int mb_wl[] = { A->m,                 A_rec->mb, 0 };
+        int nb_wl[] = { A_rec->nb,            A_rec->nb, 0 };
+        int mb_wu[] = { A_rec->mb * active_p, A_rec->mb, 0 };
+        int nb_wu[] = { A_rec->nb,            A_rec->nb, 0 };
+
+        rc = chameleon_recdesc_init(
+            chamctxt, &(options->WL), "GETRF_NP_WL", CHAMELEON_MAT_ALLOC_TILE,
+            ChamComplexDouble, ChamRecFull, 0, mb_wl, nb_wl,
+            A->m, A_rec->nb * Q * lookahead,
+            A->m, A_rec->nb * Q * lookahead, P, Q, 1,
+            NULL, NULL, NULL, NULL );
+
+        if ( rc == CHAMELEON_SUCCESS ) {
+            wl_initialized = 1;
+            rc = chameleon_recdesc_init(
+                chamctxt, &(options->WU), "GETRF_NP_WU", CHAMELEON_MAT_ALLOC_TILE,
+                ChamComplexDouble, ChamRecFull, 0, mb_wu, nb_wu,
+                A_rec->mb * active_p * lookahead, A->n,
+                A_rec->mb * active_p * lookahead, A->n, active_p, Q, 1,
+                NULL, NULL, NULL, NULL );
+        }
+    }
+    else
+#endif
     {
         rc = chameleon_desc_init( chamctxt, &(options->WL), "GETRF_NP_WL", CHAMELEON_MAT_ALLOC_TILE,
                                   ChamComplexDouble, A->mb, A->nb,
@@ -405,7 +436,7 @@ int CHAMELEON_zgetrf_nopiv_Tile_Async( CHAM_desc_t        *A,
     }
 
     /* Check input arguments */
-    if (A->nb != A->mb) {
+    if ( ( A->nb != A->mb ) && !chameleon_desc_is_recursive_panel( A ) ) {
         chameleon_error("CHAMELEON_zgetrf_nopiv_Tile", "only square tiles supported");
         return chameleon_request_fail(sequence, request, CHAMELEON_ERR_ILLEGAL_VALUE);
     }
