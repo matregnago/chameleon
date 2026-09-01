@@ -45,7 +45,7 @@ cl_zgetrf_nopiv_rectask_func( struct starpu_task *t, void *_args )
 
     starpu_cham_rectask_initrequest( t, &request );
 
-    chameleon_pzgetrf_nopiv( NULL, rtargs->tiles[0]->mat, rtargs->sequence, &request );
+    chameleon_pzgetrf_nopiv_generic( rtargs->tiles[0]->mat, 0, rtargs->sequence, &request );
 
     free( rtargs );
 }

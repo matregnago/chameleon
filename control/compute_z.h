@@ -186,6 +186,13 @@ void chameleon_pzgetrf_incpiv(CHAM_desc_t *A, CHAM_desc_t *L, CHAM_desc_t *D, in
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzgetrf_nopiv(struct chameleon_pzgetrf_nopiv_s *ws, CHAM_desc_t *A,
                              RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
+                                      int                 use_tasklimit,
+                                      RUNTIME_sequence_t *sequence,
+                                      RUNTIME_request_t  *request );
+
+#endif
 void chameleon_pzgetrf_reclap(CHAM_desc_t *A, int *IPIV,
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzgetrf_rectil(CHAM_desc_t *A, int *IPIV,
