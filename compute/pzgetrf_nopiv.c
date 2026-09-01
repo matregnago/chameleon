@@ -36,6 +36,9 @@
 #define WL(m, n) WL, m, n
 #define WU(m, n) WU, m, n
 
+#define Ap(n)    A,  n
+#define WLp(n)   WL, n
+
 /**
  * @brief Generic tile algorithm of the LU factorization without pivoting
  *
@@ -532,6 +535,95 @@ void chameleon_pzgetrf_nopiv_ws_panel_update( CHAM_desc_t        *A,
     chameleon_data_flush( sequence, A( k, 0 ), request->flush );
     RUNTIME_options_finalize( &options, chamctxt );
 }
+
+/**
+ * @brief Submit the recursive GETRF factorization and update tasks by panel.
+ *
+ * Without explicit workspaces, panels of A are used directly. Otherwise, WL
+ * and WU provide lookahead-indexed distributed copies of the lower and upper
+ * panels, respectively.
+ */
+static void chameleon_pzgetrf_nopiv_panel( CHAM_desc_t                      *A,
+                                           struct chameleon_pzgetrf_nopiv_s *ws,
+                                           RUNTIME_sequence_t               *sequence,
+                                           RUNTIME_request_t                *request )
+{
+    CHAM_context_t  *chamctxt;
+    RUNTIME_option_t options;
+    CHAM_desc_t     *WL, *WU;
+    CHAM_tile_t     *tileA = A->get_blktile( A, 0, 0 );
+    CHAM_desc_t     *A_rec = (CHAM_desc_t *)(tileA->mat);
+    int              k, n;
+    int              lookahead, l, q, Q, WLk;
+
+    assert( A->mt == 1 );
+    assert( A->mb >= A->m );
+    assert( A_rec->m == A->m );
+
+    chamctxt = chameleon_context_self();
+    if ( sequence->status != CHAMELEON_SUCCESS ) {
+        return;
+    }
+    RUNTIME_options_init( &options, chamctxt, sequence, request );
+
+    if ( ws && ws->use_workspace ) {
+        WL = &(ws->WL);
+        WU = &(ws->WU);
+    }
+    else {
+        WL = A;
+        WU = NULL;
+    }
+
+    Q         = chameleon_desc_datadist_get_iparam( A, 1 );
+    lookahead = chamctxt->lookahead;
+    options.withlacpy = 1;
+
+    for ( k = 0; k < chameleon_min( A_rec->mt, A->nt ); k++ ) {
+        RUNTIME_iteration_push( chamctxt, k );
+
+        l = k % lookahead;
+
+        options.priority = 2 * A->nt - 2 * k;
+        INSERT_TASK_zgetrf_nopiv_panel_facto( &options, k, Ap( k ), WU( l, k ) );
+        if ( WU != NULL ) {
+            chameleon_data_flush( sequence, WU( l, k ), request->flush );
+        }
+
+        if ( WL != A ) {
+            options.priority += 1;
+            chameleon_pzbcast_panel( ChamRowwise, ChamBcastRing, ChamLower, k,
+                                     A, 0, k, WL, 0, l * Q, &options );
+            options.priority -= 1;
+            WLk = l * Q + A->myrank % Q;
+        }
+        else {
+            WLk = k;
+        }
+
+        for ( n = k + 1; n < A->nt; n++ ) {
+            options.priority  = 2 * A->nt - 2 * k - n;
+            options.priority += ( ( n - k ) > lookahead ) ? 0 : 1;
+
+            INSERT_TASK_zgetrf_nopiv_panel_update( &options, k, Ap( n ), WLp( WLk ), WU( l, n ) );
+            if ( WU != NULL ) {
+                chameleon_data_flush( sequence, WU( l, n ), request->flush );
+            }
+        }
+
+        chameleon_data_flush( sequence, A( 0, k ), request->flush );
+
+        if ( WL != A ) {
+            for ( q = 0; q < Q; q++ ) {
+                chameleon_data_flush( sequence, WL( 0, l * Q + q ), request->flush );
+            }
+        }
+
+        RUNTIME_iteration_pop( chamctxt );
+    }
+
+    RUNTIME_options_finalize( &options, chamctxt );
+}
 #endif
 
 void chameleon_pzgetrf_nopiv( struct chameleon_pzgetrf_nopiv_s *ws,
@@ -539,6 +631,14 @@ void chameleon_pzgetrf_nopiv( struct chameleon_pzgetrf_nopiv_s *ws,
                               RUNTIME_sequence_t               *sequence,
                               RUNTIME_request_t                *request )
 {
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    if ( chameleon_desc_is_recursive_panel( A ) ) {
+        chameleon_pzgetrf_nopiv_panel( A, ws, sequence, request );
+        A->sync = 1;
+        return;
+    }
+#endif
+
     if ( ws && ws->use_workspace ) {
         chameleon_pzgetrf_nopiv_ws( A, &(ws->WL), &(ws->WU), sequence, request );
     }
