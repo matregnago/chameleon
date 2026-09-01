@@ -406,6 +406,132 @@ void chameleon_pzgetrf_nopiv_generic_panel_update( CHAM_desc_t        *Ak,
     chameleon_data_flush( sequence, An( k, 0 ), request->flush );
     RUNTIME_options_finalize( &options, chamctxt );
 }
+
+/**
+ * @brief Generate factorization subtasks for one recursive panel using WU.
+ */
+void chameleon_pzgetrf_nopiv_ws_panel_facto( CHAM_desc_t        *A,
+                                             const CHAM_desc_t  *WU,
+                                             int                 k,
+                                             RUNTIME_sequence_t *sequence,
+                                             RUNTIME_request_t  *request )
+{
+    CHAM_context_t  *chamctxt;
+    RUNTIME_option_t options;
+    cham_bcast_t     bcast;
+    int              m, ib;
+    int              tempkm, tempkn, tempmm;
+    int              Q, rankAm, lookahead;
+    CHAMELEON_Complex64_t zone = (CHAMELEON_Complex64_t)1.0;
+
+    /* Quick return for matrices with N > M */
+    if ( k >= A->mt ) {
+        return;
+    }
+    assert( A->nt == 1 );
+
+    chamctxt = chameleon_context_self();
+    if ( sequence->status != CHAMELEON_SUCCESS ) {
+        return;
+    }
+    RUNTIME_options_init( &options, chamctxt, sequence, request );
+
+    ib        = CHAMELEON_IB;
+    lookahead = chamctxt->lookahead;
+    Q         = chameleon_desc_datadist_get_iparam( A, 1 );
+
+    tempkm = A->get_blkdim( A, k, DIM_m, A->m );
+    tempkn = A->get_blkdim( A, 0, DIM_n, A->n );
+
+    options.priority = request->priority;
+    INSERT_TASK_zgetrf_nopiv( &options, tempkm, tempkn, ib, A->mb,
+                              A( k, 0 ), A->mb * k );
+
+    bcast = ( k < lookahead ) ? ChamBcastFull : ChamBcastRing;
+    chameleon_pzbcast_tile( ChamColumnwise, bcast,
+                            A( k, 0 ), WU( 0, 0 ), &options );
+
+    for ( m = k + 1; m < A->mt; m++ ) {
+        options.priority = request->priority - m;
+        tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        rankAm = A->get_rankof( A, m, 0 );
+        INSERT_TASK_ztrsm( &options, ChamRight, ChamUpper, ChamNoTrans, ChamNonUnit,
+                           tempmm, tempkn, A->mb, zone,
+                           WU( rankAm / Q, 0 ),
+                           A(  m,          0 ));
+    }
+
+    chameleon_data_flush( sequence, A( k, 0 ), request->flush );
+    RUNTIME_options_finalize( &options, chamctxt );
+}
+
+/**
+ * @brief Generate update subtasks for one recursive panel using WL and WU.
+ */
+void chameleon_pzgetrf_nopiv_ws_panel_update( CHAM_desc_t        *A,
+                                              const CHAM_desc_t  *WL,
+                                              const CHAM_desc_t  *WU,
+                                              int                 k,
+                                              RUNTIME_sequence_t *sequence,
+                                              RUNTIME_request_t  *request )
+{
+    CHAM_context_t  *chamctxt;
+    RUNTIME_option_t options;
+    cham_bcast_t     bcast;
+    int m;
+    int tempkm, tempmm, tempnn;
+    int lookahead;
+    int Q, rankAm, rankAk;
+    CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
+    CHAMELEON_Complex64_t mzone = (CHAMELEON_Complex64_t)-1.0;
+
+    /* Quick return for matrices with N > M */
+    if ( k >= A->mt ) {
+        return;
+    }
+    assert( A->nt == 1 );
+
+    chamctxt = chameleon_context_self();
+    if ( sequence->status != CHAMELEON_SUCCESS ) {
+        return;
+    }
+    RUNTIME_options_init( &options, chamctxt, sequence, request );
+
+    lookahead = chamctxt->lookahead;
+    Q         = chameleon_desc_datadist_get_iparam( A, 1 );
+
+    tempkm = A->get_blkdim( A, k, DIM_m, A->m );
+    tempnn = A->get_blkdim( A, 0, DIM_n, A->n );
+
+    options.priority = request->priority;
+    rankAk = A->get_rankof( A, k, 0 );
+    if ( rankAk == WL->get_rankof( WL, k, 0 ) ) {
+        INSERT_TASK_ztrsm( &options, ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
+                           tempkm, tempnn, A->mb, zone,
+                           WL( k, 0 ),
+                           A(  k, 0 ) );
+    }
+
+    bcast = ( k < lookahead ) ? ChamBcastFull : ChamBcastRing;
+    chameleon_pzbcast_tile( ChamColumnwise, bcast,
+                            A( k, 0 ), WU( 0, 0 ), &options );
+
+    for ( m = k + 1; m < A->mt; m++ ) {
+        tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        options.priority = request->priority - m;
+        rankAm = A->get_rankof( A, m, 0 );
+        if ( rankAm == A->myrank ) {
+            INSERT_TASK_zgemm( &options, ChamNoTrans, ChamNoTrans,
+                               tempmm, tempnn, tempkm, A->mb,
+                               mzone, WL( m,          0 ),
+                                      WU( rankAm / Q, 0 ),
+                               zone,  A(  m,          0 ) );
+        }
+    }
+
+    chameleon_data_flush( sequence, A( k, 0 ), request->flush );
+    RUNTIME_options_finalize( &options, chamctxt );
+}
 #endif
 
 void chameleon_pzgetrf_nopiv( struct chameleon_pzgetrf_nopiv_s *ws,
