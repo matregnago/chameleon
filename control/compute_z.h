@@ -191,7 +191,15 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
                                       int                 use_tasklimit,
                                       RUNTIME_sequence_t *sequence,
                                       RUNTIME_request_t  *request );
-
+void chameleon_pzgetrf_nopiv_generic_panel_facto( CHAM_desc_t        *A,
+                                                  int                 k,
+                                                  RUNTIME_sequence_t *sequence,
+                                                  RUNTIME_request_t  *request );
+void chameleon_pzgetrf_nopiv_generic_panel_update( CHAM_desc_t        *Ak,
+                                                   CHAM_desc_t        *An,
+                                                   int                 k,
+                                                   RUNTIME_sequence_t *sequence,
+                                                   RUNTIME_request_t  *request );
 #endif
 void chameleon_pzgetrf_reclap(CHAM_desc_t *A, int *IPIV,
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);

@@ -30,6 +30,8 @@
 #include "control/common.h"
 
 #define A(m, n)  A,  m, n
+#define Ak(m, n) Ak, m, n
+#define An(m, n) An, m, n
 #define WD(m)    WL, m, m
 #define WL(m, n) WL, m, n
 #define WU(m, n) WU, m, n
@@ -302,6 +304,109 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
     /* Mark written data for synchronization */
     A->sync = 1;
 }
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+/**
+ * @brief Generate factorization subtasks for one recursive panel without a
+ * workspace.
+ */
+void chameleon_pzgetrf_nopiv_generic_panel_facto( CHAM_desc_t        *A,
+                                                  int                 k,
+                                                  RUNTIME_sequence_t *sequence,
+                                                  RUNTIME_request_t  *request )
+{
+    CHAM_context_t  *chamctxt;
+    RUNTIME_option_t options;
+    int m, ib;
+    int tempkm, tempkn, tempmm;
+    CHAMELEON_Complex64_t zone = (CHAMELEON_Complex64_t)1.0;
+
+    /* Quick return for matrices with N > M */
+    if ( k >= A->mt ) {
+        return;
+    }
+    assert( A->nt == 1 );
+
+    chamctxt = chameleon_context_self();
+    if ( sequence->status != CHAMELEON_SUCCESS ) {
+        return;
+    }
+    RUNTIME_options_init( &options, chamctxt, sequence, request );
+
+    ib = CHAMELEON_IB;
+
+    tempkm = A->get_blkdim( A, k, DIM_m, A->m );
+    tempkn = A->get_blkdim( A, 0, DIM_n, A->n );
+
+    options.priority = request->priority;
+    INSERT_TASK_zgetrf_nopiv( &options, tempkm, tempkn, ib, A->mb,
+                              A( k, 0 ), A->mb * k );
+
+    for ( m = k + 1; m < A->mt; m++ ) {
+        options.priority = request->priority - m;
+        tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        INSERT_TASK_ztrsm( &options, ChamRight, ChamUpper, ChamNoTrans, ChamNonUnit,
+                           tempmm, tempkn, A->mb, zone,
+                           A( k, 0 ),
+                           A( m, 0 ) );
+    }
+
+    RUNTIME_options_finalize( &options, chamctxt );
+}
+
+/**
+ * @brief Generate update subtasks for two recursive panels without workspaces.
+ */
+void chameleon_pzgetrf_nopiv_generic_panel_update( CHAM_desc_t        *Ak,
+                                                   CHAM_desc_t        *An,
+                                                   int                 k,
+                                                   RUNTIME_sequence_t *sequence,
+                                                   RUNTIME_request_t  *request )
+{
+    CHAM_context_t  *chamctxt;
+    RUNTIME_option_t options;
+    int m;
+    int tempkm, tempmm, tempnn;
+    CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
+    CHAMELEON_Complex64_t mzone = (CHAMELEON_Complex64_t)-1.0;
+
+    /* Quick return for matrices with N > M */
+    if ( k >= Ak->mt ) {
+        return;
+    }
+    assert( Ak->nt == 1 );
+    assert( An->nt == 1 );
+
+    chamctxt = chameleon_context_self();
+    if ( sequence->status != CHAMELEON_SUCCESS ) {
+        return;
+    }
+    RUNTIME_options_init( &options, chamctxt, sequence, request );
+
+    tempkm = Ak->get_blkdim( Ak, k, DIM_m, Ak->m );
+    tempnn = An->get_blkdim( An, 0, DIM_n, An->n );
+
+    options.priority = request->priority;
+    INSERT_TASK_ztrsm( &options, ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
+                       tempkm, tempnn, Ak->mb, zone,
+                       Ak( k, 0 ),
+                       An( k, 0 ) );
+
+    for ( m = k + 1; m < Ak->mt; m++ ) {
+        tempmm = Ak->get_blkdim( Ak, m, DIM_m, Ak->m );
+        options.priority = request->priority - m;
+        INSERT_TASK_zgemm( &options, ChamNoTrans, ChamNoTrans,
+                           tempmm, tempnn, Ak->mb, Ak->mb,
+                           mzone, Ak( m, 0 ),
+                                  An( k, 0 ),
+                           zone,  An( m, 0 ) );
+    }
+
+    /* Flush the U part that is no longer used */
+    chameleon_data_flush( sequence, An( k, 0 ), request->flush );
+    RUNTIME_options_finalize( &options, chamctxt );
+}
+#endif
 
 void chameleon_pzgetrf_nopiv( struct chameleon_pzgetrf_nopiv_s *ws,
                               CHAM_desc_t                      *A,
