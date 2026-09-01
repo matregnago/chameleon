@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -40,8 +40,9 @@
  *
  *******************************************************************************
  *
- * @retval An allocated opaque pointer to use in CHAMELEON_zgetrf_nopiv_Tile_Async()
- * and to free with CHAMELEON_zgetrf_nopiv_WS_Free().
+ * @return An opaque workspace pointer on success, or NULL if CHAMELEON is not
+ * initialized, @p A is NULL, or workspace allocation fails. The returned
+ * pointer must be released with CHAMELEON_zgetrf_nopiv_WS_Free().
  *
  *******************************************************************************
  *
@@ -51,40 +52,79 @@
  */
 void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
 {
-    CHAM_context_t *chamctxt;
+    CHAM_context_t                   *chamctxt;
     struct chameleon_pzgetrf_nopiv_s *options;
+    int is_recursive   = 0;
+    int wl_initialized = 0;
     int P, Q;
+    int lookahead;
+    int rc = CHAMELEON_SUCCESS;
+
 
     chamctxt = chameleon_context_self();
-    if ( chamctxt == NULL ) {
+    if ( ( chamctxt == NULL ) || ( A == NULL ) ) {
         return NULL;
     }
 
     options = calloc( 1, sizeof(struct chameleon_pzgetrf_nopiv_s) );
+    if ( options == NULL ) {
+        return NULL;
+    }
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    is_recursive = chameleon_desc_has_recursive_tiles( A );
+#endif
+
     options->use_workspace = 0;
+    options->use_tasklimit = chamctxt->autominmax_enabled && !is_recursive;
 
     P = chameleon_desc_datadist_get_iparam( A, 0 );
     Q = chameleon_desc_datadist_get_iparam( A, 1 );
 
-    if ( ( ( P > 1 ) || ( Q > 1 ) ) &&
-         ( A->get_rankof_init == chameleon_getrankof_2d ) &&
-         ( chamctxt->generic_enabled != CHAMELEON_TRUE ) )
-    {
-        int lookahead = chamctxt->lookahead;
-        options->use_workspace = 1;
-
-        chameleon_desc_init( chamctxt, &(options->WL), "GETRF_NP_WL", CHAMELEON_MAT_ALLOC_TILE,
-                             ChamComplexDouble, A->mb, A->nb,
-                             A->mt * A->mb, A->nb * Q * lookahead,
-                             A->mt * A->mb, A->nb * Q * lookahead, P, Q,
-                             NULL, NULL, A->get_rankof_init, A->get_rankof_init_arg );
-
-        chameleon_desc_init( chamctxt, &(options->WU), "GETRF_NP_WU", CHAMELEON_MAT_ALLOC_TILE,
-                             ChamComplexDouble, A->mb, A->nb,
-                             A->mb * P * lookahead, A->nt * A->nb,
-                             A->mb * P * lookahead, A->nt * A->nb, P, Q,
-                             NULL, NULL, A->get_rankof_init, A->get_rankof_init_arg );
+    if ( ( P == 1 ) && ( Q == 1 ) ) {
+        /* No mpi => No workspace */
+        return (void*)options;
     }
+
+    if ( chamctxt->generic_enabled == CHAMELEON_TRUE ) {
+        /* Generic => No workspace */
+        return (void*)options;
+    }
+
+    if ( is_recursive ) {
+        /* Square recursive => No workspace (yet ?) */
+        return (void*)options;
+    }
+
+    lookahead = chamctxt->lookahead;
+    rc = CHAMELEON_SUCCESS;
+
+    {
+        rc = chameleon_desc_init( chamctxt, &(options->WL), "GETRF_NP_WL", CHAMELEON_MAT_ALLOC_TILE,
+                                  ChamComplexDouble, A->mb, A->nb,
+                                  A->mt * A->mb, A->nb * Q * lookahead,
+                                  A->mt * A->mb, A->nb * Q * lookahead, P, Q,
+                                  NULL, NULL, A->get_rankof_init, A->get_rankof_init_arg );
+
+        if ( rc == CHAMELEON_SUCCESS ) {
+            wl_initialized = 1;
+            rc = chameleon_desc_init( chamctxt, &(options->WU), "GETRF_NP_WU", CHAMELEON_MAT_ALLOC_TILE,
+                                      ChamComplexDouble, A->mb, A->nb,
+                                      A->mb * P * lookahead, A->nt * A->nb,
+                                      A->mb * P * lookahead, A->nt * A->nb, P, Q,
+                                      NULL, NULL, A->get_rankof_init, A->get_rankof_init_arg );
+        }
+    }
+
+    if ( rc != CHAMELEON_SUCCESS ) {
+        if ( wl_initialized ) {
+            chameleon_desc_destroy( &(options->WL) );
+        }
+        free( options );
+        return NULL;
+    }
+
+    options->use_workspace = 1;
 
     return (void*)options;
 }
@@ -98,9 +138,9 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
  *
  *******************************************************************************
  *
- * @param[in,out] user_ws
- *          On entry, the opaque pointer allocated by CHAMELEON_zgetrf_nopiv_WS_Alloc()
- *          On exit, all data are freed.
+ * @param[in] user_ws
+ *          Opaque pointer returned by CHAMELEON_zgetrf_nopiv_WS_Alloc(). NULL
+ *          is accepted. On return, all associated data have been freed.
  *
  *******************************************************************************
  *
@@ -111,6 +151,10 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
 void CHAMELEON_zgetrf_nopiv_WS_Free( void *user_ws )
 {
     struct chameleon_pzgetrf_nopiv_s *ws = (struct chameleon_pzgetrf_nopiv_s*)user_ws;
+
+    if ( ws == NULL ) {
+        return;
+    }
 
     if ( ws->use_workspace ) {
         chameleon_desc_destroy( &(ws->WL) );
