@@ -160,12 +160,23 @@ int chameleon_desc_init_base( CHAM_desc_t *desc, int myrank, const char *name,
                               const CHAM_desc_storage_t *storage,
                               const CHAM_desc_layout_t  *layout );
 
+void chameleon_desc_init_tiles( CHAM_desc_t *desc, blkrankof_fct_t rankof );
 void chameleon_desc_init_2d_distribution( CHAM_desc_t *desc, int p, int q );
 void chameleon_desc_init_2d_distribution_with_offset( CHAM_desc_t *desc, int p, int q,
                                                       int dist_it, int dist_jt );
 int  chameleon_desc_init_storage( const CHAM_context_t *chamctxt, CHAM_desc_t *desc, void *mat );
 void chameleon_desc_register( CHAM_desc_t *desc );
 void chameleon_desc_register_with_offset( CHAM_desc_t *desc );
+int  chameleon_recdesc_init( const CHAM_context_t *chamctxt,
+                             CHAM_desc_t *desc, const char *name, void *mat,
+                             cham_flttype_t dtyp, cham_rec_t rec, int rarg,
+                             const int *mbs, const int *nbs,
+                             int lm, int ln, int m, int n, int p, int q,
+                             int dist_level,
+                             blkaddr_fct_t get_blkaddr,
+                             blkldd_fct_t get_blkldd,
+                             blkrankof_fct_t get_rankof,
+                             void *get_rankof_arg );
 int  chameleon_desc_create_recursive( CHAM_desc_t **desc, const CHAM_desc_create_t *args );
 
 static inline int

@@ -164,6 +164,21 @@ if (NOT CHAMELEON_SIMULATION)
           # if ( ${cat} STREQUAL "mpi" )
           #   add_test( ${laswp_test_prefix}_ppiv_comm_with_task ${laswp_test_cmd} -P ${NP} )
           # endif()
+
+          if ( CHAMELEON_USE_RECURSIVE_TASKS AND
+               ( ${cat} STREQUAL "shm" OR ${cat} STREQUAL "mpi" ) )
+            if ( ${cat} STREQUAL "mpi" )
+              set( recursive_mtxfmts 1 )
+            else()
+              set( recursive_mtxfmts 0 1 )
+            endif()
+
+            foreach( recursive_mtxfmt ${recursive_mtxfmts} )
+              add_test( test_${cat}_${prec}print_recursive_${recursive_mtxfmt}
+                ${FULLPREFIX} -P 1 -f input/print_recursive.in
+                --rec=full --mtxfmt=${recursive_mtxfmt} )
+            endforeach()
+          endif()
         endif()
 
         if ( CHAMELEON_SCHED_STARPU AND HAVE_STARPU_NONE_NONZERO )

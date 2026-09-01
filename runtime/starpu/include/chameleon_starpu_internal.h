@@ -46,6 +46,55 @@ typedef struct CHAM_context_starpu_s
     struct starpu_parallel_worker_config *pw_config;   /**< StarPU parallel workers configuration */
 } CHAM_context_starpu_t;
 
+/**
+ * @brief StarPU-specific state attached to a Chameleon descriptor.
+ *
+ * The flexible array stores all handles owned by the descriptor. Recursive
+ * descriptors additionally retain their partition filter and the mutex
+ * protecting lazy handle registration in this state.
+ */
+typedef struct starpu_cham_schedopt_s
+{
+    size_t                    nhandles;           /**< Number of entries in @c handles         */
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+    struct starpu_data_filter filter;             /**< Persistent recursive partition filter  */
+    starpu_pthread_mutex_t    registration_mutex; /**< Protects lazy handle and plan creation  */
+#endif
+    starpu_data_handle_t      handles[];
+} starpu_cham_schedopt_t;
+
+static inline starpu_cham_schedopt_t *
+chameleon_starpu_desc_get_schedopt( const CHAM_desc_t *desc )
+{
+    return (starpu_cham_schedopt_t *)desc->schedopt;
+}
+
+static inline starpu_data_handle_t *
+chameleon_starpu_desc_get_handles( const CHAM_desc_t *desc )
+{
+    return chameleon_starpu_desc_get_schedopt( desc )->handles;
+}
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+/**
+ * @brief Return the descriptor-owned persistent partition filter.
+ */
+static inline struct starpu_data_filter *
+runtime_desc_get_partition_filter( const CHAM_desc_t *desc )
+{
+    return &(chameleon_starpu_desc_get_schedopt( desc )->filter);
+}
+
+/**
+ * @brief Return the descriptor-owned registration mutex.
+ */
+static inline starpu_pthread_mutex_t *
+chameleon_starpu_desc_get_mutex( const CHAM_desc_t *desc )
+{
+    return &(chameleon_starpu_desc_get_schedopt( desc )->registration_mutex);
+}
+#endif
+
 typedef void (*callback_fct_t)(void *);
 
 /**
@@ -178,7 +227,7 @@ chameleon_starpu_data_gethandle( const CHAM_desc_t *A, int m, int n )
     int64_t mm = m + (A->i / A->mb);
     int64_t nn = n + (A->j / A->nb);
 
-    starpu_data_handle_t *ptrtile = A->schedopt;
+    starpu_data_handle_t *ptrtile = chameleon_starpu_desc_get_handles( A );
     ptrtile += ((int64_t)A->lmt) * nn + mm;
 
     return ptrtile;
@@ -191,7 +240,7 @@ chameleon_starpu_data_iscached(const CHAM_desc_t *A, int m, int n)
     int64_t mm = m + (A->i / A->mb);
     int64_t nn = n + (A->j / A->nb);
 
-    starpu_data_handle_t *ptrtile = A->schedopt;
+    starpu_data_handle_t *ptrtile = chameleon_starpu_desc_get_handles( A );
     ptrtile += ((int64_t)A->lmt) * nn + mm;
 
     if (!(*ptrtile)) {

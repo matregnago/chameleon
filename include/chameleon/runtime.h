@@ -383,6 +383,41 @@ void
 RUNTIME_desc_create( CHAM_desc_t *desc );
 
 /**
+ * @brief Populate a classic descriptor with borrowed recursive leaf handles.
+ *
+ * @param[inout] desc
+ *          Initialized classic descriptor receiving the borrowed handles.
+ *
+ * @param[in] recdesc
+ *          Source recursive descriptor.
+ *
+ * @retval CHAMELEON_SUCCESS on success.
+ * @retval CHAMELEON_ERR_NOT_SUPPORTED if the runtime cannot create the view or
+ *         a requested tile has no matching initialized leaf handle.
+ * @retval CHAMELEON_ERR_OUT_OF_RESOURCES if the handle array cannot be allocated.
+ */
+int
+RUNTIME_desc_create_flatview( CHAM_desc_t       *desc,
+                              const CHAM_desc_t *recdesc );
+
+/**
+ * @brief Eagerly register recursive handles down to the distributed level.
+ *
+ * All ranks traverse these shared levels in the same order. Levels below the
+ * distributed level remain lazily partitioned on their owning rank.
+ * Descriptor creation does not call this function automatically, so ordinary
+ * recursive descriptors retain lazy handle registration.
+ *
+ * @param[inout] desc
+ *          Root descriptor of the recursive hierarchy.
+ *
+ * @param[in] dist_level
+ *          Recursive level at which the data distribution applies.
+ */
+void
+RUNTIME_desc_register_recursive( CHAM_desc_t *desc, int dist_level );
+
+/**
  * @brief Submit unregistration/destruction of the data handles of a descriptor
  * for asynchronous memory de-allocation.
  * The handles cannot be re-registered between the unregistration and the

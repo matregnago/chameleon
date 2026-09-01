@@ -4,7 +4,7 @@
  *
  * @copyright 2009-2014 The University of Tennessee and The University of
  *                      Tennessee Research Foundation. All rights reserved.
- * @copyright 2012-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2012-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -14,6 +14,7 @@
  * @version 1.4.0
  * @author Mathieu Faverge
  * @author Ana Hourcau
+ * @author Florent Pruvost
  * @date 2024-10-18
  * @precisions normal z -> d
  *
@@ -30,7 +31,6 @@ void INSERT_TASK_zgered( const RUNTIME_option_t *options,
 {
     CHAM_tile_t          *tileA;
     double                u_low, lnorm;
-    int64_t               mm, nn;
     int                   tag = -1;
     starpu_data_handle_t *handleAin;
     starpu_data_handle_t  handleAout;
@@ -55,10 +55,7 @@ void INSERT_TASK_zgered( const RUNTIME_option_t *options,
     }
 
     /* Get the Input handle */
-    mm = Am + (A->i / A->mb);
-    nn = An + (A->j / A->nb);
-    handleAin = A->schedopt;
-    handleAin += ((int64_t)A->lmt) * nn + mm;
+    handleAin = chameleon_starpu_data_gethandle( A, Am, An );
 
     /*
      * Lets convert the tile precision based on the following criteria:

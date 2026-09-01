@@ -254,6 +254,7 @@ struct chameleon_desc_s {
     int register_mat; /**> 1 if we have to register mat - else 0 (handled by the application) */
     int myrank;       /**> MPI rank of the descriptor                                         */
     int ooc;          /**> 1 if the matrix is not to fit in memory                            */
+    int runtime_view; /**> 1 if schedopt borrows handles owned by another descriptor           */
 
     /* Runtime MPI-tag layout and ownership. */
     int64_t      mpitag;           /**> First MPI tag visible from this descriptor level              */
