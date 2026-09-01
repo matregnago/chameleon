@@ -40,6 +40,7 @@
  * This is the version to use by default.
  */
 void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
+                                      int                 use_tasklimit,
                                       RUNTIME_sequence_t *sequence,
                                       RUNTIME_request_t  *request )
 {
@@ -69,7 +70,8 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
      * the submission window and prevent the memory overflow issue dur to
      * pre-allocation of the reception buffers.
      */
-    if ( chamctxt->autominmax_enabled && (chamctxt->scheduler == RUNTIME_SCHED_STARPU) ) {
+    if ( use_tasklimit && ( chamctxt->scheduler == RUNTIME_SCHED_STARPU ) )
+    {
         int P                = chameleon_desc_datadist_get_iparam(A, 0);
         int Q                = chameleon_desc_datadist_get_iparam(A, 1);
         int lookahead        = chamctxt->lookahead;
@@ -83,6 +85,8 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
         }
         RUNTIME_set_minmax_submitted_tasks( mintasks, maxtasks );
     }
+#else
+    (void)use_tasklimit;
 #endif
 
     kmin = chameleon_max( 0,       chamctxt->first_step );
@@ -143,18 +147,21 @@ void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
     }
 
     RUNTIME_options_finalize(&options, chamctxt);
+
+    /* Mark written data for synchronization */
+    A->sync = 1;
 }
 
 /**
  * @brief Tile algorithm of the LU factorization without pivoting using
  * workspace to optimize the communications
  *
- * This version should be used only the workspaces have been initialized. It
- * used a ring of communication to propagate the column and row panel at each
+ * This version should be used only when the workspaces have been initialized.
+ * It uses a ring of communication to propagate the column and row panels at each
  * iteration to regulate the flow of tasks.
  * By doing so, the row and column panel are communicated along a ring with a
- * given lookahead. Thus the number of step of the algorithm ongoing at given
- * instant `t` is limited to lookahead steps.
+ * given lookahead. Thus, the number of algorithm steps in progress at a given
+ * time is limited by the lookahead.
  */
 void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
                                  CHAM_desc_t        *WL,
@@ -164,6 +171,8 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
 {
     CHAM_context_t  *chamctxt;
     RUNTIME_option_t options;
+
+    cham_bcast_t bcast;
 
     int k, m, n, ib, lp, lq;
     int tempkm, tempkn, tempmm, tempnn;
@@ -179,12 +188,12 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
     RUNTIME_options_init(&options, chamctxt, sequence, request);
     RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( getrf_nopiv ) );
 
-    ib = CHAMELEON_IB;
+    ib        = CHAMELEON_IB;
     lookahead = chamctxt->lookahead;
-    P   = chameleon_desc_datadist_get_iparam(A, 0);
-    Q   = chameleon_desc_datadist_get_iparam(A, 1);
-    myp = A->myrank / Q;
-    myq = A->myrank % Q;
+    P         = chameleon_desc_datadist_get_iparam(A, 0);
+    Q         = chameleon_desc_datadist_get_iparam(A, 1);
+    myp       = A->myrank / Q;
+    myq       = A->myrank % Q;
 
     for ( k = 0; k < chameleon_min( A->mt, A->nt ); k++ ) {
         RUNTIME_iteration_push(chamctxt, k);
@@ -203,12 +212,13 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
         /**
          * Broadcast of A(k,k) along rings in both directions
          */
-        chameleon_pzbcast_tile( ChamRowwise, ChamBcastRing,
-                                A, k, k, WL, k, lq, &options );
-        chameleon_pzbcast_tile( ChamColumnwise, ChamBcastRing,
-                                A, k, k, WU, lp, k, &options );
+        bcast = ( k < lookahead ) ? ChamBcastFull : ChamBcastRing;
+        chameleon_pzbcast_tile( ChamRowwise, bcast,
+                                A(k, k), WL(k, lq), &options );
+        chameleon_pzbcast_tile( ChamColumnwise, bcast,
+                                A(k, k), WU(lp, k), &options );
 
-        chameleon_data_flush( sequence, A( k, k ), request->flush );
+        chameleon_data_flush( sequence, A(k, k), request->flush );
 
         for ( m = k+1; m < A->mt; m++ ) {
 
@@ -225,14 +235,14 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
                 &options,
                 ChamRight, ChamUpper, ChamNoTrans, ChamNonUnit,
                 tempmm, tempkn, A->mb,
-                zone, WU( myp + lp, k ),
-                      A(  m,        k ) );
+                zone, WU(myp + lp, k),
+                      A( m,        k) );
 
             /* Broadcast A(m,k) into temp buffers through a ring */
-            chameleon_pzbcast_tile( ChamRowwise, ChamBcastRing,
-                                    A, m, k, WL, m, lq, &options );
+            chameleon_pzbcast_tile( ChamRowwise, bcast,
+                                    A(m, k), WL(m, lq), &options );
 
-            chameleon_data_flush( sequence, A( m, k ), request->flush );
+            chameleon_data_flush( sequence, A(m, k), request->flush );
         }
 
         for ( n = k+1; n < A->nt; n++ ) {
@@ -250,14 +260,14 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
                 &options,
                 ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
                 tempkm, tempnn, A->mb,
-                zone, WL( k, myq + lq ),
-                      A( k, n ));
+                zone, WL(k, myq + lq ),
+                      A( k, n        ));
 
             /* Broadcast A(k,n) into temp buffers through a ring */
-            chameleon_pzbcast_tile( ChamColumnwise, ChamBcastRing,
-                                    A, k, n, WU, lp, n, &options );
+            chameleon_pzbcast_tile( ChamColumnwise, bcast,
+                                    A(k, n), WU(lp, n), &options );
 
-            chameleon_data_flush( sequence, A( k, n ), request->flush );
+            chameleon_data_flush( sequence, A(k, n), request->flush );
 
             for ( m = k+1; m < A->mt; m++ ) {
 
@@ -276,9 +286,9 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
                     &options,
                     ChamNoTrans, ChamNoTrans,
                     tempmm, tempnn, A->mb, A->mb,
-                    mzone, WL( m, myq + lq ),
-                           WU( myp + lp, n ),
-                    zone,  A( m, n ));
+                    mzone, WL(m, myq + lq ),
+                           WU(myp + lp, n ),
+                    zone,  A( m,        n ));
             }
         }
         RUNTIME_iteration_pop( chamctxt );
@@ -288,6 +298,9 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
     CHAMELEON_Desc_Flush( WU, sequence );
 
     RUNTIME_options_finalize( &options, chamctxt );
+
+    /* Mark written data for synchronization */
+    A->sync = 1;
 }
 
 void chameleon_pzgetrf_nopiv( struct chameleon_pzgetrf_nopiv_s *ws,
@@ -299,8 +312,6 @@ void chameleon_pzgetrf_nopiv( struct chameleon_pzgetrf_nopiv_s *ws,
         chameleon_pzgetrf_nopiv_ws( A, &(ws->WL), &(ws->WU), sequence, request );
     }
     else {
-        chameleon_pzgetrf_nopiv_generic( A, sequence, request );
+        chameleon_pzgetrf_nopiv_generic( A, ws ? ws->use_tasklimit : 0, sequence, request );
     }
-    /* Mark written data for synchronization */
-    A->sync = 1;
 }
