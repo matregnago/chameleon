@@ -93,6 +93,11 @@ void *CHAMELEON_zgetrf_nopiv_WS_Alloc( const CHAM_desc_t *A )
         return (void*)options;
     }
 
+    if ( A->get_rankof_init != chameleon_getrankof_2d ) {
+        /* Workspace broadcasts rely on the 2DBC process grid. */
+        return (void*)options;
+    }
+
     if ( is_recursive && !is_recursive_panel ) {
         /* Square recursive => No workspace (yet ?) */
         return (void*)options;
