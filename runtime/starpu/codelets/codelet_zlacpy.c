@@ -95,12 +95,14 @@ cl_zlacpy_rectask_func( struct starpu_task *t, void *_args )
 }
 
 static void
-cl_zlacpy_panel_rectask_func( struct starpu_task *t, void *_args )
+cl_zlacpy_panel_rectask_func( struct starpu_task *t, void *_args, void **descrs )
 {
     rectask_args_t    *rtargs  = (rectask_args_t *)_args;
     RUNTIME_request_t  request = RUNTIME_REQUEST_INITIALIZER;
     cham_uplo_t        uplo;
     int                k;
+
+    (void)descrs;
 
     starpu_codelet_unpack_args( t->cl_arg, &uplo, &k );
     starpu_cham_rectask_initrequest( t, &request );
