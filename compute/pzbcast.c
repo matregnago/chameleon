@@ -2,7 +2,7 @@
  *
  * @file pzbcast.c
  *
- * @copyright 2025-2025 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
+ * @copyright 2025-2026 Bordeaux INP, CNRS (LaBRI UMR 5800), Inria,
  *                      Univ. Bordeaux. All rights reserved.
  *
  ***
@@ -166,6 +166,127 @@ static chameleon_pzbcast_fct_t __chameleon_pzbcast_tile[2][ChamBcastNumber] = {
     },
 };
 
+static inline void
+__chameleon_pzbcast_panel_bycol_full_2d( cham_uplo_t        uplo,
+                                         int                k,
+                                         const CHAM_desc_t *A,
+                                         int                Am,
+                                         int                An,
+                                         const CHAM_desc_t *W,
+                                         int                Wm,
+                                         int                Wn,
+                                         RUNTIME_option_t  *options )
+{
+    int P = chameleon_desc_datadist_get_iparam(W, 0);
+    int p;
+
+    for ( p = 0; p < P; p ++ ) {
+        INSERT_TASK_zlacpy_panel(
+            options, uplo, k,
+            A( Am, An ),
+            W( Wm + ( ( Am + p ) % P ), Wn ) );
+    }
+}
+
+static inline void
+__chameleon_pzbcast_panel_bycol_ring_2d( cham_uplo_t        uplo,
+                                         int                k,
+                                         const CHAM_desc_t *A,
+                                         int                Am,
+                                         int                An,
+                                         const CHAM_desc_t *W,
+                                         int                Wm,
+                                         int                Wn,
+                                         RUNTIME_option_t  *options )
+{
+    int P = chameleon_desc_datadist_get_iparam(W, 0);
+    int p;
+
+    INSERT_TASK_zlacpy_panel(
+        options, uplo, k,
+        A( Am, An ),
+        W( Wm + ( Am % P ), Wn ) );
+
+    for ( p = 1; p < P; p ++ ) {
+        INSERT_TASK_zlacpy_panel(
+            options, uplo, k,
+            W( Wm + (( Am + p - 1 ) % P ), Wn ),
+            W( Wm + (( Am + p )     % P ), Wn ) );
+    }
+}
+
+static inline void
+__chameleon_pzbcast_panel_byrow_full_2d( cham_uplo_t        uplo,
+                                         int                k,
+                                         const CHAM_desc_t *A,
+                                         int                Am,
+                                         int                An,
+                                         const CHAM_desc_t *W,
+                                         int                Wm,
+                                         int                Wn,
+                                         RUNTIME_option_t  *options )
+{
+    int Q = chameleon_desc_datadist_get_iparam(W, 1);
+    int q;
+
+    for ( q = 0; q < Q; q ++ ) {
+        INSERT_TASK_zlacpy_panel(
+            options, uplo, k,
+            A( Am, An ),
+            W( Wm, Wn + (( An + q ) % Q ) ) );
+    }
+}
+
+static inline void
+__chameleon_pzbcast_panel_byrow_ring_2d( cham_uplo_t        uplo,
+                                         int                k,
+                                         const CHAM_desc_t *A,
+                                         int                Am,
+                                         int                An,
+                                         const CHAM_desc_t *W,
+                                         int                Wm,
+                                         int                Wn,
+                                         RUNTIME_option_t  *options )
+{
+    int Q = chameleon_desc_datadist_get_iparam(W, 1);
+    int q;
+
+    INSERT_TASK_zlacpy_panel(
+        options, uplo, k,
+        A( Am, An ),
+        W( Wm, Wn + ( An % Q ) ) );
+
+    for ( q = 1; q < Q; q ++ ) {
+        INSERT_TASK_zlacpy_panel(
+            options, uplo, k,
+            W( Wm, Wn + (( An + q - 1 ) % Q ) ),
+            W( Wm, Wn + (( An + q )     % Q ) ) );
+    }
+}
+
+typedef void (*chameleon_pzbcast_panel_fct_t)( cham_uplo_t        uplo,
+                                               int                k,
+                                               const CHAM_desc_t *A,
+                                               int                Am,
+                                               int                An,
+                                               const CHAM_desc_t *W,
+                                               int                Wm,
+                                               int                Wn,
+                                               RUNTIME_option_t  *options );
+
+static chameleon_pzbcast_panel_fct_t __chameleon_pzbcast_panel[2][ChamBcastNumber] = {
+    /* ChamColumnwise */
+    {
+        __chameleon_pzbcast_panel_bycol_full_2d,
+        __chameleon_pzbcast_panel_bycol_ring_2d,
+    },
+    /* ChamRowwise */
+    {
+        __chameleon_pzbcast_panel_byrow_full_2d,
+        __chameleon_pzbcast_panel_byrow_ring_2d,
+    },
+};
+
 /**
  * @brief Bcast a tile A(Am,An) to a workspace W by column or row starting at
  * the position W(Wm,Wn)
@@ -209,4 +330,22 @@ chameleon_pzbcast_tile( cham_store_t       dir,
     assert( A->get_rankof_init == chameleon_getrankof_2d );
 
     __chameleon_pzbcast_tile[dir-ChamColumnwise][algo]( A, Am, An, W, Wm, Wn, options );
+}
+
+void
+chameleon_pzbcast_panel( cham_store_t       dir,
+                         cham_bcast_t       algo,
+                         cham_uplo_t        uplo,
+                         int                k,
+                         const CHAM_desc_t *A,
+                         int                Am,
+                         int                An,
+                         const CHAM_desc_t *W,
+                         int                Wm,
+                         int                Wn,
+                         RUNTIME_option_t  *options )
+{
+    assert( A->get_rankof_init == chameleon_getrankof_2d );
+
+    __chameleon_pzbcast_panel[dir-ChamColumnwise][algo]( uplo, k, A, Am, An, W, Wm, Wn, options );
 }

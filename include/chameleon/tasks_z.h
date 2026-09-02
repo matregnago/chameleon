@@ -150,6 +150,10 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
                          cham_uplo_t uplo, int m, int n,
                          const CHAM_desc_t *A, int Am, int An,
                          const CHAM_desc_t *B, int Bm, int Bn );
+void INSERT_TASK_zlacpy_panel( const RUNTIME_option_t *options,
+                               cham_uplo_t uplo, int k,
+                               const CHAM_desc_t *A, int Am, int An,
+                               const CHAM_desc_t *B, int Bm, int Bn );
 void INSERT_TASK_zlacpyx( const RUNTIME_option_t *options,
                           cham_uplo_t uplo, int m, int n,
                           int displA, const CHAM_desc_t *A, int Am, int An, int lda,
@@ -652,6 +656,26 @@ void INSERT_TASK_zlaswp_gemm_flush( const RUNTIME_option_t *options,
                                     const CHAM_desc_t      *WA,   int WAm, int WAn,
                                     const CHAM_desc_t      *B,    int Bm,  int Bn,
                                     void                  **clargs_ptr );
+
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+void INSERT_TASK_zgetrf_nopiv_panel_facto( const RUNTIME_option_t *options,
+                                           int                     k,
+                                           const CHAM_desc_t      *A,
+                                           int                     An,
+                                           const CHAM_desc_t      *WU,
+                                           int                     WUm,
+                                           int                     WUn );
+
+void INSERT_TASK_zgetrf_nopiv_panel_update( const RUNTIME_option_t *options,
+                                            int                     k,
+                                            const CHAM_desc_t      *A,
+                                            int                     An,
+                                            const CHAM_desc_t      *L,
+                                            int                     Ln,
+                                            const CHAM_desc_t      *WU,
+                                            int                     WUm,
+                                            int                     WUn );
+#endif
 
 #if defined(CHAMELEON_USE_MPI)
 /**

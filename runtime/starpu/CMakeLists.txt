@@ -334,6 +334,12 @@ if(GPUCUBLAS_HAVE_CUDA_HALF OR CHAMELEON_SIMULATION)
   )
 endif()
 
+if(CHAMELEON_USE_RECURSIVE_TASKS)
+  list(APPEND ZSRC
+    codelets/codelet_zgetrf_nopiv_panel.c
+  )
+endif()
+
 precisions_rules_py(RUNTIME_SRCS_GENERATED "${ZSRC}"
   PRECISIONS "${CHAMELEON_PRECISION}"
   TARGETDIR "codelets")

@@ -121,6 +121,54 @@ void chameleon_pzlacpy_generic( cham_uplo_t         uplo,
     RUNTIME_options_finalize(&options, chamctxt);
 }
 
+void chameleon_pzlacpy_panel( cham_uplo_t         uplo,
+                              int                 k,
+                              CHAM_desc_t        *A,
+                              CHAM_desc_t        *B,
+                              RUNTIME_sequence_t *sequence,
+                              RUNTIME_request_t  *request )
+{
+    CHAM_context_t  *chamctxt;
+    RUNTIME_option_t options;
+    int              m, n;
+    int              mmin = 0;
+    int              mmax = A->mt;
+    int              tempmm, tempnn;
+
+    chamctxt = chameleon_context_self();
+    if ( sequence->status != CHAMELEON_SUCCESS ) {
+        return;
+    }
+
+    switch( uplo ) {
+    case ChamUpper:
+        mmax = chameleon_min( k + 1, A->mt );
+        break;
+    case ChamLower:
+        mmin = chameleon_min( k, A->mt );
+        break;
+    case ChamUpperLower:
+    default:
+        break;
+    }
+
+    RUNTIME_options_init( &options, chamctxt, sequence, request );
+    RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( lacpy ) );
+    options.withlacpy = 1;
+
+    for ( m = mmin; m < mmax; m++ ) {
+        tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+        for ( n = 0; n < A->nt; n++ ) {
+            tempnn = A->get_blkdim( A, n, DIM_n, A->n );
+            INSERT_TASK_zlacpy( &options, ChamUpperLower, tempmm, tempnn,
+                                A( m, n ),
+                                B( m, n ) );
+        }
+    }
+
+    RUNTIME_options_finalize( &options, chamctxt );
+}
+
 void chameleon_pzlacpy( cham_uplo_t         uplo,
                         CHAM_desc_t        *A,
                         CHAM_desc_t        *B,

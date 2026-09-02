@@ -1,0 +1,11 @@
+# No-pivot GETRF with square recursive tiles
+#
+# l1 is the leaf blocking. Since M is larger than nb, this descriptor follows
+# the generic recursive-tile path rather than the recursive-panel workspace.
+
+op = getrf_nopiv
+nb = 8
+l1 = 4
+m = 31
+n = 23
+lda = 37

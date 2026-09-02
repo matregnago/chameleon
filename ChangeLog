@@ -1,6 +1,8 @@
 chameleon-2.0.0
 ------------------------------------------------------------------------
- - compute: Fix the zlaswp right case that was incorrect on non square PxQ grid
+ - compute/laswp: Fix the laswp right case that was incorrect on non square PxQ grid
+ - compute/generators: Add recursive descriptor support in random, Hermitian, symmetric, and trapezoidal matrix generators
+ - compute/getrf_nopiv: Add recursive panel factorization, including StarPU recursive panel codelets, workspace allocation, reusable recursive panel broadcast, and validation tests
  - starpu: Fix issue when using STARPU_W on both triangle side of a tile that was creating an incorrect DAG on heterogeneous architectures.
  - starpu: Fix synchronization issue of data not transferred back to their home memory node by the end of the wait call
  - fortran: Remove deprecated F77 interface that was no longer maintained
@@ -9,16 +11,25 @@ chameleon-2.0.0
  - control: Remove deprecated CHAMELEON_My_Mpi_Rank function
  - control: Remove deprecated CHAMELEON_user_tag_size function
  - control: Internally change the descriptor structure to detect when the RUNTIME_desc_flush() has to enforce or not the synchronization of the data with their home memory node.
+ - descriptors: Add support for distributed recursive descriptors
+        - Route descriptor creation through CHAMELEON_Desc_CreateEx argument structures
+        - Add offset-aware recursive descriptor initialization, distribution strides, recursive panel descriptors, and helpers to detect/check recursive descriptors
+        - Add CHAMELEON_Desc_Create_FlatView to ease checks and conversions from recursive descriptors
+        - Add StarPU recursive tile registration, lazy partitioning, pre-registration, descriptor-level schedopt state, and bottom-up cleanup
+        - Fix recursive descriptor flushes, shared-tile locality queries, multi-level recursive local-tile filters, and synchronous unregister of descriptor/permutation/pivot handles
  - compute/codelets: Remove the deprecated build functions that have been replaced by the map function
  - gpucublas: Add laset kernel (available with StarPU)
  - gpucublas: Add lacpy kernel for tiles copies not directly handled by StarPU (available with StarPU)
  - gpucublas: Add GPU matrix generation kernels: plrnt, plgsy, plghe (available with StarPU)
  - hip: Add hipsolver support and especially xpotrf kernels support with StarPU
+ - hip: Add HIP kernels for matrix generation, lacpy, laset, and latro, and expose the associated HIP tile interface helpers
  - tracing: Add optional DAG colors controlled by CHAMELEON_ENABLE_DAG_COLORS
  - tracing: Add shared color palettes for algorithms and task families, selectable through CHAMELEON_DAG_COLOR_MODE
  - runtime: Propagate DAG color metadata through the runtime task options and StarPU/Quark DAG generation paths
  - tools: Add consistency checks for DAG color mappings
  - tools: Add a StarPU FxT DAG cleanup helper for Chameleon testings, with task contraction, rank markers, kernel-only labels, and DAG color mode selection
+ - testing: Add recursive descriptor helpers, recursive parameter serialization, recursive descriptor print tests, and recursive GETRF no-pivot tests
+ - doc: Document recursive descriptor distribution strides
 
 chameleon-1.4.0
 ------------------------------------------------------------------------

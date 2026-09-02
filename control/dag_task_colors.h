@@ -346,6 +346,14 @@
 #define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_cpy_pivrow_in_Up                  GETRF
 #define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_incpiv                            GETRF
 #define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_nopiv                             GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_cgetrf_nopiv_panel_facto                 GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_dgetrf_nopiv_panel_facto                 GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_sgetrf_nopiv_panel_facto                 GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_nopiv_panel_facto                 GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_cgetrf_nopiv_panel_update                GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_dgetrf_nopiv_panel_update                GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_sgetrf_nopiv_panel_update                GETRF
+#define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_nopiv_panel_update                GETRF
 #define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_nopiv_percol_diag                 GETRF
 #define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_nopiv_percol_trsm                 GETRF
 #define CHAMELEON_DAG_TASK_COLOR_NAME_zgetrf_panel_blocked_batched             GETRF

@@ -81,13 +81,11 @@ struct chameleon_pzgetrf_s {
 };
 
 /**
- * @brief   Data structure to handle the GETRF temporary workspaces
- *          for MPI transfers.
+ * @brief Data structure holding temporary GETRF workspaces for MPI transfers.
  *
- * @comment The idea is to manage explicitely temporary
- *          blocks arising from MPI transfers automatically
- *          inferred by StarPU, hence limiting the total number
- *          of temporary data allocated for these blocks.
+ * @details The workspaces explicitly manage temporary blocks arising from MPI
+ *          transfers inferred by StarPU, limiting the amount of temporary data
+ *          allocated for those transfers.
  *
  *          The blocks to be sent/received on the network are
  *          copied into those buffers. These copies are
@@ -96,12 +94,12 @@ struct chameleon_pzgetrf_s {
  *
  *          For WL (resp. WU), the number of allocated blocks
  *          corresponds to the number of blocks on the column
- *          (resp. on the line) multiplied by lookahead number
+ *          (resp. on the row) multiplied by the lookahead
  *          from the current chameleon context.
  *
  *          Then, depending on the block panel index, we access
  *          one of the temporary column blocks of WL and row blocks
- *          of WU int a circular way.
+ *          of WU in a circular way.
  *
  *          For instance, for the block panel index k, the block
  *          A(m,k) produced by the TRSM(A(k,k),A(m,k)) is stored
@@ -109,13 +107,14 @@ struct chameleon_pzgetrf_s {
  *          Similarly, the block A(k,n) is stored into the temporary
  *          block WU(k%chamctxt->lookahead, n).
  *
- *          Notice that, by doing so, the notion of look ahead is
- *          reintroduced : artificial dependencies are implied by
+ *          Notice that, by doing so, the notion of lookahead is
+ *          reintroduced: artificial dependencies are implied by
  *          the circular usage of WL and WU temporary workspaces.
  *
  */
 struct chameleon_pzgetrf_nopiv_s {
-    int use_workspace;
+    unsigned int use_workspace:1;
+    unsigned int use_tasklimit:1;
 
     CHAM_desc_t WL; /**> Workspace to store temporary blocks of the
                          diagonal and the lower part of the problem matrix */
@@ -187,6 +186,32 @@ void chameleon_pzgetrf_incpiv(CHAM_desc_t *A, CHAM_desc_t *L, CHAM_desc_t *D, in
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzgetrf_nopiv(struct chameleon_pzgetrf_nopiv_s *ws, CHAM_desc_t *A,
                              RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
+#if defined(CHAMELEON_USE_RECURSIVE_TASKS)
+void chameleon_pzgetrf_nopiv_generic( CHAM_desc_t        *A,
+                                      int                 use_tasklimit,
+                                      RUNTIME_sequence_t *sequence,
+                                      RUNTIME_request_t  *request );
+void chameleon_pzgetrf_nopiv_generic_panel_facto( CHAM_desc_t        *A,
+                                                  int                 k,
+                                                  RUNTIME_sequence_t *sequence,
+                                                  RUNTIME_request_t  *request );
+void chameleon_pzgetrf_nopiv_generic_panel_update( CHAM_desc_t        *Ak,
+                                                   CHAM_desc_t        *An,
+                                                   int                 k,
+                                                   RUNTIME_sequence_t *sequence,
+                                                   RUNTIME_request_t  *request );
+void chameleon_pzgetrf_nopiv_ws_panel_facto( CHAM_desc_t        *A,
+                                             const CHAM_desc_t  *WU,
+                                             int                 k,
+                                             RUNTIME_sequence_t *sequence,
+                                             RUNTIME_request_t  *request );
+void chameleon_pzgetrf_nopiv_ws_panel_update( CHAM_desc_t        *A,
+                                              const CHAM_desc_t  *WL,
+                                              const CHAM_desc_t  *WU,
+                                              int                 k,
+                                              RUNTIME_sequence_t *sequence,
+                                              RUNTIME_request_t  *request );
+#endif
 void chameleon_pzgetrf_reclap(CHAM_desc_t *A, int *IPIV,
                               RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzgetrf_rectil(CHAM_desc_t *A, int *IPIV,
@@ -215,6 +240,12 @@ void chameleon_pzhetrd_he2hb(cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *T, C
                              RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzlacpy(cham_uplo_t uplo, CHAM_desc_t *A, CHAM_desc_t *B,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
+void chameleon_pzlacpy_panel( cham_uplo_t         uplo,
+                              int                 k,
+                              CHAM_desc_t        *A,
+                              CHAM_desc_t        *B,
+                              RUNTIME_sequence_t *sequence,
+                              RUNTIME_request_t  *request );
 void chameleon_pzlag2c(CHAM_desc_t *A, CHAM_desc_t *SB,
                        RUNTIME_sequence_t *sequence, RUNTIME_request_t *request);
 void chameleon_pzlange_generic( cham_normtype_t norm, cham_uplo_t uplo, cham_diag_t diag, CHAM_desc_t *A,
@@ -368,6 +399,7 @@ void chameleon_pzgram( struct chameleon_pzgram_s *ws, cham_uplo_t uplo, CHAM_des
  * Specific functions called when option is already initialized
  */
 void chameleon_pzbcast_tile( cham_store_t dir, cham_bcast_t algo, const CHAM_desc_t *A, int Am, int An, const CHAM_desc_t *W, int Wm, int Wn, RUNTIME_option_t *options );
+void chameleon_pzbcast_panel( cham_store_t dir, cham_bcast_t algo, cham_uplo_t uplo, int k, const CHAM_desc_t *A, int Am, int An, const CHAM_desc_t *W, int Wm, int Wn, RUNTIME_option_t *options );
 
 /**
  *  Macro for matrix conversion / Lapack interface
