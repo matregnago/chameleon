@@ -95,7 +95,8 @@ build_starpu_hip:
                     -DCHAMELEON_USE_MPI=OFF
                     -DBLA_VENDOR=OpenBLAS
                     -DCMAKE_C_COMPILER=gcc
-                    -DCMAKE_Fortran_COMPILER=gfortran"
+                    -DCMAKE_Fortran_COMPILER=gfortran
+                    -DMORSE_ENABLE_COVERAGE=OFF"
   script:
     - guix time-machine
       --channels=./.gitlab/guix-channels-${VARIANT}.scm
