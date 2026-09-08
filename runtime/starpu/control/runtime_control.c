@@ -256,7 +256,9 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
     starpu_cusolver_init();
 #elif defined(CHAMELEON_USE_HIP)
     starpu_hipblas_init();
+#if defined(STARPU_HAVE_LIBHIPSOLVER)
     starpu_hipsolver_init();
+#endif
 #endif
 #endif
 
@@ -292,7 +294,9 @@ void RUNTIME_finalize( CHAM_context_t *chamctxt )
 #endif
 #if defined(CHAMELEON_USE_HIP) && !defined(CHAMELEON_SIMULATION)
     starpu_hipblas_shutdown();
+#if defined(STARPU_HAVE_LIBHIPSOLVER)
     starpu_hipsolver_shutdown();
+#endif
 #endif
 
 #if defined(CHAMELEON_USE_MPI)
