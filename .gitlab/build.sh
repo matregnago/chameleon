@@ -8,6 +8,9 @@ case $SYSTEM in
 
   guix)
     echo "build on guix"
+    if [[ $VERSION == "starpu_hip" ]]; then
+     export BUILD_OPTIONS="$BUILD_OPTIONS -DCMAKE_HIP_COMPILER_ROCM_LIB=$GUIX_ENVIRONMENT/lib"
+    fi
     cmake -B build-${VERSION} -S . -C cmake_modules/gitlab-ci-initial-cache.cmake $BUILD_OPTIONS
     ;;
 

@@ -28,6 +28,8 @@
 #
 ###
 
+enable_language(HIP)
+
 include(CheckLanguage)
 
 check_language(HIP)
@@ -35,7 +37,6 @@ if (NOT CMAKE_HIP_COMPILER)
   message(FATAL_ERROR "HIP language support is required to build gpuhipblas, but no HIP compiler was detected. Set HIPCXX/CMAKE_HIP_COMPILER or install a ROCm HIP toolchain.")
 endif()
 
-enable_language(HIP)
 
 add_subdirectory(include)
 add_subdirectory(compute)
