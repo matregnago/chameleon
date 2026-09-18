@@ -25,6 +25,7 @@
       chameleon = pkgs.callPackage ./chameleon.nix {
         starpu = starpuPkg;
       };
+      parsec = pkgs.callPackage ./parsec.nix { };
     in
     {
       packages.${system} = {
@@ -32,9 +33,15 @@
       };
       devShells.${system} = {
         default = pkgs.mkShell {
+          nativeBuildInputs = [
+            pkgs.pkg-config
+            pkgs.cmake
+          ];
+
           buildInputs = [
             chameleon
             starpuPkg
+            parsec
           ];
 
         };
