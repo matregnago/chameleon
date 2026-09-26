@@ -8,6 +8,7 @@
   hwloc,
   openmpi,
   starpu,
+  parsec,
   python3,
 }:
 
@@ -29,9 +30,11 @@ stdenv.mkDerivation {
     lapack
     hwloc
     openmpi
-    starpu
+    # starpu
+    parsec
   ];
   cmakeFlags = [
     "-DBUILD_SHARED_LIBS=ON"
+    "-DCHAMELEON_SCHED=PARSEC"
   ];
 }

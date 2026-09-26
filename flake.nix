@@ -22,10 +22,11 @@
           enableTrace = true;
         }
       );
+      parsec = pkgs.callPackage ./parsec.nix { };
       chameleon = pkgs.callPackage ./chameleon.nix {
         starpu = starpuPkg;
+        parsec = parsec;
       };
-      parsec = pkgs.callPackage ./parsec.nix { };
     in
     {
       packages.${system} = {

@@ -25,8 +25,7 @@
 #include "control/common.h"
 
 #include <parsec.h>
-#include <parsec/interfaces/superscalar/insert_function.h>
-#include <parsec/data_dist/matrix/matrix.h>
+#include <parsec/interfaces/dtd/insert_function.h>
 
 struct chameleon_parsec_desc_s {
     parsec_data_collection_t super;
@@ -88,4 +87,6 @@ static inline int cham_to_parsec_access( cham_access_t accessA ) {
 
 #define RUNTIME_END_ACCESS_DECLARATION
 
+#define PARSEC_DEV_CPU        ((uint8_t)(1 << 0))
+#define PARSEC_DEV_CUDA       ((uint8_t)(1 << 2))
 #endif /* _chameleon_parsec_h_ */

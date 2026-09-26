@@ -34,4 +34,7 @@ stdenv.mkDerivation {
     hwloc
     openmpi
   ];
+  cmakeFlags = [
+    "DPARSEC_DIST_WITH_MPI=OFF"
+  ];
 }
