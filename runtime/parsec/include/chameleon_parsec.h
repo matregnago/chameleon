@@ -26,6 +26,7 @@
 
 #include <parsec.h>
 #include <parsec/interfaces/dtd/insert_function.h>
+#include <parsec/mca/device/device.h>
 
 struct chameleon_parsec_desc_s {
     parsec_data_collection_t super;
@@ -61,12 +62,12 @@ chameleon_parsec_get_arena_index_invp( const CHAM_ipiv_t *ipiv ) {
 
 static inline int cham_to_parsec_access( cham_access_t accessA ) {
     if ( accessA == ChamR ) {
-        return INPUT;
+        return PARSEC_INPUT;
     }
     if ( accessA == ChamW ) {
-        return OUTPUT;
+        return PARSEC_OUTPUT;
     }
-    return INOUT;
+    return PARSEC_INOUT;
 }
 
 /*
@@ -87,6 +88,4 @@ static inline int cham_to_parsec_access( cham_access_t accessA ) {
 
 #define RUNTIME_END_ACCESS_DECLARATION
 
-#define PARSEC_DEV_CPU        ((uint8_t)(1 << 0))
-#define PARSEC_DEV_CUDA       ((uint8_t)(1 << 2))
 #endif /* _chameleon_parsec_h_ */
