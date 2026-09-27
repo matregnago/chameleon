@@ -159,7 +159,8 @@ chameleon_parsec_data_of(parsec_data_collection_t *data_collection, ...)
     return parsec_data_create( pdesc->data_map + n * mdesc->lmt + m, data_collection,
                                chameleon_parsec_data_key( data_collection, m, n ),
                                mdesc->get_blkaddr( mdesc, m, n ),
-                               mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp) );
+                               mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp),
+                               PARSEC_DATA_FLAG_PARSEC_MANAGED );
 }
 
 static inline parsec_data_t*
@@ -176,7 +177,8 @@ chameleon_parsec_data_of_key(parsec_data_collection_t *data_collection, parsec_d
 #endif
     return parsec_data_create( pdesc->data_map + key, data_collection, key,
                                mdesc->get_blkaddr( mdesc, m, n ),
-                               mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp) );
+                               mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp),
+                               PARSEC_DATA_FLAG_PARSEC_MANAGED );
 }
 
 #if defined(PARSEC_PROF_TRACE)
@@ -228,7 +230,7 @@ void RUNTIME_desc_create( CHAM_desc_t *mdesc )
         chameleon_asprintf(&(data_collection->key_dim), "(%d, %d)", mdesc->lmt, mdesc->lnt);
     }
 #endif
-    data_collection->memory_registration_status = MEMORY_STATUS_UNREGISTERED;
+    data_collection->memory_registration_status = PARSEC_MEMORY_STATUS_UNREGISTERED;
 
     pdesc->data_map = calloc( mdesc->lmt * mdesc->lnt, sizeof(parsec_data_t*) );
 
