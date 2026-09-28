@@ -31,6 +31,7 @@
     {
       packages.${system} = {
         default = chameleon;
+        parsec = parsec;
       };
       devShells.${system} = {
         default = pkgs.mkShell {

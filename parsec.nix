@@ -4,6 +4,7 @@
   pkg-config,
   hwloc,
   fetchFromGitHub,
+  openmpi
 }:
 
 stdenv.mkDerivation {
@@ -31,8 +32,9 @@ stdenv.mkDerivation {
 
   buildInputs = [
     hwloc
+    openmpi
   ];
   cmakeFlags = [
-    "-DPARSEC_DIST_WITH_MPI=OFF"
+    "-DPARSEC_DIST_WITH_MPI=ON"
   ];
 }

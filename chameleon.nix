@@ -36,5 +36,6 @@ stdenv.mkDerivation {
   cmakeFlags = [
     "-DBUILD_SHARED_LIBS=ON"
     "-DCHAMELEON_SCHED=PARSEC"
+    "-DCHAMELEON_USE_MPI=ON"
   ];
 }

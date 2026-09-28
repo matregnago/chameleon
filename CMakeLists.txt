@@ -173,7 +173,7 @@ endif()
 
 # Use intermediate variable since cmake_dependent_option doesn't have OR conditions
 set(CHAMELEON_ENABLE_MPI OFF CACHE INTERNAL "Tells if MPI might be supported by the runtime")
-if ( CHAMELEON_SCHED_STARPU )
+if ( CHAMELEON_SCHED_PARSEC OR CHAMELEON_SCHED_STARPU )
     set(CHAMELEON_ENABLE_MPI ON FORCE)
 endif()
 
@@ -472,10 +472,6 @@ if(NOT CHAMELEON_SIMULATION)
 
         morse_export_imported_target(MPI::MPI_C mpi chameleon)
 
-        if (CHAMELEON_SCHED STREQUAL "PARSEC")
-          message(FATAL_ERROR "CHAMELEON does not support PARSEC with MPI."
-          " To use PARSEC set CHAMELEON_USE_MPI=OFF.")
-        endif()
 
     endif (CHAMELEON_USE_MPI)
 
