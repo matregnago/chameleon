@@ -29,22 +29,27 @@
  * @brief Wait for a taskpool, and for the release of the reference held by
  * the thread that detected its termination.
  *
- * The termination detector sets the taskpool as terminated before releasing
- * its own reference, so parsec_taskpool_wait() may return while another
- * thread still uses the taskpool. If the taskpool is freed at this time, it
- * stays alive in the context list and a following parsec_context_wait() (used
- * by RUNTIME_barrier()) enters it again, racing with the delayed release that
- * then destroys a taskpool still in use.
+ * The local termination detector marks the taskpool as ready (busy) before
+ * retaining it. If a worker completes the last task in between, it detects
+ * the termination and releases a reference that has not been taken yet: an
+ * extra reference is thus held during the wait, otherwise the taskpool is
+ * destroyed by the worker while the main thread still waits on it.
+ *
+ * The termination detector also sets the taskpool as terminated before
+ * releasing its own reference, so parsec_taskpool_wait() may return while
+ * another thread still uses the taskpool.
  */
 static void
 chameleon_parsec_taskpool_wait( parsec_taskpool_t *tp )
 {
     parsec_object_t *obj = (parsec_object_t *)tp;
 
+    PARSEC_OBJ_RETAIN( tp );
     parsec_taskpool_wait( tp );
-    while ( parsec_atomic_fetch_add_int32( &(obj->obj_reference_count), 0 ) > 1 ) {
+    while ( parsec_atomic_fetch_add_int32( &(obj->obj_reference_count), 0 ) > 2 ) {
         sched_yield();
     }
+    PARSEC_OBJ_RELEASE( tp );
 }
 
 /*
