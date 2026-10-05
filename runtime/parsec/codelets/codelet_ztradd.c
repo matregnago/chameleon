@@ -121,10 +121,10 @@ void INSERT_TASK_ztradd( const RUNTIME_option_t *options,
         sizeof(int),               &m,     PARSEC_VALUE,
         sizeof(int),               &n,     PARSEC_VALUE,
         sizeof(CHAMELEON_Complex64_t), &alpha, PARSEC_VALUE,
-        PASSED_BY_REF,              RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INPUT,
+        PASSED_BY_REF,              RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
         sizeof(CHAMELEON_Complex64_t), &beta,  PARSEC_VALUE,
-        PASSED_BY_REF,              RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B ) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,              RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         sizeof(int), &(tileB->ld), PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 

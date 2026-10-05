@@ -57,10 +57,10 @@ void INSERT_TASK_zlanhe(const RUNTIME_option_t *options,
         sizeof(cham_normtype_t),            &norm,          PARSEC_VALUE,
         sizeof(cham_uplo_t),            &uplo,          PARSEC_VALUE,
         sizeof(int),                   &N,             PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INPUT,
+        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld),           PARSEC_VALUE,
         sizeof(double)*szeW,           NULL,           PARSEC_SCRATCH,
-        PASSED_BY_REF,         RTBLKADDR( B, double, Bm, Bn ),            PARSEC_OUTPUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( B, double, Bm, Bn ),            chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
         PARSEC_DTD_ARG_END );
 
     (void)NB;

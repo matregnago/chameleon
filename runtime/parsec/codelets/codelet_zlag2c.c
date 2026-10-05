@@ -57,9 +57,9 @@ void INSERT_TASK_zlag2c( const RUNTIME_option_t *options,
         PARSEC_dtd_taskpool, CORE_zlag2c_parsec, options->priority, PARSEC_DEV_CPU, "lag2c",
         sizeof(int),                        &m,         PARSEC_VALUE,
         sizeof(int),                        &n,         PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INPUT,
+        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( B, CHAMELEON_Complex32_t, Bm, Bn ),     PARSEC_OUTPUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( B, CHAMELEON_Complex32_t, Bm, Bn ),     chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
         sizeof(int), &(tileB->ld), PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 }
@@ -102,9 +102,9 @@ void INSERT_TASK_clag2z( const RUNTIME_option_t *options,
         PARSEC_dtd_taskpool, CORE_clag2z_parsec, options->priority, PARSEC_DEV_CPU, "lag2z",
         sizeof(int),                        &m,         PARSEC_VALUE,
         sizeof(int),                        &n,         PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex32_t, Am, An ),     PARSEC_INPUT,
+        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex32_t, Am, An ),     chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
         sizeof(int), &(tileB->ld), PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 }

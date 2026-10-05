@@ -54,9 +54,9 @@ void INSERT_TASK_dlag2z( const RUNTIME_option_t *options,
         sizeof(cham_uplo_t), &uplo,       PARSEC_VALUE,
         sizeof(int),         &m,          PARSEC_VALUE,
         sizeof(int),         &n,          PARSEC_VALUE,
-        PASSED_BY_REF,        RTBLKADDR( A, double, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INPUT,
+        PASSED_BY_REF,        RTBLKADDR( A, double, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int),        &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,        RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B ) | PARSEC_OUTPUT,
+        PASSED_BY_REF,        RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
         sizeof(int),        &(tileB->ld), PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 }

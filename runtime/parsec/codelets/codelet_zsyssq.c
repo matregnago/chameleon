@@ -56,8 +56,8 @@ void INSERT_TASK_zsyssq( const RUNTIME_option_t *options,
         sizeof(cham_store_t),   &storev,                PARSEC_VALUE,
         sizeof(cham_uplo_t),            &uplo,                  PARSEC_VALUE,
         sizeof(int),            &n,                     PARSEC_VALUE,
-        PASSED_BY_REF,          RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INPUT,
+        PASSED_BY_REF,          RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,          RTBLKADDR( SCALESUMSQ, double, SCALESUMSQm, SCALESUMSQn ), chameleon_parsec_get_arena_index( SCALESUMSQ ) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,          RTBLKADDR( SCALESUMSQ, double, SCALESUMSQm, SCALESUMSQn ), chameleon_parsec_get_arena_index( SCALESUMSQ, SCALESUMSQm, SCALESUMSQn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         PARSEC_DTD_ARG_END );
 }

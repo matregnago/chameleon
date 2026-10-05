@@ -59,8 +59,8 @@ void INSERT_TASK_ztrasm(const RUNTIME_option_t *options,
         sizeof(cham_diag_t),     &diag,                  PARSEC_VALUE,
         sizeof(int),            &M,                     PARSEC_VALUE,
         sizeof(int),            &N,                     PARSEC_VALUE,
-        PASSED_BY_REF,          RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INPUT,
+        PASSED_BY_REF,          RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,          RTBLKADDR( B, double, Bm, Bn ),     PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,          RTBLKADDR( B, double, Bm, Bn ),     chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         PARSEC_DTD_ARG_END );
 }
