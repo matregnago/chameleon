@@ -227,6 +227,24 @@ void RUNTIME_desc_create( CHAM_desc_t *mdesc )
     parsec_dtd_data_collection_init(data_collection);
 
     /*
+     * The remote tiles are received in buffers described by the arena of their
+     * shape, whose leading dimension is at least the number of rows. In column
+     * major storage, the leading dimension of the remote tiles is the local
+     * number of rows, which may be smaller (or even 0 when the process owns no
+     * tile): the leading dimension given to the kernels must match the one of
+     * the received buffers.
+     */
+    {
+        CHAM_tile_t *tile = mdesc->tiles;
+        int nbtiles = mdesc->lmt * mdesc->lnt;
+        for ( i = 0; i < nbtiles; i++, tile++ ) {
+            if ( ( tile->rank != mdesc->myrank ) && ( tile->ld < tile->m ) ) {
+                tile->ld = tile->m;
+            }
+        }
+    }
+
+    /*
      * Arenas: one per shape of tile. Only the last tile row and the last tile
      * column may differ from the regular mb-by-nb tiles.
      */
