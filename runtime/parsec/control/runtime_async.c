@@ -19,6 +19,45 @@
  *
  */
 #include "chameleon_parsec.h"
+#include "chameleon/getenv.h"
+#include <parsec/interfaces/dtd/insert_function_internal.h>
+
+#if defined(CHAMELEON_USE_MPI)
+#include <mpi.h>
+
+/**
+ * @brief Check that all the ranks inserted the same number of tasks.
+ *
+ * In DTD, a task is identified by its insertion counter in the taskpool, so
+ * every rank must insert the same sequence of tasks. A divergence leads to a
+ * hang in the wait: when CHAMELEON_PARSEC_CHECK_STREAM is set, abort with a
+ * message instead.
+ */
+static void
+chameleon_parsec_check_stream( CHAM_context_t *chamctxt, parsec_taskpool_t *tp )
+{
+    static int check = -1;
+    int        local[2], global[2];
+
+    if ( check == -1 ) {
+        check = chameleon_env_on_off( "CHAMELEON_PARSEC_CHECK_STREAM", CHAMELEON_FALSE );
+    }
+    if ( !check ) {
+        return;
+    }
+
+    local[0] =  ((parsec_dtd_taskpool_t *)tp)->task_id;
+    local[1] = -((parsec_dtd_taskpool_t *)tp)->task_id;
+    MPI_Allreduce( local, global, 2, MPI_INT, MPI_MAX, chamctxt->comm );
+    if ( global[0] != -global[1] ) {
+        chameleon_fatal_error( "RUNTIME_sequence_wait",
+                               "The ranks inserted different numbers of tasks in the same taskpool" );
+        MPI_Abort( chamctxt->comm, 1 );
+    }
+}
+#else
+#define chameleon_parsec_check_stream( _ctx_, _tp_ ) do { (void)(_ctx_); (void)(_tp_); } while(0)
+#endif
 
 /**
  *  Create a sequence
@@ -46,6 +85,12 @@ int RUNTIME_sequence_destroy( CHAM_context_t     *chamctxt,
     parsec_taskpool_t *parsec_dtd_tp = (parsec_taskpool_t *)(sequence->schedopt);
 
     assert( parsec_dtd_tp );
+
+    /* The data must be flushed before the taskpool is released */
+    if ( chameleon_parsec_flush_has_pending( parsec_dtd_tp ) ) {
+        chameleon_parsec_flush_pending( parsec_dtd_tp );
+        parsec_taskpool_wait( parsec_dtd_tp );
+    }
     parsec_taskpool_free( parsec_dtd_tp );
 
     sequence->schedopt = NULL;
@@ -63,9 +108,12 @@ int RUNTIME_sequence_wait( CHAM_context_t  *chamctxt,
     parsec_taskpool_t *parsec_dtd_tp = (parsec_taskpool_t *) sequence->schedopt;
 
     assert( parsec_dtd_tp );
+
+    /* Bring back all the data used by the sequence to their owner */
+    chameleon_parsec_flush_pending( parsec_dtd_tp );
+    chameleon_parsec_check_stream( chamctxt, parsec_dtd_tp );
     parsec_taskpool_wait( parsec_dtd_tp );
 
-    (void)chamctxt;
     return CHAMELEON_SUCCESS;
 }
 
