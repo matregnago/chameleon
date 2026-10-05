@@ -26,23 +26,6 @@
 #include <parsec/datatype.h>
 #include <parsec/arena.h>
 
-#if defined(CHAMELEON_USE_MPI)
-
-/* Variable parsec_dtd_no_of_arenas is private and cannot be changed */
-#define CHAMELEON_PARSEC_DTD_NO_OF_ARENA 16 /**< Number of arenas available per DTD */
-
-typedef struct chameleon_parsec_arena_s {
-    /* int mb; */
-    /* int nb; */
-    /* cham_flttype_t dtype; */
-    size_t size;
-} chameleon_parsec_arena_t;
-
-static int chameleon_parsec_nb_arenas = 0;
-static chameleon_parsec_arena_t chameleon_parsec_registered_arenas[CHAMELEON_PARSEC_DTD_NO_OF_ARENA] = { { 0 } };
-
-#endif
-
 void *RUNTIME_malloc( size_t size )
 {
     return malloc(size);
@@ -90,11 +73,24 @@ chameleon_parsec_data_key(parsec_data_collection_t *data_collection, ...)
     return ((n * mdesc->lmt) + m);
 }
 
+/*
+ * The key is the index of the tile in the global tile array of the
+ * descriptor, so the rank is directly given by the tile structure. This also
+ * supports any custom data distribution.
+ */
 static inline uint32_t
-chameleon_parsec_rank_of(parsec_data_collection_t *data_collection, ...)
+chameleon_parsec_rank_of_key(parsec_data_collection_t *data_collection, parsec_data_key_t key)
 {
     chameleon_parsec_desc_t *pdesc = (chameleon_parsec_desc_t*)data_collection;
     CHAM_desc_t *mdesc = pdesc->desc;
+
+    assert( key < (parsec_data_key_t)(mdesc->lmt * mdesc->lnt) );
+    return mdesc->tiles[key].rank;
+}
+
+static inline uint32_t
+chameleon_parsec_rank_of(parsec_data_collection_t *data_collection, ...)
+{
     va_list ap;
     int m, n;
 
@@ -104,19 +100,8 @@ chameleon_parsec_rank_of(parsec_data_collection_t *data_collection, ...)
     n = va_arg(ap, unsigned int);
     va_end(ap);
 
-    /* Offset by (i,j) to translate (m,n) in the global matrix */
-    m += mdesc->i / mdesc->mb;
-    n += mdesc->j / mdesc->nb;
-
-    return mdesc->get_rankof( mdesc, m, n );
-}
-
-static inline uint32_t
-chameleon_parsec_rank_of_key(parsec_data_collection_t *data_collection, parsec_data_key_t key)
-{
-    int m, n;
-    chameleon_parsec_key_to_coordinates(data_collection, key, &m, &n);
-    return chameleon_parsec_rank_of(data_collection, m, n);
+    return chameleon_parsec_rank_of_key( data_collection,
+                                         chameleon_parsec_data_key( data_collection, m, n ) );
 }
 
 static inline int32_t
@@ -129,16 +114,46 @@ chameleon_parsec_vpid_of(parsec_data_collection_t *data_collection, ... )
 static inline int32_t
 chameleon_parsec_vpid_of_key(parsec_data_collection_t *data_collection, parsec_data_key_t key)
 {
-    int m, n;
-    chameleon_parsec_key_to_coordinates(data_collection, key, &m, &n);
-    return chameleon_parsec_vpid_of(data_collection, m, n);
+    (void)data_collection;
+    (void)key;
+    return 0;
+}
+
+/*
+ * Only called for the local tiles. Tiles without memory (allocation tile per
+ * tile) are allocated on first use and released with the descriptor.
+ */
+static inline parsec_data_t*
+chameleon_parsec_data_of_key(parsec_data_collection_t *data_collection, parsec_data_key_t key)
+{
+    chameleon_parsec_desc_t *pdesc = (chameleon_parsec_desc_t*)data_collection;
+    CHAM_desc_t *mdesc = pdesc->desc;
+    CHAM_tile_t *tile;
+    size_t       eltsize, size;
+
+    assert( key < (parsec_data_key_t)(mdesc->lmt * mdesc->lnt) );
+    if ( pdesc->data_map[key] != NULL ) {
+        return pdesc->data_map[key];
+    }
+
+    tile    = mdesc->tiles + key;
+    eltsize = CHAMELEON_Element_Size( mdesc->dtyp );
+    size    = ( (tile->m > 0) && (tile->n > 0) ) ? ((size_t)(tile->ld) * (tile->n - 1) + tile->m) * eltsize : 0;
+    assert( tile->rank == (int)data_collection->myrank );
+
+    if ( tile->mat == NULL ) {
+        tile->mat = parsec_data_allocate( (size > 0) ? size : eltsize );
+        pdesc->allocated[key] = 1;
+    }
+
+    return parsec_data_create( pdesc->data_map + key, data_collection, key,
+                               CHAM_tile_get_ptr( tile ), size,
+                               PARSEC_DATA_FLAG_PARSEC_MANAGED );
 }
 
 static inline parsec_data_t*
 chameleon_parsec_data_of(parsec_data_collection_t *data_collection, ...)
 {
-    chameleon_parsec_desc_t *pdesc = (chameleon_parsec_desc_t*)data_collection;
-    CHAM_desc_t *mdesc = pdesc->desc;
     va_list ap;
     int m, n;
 
@@ -148,45 +163,14 @@ chameleon_parsec_data_of(parsec_data_collection_t *data_collection, ...)
     n = va_arg(ap, unsigned int);
     va_end(ap);
 
-    /* Offset by (i,j) to translate (m,n) in the global matrix */
-    m += mdesc->i / mdesc->mb;
-    n += mdesc->j / mdesc->nb;
-
-#if defined(CHAMELEON_USE_MPI)
-    /* TODO: change displacement in data_map when in distributed */
-    //assert( data_collection->nodes == 1 );
-#endif
-    return parsec_data_create( pdesc->data_map + n * mdesc->lmt + m, data_collection,
-                               chameleon_parsec_data_key( data_collection, m, n ),
-                               mdesc->get_blkaddr( mdesc, m, n ),
-                               mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp),
-                               PARSEC_DATA_FLAG_PARSEC_MANAGED );
-}
-
-static inline parsec_data_t*
-chameleon_parsec_data_of_key(parsec_data_collection_t *data_collection, parsec_data_key_t key)
-{
-    chameleon_parsec_desc_t *pdesc = (chameleon_parsec_desc_t*)data_collection;
-    CHAM_desc_t *mdesc = pdesc->desc;
-    int m, n;
-    chameleon_parsec_key_to_coordinates(data_collection, key, &m, &n);
-
-#if defined(CHAMELEON_USE_MPI)
-    /* TODO: change displacement in data_map when in distributed */
-    //assert( data_collection->nodes == 1 );
-#endif
-    return parsec_data_create( pdesc->data_map + key, data_collection, key,
-                               mdesc->get_blkaddr( mdesc, m, n ),
-                               mdesc->bsiz * CHAMELEON_Element_Size(mdesc->dtyp),
-                               PARSEC_DATA_FLAG_PARSEC_MANAGED );
+    return chameleon_parsec_data_of_key( data_collection,
+                                         chameleon_parsec_data_key( data_collection, m, n ) );
 }
 
 #if defined(PARSEC_PROF_TRACE)
 static inline int
 chameleon_parsec_key_to_string(parsec_data_collection_t *data_collection, parsec_data_key_t key, char * buffer, uint32_t buffer_size)
 {
-    chameleon_parsec_desc_t *pdesc = (chameleon_parsec_desc_t*)data_collection;
-    CHAM_desc_t *mdesc = pdesc->desc;
     int m, n, res;
     chameleon_parsec_key_to_coordinates( data_collection, key, &m, &n );
     res = snprintf( buffer, buffer_size, "(%d, %d)", m, n );
@@ -201,20 +185,22 @@ chameleon_parsec_key_to_string(parsec_data_collection_t *data_collection, parsec
 
 /**
  *  Create data descriptor
+ *
+ *  Collective call: the arenas and the data collection identifier must be
+ *  created in the same order on all the ranks.
  */
 void RUNTIME_desc_create( CHAM_desc_t *mdesc )
 {
+    CHAM_context_t           *chamctxt = chameleon_context_self();
     parsec_data_collection_t *data_collection;
-    chameleon_parsec_desc_t *pdesc;
-    int comm_size;
+    chameleon_parsec_desc_t  *pdesc;
+    int                       lastm, lastn, i, j;
 
-    pdesc = malloc( sizeof(chameleon_parsec_desc_t) );
+    pdesc = calloc( 1, sizeof(chameleon_parsec_desc_t) );
     data_collection = (parsec_data_collection_t*)pdesc;
 
     /* Super setup */
-    comm_size = RUNTIME_comm_size( NULL );
-    data_collection->nodes  = comm_size;
-    data_collection->myrank = mdesc->myrank;
+    parsec_data_collection_init( data_collection, RUNTIME_comm_size( chamctxt ), mdesc->myrank );
 
     data_collection->data_key    = chameleon_parsec_data_key;
     data_collection->rank_of     = chameleon_parsec_rank_of;
@@ -230,9 +216,9 @@ void RUNTIME_desc_create( CHAM_desc_t *mdesc )
         chameleon_asprintf(&(data_collection->key_dim), "(%d, %d)", mdesc->lmt, mdesc->lnt);
     }
 #endif
-    data_collection->memory_registration_status = PARSEC_MEMORY_STATUS_UNREGISTERED;
 
-    pdesc->data_map = calloc( mdesc->lmt * mdesc->lnt, sizeof(parsec_data_t*) );
+    pdesc->data_map  = calloc( mdesc->lmt * mdesc->lnt, sizeof(parsec_data_t*) );
+    pdesc->allocated = calloc( mdesc->lmt * mdesc->lnt, sizeof(int8_t) );
 
     /* Double linking */
     pdesc->desc     = mdesc;
@@ -240,58 +226,23 @@ void RUNTIME_desc_create( CHAM_desc_t *mdesc )
 
     parsec_dtd_data_collection_init(data_collection);
 
-    /* arena init */
-    pdesc->arena_index = 0;
+    /*
+     * Arenas: one per shape of tile. Only the last tile row and the last tile
+     * column may differ from the regular mb-by-nb tiles.
+     */
+    lastm = chameleon_max( mdesc->lmt - 1, 0 );
+    lastn = chameleon_max( mdesc->lnt - 1, 0 );
+    for ( i=0; i<2; i++ ) {
+        for ( j=0; j<2; j++ ) {
+            int ii = i ? lastm : 0;
+            int jj = j ? lastn : 0;
+            int tm = ( ii == mdesc->lmt-1 ) ? mdesc->lm - ii * mdesc->mb : mdesc->mb;
+            int tn = ( jj == mdesc->lnt-1 ) ? mdesc->ln - jj * mdesc->nb : mdesc->nb;
+            int ld = mdesc->get_blkldd( mdesc, ii - mdesc->i / mdesc->mb );
 
-    /* taskpool init to bypass a requirement of PaRSEC  */
-#if defined(CHAMELEON_USE_MPI)
-    /* Look if an arena already exists for this descriptor */
-    {
-        chameleon_parsec_arena_t *arena = chameleon_parsec_registered_arenas;
-        size_t size = mdesc->mb * mdesc->nb * CHAMELEON_Element_Size(mdesc->dtyp);
-        int i;
-
-        for(i=0; i<chameleon_parsec_nb_arenas; i++, arena++) {
-            if ( size == arena->size) {
-                pdesc->arena_index = i;
-                break;
-            }
-        }
-
-        if (i == chameleon_parsec_nb_arenas) {
-            parsec_datatype_t datatype;
-
-            /* Create a taskpool to make sur the system is initialized */
-            if ( i == 0 ) {
-                parsec_taskpool_t *tp = parsec_dtd_taskpool_new();
-                parsec_taskpool_free( tp );
-            }
-
-            /* Internal limitation of PaRSEC */
-            assert(chameleon_parsec_nb_arenas < CHAMELEON_PARSEC_DTD_NO_OF_ARENA);
-
-            switch(mdesc->dtyp) {
-            case ChamInteger:       datatype = parsec_datatype_int32_t; break;
-            case ChamRealFloat:     datatype = parsec_datatype_float_t; break;
-            case ChamRealDouble:    datatype = parsec_datatype_double_t; break;
-            case ChamComplexFloat:  datatype = parsec_datatype_complex_t; break;
-            case ChamComplexDouble: datatype = parsec_datatype_double_complex_t; break;
-            default: chameleon_fatal_error("CHAMELEON_Element_Size", "undefined type");
-                return;
-            }
-
-            /* Register the new arena */
-            parsec_matrix_add2arena( parsec_dtd_arenas[i], datatype, matrix_UpperLower, 1,
-                                     mdesc->mb, mdesc->nb, mdesc->mb, PARSEC_ARENA_ALIGNMENT_SSE, -1 );
-            arena->size = size;
-            pdesc->arena_index = i;
-            chameleon_parsec_nb_arenas++;
+            pdesc->arena_ids[i][j] = chameleon_parsec_arena_typed( mdesc->dtyp, tm, tn, ld );
         }
     }
-#endif
-    /* /\* Overwrite the leading dimensions to store the padding *\/ */
-    /* mdesc->llm = mdesc->mb * mdesc->lmt; */
-    /* mdesc->lln = mdesc->nb * mdesc->lnt; */
     return;
 }
 
@@ -325,6 +276,15 @@ void RUNTIME_desc_destroy( CHAM_desc_t *mdesc )
         return;
     }
 
+    /* Submatrices share the runtime descriptor of their parent */
+    if ( pdesc->desc != mdesc ) {
+        return;
+    }
+
+    if ( pdesc->pending_tp != NULL ) {
+        chameleon_parsec_flush_forget( (parsec_data_collection_t *)pdesc );
+    }
+
     if ( pdesc->data_map != NULL ) {
         parsec_data_t **data = pdesc->data_map;
         int nb_local_tiles = mdesc->lmt * mdesc->lnt;
@@ -335,13 +295,20 @@ void RUNTIME_desc_destroy( CHAM_desc_t *mdesc )
             if (*data) {
                 parsec_data_destroy( *data );
             }
+            if ( pdesc->allocated[i] ) {
+                parsec_data_free( mdesc->tiles[i].mat );
+                mdesc->tiles[i].mat = NULL;
+            }
         }
 
         free( pdesc->data_map );
-        pdesc->data_map = NULL;
+        free( pdesc->allocated );
+        pdesc->data_map  = NULL;
+        pdesc->allocated = NULL;
     }
 
     parsec_dtd_data_collection_fini( (parsec_data_collection_t *)pdesc );
+    parsec_data_collection_destroy( (parsec_data_collection_t *)pdesc );
 
     free(pdesc);
     mdesc->schedopt = NULL;
@@ -375,12 +342,16 @@ void RUNTIME_flush( CHAM_context_t *chamctxt )
     return;
 }
 
+/*
+ * A flushed tile cannot be reused before the wait of the taskpool, and all the
+ * tiles must be flushed before this wait. The flush is thus deferred to
+ * RUNTIME_sequence_wait() which flushes every collection used by the sequence.
+ */
 void RUNTIME_desc_flush( CHAM_desc_t              *desc,
                          const RUNTIME_sequence_t *sequence )
 {
-    parsec_taskpool_t* PARSEC_dtd_taskpool = (parsec_taskpool_t *)(sequence->schedopt);
-
-    parsec_dtd_data_flush_all( PARSEC_dtd_taskpool, (parsec_data_collection_t*)(desc->schedopt) );
+    chameleon_parsec_flush_defer( (parsec_taskpool_t *)(sequence->schedopt),
+                                  (parsec_data_collection_t*)(desc->schedopt) );
 }
 
 void RUNTIME_data_flush( const RUNTIME_sequence_t *sequence,

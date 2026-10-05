@@ -45,6 +45,7 @@ struct chameleon_parsec_desc_s {
     int                      arena_ids[2][2]; /**< Arenas of the tiles: [last tile row?][last tile col?] */
     CHAM_desc_t             *desc;
     parsec_data_t          **data_map;
+    int8_t                  *allocated; /**< 1 if the tile memory is allocated by the runtime */
 };
 
 typedef struct chameleon_parsec_desc_s chameleon_parsec_desc_t;
