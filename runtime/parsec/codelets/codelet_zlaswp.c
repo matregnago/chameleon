@@ -97,7 +97,7 @@ void INSERT_TASK_zlaswp_set( const RUNTIME_option_t *options,
         sizeof(int),         &(tileWA->ld), PARSEC_VALUE,
         PASSED_BY_REF, RTBLKADDR( A, ChamComplexDouble, Am, An ), chameleon_parsec_get_arena_index( A, Am, An )         | PARSEC_INOUT,
         sizeof(int),         &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF, RUNTIME_ipiv_getinvp( ipiv, ipivk ),        chameleon_parsec_get_arena_index_invp( ipiv ) | PARSEC_INPUT,
+        PASSED_BY_REF, chameleon_parsec_ipiv_tile( options, ipiv, ChamParsecInvp, ipivk ), chameleon_parsec_ipiv_arena( ipiv, ChamParsecInvp, ipivk ) | PARSEC_INPUT,
         PARSEC_DTD_ARG_END );
 
     (void)dir;

@@ -150,22 +150,188 @@ chameleon_parsec_tile_of( const RUNTIME_option_t *options, const CHAM_desc_t *de
     return parsec_dtd_tile_of( dc, key );
 }
 
+/*
+ * IPIV descriptors (runtime_ipiv.c)
+ * ---------------------------------
+ * One vector collection per family (ipiv, perm, invp), indexed by the tile
+ * index of the full vector and owned by the owner of the diagonal tile.
+ */
+typedef enum chameleon_parsec_ipiv_family_e {
+    ChamParsecIpiv = 0,
+    ChamParsecPerm = 1,
+    ChamParsecInvp = 2,
+} chameleon_parsec_ipiv_family_t;
+
+typedef struct chameleon_parsec_ipiv_s {
+    chameleon_parsec_vdc_t vdc[3];
+    const CHAM_ipiv_t     *ipiv;
+} chameleon_parsec_ipiv_t;
+
 static inline int
-chameleon_parsec_get_arena_index_ipiv( const CHAM_ipiv_t *ipiv ) {
-    assert(0);
-    return -1;
+chameleon_parsec_ipiv_key( const CHAM_ipiv_t *ipiv, int m ) {
+    return m + ipiv->i / ipiv->mb;
+}
+
+static inline chameleon_parsec_vdc_t *
+chameleon_parsec_ipiv_vdc( const CHAM_ipiv_t *ipiv, chameleon_parsec_ipiv_family_t family ) {
+    return ((chameleon_parsec_ipiv_t *)(ipiv->ipiv))->vdc + family;
+}
+
+static inline parsec_dtd_tile_t *
+chameleon_parsec_ipiv_tile( const RUNTIME_option_t *options, const CHAM_ipiv_t *ipiv,
+                            chameleon_parsec_ipiv_family_t family, int m ) {
+    return chameleon_parsec_vdc_tile_of( options, chameleon_parsec_ipiv_vdc( ipiv, family ),
+                                         chameleon_parsec_ipiv_key( ipiv, m ) );
 }
 
 static inline int
-chameleon_parsec_get_arena_index_perm( const CHAM_ipiv_t *ipiv ) {
-    assert(0);
-    return -1;
+chameleon_parsec_ipiv_arena( const CHAM_ipiv_t *ipiv, chameleon_parsec_ipiv_family_t family, int m ) {
+    return chameleon_parsec_vdc_arena( chameleon_parsec_ipiv_vdc( ipiv, family ),
+                                       chameleon_parsec_ipiv_key( ipiv, m ) );
+}
+
+/*
+ * Pivot structures of the panel factorization (runtime_pivot.c)
+ * -------------------------------------------------------------
+ * One buffer per rank and parity of the column index h: key = 2 * rank + (h & 1).
+ * The buffer holds a header followed by the pivot row and the diagonal row.
+ *
+ * DTD has no reduction: each rank accumulates the candidates of its tiles in
+ * its own buffer (the first task of a step on a rank resets it), and the
+ * buffers are then merged in the buffer of the root (owner of the diagonal
+ * tile) which is read by the next step.
+ */
+#define CHAMELEON_PARSEC_PIVOT_HDR 64
+
+typedef struct chameleon_parsec_pivot_hdr_s {
+    int has_diag; /**< 1 if the diagonal row is stored, -1 otherwise */
+    int h;        /**< Column index of the step                      */
+    int blkm0;
+    int blkidx;
+} chameleon_parsec_pivot_hdr_t;
+
+typedef struct chameleon_parsec_pivot_s {
+    chameleon_parsec_vdc_t vdc;
+    int                    NP;
+    int                    root;       /**< Owner of the diagonal tile of the current panel */
+    int                    stamp;      /**< Current step, incremented by each diagonal task */
+    int                   *init_stamp; /**< Last step reset by each rank                    */
+} chameleon_parsec_pivot_t;
+
+static inline chameleon_parsec_pivot_t *
+chameleon_parsec_pivot( const CHAM_desc_pivot_t *pivot ) {
+    return (chameleon_parsec_pivot_t *)(pivot->nextpiv);
 }
 
 static inline int
-chameleon_parsec_get_arena_index_invp( const CHAM_ipiv_t *ipiv ) {
-    assert(0);
-    return -1;
+chameleon_parsec_pivot_key( int rank, int h ) {
+    return 2 * rank + (h & 1);
+}
+
+static inline parsec_dtd_tile_t *
+chameleon_parsec_pivot_tile( const RUNTIME_option_t *options, const CHAM_desc_pivot_t *pivot,
+                             int rank, int h ) {
+    return chameleon_parsec_vdc_tile_of( options, &(chameleon_parsec_pivot( pivot )->vdc),
+                                         chameleon_parsec_pivot_key( rank, h ) );
+}
+
+static inline int
+chameleon_parsec_pivot_arena( const CHAM_desc_pivot_t *pivot ) {
+    return chameleon_parsec_pivot( pivot )->vdc.arena_id;
+}
+
+static inline size_t
+chameleon_parsec_pivot_size( int nb, cham_flttype_t dtyp ) {
+    return CHAMELEON_PARSEC_PIVOT_HDR + 2 * (size_t)nb * CHAMELEON_Element_Size( dtyp );
+}
+
+/**
+ * @brief Build the CHAM_pivot_t view of a pivot buffer.
+ */
+static inline void
+chameleon_parsec_pivot_load( void *buf, int nb, cham_flttype_t dtyp, CHAM_pivot_t *piv ) {
+    chameleon_parsec_pivot_hdr_t *hdr = (chameleon_parsec_pivot_hdr_t *)buf;
+    char *rows = (char *)buf + CHAMELEON_PARSEC_PIVOT_HDR;
+
+    piv->blkm0   = hdr->blkm0;
+    piv->blkidx  = hdr->blkidx;
+    piv->pivrow  = rows;
+    piv->diagrow = rows + (size_t)nb * CHAMELEON_Element_Size( dtyp );
+}
+
+/**
+ * @brief Save the scalar fields of the CHAM_pivot_t view in the buffer.
+ */
+static inline void
+chameleon_parsec_pivot_store( void *buf, const CHAM_pivot_t *piv ) {
+    chameleon_parsec_pivot_hdr_t *hdr = (chameleon_parsec_pivot_hdr_t *)buf;
+    hdr->blkm0  = piv->blkm0;
+    hdr->blkidx = piv->blkidx;
+}
+
+/**
+ * @brief Reset a pivot buffer as the StarPU reduction initialization does.
+ */
+static inline void
+chameleon_parsec_pivot_reset( void *buf, int nb, cham_flttype_t dtyp ) {
+    chameleon_parsec_pivot_hdr_t *hdr = (chameleon_parsec_pivot_hdr_t *)buf;
+    memset( buf, 0, chameleon_parsec_pivot_size( nb, dtyp ) );
+    hdr->has_diag = -1;
+    hdr->h        = -1;
+}
+
+/*
+ * Permutation workspaces (runtime_perm.c)
+ * ---------------------------------------
+ * Same keys and owners as StarPU. The buffer holds a header followed by the
+ * index array and the rows.
+ */
+#define CHAMELEON_PARSEC_PERM_HDR 64
+
+typedef struct chameleon_parsec_perm_hdr_s {
+    int nindex; /**< Number of rows stored                     */
+    int m;      /**< Maximal number of rows                    */
+    int n;      /**< Number of columns of each row (row stride) */
+    int side;
+} chameleon_parsec_perm_hdr_t;
+
+static inline int
+chameleon_parsec_perm_key( const CHAM_perm_t *ws, int m, int n ) {
+    return ( ws->side == ChamLeft ) ? m + n * ws->NP : n + m * ws->NP;
+}
+
+static inline size_t
+chameleon_parsec_perm_rowsoff( int mrows ) {
+    size_t off = CHAMELEON_PARSEC_PERM_HDR + sizeof(int) * (size_t)mrows;
+    return ( off + 63 ) & ~((size_t)63);
+}
+
+static inline parsec_dtd_tile_t *
+chameleon_parsec_perm_tile( const RUNTIME_option_t *options, const CHAM_perm_t *ws, int m, int n ) {
+    return chameleon_parsec_vdc_tile_of( options, (chameleon_parsec_vdc_t *)(ws->ws),
+                                         chameleon_parsec_perm_key( ws, m, n ) );
+}
+
+static inline int
+chameleon_parsec_perm_arena( const CHAM_perm_t *ws ) {
+    return ((chameleon_parsec_vdc_t *)(ws->ws))->arena_id;
+}
+
+/**
+ * @brief Build the CHAM_laswpws_t view of a permutation workspace buffer.
+ */
+static inline void
+chameleon_parsec_perm_load( void *buf, CHAM_laswpws_t *lws ) {
+    chameleon_parsec_perm_hdr_t *hdr = (chameleon_parsec_perm_hdr_t *)buf;
+    lws->index  = (int *)((char *)buf + CHAMELEON_PARSEC_PERM_HDR);
+    lws->offset = chameleon_parsec_perm_rowsoff( hdr->m );
+    lws->rows   = (char *)buf + lws->offset;
+    lws->nindex = hdr->nindex;
+}
+
+static inline void
+chameleon_parsec_perm_store( void *buf, const CHAM_laswpws_t *lws ) {
+    ((chameleon_parsec_perm_hdr_t *)buf)->nindex = lws->nindex;
 }
 
 /**
