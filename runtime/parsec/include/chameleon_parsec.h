@@ -28,14 +28,91 @@
 #include <parsec/interfaces/dtd/insert_function.h>
 #include <parsec/mca/device/device.h>
 
+/**
+ * @brief Common header of every Chameleon data collection.
+ *
+ * pending_tp is the taskpool in which the collection is registered for the
+ * deferred flush (see chameleon_parsec_flush_defer()), or NULL.
+ */
+typedef struct chameleon_parsec_dc_s {
+    parsec_data_collection_t super;
+    parsec_taskpool_t       *pending_tp;
+} chameleon_parsec_dc_t;
+
 struct chameleon_parsec_desc_s {
     parsec_data_collection_t super;
+    parsec_taskpool_t       *pending_tp;
     int                      arena_index;
     CHAM_desc_t             *desc;
     parsec_data_t          **data_map;
 };
 
 typedef struct chameleon_parsec_desc_s chameleon_parsec_desc_t;
+
+/**
+ * @brief Generic data collection of 1D buffers (ipiv, pivot, permutation
+ * workspaces), one buffer per key.
+ */
+typedef struct chameleon_parsec_vdc_s chameleon_parsec_vdc_t;
+
+typedef int   (*chameleon_parsec_vdc_owner_fct_t)  ( const chameleon_parsec_vdc_t *vdc, int key );
+typedef void *(*chameleon_parsec_vdc_userptr_fct_t)( const chameleon_parsec_vdc_t *vdc, int key );
+typedef void  (*chameleon_parsec_vdc_init_fct_t)   ( const chameleon_parsec_vdc_t *vdc, int key, void *buf );
+
+struct chameleon_parsec_vdc_s {
+    parsec_data_collection_t           super;
+    parsec_taskpool_t                 *pending_tp;
+    int                                nkeys;     /**< Number of buffers                        */
+    size_t                             size;      /**< Size in bytes of each buffer             */
+    size_t                             size_last; /**< Size in bytes of the last buffer         */
+    int                                arena_id;      /**< Arena of the regular buffers         */
+    int                                arena_id_last; /**< Arena of the last buffer             */
+    chameleon_parsec_vdc_owner_fct_t   owner;     /**< Rank owning a key                        */
+    chameleon_parsec_vdc_userptr_fct_t userptr;   /**< User buffer of a key, or NULL (internal) */
+    chameleon_parsec_vdc_init_fct_t    init;      /**< Initialization of internal buffers       */
+    void                              *args;      /**< Opaque argument of the callbacks         */
+    void                             **ptrs;      /**< Internally allocated buffers             */
+    parsec_data_t                    **data_map;
+};
+
+/*
+ * Arena datatypes cache (runtime_auxdc.c)
+ */
+int  chameleon_parsec_arena_typed( cham_flttype_t dtyp, int m, int n, int ld );
+int  chameleon_parsec_arena_bytes( size_t nbytes );
+void chameleon_parsec_arena_fini( parsec_context_t *parsec );
+
+/*
+ * Deferred flush (runtime_auxdc.c)
+ */
+void chameleon_parsec_flush_defer( parsec_taskpool_t *tp, parsec_data_collection_t *dc );
+void chameleon_parsec_flush_pending( parsec_taskpool_t *tp );
+int  chameleon_parsec_flush_has_pending( const parsec_taskpool_t *tp );
+void chameleon_parsec_flush_forget( parsec_data_collection_t *dc );
+
+/*
+ * Generic vector data collection (runtime_auxdc.c)
+ */
+void chameleon_parsec_vdc_init( chameleon_parsec_vdc_t *vdc, int nkeys,
+                                size_t size, size_t size_last,
+                                chameleon_parsec_vdc_owner_fct_t   owner,
+                                chameleon_parsec_vdc_userptr_fct_t userptr,
+                                chameleon_parsec_vdc_init_fct_t    init,
+                                void *args );
+void chameleon_parsec_vdc_fini( chameleon_parsec_vdc_t *vdc );
+
+static inline int
+chameleon_parsec_vdc_arena( const chameleon_parsec_vdc_t *vdc, int key ) {
+    return ( key == vdc->nkeys-1 ) ? vdc->arena_id_last : vdc->arena_id;
+}
+
+static inline parsec_dtd_tile_t *
+chameleon_parsec_vdc_tile_of( const RUNTIME_option_t *options, const chameleon_parsec_vdc_t *vdc, int key ) {
+    parsec_data_collection_t *dc = (parsec_data_collection_t *)vdc;
+    assert( (key >= 0) && (key < vdc->nkeys) );
+    chameleon_parsec_flush_defer( (parsec_taskpool_t *)(options->sequence->schedopt), dc );
+    return parsec_dtd_tile_of( dc, key );
+}
 
 static inline int
 chameleon_parsec_get_arena_index( const CHAM_desc_t *desc ) {
