@@ -16,30 +16,27 @@
  * @author Matthieu Kuhn
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-12-19
+ * @date 2026-10-05
  * @precisions normal z -> c d s
  *
  */
 #include "chameleon_parsec.h"
 #include "chameleon/tasks_z.h"
 
+/*
+ * The per column algorithm is the blocked one with a single block covering the
+ * whole tile, and without the Up workspace.
+ */
 void INSERT_TASK_zgetrf_percol_diag( const RUNTIME_option_t *options,
                                      int m, int n, int h, int m0,
                                      CHAM_desc_t *A, int Am, int An,
                                      CHAM_ipiv_t       *ipiv,
                                      CHAM_desc_pivot_t *pivot )
 {
-    assert( 0 );
-    (void)options;
-    (void)m;
-    (void)n;
-    (void)h;
-    (void)m0;
-    (void)A;
-    (void)Am;
-    (void)An;
-    (void)ipiv;
-    (void)pivot;
+    int ib = A->get_blktile( A, Am, An )->n;
+
+    INSERT_TASK_zgetrf_blocked_diag( options, m, n, h, m0, ib, 0,
+                                     A, Am, An, NULL, 0, 0, ipiv, pivot );
 }
 
 void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
@@ -47,14 +44,8 @@ void INSERT_TASK_zgetrf_percol_offdiag( const RUNTIME_option_t *options,
                                         CHAM_desc_t *A, int Am, int An,
                                         CHAM_desc_pivot_t *pivot )
 {
-    assert( 0 );
-    (void)options;
-    (void)m;
-    (void)n;
-    (void)h;
-    (void)m0;
-    (void)A;
-    (void)Am;
-    (void)An;
-    (void)pivot;
+    int ib = A->get_blktile( A, Am, An )->n;
+
+    INSERT_TASK_zgetrf_blocked_offdiag( options, m, n, h, m0, ib, 0,
+                                        A, Am, An, NULL, 0, 0, pivot );
 }
