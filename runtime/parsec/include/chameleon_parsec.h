@@ -42,7 +42,7 @@ typedef struct chameleon_parsec_dc_s {
 struct chameleon_parsec_desc_s {
     parsec_data_collection_t super;
     parsec_taskpool_t       *pending_tp;
-    int                      arena_index;
+    int                      arena_ids[2][2]; /**< Arenas of the tiles: [last tile row?][last tile col?] */
     CHAM_desc_t             *desc;
     parsec_data_t          **data_map;
 };
@@ -114,9 +114,39 @@ chameleon_parsec_vdc_tile_of( const RUNTIME_option_t *options, const chameleon_p
     return parsec_dtd_tile_of( dc, key );
 }
 
+/**
+ * @brief Return the arena of the tile (m, n) of desc.
+ *
+ * Border tiles may be smaller and, in tile storage, have a smaller leading
+ * dimension, so the datatype depends on the position of the tile in the
+ * global matrix.
+ */
 static inline int
-chameleon_parsec_get_arena_index( const CHAM_desc_t *desc ) {
-    return ((chameleon_parsec_desc_t *)desc->schedopt)->arena_index;
+chameleon_parsec_get_arena_index( const CHAM_desc_t *desc, int m, int n ) {
+    const chameleon_parsec_desc_t *pdesc = (const chameleon_parsec_desc_t *)(desc->schedopt);
+    const CHAM_desc_t             *mdesc = pdesc->desc;
+    int mm = m + desc->i / desc->mb;
+    int nn = n + desc->j / desc->nb;
+    return pdesc->arena_ids[ mm == (mdesc->lmt-1) ][ nn == (mdesc->lnt-1) ];
+}
+
+/**
+ * @brief Return the DTD tile of the tile (m, n) of desc, and register the
+ * collection for the deferred flush of the sequence.
+ *
+ * The key is computed from desc itself and not from the runtime descriptor,
+ * which is shared with the parent matrix of a submatrix and thus does not
+ * know the (i, j) offset.
+ */
+static inline parsec_dtd_tile_t *
+chameleon_parsec_tile_of( const RUNTIME_option_t *options, const CHAM_desc_t *desc, int m, int n ) {
+    parsec_data_collection_t *dc    = (parsec_data_collection_t *)(desc->schedopt);
+    const CHAM_desc_t        *mdesc = ((chameleon_parsec_desc_t *)dc)->desc;
+    parsec_data_key_t         key;
+
+    key = (parsec_data_key_t)(n + desc->j / desc->nb) * mdesc->lmt + (m + desc->i / desc->mb);
+    chameleon_parsec_flush_defer( (parsec_taskpool_t *)(options->sequence->schedopt), dc );
+    return parsec_dtd_tile_of( dc, key );
 }
 
 static inline int
@@ -150,8 +180,7 @@ static inline int cham_to_parsec_access( cham_access_t accessA ) {
 /*
  * Access to block pointer and leading dimension
  */
-#define RTBLKADDR( desc, type, m, n ) ( parsec_dtd_tile_of( (parsec_data_collection_t *) ((desc)->schedopt), \
-                                                            ((parsec_data_collection_t *) (desc)->schedopt)->data_key((desc)->schedopt, m, n) ))
+#define RTBLKADDR( desc, type, m, n ) chameleon_parsec_tile_of( options, (desc), (m), (n) )
 
 #define RUNTIME_BEGIN_ACCESS_DECLARATION
 
