@@ -168,6 +168,22 @@ chameleon_parsec_get_arena_index_invp( const CHAM_ipiv_t *ipiv ) {
     return -1;
 }
 
+/**
+ * PaRSEC packs the PARSEC_SCRATCH buffers right after the values in the task
+ * without any alignment, while vectorized kernels may require aligned
+ * workspaces. Scratch buffers are thus over-allocated with
+ * CHAMELEON_PARSEC_SCRATCH_SIZE() and aligned in the task body with
+ * chameleon_parsec_scratch_align().
+ */
+#define CHAMELEON_PARSEC_SCRATCH_ALIGN 64
+#define CHAMELEON_PARSEC_SCRATCH_SIZE( _size_ ) ( (_size_) + CHAMELEON_PARSEC_SCRATCH_ALIGN )
+
+static inline void *
+chameleon_parsec_scratch_align( void *ptr ) {
+    uintptr_t addr = (uintptr_t)ptr;
+    return (void *)( (addr + CHAMELEON_PARSEC_SCRATCH_ALIGN - 1) & ~((uintptr_t)CHAMELEON_PARSEC_SCRATCH_ALIGN - 1) );
+}
+
 static inline int cham_to_parsec_access( cham_access_t accessA ) {
     if ( accessA == ChamR ) {
         return PARSEC_INPUT;

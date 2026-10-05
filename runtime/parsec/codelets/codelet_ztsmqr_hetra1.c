@@ -49,6 +49,7 @@ CORE_ztsmqr_hetra1_parsec( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &side, &trans, &m1, &n1, &m2, &n2, &k, &ib, &A1, &lda1, &A2, &lda2, &V, &ldv, &T, &ldt, &WORK, &ldwork);
+    WORK = chameleon_parsec_scratch_align( WORK );
 
     CORE_ztsmqr_hetra1( side, trans, m1, n1, m2, n2, k, ib,
                         A1, lda1, A2, lda2,
@@ -92,7 +93,7 @@ void INSERT_TASK_ztsmqr_hetra1(const RUNTIME_option_t *options,
         sizeof(int), &(tileV->ld), PARSEC_VALUE,
         PASSED_BY_REF,       RTBLKADDR( T, CHAMELEON_Complex64_t, Tm, Tn ),  chameleon_parsec_get_arena_index( T, Tm, Tn ) | PARSEC_INPUT,
         sizeof(int), &(tileT->ld), PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t)*ib*nb, NULL, PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*ib*nb ), NULL, PARSEC_SCRATCH,
         sizeof(int),        &ldwork, PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 }

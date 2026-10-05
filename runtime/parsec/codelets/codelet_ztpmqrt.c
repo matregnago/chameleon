@@ -44,6 +44,7 @@ CORE_ztpmqrt_parsec( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &side, &trans, &M, &N, &K, &L, &ib, &V, &ldv, &T, &ldt, &A, &lda, &B, &ldb, &WORK );
+    WORK = chameleon_parsec_scratch_align( WORK );
 
     CORE_ztpmqrt( side, trans, M, N, K, L, ib,
                   V, ldv, T, ldt, A, lda, B, ldb, WORK );
@@ -83,6 +84,6 @@ void INSERT_TASK_ztpmqrt( const RUNTIME_option_t *options,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
         PASSED_BY_REF,       RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         sizeof(int), &(tileB->ld), PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t)*ib*nb, NULL, PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*ib*nb ), NULL, PARSEC_SCRATCH,
         PARSEC_DTD_ARG_END );
 }

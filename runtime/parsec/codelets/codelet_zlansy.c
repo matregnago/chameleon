@@ -36,6 +36,7 @@ CORE_zlansy_parsec( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &norm, &uplo, &N, &A, &LDA, &work, &normA );
+    work = chameleon_parsec_scratch_align( work );
 
     CORE_zlansy( norm, uplo, N, A, LDA, work, normA );
 
@@ -59,7 +60,7 @@ void INSERT_TASK_zlansy(const RUNTIME_option_t *options,
         sizeof(int),                   &N,             PARSEC_VALUE,
         PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        sizeof(double)*szeW,           NULL,           PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(double)*szeW ),           NULL,           PARSEC_SCRATCH,
         PASSED_BY_REF,         RTBLKADDR( B, double, Bm, Bn ),            chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
         PARSEC_DTD_ARG_END );
 

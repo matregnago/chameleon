@@ -43,6 +43,7 @@ CORE_zunmqr_parsec( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &side, &trans, &m, &n, &k, &ib, &A, &lda, &T, &ldt, &C, &ldc, &WORK, &ldwork );
+    WORK = chameleon_parsec_scratch_align( WORK );
 
     CORE_zunmqr( side, trans, m, n, k, ib,
                  A, lda, T, ldt, C, ldc, WORK, ldwork);
@@ -77,7 +78,7 @@ void INSERT_TASK_zunmqr(const RUNTIME_option_t *options,
         sizeof(int), &(tileT->ld), PARSEC_VALUE,
         PASSED_BY_REF,         RTBLKADDR( C, CHAMELEON_Complex64_t, Cm, Cn ), chameleon_parsec_get_arena_index( C, Cm, Cn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         sizeof(int), &(tileC->ld), PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t)*ib*nb,   NULL,                          PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*ib*nb ),   NULL,                          PARSEC_SCRATCH,
         sizeof(int),           &nb,                                PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 }

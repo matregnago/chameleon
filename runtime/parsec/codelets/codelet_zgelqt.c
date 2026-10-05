@@ -38,6 +38,8 @@ CORE_zgelqt_parsec( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &m, &n, &ib, &A, &lda, &T, &ldt, &TAU, &WORK );
+    TAU = chameleon_parsec_scratch_align( TAU );
+    WORK = chameleon_parsec_scratch_align( WORK );
 
     CORE_zlaset( ChamUpperLower, ib, m, 0., 0., T, ldt );
     CORE_zgelqt( m, n, ib, A, lda, T, ldt, TAU, WORK );
@@ -64,7 +66,7 @@ void INSERT_TASK_zgelqt(const RUNTIME_option_t *options,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
         PASSED_BY_REF,         RTBLKADDR( T, CHAMELEON_Complex64_t, Tm, Tn ), chameleon_parsec_get_arena_index( T, Tm, Tn ) | PARSEC_OUTPUT,
         sizeof(int), &(tileT->ld), PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t)*nb,       NULL,   PARSEC_SCRATCH,
-        sizeof(CHAMELEON_Complex64_t)*ib*nb,    NULL,   PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*nb ),       NULL,   PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*ib*nb ),    NULL,   PARSEC_SCRATCH,
         PARSEC_DTD_ARG_END );
 }
