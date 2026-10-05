@@ -23,6 +23,7 @@
 #include <parsec/interfaces/dtd/insert_function_internal.h>
 
 #include <sched.h>
+#include <pthread.h>
 
 /**
  * @brief Wait for a taskpool, and for the release of the reference held by
@@ -44,6 +45,53 @@ chameleon_parsec_taskpool_wait( parsec_taskpool_t *tp )
     while ( parsec_atomic_fetch_add_int32( &(obj->obj_reference_count), 0 ) > 1 ) {
         sched_yield();
     }
+}
+
+/*
+ * Deferred release of the taskpools
+ * ---------------------------------
+ *
+ * In rare cases, a worker of PaRSEC still completes the release of the last
+ * task of a DTD taskpool after the wait on this taskpool has returned. The
+ * taskpools are thus kept alive (idle, in the context) for a few sequences
+ * before being released, and the remaining ones are released at finalize.
+ */
+#define CHAMELEON_PARSEC_TP_DEFERRED 16
+
+static parsec_taskpool_t *chameleon_parsec_tp_ring[CHAMELEON_PARSEC_TP_DEFERRED] = { NULL };
+static int                chameleon_parsec_tp_next = 0;
+static pthread_mutex_t    chameleon_parsec_tp_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static void
+chameleon_parsec_taskpool_release( parsec_taskpool_t *tp )
+{
+    parsec_taskpool_t *old;
+
+    pthread_mutex_lock( &chameleon_parsec_tp_lock );
+    old = chameleon_parsec_tp_ring[chameleon_parsec_tp_next];
+    chameleon_parsec_tp_ring[chameleon_parsec_tp_next] = tp;
+    chameleon_parsec_tp_next = (chameleon_parsec_tp_next + 1) % CHAMELEON_PARSEC_TP_DEFERRED;
+    pthread_mutex_unlock( &chameleon_parsec_tp_lock );
+
+    if ( old != NULL ) {
+        parsec_taskpool_free( old );
+    }
+}
+
+void
+chameleon_parsec_taskpool_release_all( void )
+{
+    int i;
+
+    pthread_mutex_lock( &chameleon_parsec_tp_lock );
+    for ( i = 0; i < CHAMELEON_PARSEC_TP_DEFERRED; i++ ) {
+        if ( chameleon_parsec_tp_ring[i] != NULL ) {
+            parsec_taskpool_free( chameleon_parsec_tp_ring[i] );
+            chameleon_parsec_tp_ring[i] = NULL;
+        }
+    }
+    chameleon_parsec_tp_next = 0;
+    pthread_mutex_unlock( &chameleon_parsec_tp_lock );
 }
 
 #if defined(CHAMELEON_USE_MPI)
@@ -115,7 +163,7 @@ int RUNTIME_sequence_destroy( CHAM_context_t     *chamctxt,
         chameleon_parsec_flush_pending( parsec_dtd_tp );
         chameleon_parsec_taskpool_wait( parsec_dtd_tp );
     }
-    parsec_taskpool_free( parsec_dtd_tp );
+    chameleon_parsec_taskpool_release( parsec_dtd_tp );
 
     sequence->schedopt = NULL;
 

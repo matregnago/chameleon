@@ -74,6 +74,7 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
 void RUNTIME_finalize( CHAM_context_t *chamctxt )
 {
     parsec_context_t *parsec = (parsec_context_t*)chamctxt->schedopt;
+    chameleon_parsec_taskpool_release_all();
     chameleon_parsec_arena_fini( parsec );
     parsec_fini(&parsec);
     return;

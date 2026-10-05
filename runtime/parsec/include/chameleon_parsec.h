@@ -84,6 +84,11 @@ int  chameleon_parsec_arena_bytes( size_t nbytes );
 void chameleon_parsec_arena_fini( parsec_context_t *parsec );
 
 /*
+ * Deferred release of the taskpools (runtime_async.c)
+ */
+void chameleon_parsec_taskpool_release_all( void );
+
+/*
  * Deferred flush (runtime_auxdc.c)
  */
 void chameleon_parsec_flush_defer( parsec_taskpool_t *tp, parsec_data_collection_t *dc );
