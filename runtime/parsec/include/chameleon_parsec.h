@@ -280,6 +280,29 @@ chameleon_parsec_pivot_reset( void *buf, int nb, cham_flttype_t dtyp ) {
     hdr->h        = -1;
 }
 
+/**
+ * @brief Register a contribution of rank to the current step of the pivot
+ * search, and return 1 if the buffer of rank must be reset by the task.
+ *
+ * The diagonal task is always the first one of a step: it sets the root (its
+ * rank) and starts a new step. The stamps are updated at submission, which is
+ * identical on all the ranks.
+ */
+static inline int
+chameleon_parsec_pivot_contrib( const CHAM_desc_pivot_t *pivot, int rank, int isdiag ) {
+    chameleon_parsec_pivot_t *ppivot = chameleon_parsec_pivot( pivot );
+    int reset;
+
+    if ( isdiag ) {
+        ppivot->root = rank;
+        ppivot->stamp++;
+    }
+    assert( ppivot->root != -1 );
+    reset = ( ppivot->init_stamp[rank] != ppivot->stamp );
+    ppivot->init_stamp[rank] = ppivot->stamp;
+    return reset;
+}
+
 /*
  * Permutation workspaces (runtime_perm.c)
  * ---------------------------------------
