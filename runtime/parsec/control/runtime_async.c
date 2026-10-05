@@ -22,6 +22,30 @@
 #include "chameleon/getenv.h"
 #include <parsec/interfaces/dtd/insert_function_internal.h>
 
+#include <sched.h>
+
+/**
+ * @brief Wait for a taskpool, and for the release of the reference held by
+ * the thread that detected its termination.
+ *
+ * The termination detector sets the taskpool as terminated before releasing
+ * its own reference, so parsec_taskpool_wait() may return while another
+ * thread still uses the taskpool. If the taskpool is freed at this time, it
+ * stays alive in the context list and a following parsec_context_wait() (used
+ * by RUNTIME_barrier()) enters it again, racing with the delayed release that
+ * then destroys a taskpool still in use.
+ */
+static void
+chameleon_parsec_taskpool_wait( parsec_taskpool_t *tp )
+{
+    parsec_object_t *obj = (parsec_object_t *)tp;
+
+    parsec_taskpool_wait( tp );
+    while ( parsec_atomic_fetch_add_int32( &(obj->obj_reference_count), 0 ) > 1 ) {
+        sched_yield();
+    }
+}
+
 #if defined(CHAMELEON_USE_MPI)
 #include <mpi.h>
 
@@ -89,7 +113,7 @@ int RUNTIME_sequence_destroy( CHAM_context_t     *chamctxt,
     /* The data must be flushed before the taskpool is released */
     if ( chameleon_parsec_flush_has_pending( parsec_dtd_tp ) ) {
         chameleon_parsec_flush_pending( parsec_dtd_tp );
-        parsec_taskpool_wait( parsec_dtd_tp );
+        chameleon_parsec_taskpool_wait( parsec_dtd_tp );
     }
     parsec_taskpool_free( parsec_dtd_tp );
 
@@ -112,7 +136,7 @@ int RUNTIME_sequence_wait( CHAM_context_t  *chamctxt,
     /* Bring back all the data used by the sequence to their owner */
     chameleon_parsec_flush_pending( parsec_dtd_tp );
     chameleon_parsec_check_stream( chamctxt, parsec_dtd_tp );
-    parsec_taskpool_wait( parsec_dtd_tp );
+    chameleon_parsec_taskpool_wait( parsec_dtd_tp );
 
     return CHAMELEON_SUCCESS;
 }
