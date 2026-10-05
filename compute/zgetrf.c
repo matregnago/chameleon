@@ -484,8 +484,10 @@ CHAMELEON_zgetrf_Tile_Async( CHAM_desc_t        *A,
         chameleon_fatal_error( "CHAMELEON_zgetrf_Tile_Async", "CHAMELEON not initialized" );
         return CHAMELEON_ERR_NOT_INITIALIZED;
     }
-    if ( chamctxt->scheduler != RUNTIME_SCHED_STARPU ) {
-        chameleon_fatal_error( "CHAMELEON_zgetrf_Tile_Async", "CHAMELEON_zgetrf_Tile_Async is only available with StarPU" );
+    if ( ( chamctxt->scheduler != RUNTIME_SCHED_STARPU ) &&
+         ( chamctxt->scheduler != RUNTIME_SCHED_PARSEC ) )
+    {
+        chameleon_fatal_error( "CHAMELEON_zgetrf_Tile_Async", "CHAMELEON_zgetrf_Tile_Async is only available with StarPU and PaRSEC" );
         return CHAMELEON_ERR_NOT_INITIALIZED;
     }
     if ( sequence == NULL ) {

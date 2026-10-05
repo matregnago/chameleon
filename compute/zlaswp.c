@@ -71,6 +71,7 @@ CHAMELEON_zlaswp_WS_Alloc( cham_side_t side, const CHAM_desc_t *A )
 
     reduce = &(ws->reduce);
     reduce->alg_allreduce = ChamStarPUTasks;
+    reduce->replicated    = chameleon_replicated_submission( chamctxt );
 
 #if defined (CHAMELEON_USE_MPI)
     reduce->proc_involved = malloc( sizeof( int ) * max_involved );
@@ -565,6 +566,11 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
     }
 
     if ( IPIV->data != NULL ) {
+        /*
+         * The conversion is executed by the owner of the ipiv tile: StarPU
+         * filters it at submission, and it must be submitted by all the ranks
+         * with replicated submission.
+         */
         RUNTIME_options_init( &options, chamctxt, sequence, request );
         RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( laswp ) );
         if ( side == ChamLeft ) {
@@ -573,9 +579,6 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
             for ( k = 0; k < IPIV->mt; k++ ) {
                 tempkm = A->get_blkdim( A, k, DIM_m, A->m );
                 m0 = k * A->mb;
-                if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
-                    continue;
-                }
                 INSERT_TASK_ipiv_to_perm( &options, m0, tempkm, tempkm,
                                           K1 - 1, K2 - 1, A->mt - k, IPIV, k );
                 RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );
@@ -587,9 +590,6 @@ int CHAMELEON_zlaswp_Tile_Async( cham_side_t         side,
             for ( k = 0; k < IPIV->mt; k++ ) {
                 tempkn = A->get_blkdim( A, k, DIM_n, A->n );
                 n0 = k * A->nb;
-                if ( IPIV->get_rankof( IPIV, k, k ) != IPIV->myrank ) {
-                    continue;
-                }
                 INSERT_TASK_ipiv_to_perm( &options, n0, tempkn, tempkn,
                                           K1 - 1, K2 - 1, A->nt - k, IPIV, k );
                 RUNTIME_ipiv_flushone( sequence, CHAMIPIV_IPIV, IPIV, k );

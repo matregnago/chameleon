@@ -106,8 +106,47 @@ struct chameleon_reduce_s {
     unsigned int            involved;      /**< Specifies if the current process is involved in the reduction operation */
     int                     np_involved;   /**< Specifies the number of involved processes in the reduction operation   */
     int                     arity;         /**< Specifies the arity of the reduction tree                               */
+    int                     replicated;    /**< All the ranks submit the tasks of all the involved processes            */
 };
 typedef struct chameleon_reduce_s CHAM_reduce_t;
+
+/**
+ * @brief Number of processes whose work is submitted by the current one: all
+ * the involved processes with replicated submission, only itself otherwise.
+ */
+static inline int
+chameleon_reduce_nranks( const CHAM_reduce_t *reduce )
+{
+#if defined(CHAMELEON_USE_MPI)
+    return reduce->replicated ? reduce->np_involved : 1;
+#else
+    (void)reduce;
+    return 1;
+#endif
+}
+
+static inline int
+chameleon_reduce_rank( const CHAM_reduce_t *reduce, int me, int i )
+{
+#if defined(CHAMELEON_USE_MPI)
+    return reduce->replicated ? reduce->proc_involved[i] : me;
+#else
+    (void)reduce;
+    (void)i;
+    return me;
+#endif
+}
+
+/**
+ * @brief Iterate with _p_ over the processes whose per-process work (copies
+ * into their workspace, replicated trsm, ...) is submitted by the current
+ * process _me_.
+ */
+#define CHAMELEON_FOREACH_RANK( _reduce_, _me_, _i_, _p_ )                   \
+    for ( (_i_) = 0;                                                         \
+          ( (_i_) < chameleon_reduce_nranks( (_reduce_) ) ) &&               \
+          ( ( (_p_) = chameleon_reduce_rank( (_reduce_), (_me_), (_i_) ) ), 1 ); \
+          (_i_)++ )
 
 /**
  *  Global array of LAPACK constants
