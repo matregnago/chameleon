@@ -179,6 +179,14 @@ CHAM_context_t *chameleon_context_create()
 
     chamctxt->runtime_paused      = CHAMELEON_FALSE;
 
+    /*
+     * Replicated submission: every rank submits the full task graph, in the
+     * same order, instead of pruning the tasks it is not involved in. It is
+     * required by runtimes that identify the tasks by their submission order
+     * (PaRSEC DTD) and forced by them in RUNTIME_context_create().
+     */
+    chamctxt->replicated_submission = chameleon_env_on_off( "CHAMELEON_REPLICATED_SUBMISSION", CHAMELEON_FALSE );
+
     chamctxt->householder = chameleon_getenv_householder( "CHAMELEON_HOUSEHOLDER_MODE", ChamFlatHouseholder );
     chamctxt->translation = chameleon_getenv_translation( "CHAMELEON_TRANSLATION_MODE", ChamInPlace );
 #if defined(CHAMELEON_ENABLE_DAG_COLORS)

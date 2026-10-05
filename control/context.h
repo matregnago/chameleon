@@ -36,6 +36,29 @@ CHAM_context_t* chameleon_context_create  ();
 CHAM_context_t* chameleon_context_self    ();
 int             chameleon_context_destroy ();
 
+/**
+ * @brief Return true if every rank submits all the tasks in the same order.
+ *
+ * In that case, the algorithms must not prune the submission with the local
+ * rank: loops cover the whole iteration space and the workspaces are indexed
+ * by the owner of the tile instead of the local process.
+ */
+static inline int
+chameleon_replicated_submission( const CHAM_context_t *chamctxt )
+{
+    return (chamctxt != NULL) && chamctxt->replicated_submission;
+}
+
+/**
+ * @brief Return true if the runtime supports the reduction access mode
+ * (ChamRW|ChamCOMMUTE or STARPU_REDUX).
+ */
+static inline int
+chameleon_runtime_has_reductions( const CHAM_context_t *chamctxt )
+{
+    return (chamctxt != NULL) && (chamctxt->scheduler != RUNTIME_SCHED_PARSEC);
+}
+
 #ifdef __cplusplus
 }
 #endif

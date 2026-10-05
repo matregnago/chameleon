@@ -355,6 +355,32 @@ inline static int chameleon_desc_islocal( const CHAM_desc_t *A, int m, int n )
     (void)__chameleon_need_exec;                \
 }
 
+/**
+ * @brief Helpers to iterate over the 2D block cyclic indices of a process.
+ *
+ * Without replicated submission, a process only iterates over its own
+ * indices: my, my+np, my+2np, ... With replicated submission, every process
+ * iterates over all of them: 0, 1, 2, ...
+ *
+ *   for ( m = chameleon_2dbc_first( repl, myp, P ); m < MT; m += chameleon_2dbc_stride( repl, P ) )
+ *
+ * chameleon_2dbc_last() bounds the loops over the processes themselves:
+ *
+ *   for ( p = chameleon_2dbc_first( repl, myp, P ); p < chameleon_2dbc_last( repl, myp, P ); p++ )
+ */
+static inline int chameleon_2dbc_first( int repl, int my, int np ) {
+    (void)np;
+    return repl ? 0 : my;
+}
+
+static inline int chameleon_2dbc_stride( int repl, int np ) {
+    return repl ? 1 : np;
+}
+
+static inline int chameleon_2dbc_last( int repl, int my, int np ) {
+    return repl ? np : my + 1;
+}
+
 #ifdef __cplusplus
 }
 #endif

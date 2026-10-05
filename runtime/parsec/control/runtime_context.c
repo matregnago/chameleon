@@ -26,6 +26,9 @@ void RUNTIME_context_create( CHAM_context_t *chamctxt )
 {
     /* In case of PaRSEC, this is done in init */
     chamctxt->scheduler = RUNTIME_SCHED_PARSEC;
+
+    /* DTD tasks are identified by their insertion order in the taskpool */
+    chamctxt->replicated_submission = CHAMELEON_TRUE;
     return;
 }
 
