@@ -17,6 +17,7 @@ test_parsec_master:
   parallel:
     matrix:
       - PRECISION: [s, d, c, z]
+        CATEGORY: [shm, mpi, cdist]
 
 test_parsec_mr:
   extends: .test_parsec
@@ -26,3 +27,8 @@ test_parsec_mr:
   parallel:
     matrix:
       - PRECISION: [c]
+        CATEGORY: [shm]
+      - PRECISION: [s]
+        CATEGORY: [mpi]
+      - PRECISION: [z]
+        CATEGORY: [cdist]

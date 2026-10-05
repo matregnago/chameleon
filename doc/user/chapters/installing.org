@@ -248,8 +248,10 @@ and [[sec:ug:brew][Brew]] on macOS.
       [[http://www.open-mpi.org/][OpenMPI]] is an open source Message Passing Interface
       implementation for execution on multiple nodes with
       distributed-memory environment.  MPI can be enabled only if the
-      runtime system chosen is StarPU (default).  To use MPI through
-      StarPU, it is necessary to compile StarPU with MPI enabled.
+      runtime system chosen is StarPU (default) or PaRSEC.  To use MPI
+      through StarPU, it is necessary to compile StarPU with MPI enabled.
+      To use MPI through PaRSEC, it is necessary to compile PaRSEC with
+      =PARSEC_DIST_WITH_MPI=ON=.
 
       *Caution about the compatibility:* OpenMPI should be built with the
       --enable-mpi-thread-multiple option.
@@ -367,6 +369,7 @@ and [[sec:ug:brew][Brew]] on macOS.
       * *CHAMELEON_USE_MPI=ON|OFF* (default OFF): to link with MPI
         library (message passing implementation for use of multiple
         nodes with distributed memory), can only be used with StarPU
+        and PaRSEC
       * *CHAMELEON_USE_CUDA=ON|OFF* (default OFF): to link with CUDA
         runtime (implementation paradigm for accelerated codes on Nvidia GPUs)
         and cuBLAS library (optimized BLAS kernels on Nvidia GPUs), can only

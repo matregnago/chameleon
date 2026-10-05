@@ -195,13 +195,13 @@ cmake_dependent_option(CHAMELEON_USE_EZTRACE
                     "Enable Kernel Tracing with eztrace" OFF
                     "BUILD_SHARED_LIBS" OFF)
 
-# Enable the distributed interface (allowed only when StarPU is enabled)
+# Enable the distributed interface (allowed only when StarPU or PaRSEC is enabled)
 # TODO: Default should be changed to ON/OFF when it will be ok
 cmake_dependent_option(CHAMELEON_USE_MPI
                     "Enable distributed memory through MPI" OFF
                     "CHAMELEON_ENABLE_MPI" OFF)
 if (CHAMELEON_ENABLE_MPI AND NOT CHAMELEON_USE_MPI)
-    message("-- ${BoldGreen}CHAMELEON_USE_MPI is set to OFF, turn it ON to use MPI (only supported with StarPU)${ColourReset}")
+    message("-- ${BoldGreen}CHAMELEON_USE_MPI is set to OFF, turn it ON to use MPI (only supported with StarPU and PaRSEC)${ColourReset}")
 endif()
 
 cmake_dependent_option(CHAMELEON_USE_MIGRATE
