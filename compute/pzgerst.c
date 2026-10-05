@@ -34,6 +34,19 @@ void chameleon_pzgerst( cham_uplo_t         uplo,
     if (sequence->status != CHAMELEON_SUCCESS) {
         return;
     }
+
+    /*
+     * The precision of a tile is only known by its owner, so the tasks can not
+     * be submitted identically by all the ranks.
+     */
+    if ( chameleon_replicated_submission( chamctxt ) &&
+         ( RUNTIME_comm_size( chamctxt ) > 1 ) )
+    {
+        chameleon_error( "chameleon_pzgerst", "not supported with replicated submission on multiple processes" );
+        sequence->status = CHAMELEON_ERR_NOT_SUPPORTED;
+        return;
+    }
+
     RUNTIME_options_init(&options, chamctxt, sequence, request);
     RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( gerst ) );
 
