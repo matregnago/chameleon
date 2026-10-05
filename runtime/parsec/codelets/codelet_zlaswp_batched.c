@@ -110,10 +110,11 @@ void INSERT_TASK_zlaswp_set_batched( const RUNTIME_option_t *options,
                                      int                     k,
                                      void                   *ws,
                                      const CHAM_ipiv_t      *ipiv, int ipivk,
-                                     const CHAM_desc_t      *A,   int Am,   int An,
                                      const CHAM_desc_t      *WA,  int WAm,  int WAn,
+                                     const CHAM_desc_t      *A,   int Am,   int An,
                                      void                  **clargs_ptr )
 {
+    /* The rows of WA are copied into A */
     INSERT_TASK_zlaswp_set( options, side, dir, m0, m, n, k, ipiv, ipivk,
                             WA, WAm, WAn, A, Am, An );
     (void)ws;
