@@ -16,6 +16,11 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
+      # CUDA is unfree; only the packages that ask for it are built with it
+      pkgsUnfree = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
       starpuPkg = (
         starpu.packages.${system}.default.override {
           enableCUDA = false;
@@ -27,11 +32,19 @@
         starpu = starpuPkg;
         parsec = parsec;
       };
+      parsecCuda = pkgsUnfree.callPackage ./parsec.nix { cudaSupport = true; };
+      chameleonCuda = pkgsUnfree.callPackage ./chameleon.nix {
+        starpu = starpuPkg;
+        parsec = parsecCuda;
+        cudaSupport = true;
+      };
     in
     {
       packages.${system} = {
         default = chameleon;
         parsec = parsec;
+        parsec-cuda = parsecCuda;
+        chameleon-cuda = chameleonCuda;
       };
       devShells.${system} = {
         default = pkgs.mkShell {
@@ -46,6 +59,10 @@
             parsec
           ];
 
+        };
+        cuda = pkgs.mkShell {
+          inputsFrom = [ chameleonCuda ];
+          buildInputs = [ parsecCuda ];
         };
       };
     };
