@@ -64,6 +64,11 @@
           ];
 
         };
+        # build tools of the CPU package, to build chameleon by hand
+        cpu = pkgs.mkShell {
+          inputsFrom = [ chameleon ];
+          buildInputs = [ parsec ];
+        };
         # outside NixOS, run the GPU binaries with `nixglhost <cmd>`
         cuda = pkgs.mkShell {
           inputsFrom = [ chameleonCuda ];
