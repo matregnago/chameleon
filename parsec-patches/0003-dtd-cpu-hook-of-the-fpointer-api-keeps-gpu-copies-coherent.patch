@@ -1,0 +1,33 @@
+dtd: keep the GPU copies coherent with the CPU tasks of parsec_dtd_insert_task
+
+A task class created by parsec_dtd_insert_task (fpointer API) calls the user
+function directly as the CPU hook, while the CPU chores added by
+parsec_dtd_task_class_add_chore go through parsec_dtd_cpu_task_submit. That
+wrapper increments the version of the written host copies and takes the
+ownership back from a GPU. Without it, a CPU task of the fpointer API that
+writes a tile last written on a GPU leaves the GPU copy owner, with the same
+version as the host copy: the next GPU task that reads the tile uses the stale
+GPU copy, without any transfer.
+
+This happens as soon as the fpointer API and task classes with a GPU chore are
+mixed on the same data (Chameleon: getrf_nopiv on the CPU between trsm/gemm on
+the GPU gives wrong factorizations). Use the wrapper for both APIs.
+
+diff --git a/parsec/interfaces/dtd/insert_function.c b/parsec/interfaces/dtd/insert_function.c
+index 2ac4fef34..25cfd8eac 100644
+--- a/parsec/interfaces/dtd/insert_function.c
++++ b/parsec/interfaces/dtd/insert_function.c
+@@ -3469,8 +3469,11 @@ __parsec_dtd_taskpool_create_task(parsec_taskpool_t *tp,
+                 dtd_tc->gpu_func_ptr = (parsec_advance_task_function_t)fpointer;
+             }
+             else {
+-                /* Default case: the user-provided function is directly the hook to call */
+-                incarnations[0].hook = fpointer; // We can directly call the CPU hook
++                /* Go through the CPU submit wrapper, as the chores of
++                 * parsec_dtd_task_class_add_chore do: it moves the ownership
++                 * of the written data back to the host, so that the GPU copies
++                 * are not reused once the CPU modified the data. */
++                incarnations[0].hook = parsec_dtd_cpu_task_submit;
+                 dtd_tc->cpu_func_ptr = fpointer;
+             }
+             incarnations[1].type = PARSEC_DEV_NONE;

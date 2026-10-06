@@ -53,6 +53,67 @@ CORE_zgemm_parsec( parsec_execution_stream_t *context,
     return PARSEC_HOOK_RETURN_DONE;
 }
 
+#if defined(CHAMELEON_PARSEC_CUDA)
+static int
+CORE_zgemm_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
+                        parsec_gpu_task_t          *gpu_task,
+                        parsec_gpu_exec_stream_t   *gpu_stream )
+{
+    cham_trans_t transA;
+    cham_trans_t transB;
+    int m;
+    int n;
+    int k;
+    cuDoubleComplex alpha; /* 16 bytes aligned: read by cuBLAS with aligned loads */
+    CHAMELEON_Complex64_t *A;
+    int lda;
+    CHAMELEON_Complex64_t *B;
+    int ldb;
+    cuDoubleComplex beta;
+    CHAMELEON_Complex64_t *C;
+    int ldc;
+
+    parsec_dtd_unpack_args(
+        gpu_task->ec, &transA, &transB, &m, &n, &k, &alpha, &A, &lda, &B, &ldb, &beta, &C, &ldc );
+
+    CUDA_zgemm( transA, transB, m, n, k,
+                (cuDoubleComplex *)&alpha, (cuDoubleComplex *)A, lda,
+                                           (cuDoubleComplex *)B, ldb,
+                (cuDoubleComplex *)&beta,  (cuDoubleComplex *)C, ldc,
+                chameleon_parsec_cuda_handles( gpu_stream )->cublas );
+
+    (void)gpu_device;
+    return PARSEC_HOOK_RETURN_DONE;
+}
+#endif
+
+static parsec_task_class_t *
+zgemm_task_class( parsec_taskpool_t *tp )
+{
+    parsec_task_class_t *tc = parsec_dtd_create_task_class(
+        tp, "gemm",
+        sizeof(cham_trans_t),          PARSEC_VALUE,
+        sizeof(cham_trans_t),          PARSEC_VALUE,
+        sizeof(int),                   PARSEC_VALUE,
+        sizeof(int),                   PARSEC_VALUE,
+        sizeof(int),                   PARSEC_VALUE,
+        sizeof(CHAMELEON_Complex64_t), PARSEC_VALUE,
+        PASSED_BY_REF,                 PARSEC_INPUT,
+        sizeof(int),                   PARSEC_VALUE,
+        PASSED_BY_REF,                 PARSEC_INPUT,
+        sizeof(int),                   PARSEC_VALUE,
+        sizeof(CHAMELEON_Complex64_t), PARSEC_VALUE,
+        PASSED_BY_REF,                 PARSEC_INOUT | PARSEC_AFFINITY,
+        sizeof(int),                   PARSEC_VALUE,
+        PARSEC_DTD_ARG_END );
+
+#if defined(CHAMELEON_PARSEC_CUDA)
+    chameleon_parsec_add_cuda_chore( tp, tc, CORE_zgemm_parsec_cuda );
+#endif
+    parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_CPU, (void *)CORE_zgemm_parsec );
+    return tc;
+}
+
 void
 INSERT_TASK_zgemm( const RUNTIME_option_t *options,
                    cham_trans_t transA, cham_trans_t transB,
@@ -62,25 +123,35 @@ INSERT_TASK_zgemm( const RUNTIME_option_t *options,
                    CHAMELEON_Complex64_t beta,  const CHAM_desc_t *C, int Cm, int Cn )
 {
     parsec_taskpool_t* PARSEC_dtd_taskpool = (parsec_taskpool_t *)(options->sequence->schedopt);
+    parsec_task_class_t *tc = chameleon_parsec_task_class( options, CORE_zgemm_parsec, 3, zgemm_task_class );
     CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
     CHAM_tile_t *tileB = B->get_blktile( B, Bm, Bn );
     CHAM_tile_t *tileC = C->get_blktile( C, Cm, Cn );
+    int devices = CHAMELEON_PARSEC_DEVICES_OF( tileA, tileB, tileC );
 
-    parsec_dtd_insert_task(
-        PARSEC_dtd_taskpool, CORE_zgemm_parsec, options->priority, PARSEC_DEV_CPU, "gemm",
-        sizeof(cham_trans_t),    &transA,                           PARSEC_VALUE,
-        sizeof(cham_trans_t),    &transB,                           PARSEC_VALUE,
-        sizeof(int),           &m,                                PARSEC_VALUE,
-        sizeof(int),           &n,                                PARSEC_VALUE,
-        sizeof(int),           &k,                                PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t),           &alpha,              PARSEC_VALUE,
-        PASSED_BY_REF,     RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INPUT,
-        sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,     RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ), chameleon_parsec_get_arena_index( B, Bm, Bn ) | PARSEC_INPUT,
-        sizeof(int), &(tileB->ld), PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t),           &beta,               PARSEC_VALUE,
-        PASSED_BY_REF,     RTBLKADDR( C, CHAMELEON_Complex64_t, Cm, Cn ), chameleon_parsec_get_arena_index( C, Cm, Cn ) | PARSEC_INOUT | PARSEC_AFFINITY,
-        sizeof(int), &(tileC->ld), PARSEC_VALUE,
+    /* WARNING: CUDA 12.3 has an issue when m or n or k=1 in double complex,
+       thus we disable gemm on gpu in these cases */
+#if defined(PRECISION_z)
+    if ( (k == 1) || (n == 1) || (m == 1) ) {
+        devices = PARSEC_DEV_CPU;
+    }
+#endif
+
+    parsec_dtd_insert_task_with_task_class(
+        PARSEC_dtd_taskpool, tc, options->priority, devices,
+        PARSEC_DTD_EMPTY_FLAG, &transA,
+        PARSEC_DTD_EMPTY_FLAG, &transB,
+        PARSEC_DTD_EMPTY_FLAG, &m,
+        PARSEC_DTD_EMPTY_FLAG, &n,
+        PARSEC_DTD_EMPTY_FLAG, &k,
+        PARSEC_DTD_EMPTY_FLAG, &alpha,
+        chameleon_parsec_get_arena_index( A, Am, An ), RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ),
+        PARSEC_DTD_EMPTY_FLAG, &(tileA->ld),
+        chameleon_parsec_get_arena_index( B, Bm, Bn ), RTBLKADDR( B, CHAMELEON_Complex64_t, Bm, Bn ),
+        PARSEC_DTD_EMPTY_FLAG, &(tileB->ld),
+        PARSEC_DTD_EMPTY_FLAG, &beta,
+        chameleon_parsec_get_arena_index( C, Cm, Cn ) | CHAMELEON_PARSEC_GPU_OUT, RTBLKADDR( C, CHAMELEON_Complex64_t, Cm, Cn ),
+        PARSEC_DTD_EMPTY_FLAG, &(tileC->ld),
         PARSEC_DTD_ARG_END );
 
     (void)nb;

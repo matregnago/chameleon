@@ -1,27 +1,38 @@
 {
+  lib,
   stdenv,
   cmake,
   pkg-config,
   hwloc,
   fetchFromGitHub,
-  openmpi
+  openmpi,
+  cudaSupport ? false,
+  cudaPackages ? null,
+  # architectures of the GPUs that will run the kernels (the build machine
+  # usually has none, so "native" cannot be used)
+  cudaArchitectures ? "70;80;90",
+  autoAddDriverRunpath ? null,
 }:
 
 stdenv.mkDerivation {
   pname = "parsec";
   version = "1";
 
+  # master with the DTD task classes, the GPU chores and the unpack of the
+  # device copy (fadf9d8e1)
   src = fetchFromGitHub {
     owner = "ICLDisco";
     repo = "parsec";
-    rev = "d0fc4c01e6d10c8cc10719c1930ce1a5677a075c";
-    hash = "sha256-cgLZeWfznrUjCpEV7YR2uCgoigYVZH63q/Xl35ncpWk=";
+    rev = "92b356425c02bdf7bef03eb85b4929488d19ce8d";
+    hash = "sha256-8eAVAzfdtD+f3OMBuPKRZrako1Qw38qLBxgGvR2eJnI=";
   };
 
-  # Races of the DTD interface hit by the Chameleon tests (0001 is upstream a74104665)
+  # Races of the DTD interface hit by the Chameleon tests (the former 0001 is
+  # upstream since a74104665), and the coherence of the GPU copies with the CPU
+  # tasks of the fpointer API (0003)
   patches = [
-    ./parsec-patches/0001-data-fix-use-after-free-race-in-self-contained-data-release.patch
     ./parsec-patches/0002-dtd-two-races-in-the-tracking-of-tile-users.patch
+    ./parsec-patches/0003-dtd-cpu-hook-of-the-fpointer-api-keeps-gpu-copies-coherent.patch
   ];
 
   postPatch = ''
@@ -34,13 +45,27 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     cmake
     pkg-config
+  ]
+  ++ lib.optionals cudaSupport [
+    cudaPackages.cuda_nvcc
+    # finds libcuda in /run/opengl-driver on NixOS
+    autoAddDriverRunpath
   ];
 
   buildInputs = [
     hwloc
     openmpi
+  ]
+  ++ lib.optionals cudaSupport [
+    cudaPackages.cuda_cudart
+    cudaPackages.cuda_cccl
   ];
+
   cmakeFlags = [
     "-DPARSEC_DIST_WITH_MPI=ON"
-  ];
+    "-DPARSEC_GPU_WITH_CUDA=${if cudaSupport then "ON" else "OFF"}"
+    "-DPARSEC_GPU_WITH_HIP=OFF"
+    "-DPARSEC_GPU_WITH_LEVEL_ZERO=OFF"
+  ]
+  ++ lib.optionals cudaSupport [ "-DCMAKE_CUDA_ARCHITECTURES=${cudaArchitectures}" ];
 }
