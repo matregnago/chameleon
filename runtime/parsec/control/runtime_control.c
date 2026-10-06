@@ -80,6 +80,68 @@ chameleon_parsec_cuda_handles_destroy( void *obj, void *user )
     (void)user;
 }
 
+parsec_info_id_t chameleon_parsec_cuda_ws_id = PARSEC_INFO_ID_UNDEFINED;
+
+static void *
+chameleon_parsec_cuda_ws_create( void *obj, void *user )
+{
+    chameleon_parsec_cuda_ws_t *ws = calloc( 1, sizeof(chameleon_parsec_cuda_ws_t) );
+
+    if ( (cudaMalloc( (void **)&(ws->dinfo), sizeof(int) ) != cudaSuccess) ||
+         (cudaMallocHost( (void **)&(ws->hinfo), CHAMELEON_PARSEC_CUDA_NINFO * sizeof(int) ) != cudaSuccess) )
+    {
+        chameleon_fatal_error( "chameleon_parsec_cuda_ws_create", "Allocation of the info of the stream failed" );
+        cudaFree( ws->dinfo );
+        free( ws );
+        return NULL;
+    }
+
+    (void)obj;
+    (void)user;
+    return ws;
+}
+
+static void
+chameleon_parsec_cuda_ws_destroy( void *obj, void *user )
+{
+    chameleon_parsec_cuda_ws_t *ws = (chameleon_parsec_cuda_ws_t *)obj;
+
+    cudaFree( ws->work );
+    cudaFree( ws->dinfo );
+    cudaFreeHost( ws->hinfo );
+    free( ws );
+    (void)user;
+}
+
+/**
+ * @brief Return a device workspace of at least size bytes for the next kernel of
+ * the stream, or NULL if it cannot be allocated.
+ *
+ * The kernels already submitted to the stream may still use the previous
+ * buffer, so it is released and replaced in the order of the stream.
+ */
+void *
+chameleon_parsec_cuda_ws_work( chameleon_parsec_cuda_ws_t *ws,
+                               parsec_gpu_exec_stream_t *gpu_stream, size_t size )
+{
+    cudaStream_t stream = chameleon_parsec_cuda_stream( gpu_stream );
+
+    if ( size <= ws->size ) {
+        return ws->work;
+    }
+    if ( ws->work != NULL ) {
+        cudaFreeAsync( ws->work, stream );
+        ws->work = NULL;
+        ws->size = 0;
+    }
+    if ( cudaMallocAsync( &(ws->work), size, stream ) != cudaSuccess ) {
+        ws->work = NULL;
+        return NULL;
+    }
+    ws->size = size;
+    return ws->work;
+}
+
 static void
 chameleon_parsec_cuda_init( void )
 {
@@ -102,6 +164,12 @@ chameleon_parsec_cuda_init( void )
                               chameleon_parsec_cuda_handles_create, NULL, NULL );
     assert( chameleon_parsec_cuda_handles_id != PARSEC_INFO_ID_UNDEFINED );
 
+    chameleon_parsec_cuda_ws_id =
+        parsec_info_register( &parsec_per_stream_infos, "CHAMELEON::CUDA::WORKSPACE",
+                              chameleon_parsec_cuda_ws_destroy, NULL,
+                              chameleon_parsec_cuda_ws_create, NULL, NULL );
+    assert( chameleon_parsec_cuda_ws_id != PARSEC_INFO_ID_UNDEFINED );
+
     cublasCreate( &chameleon_parsec_cublas_handle );
     cusolverDnCreate( &chameleon_parsec_cusolverDn_handle );
 }
@@ -113,6 +181,8 @@ chameleon_parsec_cuda_fini( void )
         return;
     }
 
+    parsec_info_unregister( &parsec_per_stream_infos, chameleon_parsec_cuda_ws_id, NULL );
+    chameleon_parsec_cuda_ws_id = PARSEC_INFO_ID_UNDEFINED;
     parsec_info_unregister( &parsec_per_stream_infos, chameleon_parsec_cuda_handles_id, NULL );
     chameleon_parsec_cuda_handles_id = PARSEC_INFO_ID_UNDEFINED;
 

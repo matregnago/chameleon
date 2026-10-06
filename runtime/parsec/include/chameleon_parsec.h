@@ -62,6 +62,35 @@ static inline cudaStream_t
 chameleon_parsec_cuda_stream( parsec_gpu_exec_stream_t *gpu_stream ) {
     return ((parsec_cuda_exec_stream_t *)gpu_stream)->cuda_stream;
 }
+
+/**
+ * @brief Workspace of a CUDA execution stream for the cuSOLVER kernels.
+ *
+ * The kernels of a stream are executed in order, so its tasks share it. The
+ * info of a kernel is copied asynchronously to a pinned slot of hinfo, read
+ * when the stream reaches the end of the task: a stream holds at most
+ * PARSEC_MAX_EVENTS_PER_STREAM tasks, so the ring is never overrun.
+ */
+#define CHAMELEON_PARSEC_CUDA_NINFO 32
+
+typedef struct chameleon_parsec_cuda_ws_s {
+    void    *work;  /**< Device workspace, grown on demand       */
+    size_t   size;  /**< Size in bytes of work                   */
+    int     *dinfo; /**< Device info of the cuSOLVER kernels     */
+    int     *hinfo; /**< Ring of pinned host copies of the infos */
+    unsigned next;  /**< Next slot of hinfo                      */
+} chameleon_parsec_cuda_ws_t;
+
+extern parsec_info_id_t chameleon_parsec_cuda_ws_id;
+
+static inline chameleon_parsec_cuda_ws_t *
+chameleon_parsec_cuda_ws( parsec_gpu_exec_stream_t *gpu_stream ) {
+    return (chameleon_parsec_cuda_ws_t *)parsec_info_get( &(gpu_stream->infos),
+                                                          chameleon_parsec_cuda_ws_id );
+}
+
+void *chameleon_parsec_cuda_ws_work( chameleon_parsec_cuda_ws_t *ws,
+                                     parsec_gpu_exec_stream_t *gpu_stream, size_t size );
 #endif
 
 /**
