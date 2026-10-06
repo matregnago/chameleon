@@ -30,14 +30,26 @@
 #include <parsec/mca/device/device.h>
 
 /*
- * The CUDA incarnations of the codelets require both Chameleon and PaRSEC to be
- * built with CUDA.
+ * The CUDA (resp. HIP) incarnations of the codelets require both Chameleon and
+ * PaRSEC to be built with CUDA (resp. HIP). PaRSEC drives only one of the two.
  */
 #if defined(CHAMELEON_USE_CUDA) && defined(PARSEC_HAVE_DEV_CUDA_SUPPORT) && !defined(CHAMELEON_SIMULATION)
 #define CHAMELEON_PARSEC_CUDA
 #include <parsec/parsec_internal.h>
 #include <parsec/mca/device/device_gpu.h>
 #include <parsec/mca/device/cuda/device_cuda.h>
+#endif
+
+#if defined(CHAMELEON_USE_HIP) && defined(PARSEC_HAVE_DEV_HIP_SUPPORT) && !defined(CHAMELEON_SIMULATION)
+#define CHAMELEON_PARSEC_HIP
+#include <parsec/parsec_internal.h>
+#include <parsec/mca/device/device_gpu.h>
+#include <parsec/mca/device/hip/device_hip.h>
+#endif
+
+#if defined(CHAMELEON_PARSEC_CUDA) || defined(CHAMELEON_PARSEC_HIP)
+#define CHAMELEON_PARSEC_GPU
+extern int chameleon_parsec_devices;
 #endif
 
 #if defined(CHAMELEON_PARSEC_CUDA)
@@ -50,7 +62,6 @@ typedef struct chameleon_parsec_cuda_handles_s {
 } chameleon_parsec_cuda_handles_t;
 
 extern int              chameleon_parsec_ncudas;
-extern int              chameleon_parsec_devices;
 extern parsec_info_id_t chameleon_parsec_cuda_handles_id;
 
 static inline chameleon_parsec_cuda_handles_t *
@@ -92,6 +103,56 @@ chameleon_parsec_cuda_ws( parsec_gpu_exec_stream_t *gpu_stream ) {
 
 void *chameleon_parsec_cuda_ws_work( chameleon_parsec_cuda_ws_t *ws,
                                      parsec_gpu_exec_stream_t *gpu_stream, size_t size );
+#endif
+
+#if defined(CHAMELEON_PARSEC_HIP)
+/**
+ * @brief Library handles of a PaRSEC HIP execution stream, bound to it.
+ */
+typedef struct chameleon_parsec_hip_handles_s {
+    hipblasHandle_t     hipblas;
+    hipsolverDnHandle_t hipsolverDn;
+} chameleon_parsec_hip_handles_t;
+
+extern int              chameleon_parsec_nhips;
+extern parsec_info_id_t chameleon_parsec_hip_handles_id;
+
+static inline chameleon_parsec_hip_handles_t *
+chameleon_parsec_hip_handles( parsec_gpu_exec_stream_t *gpu_stream ) {
+    return (chameleon_parsec_hip_handles_t *)parsec_info_get( &(gpu_stream->infos),
+                                                              chameleon_parsec_hip_handles_id );
+}
+
+static inline hipStream_t
+chameleon_parsec_hip_stream( parsec_gpu_exec_stream_t *gpu_stream ) {
+    return ((parsec_hip_exec_stream_t *)gpu_stream)->hip_stream;
+}
+
+/**
+ * @brief Workspace of a HIP execution stream for the hipSOLVER kernels.
+ *
+ * Same as the CUDA one (see chameleon_parsec_cuda_ws_t).
+ */
+#define CHAMELEON_PARSEC_HIP_NINFO 32
+
+typedef struct chameleon_parsec_hip_ws_s {
+    void    *work;  /**< Device workspace, grown on demand       */
+    size_t   size;  /**< Size in bytes of work                   */
+    int     *dinfo; /**< Device info of the hipSOLVER kernels    */
+    int     *hinfo; /**< Ring of pinned host copies of the infos */
+    unsigned next;  /**< Next slot of hinfo                      */
+} chameleon_parsec_hip_ws_t;
+
+extern parsec_info_id_t chameleon_parsec_hip_ws_id;
+
+static inline chameleon_parsec_hip_ws_t *
+chameleon_parsec_hip_ws( parsec_gpu_exec_stream_t *gpu_stream ) {
+    return (chameleon_parsec_hip_ws_t *)parsec_info_get( &(gpu_stream->infos),
+                                                         chameleon_parsec_hip_ws_id );
+}
+
+void *chameleon_parsec_hip_ws_work( chameleon_parsec_hip_ws_t *ws,
+                                    parsec_gpu_exec_stream_t *gpu_stream, size_t size );
 #endif
 
 /**
@@ -493,6 +554,23 @@ chameleon_parsec_add_cuda_chore( parsec_taskpool_t *tp, parsec_task_class_t *tc,
         parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_CUDA, (void *)body );
     }
 }
+#endif
+
+#if defined(CHAMELEON_PARSEC_HIP)
+/**
+ * @brief Add a HIP chore to a task class, if PaRSEC drives HIP devices.
+ */
+static inline void
+chameleon_parsec_add_hip_chore( parsec_taskpool_t *tp, parsec_task_class_t *tc,
+                                parsec_advance_task_function_t body )
+{
+    if ( chameleon_parsec_nhips > 0 ) {
+        parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_HIP, (void *)body );
+    }
+}
+#endif
+
+#if defined(CHAMELEON_PARSEC_GPU)
 
 /**
  * The DTD copies the data written by a GPU task back to the host only if the
@@ -503,7 +581,7 @@ chameleon_parsec_add_cuda_chore( parsec_taskpool_t *tp, parsec_task_class_t *tc,
 #define CHAMELEON_PARSEC_GPU_OUT PARSEC_PUSHOUT
 
 /**
- * Devices the tasks with a GPU chore may run on (CHAMELEON_PARSEC_DEVICES=cpu|cuda|all)
+ * Devices the tasks with a GPU chore may run on (CHAMELEON_PARSEC_DEVICES=cpu|cuda|hip|all)
  */
 #define CHAMELEON_PARSEC_DEVICES chameleon_parsec_devices
 
