@@ -478,9 +478,8 @@ chameleon_parsec_vdc_fini( chameleon_parsec_vdc_t *vdc )
     parsec_data_collection_t *dc = (parsec_data_collection_t *)vdc;
     int key;
 
-    if ( vdc->pending_tp != NULL ) {
-        chameleon_parsec_flush_forget( dc );
-    }
+    /* The collection may still be registered in a sequence other than the last one */
+    chameleon_parsec_flush_forget( dc );
 
     parsec_dtd_data_collection_fini( dc );
 

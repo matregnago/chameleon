@@ -299,9 +299,8 @@ void RUNTIME_desc_destroy( CHAM_desc_t *mdesc )
         return;
     }
 
-    if ( pdesc->pending_tp != NULL ) {
-        chameleon_parsec_flush_forget( (parsec_data_collection_t *)pdesc );
-    }
+    /* The collection may still be registered in a sequence other than the last one */
+    chameleon_parsec_flush_forget( (parsec_data_collection_t *)pdesc );
 
     if ( pdesc->data_map != NULL ) {
         parsec_data_t **data = pdesc->data_map;
