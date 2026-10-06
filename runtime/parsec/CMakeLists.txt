@@ -125,6 +125,9 @@ add_dependencies(chameleon_parsec
 if (CHAMELEON_USE_CUDA)
   add_dependencies(chameleon_parsec gpucublas_include)
 endif()
+if (CHAMELEON_USE_HIP)
+  add_dependencies(chameleon_parsec gpuhipblas_include)
+endif()
 
 target_include_directories(chameleon_parsec PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -143,6 +146,9 @@ target_link_libraries(chameleon_parsec PRIVATE coreblas)
 if(CHAMELEON_USE_CUDA)
   target_link_libraries(chameleon_parsec PRIVATE gpucublas)
 endif(CHAMELEON_USE_CUDA)
+if(CHAMELEON_USE_HIP)
+  target_link_libraries(chameleon_parsec PRIVATE gpuhipblas)
+endif(CHAMELEON_USE_HIP)
 target_link_libraries(chameleon_parsec PRIVATE MORSE::M)
 
 # necessary cause of include control/common.h which depends on hqr, mpi, cuda, ...
@@ -153,6 +159,9 @@ if (CHAMELEON_USE_MPI)
 endif()
 if (CHAMELEON_USE_CUDA)
   target_link_libraries(chameleon_parsec PUBLIC CUDA::cusolver CUDA::cublas)
+endif()
+if (CHAMELEON_USE_HIP)
+  target_link_libraries(chameleon_parsec PUBLIC roc::hipsolver roc::hipblas)
 endif()
 
 # export target
