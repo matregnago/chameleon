@@ -1,0 +1,140 @@
+From a741046653fd2df335f6b8efd9e265303b12b05c Mon Sep 17 00:00:00 2001
+From: George Bosilca <gbosilca@nvidia.com>
+Date: Wed, 23 Sep 2026 02:21:10 -0400
+Subject: [PATCH] data: fix use-after-free race in self-contained data release
+
+__parsec_data_copy_release inspected the copy after releasing it: the
+refcount test guarding the self-contained teardown read ->original and
+->obj_reference_count through *copy once PARSEC_OBJ_RELEASE had already
+given up this thread's reference. A concurrent release of the last
+reference frees the copy in that window, and the comm thread then walked
+freed memory. ASan caught it as a heap-use-after-free between
+remote_dep_release_incoming and a DTD task completion.
+
+parsec_data_release_self_contained_data had a matching problem: it decided
+that a data was reachable only through its own copies and then freed every
+copy, with nothing serializing the two steps, so two threads that had each
+just dropped a reference could both pass the test and both tear the data
+down.
+
+Capture the original before releasing the copy and keep a reference on it
+for the duration, so nothing is dereferenced after being handed away, and
+hold data->lock across both the decision and the teardown. Releasing the
+last copy also destroys the data, and with it the lock that still has to be
+unlocked, so the teardown takes a reference of its own and discounts it,
+along with the caller's, when testing whether the data is self-contained.
+
+Signed-off-by: George Bosilca <gbosilca@nvidia.com>
+---
+ parsec/data.c          | 37 ++++++++++++++++++++++++++++++++-----
+ parsec/data_internal.h | 19 ++++++++++++++++---
+ 2 files changed, 48 insertions(+), 8 deletions(-)
+
+diff --git a/parsec/data.c b/parsec/data.c
+index 306a6c507..14e279f33 100644
+--- a/parsec/data.c
++++ b/parsec/data.c
+@@ -675,16 +675,37 @@ void parsec_data_protect_cpu_mirror(parsec_data_t *data)
+ 
+ int parsec_data_release_self_contained_data(parsec_data_t *data)
+ {
+-    int32_t nb_copies = data->nb_copies;
+-    if (data->super.obj_reference_count != nb_copies) return 0;
++    return parsec_data_release_self_contained_data_ext(data, 0);
++}
++
++int parsec_data_release_self_contained_data_ext(parsec_data_t *data, int32_t extra_refs)
++{
+     parsec_data_copy_t *copy = NULL;
++    int32_t nb_copies;
++    int rc = 0;
++
++    if( NULL == data ) return 0;
++
++    /* Deciding that the data is self-contained and acting on that decision must
++     * be a single atomic step: two threads that each just dropped a reference
++     * would otherwise both observe the condition below and both free every
++     * copy. The lock covers the decision and the teardown. Releasing the last
++     * copy also destroys the data, and with it the lock we still have to
++     * unlock, so hold a reference of our own for the duration and discount it
++     * along with the caller's.
++     */
++    PARSEC_OBJ_RETAIN(data);
++    parsec_atomic_lock(&data->lock);
++    nb_copies = data->nb_copies;
++    if( (0 == nb_copies) || (data->super.obj_reference_count != nb_copies + extra_refs + 1) )
++        goto unlock;
+     /* this data is only referenced by it's own copies. If these copies are also only referenced by
+      * data, then we can release them all.
+      */
+     for( uint32_t i = 0; i < parsec_nb_devices; i++) {
+         if (NULL == (copy = data->device_copies[i])) continue;
+         if( copy->super.super.obj_reference_count > 1 || copy->readers > 0 )
+-            return 0;
++            goto unlock;
+     }
+     PARSEC_DEBUG_VERBOSE(90, parsec_debug_output, "Release copy %p from self-contained data %p", copy, data);
+     for( uint32_t i = 0; i < parsec_nb_devices; i++) {
+@@ -724,8 +745,14 @@ int parsec_data_release_self_contained_data(parsec_data_t *data)
+             PARSEC_DATA_COPY_RELEASE(copy);
+             assert(NULL == copy);
+         }
+-        if (0 == --nb_copies) return 1; /* we deallocate the data_t during the copy_release/detach of the last copy, so we need to stop now */
++        if (0 == --nb_copies) { /* every copy is gone; nothing left to walk */
++            rc = 1;
++            goto unlock;
++        }
+     }
+     parsec_warning("Release copy %p from self-contained data %p had %d more copies than present in device_copies", copy, data, nb_copies);
+-    return 0;
++  unlock:
++    parsec_atomic_unlock(&data->lock);
++    PARSEC_OBJ_RELEASE(data);
++    return rc;
+ }
+diff --git a/parsec/data_internal.h b/parsec/data_internal.h
+index 30662c753..746ac71d4 100644
+--- a/parsec/data_internal.h
++++ b/parsec/data_internal.h
+@@ -92,6 +92,10 @@ PARSEC_DECLSPEC PARSEC_OBJ_CLASS_DECLARATION(parsec_data_copy_t);
+     ((DATA)->device_copies[(DEVID)])
+ 
+ int parsec_data_release_self_contained_data(parsec_data_t* data);
++/** Same, for callers that hold EXTRA_REFS references on DATA beyond the ones
++ *  held by its own copies. Those references are discounted when deciding
++ *  whether the data is only reachable through its own copies. */
++int parsec_data_release_self_contained_data_ext(parsec_data_t* data, int32_t extra_refs);
+ void parsec_data_protect_cpu_mirror(parsec_data_t* data);
+ /**
+  * Decrease the refcount of this copy of the data. If the refcount reach
+@@ -139,15 +143,24 @@ static inline void __parsec_data_copy_release(parsec_data_copy_t** copy)
+         }
+         return;
+     }
++    /* Hold the original across the release of our copy. Dropping our reference
++     * hands the copy to whoever still owns one, and destroying the last copy
++     * destroys the original too, so neither may be dereferenced afterwards.
++     * This reference is discounted by the _ext variant below.
++     */
++    if( NULL != original ) PARSEC_OBJ_RETAIN(original);
+     PARSEC_OBJ_RELEASE(*copy);
+     if( release_protected_cpu_mirror ) {
+-        if( parsec_data_release_self_contained_data(original) && releasing_protected_cpu_mirror ) {
++        if( parsec_data_release_self_contained_data_ext(original, 1) && releasing_protected_cpu_mirror ) {
+             *copy = NULL;
+         }
++        PARSEC_OBJ_RELEASE(original);
+         return;
+     }
+-    if ((NULL != *copy) && (NULL != (*copy)->original) && (1 == (*copy)->super.super.obj_reference_count))
+-        parsec_data_release_self_contained_data((*copy)->original);
++    if( NULL != original ) {
++        parsec_data_release_self_contained_data_ext(original, 1);
++        PARSEC_OBJ_RELEASE(original);
++    }
+ }
+ #define PARSEC_DATA_COPY_RELEASE(COPY) \
+     __parsec_data_copy_release(&(COPY))
+-- 
+2.55.0
+

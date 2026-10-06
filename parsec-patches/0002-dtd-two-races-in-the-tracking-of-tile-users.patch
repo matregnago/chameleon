@@ -1,0 +1,79 @@
+dtd: two races in the tracking of tile users
+
+1. ABA on tile->last_user. A completed reader stays referenced by
+   tile->last_user after its task structure has gone back to the mempool.
+   When a new task of the same class reuses that memory and accesses the
+   tile on a later flow, the "same task uses this tile on several flows"
+   test in parsec_insert_dtd_task (parent not alive branch) matches by
+   pointer and releases a reader on the data copy of another flow. The
+   readers counter then drops to zero early and the next writer passes the
+   WAR gate while a reader is still running (wrong results; with asserts,
+   "parsec_dtd_data_copy_reader_release: previous > 0").
+   Only trust the match when a previous flow of the task uses the tile.
+
+2. Remote writer after a remote writer with local readers in between.
+   The second writer is a successor in the chain that the iteration of the
+   first writer walks when its data arrives, but it is only retained while
+   it is the last writer. If the data of the first writer arrives after a
+   third writer has been inserted, the iteration reaches a released task
+   (segfault/deadlock in made_sure_nextinline_is_null). Retain it as when
+   the previous writer is local, and release it when the iteration
+   reaches it.
+
+--- a/parsec/interfaces/dtd/insert_function_internal.h
++++ b/parsec/interfaces/dtd/insert_function_internal.h
+@@ -104,6 +104,11 @@
+  * through the last "R" flow.
+  */
+ #define RELEASE_OWNERSHIP_SPECIAL (1<<4)
++/* A remote writer that follows a remote writer with local readers in between
++ * is reached when the data of the previous writer arrives. It is retained until
++ * then, and this flag tells the iteration of successors to release it.
++ */
++#define RETAINED_BY_REMOTE_CHAIN (1<<5)
+ 
+ /*
+  * Contains info about each flow of a task
+--- a/parsec/interfaces/dtd/insert_function.c
++++ b/parsec/interfaces/dtd/insert_function.c
+@@ -3094,6 +3094,13 @@
+                     if( parsec_dtd_task_is_local(last_writer.task)) {
+                         parsec_dtd_remote_task_retain(
+                                 this_task); /* every time we have a remote_task as descendant of a local task */
++                    } else if( TASK_IS_ALIVE == last_user.alive && NULL != last_user.task &&
++                               parsec_dtd_task_is_local(last_user.task) ) {
++                        /* The remote last writer has local readers that have not been
++                         * activated yet: its data will arrive here and the iteration of
++                         * its successors will reach this_task, so it has to stay alive */
++                        parsec_dtd_remote_task_retain(this_task);
++                        FLOW_OF(this_task, flow_index)->flags |= RETAINED_BY_REMOTE_CHAIN;
+                     }
+                 }
+             }
+@@ -3208,7 +3215,12 @@
+                  * operation on the data as following: R, .... R, W. This takes care of those
+                  * cases.
+                  */
+-                if( last_user.task == this_task ) {
++                /* last_user.task may be a completed reader whose memory was recycled
++                 * for this_task: only trust the match if one of our previous flows
++                 * really uses this tile */
++                if( last_user.task == this_task &&
++                    last_user.flow_index < flow_index &&
++                    FLOW_OF(this_task, last_user.flow_index)->tile == tile ) {
+                     if((last_user.op_type & PARSEC_GET_OP_TYPE) == PARSEC_INPUT ) {
+                         if( this_task->super.data[last_user.flow_index].data_in != NULL) {
+ /* #if defined(PARSEC_HAVE_DEV_CUDA_SUPPORT) */
+--- a/parsec/interfaces/dtd/overlap_strategies.c
++++ b/parsec/interfaces/dtd/overlap_strategies.c
+@@ -332,6 +332,10 @@
+                 if(action_mask & PARSEC_ACTION_RELEASE_LOCAL_DEPS) {
+                     if( parsec_dtd_task_is_remote(current_desc) && parsec_dtd_task_is_local(current_task) ) {
+                         parsec_dtd_remote_task_release( current_desc );
++                    } else if( parsec_dtd_task_is_remote(current_desc) &&
++                               (FLOW_OF(current_desc, tmp_desc_flow_index)->flags & RETAINED_BY_REMOTE_CHAIN) ) {
++                        FLOW_OF(current_desc, tmp_desc_flow_index)->flags &= ~RETAINED_BY_REMOTE_CHAIN;
++                        parsec_dtd_remote_task_release( current_desc );
+                     }
+                     if(release_parent) {
+                         if( parsec_dtd_task_is_local(current_task) ) {

@@ -43,6 +43,7 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
     int Q   = chameleon_desc_datadist_get_iparam( A, 1 );
     int myp = A->myrank / Q;
     int myq = A->myrank % Q;
+    int pp, qq, repl;
     int tempmm, tempnn;
     int cnt, maxiter;
     double e0, normx, normsx, beta, scl;
@@ -58,6 +59,13 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
     chamctxt = chameleon_context_self();
     RUNTIME_options_init( &options, chamctxt, sequence, request );
     RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( genm2 ) );
+
+    /*
+     * With replicated submission, every rank submits the work of all the
+     * processes: the loops over the local rows/columns of processes (myp,
+     * myq) become loops over all of them.
+     */
+    repl = chameleon_replicated_submission( chamctxt );
 
     /* Initialize the result */
     *result = 0.0;
@@ -88,23 +96,25 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
      * So drow[j] = sum( S_{p,j}, p=0..P-1 ) with S_{p,j} = sum( |A_{i,j}|, i=0..m-1 \ i%P = p )
      *
      */
-    for(n = myq; n < A->nt; n += Q) {
+    for(n = chameleon_2dbc_first( repl, myq, Q ); n < A->nt; n += chameleon_2dbc_stride( repl, Q )) {
         tempnn = A->get_blkdim( A, n, DIM_n, A->n );
 
-        /* Zeroes the local intermediate vector */
-        INSERT_TASK_dlaset(
-            &options,
-            ChamUpperLower, 1, tempnn,
-            0., 0.,
-            DROW( myp, n ) );
-
-        /* Computes the sums of the local tiles into the local vector */
-        for(m = myp; m < A->mt; m += P) {
-            tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-            INSERT_TASK_dzasum(
+        for(pp = chameleon_2dbc_first( repl, myp, P ); pp < chameleon_2dbc_last( repl, myp, P ); pp++) {
+            /* Zeroes the local intermediate vector */
+            INSERT_TASK_dlaset(
                 &options,
-                ChamColumnwise, ChamUpperLower, tempmm, tempnn,
-                A(m, n), DROW( myp, n ) );
+                ChamUpperLower, 1, tempnn,
+                0., 0.,
+                DROW( pp, n ) );
+
+            /* Computes the sums of the local tiles into the local vector */
+            for(m = pp; m < A->mt; m += P) {
+                tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+                INSERT_TASK_dzasum(
+                    &options,
+                    ChamColumnwise, ChamUpperLower, tempmm, tempnn,
+                    A(m, n), DROW( pp, n ) );
+            }
         }
 
         /* Reduce on first row of nodes */
@@ -119,32 +129,34 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
     /**
      * Reduce now by columns on processes with (myp == 0)
      */
-    if ( myp == 0 )
+    if ( repl || (myp == 0) )
     {
-        INSERT_TASK_dlaset(
-            &options,
-            ChamUpperLower, NRMX.mb, NRMX.nb,
-            1., 0.,
-            NRMX( myp, myq ) );
+        for( qq = chameleon_2dbc_first( repl, myq, Q ); qq < chameleon_2dbc_last( repl, myq, Q ); qq++ ) {
+            INSERT_TASK_dlaset(
+                &options,
+                ChamUpperLower, NRMX.mb, NRMX.nb,
+                1., 0.,
+                NRMX( 0, qq ) );
 
-        for( n = myq; n < A->nt; n += Q ) {
-            tempnn = A->get_blkdim( A, n, DIM_n, A->n );
-            INSERT_TASK_dgessq(
-                &options, ChamEltwise, 1, tempnn,
-                DROW( myp, n   ),
-                NRMX( myp, myq ) );
+            for( n = qq; n < A->nt; n += Q ) {
+                tempnn = A->get_blkdim( A, n, DIM_n, A->n );
+                INSERT_TASK_dgessq(
+                    &options, ChamEltwise, 1, tempnn,
+                    DROW( 0, n  ),
+                    NRMX( 0, qq ) );
+            }
         }
 
         /* Reduce on first row of nodes */
         for(n = 1; n < Q; n++) {
             INSERT_TASK_dplssq(
                 &options, ChamEltwise, 1, 1,
-                NRMX( myp, n ),
-                NRMX( myp, 0 ) );
+                NRMX( 0, n ),
+                NRMX( 0, 0 ) );
         }
 
         INSERT_TASK_dplssq2(
-            &options, 1, NRMX( myp, 0 ) );
+            &options, 1, NRMX( 0, 0 ) );
     }
 
     /* Bcast norm over processes from node (0,0) */
@@ -192,10 +204,10 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
         /* Initialization of X in the first loop */
         if ( cnt == 0 )
         {
-            for (n = myq; n < A->nt; n += Q) {
+            for (n = chameleon_2dbc_first( repl, myq, Q ); n < A->nt; n += chameleon_2dbc_stride( repl, Q )) {
                 tempnn = A->get_blkdim( A, n, DIM_n, A->n );
 
-                if ( myp == 0 ) {
+                if ( repl || (myp == 0) ) {
 #if defined(PRECISION_z) || defined(PRECISION_c)
                     INSERT_TASK_dlag2z(
                         &options,
@@ -230,31 +242,35 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
          * copy of the scaled X.
          */
         scl = 1. / e0;
-        for (n = myq; n < A->nt; n += Q) {
+        for (n = chameleon_2dbc_first( repl, myq, Q ); n < A->nt; n += chameleon_2dbc_stride( repl, Q )) {
             tempnn = A->get_blkdim( A, n, DIM_n, A->n );
 
-            INSERT_TASK_zlascal(
-                &options,
-                ChamUpperLower, 1, tempnn, tempnn,
-                scl, X( myp, n ) );
+            for (pp = chameleon_2dbc_first( repl, myp, P ); pp < chameleon_2dbc_last( repl, myp, P ); pp++) {
+                INSERT_TASK_zlascal(
+                    &options,
+                    ChamUpperLower, 1, tempnn, tempnn,
+                    scl, X( pp, n ) );
+            }
         }
 
         /**
          *  Compute Sx = S * x
          */
-        for(m = myp; m < A->mt;  m+=P) {
+        for(m = chameleon_2dbc_first( repl, myp, P ); m < A->mt; m += chameleon_2dbc_stride( repl, P )) {
             tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+            pp     = m % P;
 
-            for (n = myq; n < A->nt; n += Q ) {
+            for (n = chameleon_2dbc_first( repl, myq, Q ); n < A->nt; n += chameleon_2dbc_stride( repl, Q )) {
                 tempnn = A->get_blkdim( A, n, DIM_n, A->n );
-                beta   = n == myq ? 0. : 1.;
+                qq     = n % Q;
+                beta   = n < Q ? 0. : 1.;
 
                 INSERT_TASK_zgemv(
                     &options,
                     ChamNoTrans, tempmm, tempnn,
-                    1.,   A(  m,   n ),
-                          X(  myp, n ), 1,
-                    beta, SX( m, myq ), 1 );
+                    1.,   A(  m,  n  ),
+                          X(  pp, n  ), 1,
+                    beta, SX( m,  qq ), 1 );
             }
 
             /* Reduce columns */
@@ -277,19 +293,21 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
         /**
          *  Compute x = S' * S * x = S' * Sx
          */
-        for ( n = myq; n < A->nt; n += Q ) {
+        for ( n = chameleon_2dbc_first( repl, myq, Q ); n < A->nt; n += chameleon_2dbc_stride( repl, Q ) ) {
             tempnn = A->get_blkdim( A, n, DIM_n, A->n );
+            qq     = n % Q;
 
-            for( m = myp; m < A->mt;  m += P ) {
+            for( m = chameleon_2dbc_first( repl, myp, P ); m < A->mt; m += chameleon_2dbc_stride( repl, P ) ) {
                 tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-                beta   = m == myp ? 0. : 1.;
+                pp     = m % P;
+                beta   = m < P ? 0. : 1.;
 
                 INSERT_TASK_zgemv(
                     &options,
                     ChamConjTrans, tempmm, tempnn,
-                    1.,   A(  m,   n ),
-                          SX( m, myq ), 1,
-                    beta, X(  myp, n ), 1 );
+                    1.,   A(  m,  n  ),
+                          SX( m,  qq ), 1,
+                    beta, X(  pp, n  ), 1 );
             }
 
             /* Reduce rows */
@@ -314,40 +332,42 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
          *
          * All rows of Q nodes compute the same thing in parallel due to replication.
          */
-        {
-            INSERT_TASK_dlaset(
-                &options,
-                ChamUpperLower, NRMX.mb, NRMX.nb,
-                1., 0.,
-                NRMX( myp, myq ) );
+        for(pp = chameleon_2dbc_first( repl, myp, P ); pp < chameleon_2dbc_last( repl, myp, P ); pp++) {
+            for(qq = chameleon_2dbc_first( repl, myq, Q ); qq < chameleon_2dbc_last( repl, myq, Q ); qq++) {
+                INSERT_TASK_dlaset(
+                    &options,
+                    ChamUpperLower, NRMX.mb, NRMX.nb,
+                    1., 0.,
+                    NRMX( pp, qq ) );
 
-            for( n = myq; n < A->nt; n += Q ) {
-                tempnn = A->get_blkdim( A, n, DIM_n, A->n );
+                for( n = qq; n < A->nt; n += Q ) {
+                    tempnn = A->get_blkdim( A, n, DIM_n, A->n );
 
-                INSERT_TASK_zgessq(
-                    &options, ChamEltwise, 1, tempnn,
-                    X(    myp, n   ),
-                    NRMX( myp, myq ) );
+                    INSERT_TASK_zgessq(
+                        &options, ChamEltwise, 1, tempnn,
+                        X(    pp, n  ),
+                        NRMX( pp, qq ) );
+                }
             }
 
             /* Reduce columns  */
             for(n = 1; n < chameleon_min( Q, A->nt ); n++) {
                 INSERT_TASK_dplssq(
                     &options, ChamEltwise, 1, 1,
-                    NRMX( myp, n ),
-                    NRMX( myp, 0 ) );
+                    NRMX( pp, n ),
+                    NRMX( pp, 0 ) );
             }
 
             INSERT_TASK_dplssq2(
-                &options, 1, NRMX( myp, 0 ) );
+                &options, 1, NRMX( pp, 0 ) );
 
             /* Broadcast the results to processes in the same row */
             for(n = 1; n < Q; n++) {
                 INSERT_TASK_dlacpy(
                     &options,
                     ChamUpperLower, 1, 1,
-                    NRMX( myp, 0 ),
-                    NRMX( myp, n ) );
+                    NRMX( pp, 0 ),
+                    NRMX( pp, n ) );
             }
         }
 
@@ -356,39 +376,41 @@ chameleon_pzgenm2( double tol, CHAM_desc_t *A, double *result,
          *
          * All columns of P nodes compute the same thing in parallel due to replication.
          */
-        {
-            INSERT_TASK_dlaset(
-                &options,
-                ChamUpperLower, NRMSX.mb, NRMSX.nb,
-                1., 0.,
-                NRMSX( myp, myq ) );
+        for(qq = chameleon_2dbc_first( repl, myq, Q ); qq < chameleon_2dbc_last( repl, myq, Q ); qq++) {
+            for(pp = chameleon_2dbc_first( repl, myp, P ); pp < chameleon_2dbc_last( repl, myp, P ); pp++) {
+                INSERT_TASK_dlaset(
+                    &options,
+                    ChamUpperLower, NRMSX.mb, NRMSX.nb,
+                    1., 0.,
+                    NRMSX( pp, qq ) );
 
-            for( m = myp; m < A->mt; m += P ) {
-                tempmm = A->get_blkdim( A, m, DIM_m, A->m );
-                INSERT_TASK_zgessq(
-                    &options, ChamEltwise, tempmm, 1,
-                    SX(    m,   myq ),
-                    NRMSX( myp, myq ) );
+                for( m = pp; m < A->mt; m += P ) {
+                    tempmm = A->get_blkdim( A, m, DIM_m, A->m );
+                    INSERT_TASK_zgessq(
+                        &options, ChamEltwise, tempmm, 1,
+                        SX(    m,  qq ),
+                        NRMSX( pp, qq ) );
+                }
             }
 
             /* Reduce rows */
             for( m = 1; m < chameleon_min( P, A->mt ); m++ ) {
                 INSERT_TASK_dplssq(
                     &options, ChamEltwise, 1, 1,
-                    NRMSX( m, myq ),
-                    NRMSX( 0, myq ) );
+                    NRMSX( m, qq ),
+                    NRMSX( 0, qq ) );
             }
 
             INSERT_TASK_dplssq2(
-                &options, 1, NRMSX( 0, myq ) );
+                &options, 1, NRMSX( 0, qq ) );
 
             /* Broadcast the results to processes in the same column */
             for(m = 1; m < P; m++) {
                 INSERT_TASK_dlacpy(
                     &options,
                     ChamUpperLower, 1, 1,
-                    NRMSX( 0, myq ),
-                    NRMSX( m, myq ) );
+                    NRMSX( 0, qq ),
+                    NRMSX( m, qq ) );
             }
         }
         NRMX.sync  = 1; /* Need to be sync to read the norm */

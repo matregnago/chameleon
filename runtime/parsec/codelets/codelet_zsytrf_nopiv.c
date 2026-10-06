@@ -53,7 +53,7 @@ void INSERT_TASK_zsytrf_nopiv(const RUNTIME_option_t *options,
         PARSEC_dtd_taskpool, CORE_zsytrf_nopiv_parsec, options->priority, PARSEC_DEV_CPU, "sytrf_nopiv",
         sizeof(cham_uplo_t),              &uplo,                PARSEC_VALUE,
         sizeof(int),                     &n,                   PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INOUT | PARSEC_AFFINITY,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
         sizeof(int),                     &iinfo,               PARSEC_VALUE,
         PARSEC_DTD_ARG_END );

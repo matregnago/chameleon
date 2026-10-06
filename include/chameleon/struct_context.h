@@ -46,6 +46,7 @@ typedef struct chameleon_context_s {
     cham_bool_t        autominmax_enabled;
     cham_bool_t        optlacpy_enabled;   /**< Enable runtime cpy instead of lacpy kernel            */
     cham_bool_t        runtime_paused;
+    cham_bool_t        replicated_submission; /**< All the ranks submit all the tasks, in the same order */
 
     cham_householder_t householder;        /**< "domino" (flat) or tree-based (reduction) Householder */
     cham_translation_t translation;        /**< In place or Out of place layout conversion            */

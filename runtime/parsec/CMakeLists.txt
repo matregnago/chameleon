@@ -82,6 +82,7 @@ precisions_rules_py(
 
 set(RUNTIME_COMMON
   ${CONTROL_SRC}
+  control/runtime_auxdc.c
   ${RUNTIME_COMMON_GENERATED}
   )
 

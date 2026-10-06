@@ -298,7 +298,7 @@ chameleon_pzsymm_summa_left( CHAM_context_t *chamctxt, cham_uplo_t uplo,
     cham_trans_t transA;
     int m, n, k, KT, lp, lq;
     int tempmm, tempnn, tempkk;
-    int lookahead, myp, myq;
+    int lookahead, myp, myq, p, q, repl;
     int P, Q;
 
     CHAMELEON_Complex64_t zbeta;
@@ -310,6 +310,7 @@ chameleon_pzsymm_summa_left( CHAM_context_t *chamctxt, cham_uplo_t uplo,
     Q   = chameleon_desc_datadist_get_iparam(C, 1);
     myp = C->myrank / Q;
     myq = C->myrank % Q;
+    repl = chameleon_replicated_submission( chamctxt );
 
     for (k = 0; k < KT; k++ ) {
         lp = (k % lookahead) * P;
@@ -347,18 +348,20 @@ chameleon_pzsymm_summa_left( CHAM_context_t *chamctxt, cham_uplo_t uplo,
         }
 
         /* Perform the update of this iteration */
-        for (m = myp; m < C->mt; m+=P) {
+        for (m = chameleon_2dbc_first( repl, myp, P ); m < C->mt; m += chameleon_2dbc_stride( repl, P )) {
+            p = m % P;
             tempmm = C->get_blkdim( C, m, DIM_m, C->m );
 
             if ( k == m ) {
-                for (n = myq; n < C->nt; n+=Q) {
+                for (n = chameleon_2dbc_first( repl, myq, Q ); n < C->nt; n += chameleon_2dbc_stride( repl, Q )) {
+                    q = n % Q;
                     tempnn = C->get_blkdim( C, n, DIM_n, C->n );
 
                     INSERT_TASK_zsymm(
                         options, ChamLeft, uplo,
                         tempmm, tempnn, A->mb,
-                        alpha, WA( m,        myq + lq ),
-                               WB( myp + lp, n        ),
+                        alpha, WA( m,        q + lq   ),
+                               WB( p + lp,   n        ),
                         zbeta, C(  m,        n        ) );
                 }
             }
@@ -372,14 +375,15 @@ chameleon_pzsymm_summa_left( CHAM_context_t *chamctxt, cham_uplo_t uplo,
                     transA = ChamNoTrans;
                 }
 
-                for (n = myq; n < C->nt; n+=Q) {
+                for (n = chameleon_2dbc_first( repl, myq, Q ); n < C->nt; n += chameleon_2dbc_stride( repl, Q )) {
+                    q = n % Q;
                     tempnn = C->get_blkdim( C, n, DIM_n, C->n );
 
                     INSERT_TASK_zgemm(
                         options, transA, ChamNoTrans,
                         tempmm, tempnn, tempkk, A->mb,
-                        alpha, WA( m,        myq + lq ),
-                               WB( myp + lp, n        ),
+                        alpha, WA( m,        q + lq   ),
+                               WB( p + lp,   n        ),
                         zbeta, C(  m,        n        ) );
                 }
             }
@@ -403,7 +407,7 @@ chameleon_pzsymm_summa_right( CHAM_context_t *chamctxt, cham_uplo_t uplo,
     cham_trans_t transA;
     int m, n, k, KT, lp, lq;
     int tempmm, tempnn, tempkk;
-    int lookahead, myp, myq;
+    int lookahead, myp, myq, p, q, repl;
     int P, Q;
 
     CHAMELEON_Complex64_t zbeta;
@@ -415,6 +419,7 @@ chameleon_pzsymm_summa_right( CHAM_context_t *chamctxt, cham_uplo_t uplo,
     Q   = chameleon_desc_datadist_get_iparam(C, 1);
     myp = C->myrank / Q;
     myq = C->myrank % Q;
+    repl = chameleon_replicated_submission( chamctxt );
 
     for (k = 0; k < KT; k++ ) {
         lp = (k % lookahead) * P;
@@ -452,19 +457,21 @@ chameleon_pzsymm_summa_right( CHAM_context_t *chamctxt, cham_uplo_t uplo,
         }
 
         /* Perform the update of this iteration */
-        for (n = myq; n < C->nt; n+=Q) {
+        for (n = chameleon_2dbc_first( repl, myq, Q ); n < C->nt; n += chameleon_2dbc_stride( repl, Q )) {
+            q = n % Q;
             tempnn = C->get_blkdim( C, n, DIM_n, C->n );
 
             if ( k == n ) {
-                for (m = myp; m < C->mt; m+=P) {
+                for (m = chameleon_2dbc_first( repl, myp, P ); m < C->mt; m += chameleon_2dbc_stride( repl, P )) {
+                    p = m % P;
                     tempmm = C->get_blkdim( C, m, DIM_m, C->m );
 
                     /* A has been stored in WA or WB for the summa ring */
                     INSERT_TASK_zsymm(
                         options, ChamRight, uplo,
                         tempmm, tempnn, A->mb,
-                        alpha, WB( myp + lp, n        ),
-                               WA( m,        myq + lq ),
+                        alpha, WB( p + lp,   n        ),
+                               WA( m,        q + lq   ),
                         zbeta, C(  m,        n        ) );
                 }
             }
@@ -478,14 +485,15 @@ chameleon_pzsymm_summa_right( CHAM_context_t *chamctxt, cham_uplo_t uplo,
                     transA = ChamNoTrans;
                 }
 
-                for (m = myp; m < C->mt; m+=P) {
+                for (m = chameleon_2dbc_first( repl, myp, P ); m < C->mt; m += chameleon_2dbc_stride( repl, P )) {
+                    p = m % P;
                     tempmm = C->get_blkdim( C, m, DIM_m, C->m );
 
                     INSERT_TASK_zgemm(
                         options, ChamNoTrans, transA,
                         tempmm, tempnn, tempkk, A->mb,
-                        alpha, WA( m,        myq + lq ),
-                               WB( myp + lp, n        ),
+                        alpha, WA( m,        q + lq   ),
+                               WB( p + lp,   n        ),
                         zbeta, C(  m,        n        ) );
                 }
             }

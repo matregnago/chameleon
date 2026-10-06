@@ -39,11 +39,18 @@ chameleon_pzplrnk_generic( CHAM_context_t         *chamctxt,
     RUNTIME_sequence_t      *sequence = options->sequence;
     const RUNTIME_request_t *request  = options->request;
     CHAMELEON_Complex64_t zbeta;
-    int  m, n, k, KT;
+    int  m, n, k, KT, r, i;
     int  tempmm, tempnn, tempkk;
     int  myrank  = RUNTIME_comm_rank( chamctxt );
-    int  initA;
-    int *initB = malloc( sizeof(int) * C->nt );
+    int  repl    = chameleon_replicated_submission( chamctxt );
+    /*
+     * The workspaces of a tile are indexed by the owner of C(m, n). Without
+     * replicated submission, only the local rank is considered, otherwise the
+     * initializations are tracked per rank.
+     */
+    int  nr      = repl ? RUNTIME_comm_size( chamctxt ) : 1;
+    int *initA   = malloc( sizeof(int) * nr );
+    int *initB   = malloc( sizeof(int) * nr * C->nt );
 
     KT = (K + C->mb - 1) / C->mb;
 
@@ -51,52 +58,63 @@ chameleon_pzplrnk_generic( CHAM_context_t         *chamctxt,
         tempkk = k == KT-1 ? K - k * WA->nb : WA->nb;
         zbeta  = k == 0 ? 0. : 1.;
 
-        memset( initB, 0, sizeof(int) * C->nt );
+        memset( initB, 0, sizeof(int) * nr * C->nt );
 
         for (m = 0; m < C->mt; m++) {
             tempmm = C->get_blkdim( C, m, DIM_m, C->m );
 
-            initA = 0;
+            memset( initA, 0, sizeof(int) * nr );
 
             for (n = 0; n < C->nt; n++) {
                 tempnn = C->get_blkdim( C, n, DIM_n, C->n );
 
-                if ( C->get_rankof( C(m, n) ) == myrank ) {
-                    if ( !initA ) {
-                        INSERT_TASK_zplrnt(
-                            options,
-                            tempmm, tempkk, WA(m, myrank),
-                            WA->m, m * WA->mb, k * WA->nb, seedA );
-                        initA = 1;
-                    }
-                    if ( !initB[n] ) {
-                        INSERT_TASK_zplrnt(
-                            options,
-                            tempkk, tempnn, WB(myrank, n),
-                            WB->m, k * WB->mb, n * WB->nb, seedB );
-                        initB[n] = 1;
-                    }
+                r = C->get_rankof( C(m, n) );
+                if ( !repl && (r != myrank) ) {
+                    continue;
+                }
+                i = repl ? r : 0;
 
-                    INSERT_TASK_zgemm(
+                if ( !initA[i] ) {
+                    INSERT_TASK_zplrnt(
                         options,
-                        ChamNoTrans, ChamNoTrans,
-                        tempmm, tempnn, tempkk, C->mb,
-                        1.,    WA(m, myrank),
-                               WB(myrank, n),
-                        zbeta, C(m, n));
+                        tempmm, tempkk, WA(m, r),
+                        WA->m, m * WA->mb, k * WA->nb, seedA );
+                    initA[i] = 1;
+                }
+                if ( !initB[i * C->nt + n] ) {
+                    INSERT_TASK_zplrnt(
+                        options,
+                        tempkk, tempnn, WB(r, n),
+                        WB->m, k * WB->mb, n * WB->nb, seedB );
+                    initB[i * C->nt + n] = 1;
+                }
+
+                INSERT_TASK_zgemm(
+                    options,
+                    ChamNoTrans, ChamNoTrans,
+                    tempmm, tempnn, tempkk, C->mb,
+                    1.,    WA(m, r),
+                           WB(r, n),
+                    zbeta, C(m, n));
+            }
+            for (i = 0; i < nr; i++) {
+                if ( initA[i] ) {
+                    r = repl ? i : myrank;
+                    chameleon_data_flush( sequence, WA(m, r), request->flush );
                 }
             }
-            if ( initA ) {
-                chameleon_data_flush( sequence, WA(m, myrank), request->flush );
-            }
         }
-        for (n = 0; n < C->nt; n++) {
-            if ( initB[n] ) {
-                chameleon_data_flush( sequence, WB(myrank, n), request->flush );
+        for (i = 0; i < nr; i++) {
+            r = repl ? i : myrank;
+            for (n = 0; n < C->nt; n++) {
+                if ( initB[i * C->nt + n] ) {
+                    chameleon_data_flush( sequence, WB(r, n), request->flush );
+                }
             }
         }
     }
 
+    free( initA );
     free( initB );
     (void)chamctxt;
 }
@@ -119,50 +137,63 @@ chameleon_pzplrnk_2dbc( CHAM_context_t         *chamctxt,
     CHAMELEON_Complex64_t    zbeta;
     int m, n, k, KT;
     int tempmm, tempnn, tempkk;
-    int p, q, myp, myq;
+    int p, q, myp, myq, pm, qn, pp, qq, repl;
 
-    KT  = (K + C->mb - 1) / C->mb;
-    p   = chameleon_desc_datadist_get_iparam( C, 0 );
-    q   = chameleon_desc_datadist_get_iparam( C, 1 );
-    myp = C->myrank / q;
-    myq = C->myrank % q;
+    KT   = (K + C->mb - 1) / C->mb;
+    p    = chameleon_desc_datadist_get_iparam( C, 0 );
+    q    = chameleon_desc_datadist_get_iparam( C, 1 );
+    myp  = C->myrank / q;
+    myq  = C->myrank % q;
+    repl = chameleon_replicated_submission( chamctxt );
 
     for (k = 0; k < KT; k++) {
         tempkk = k == KT-1 ? K - k * WA->nb : WA->nb;
         zbeta  = k == 0 ? 0. : 1.;
 
-        for (n = myq; n < C->nt; n += q) {
+        /* WB(pp, n) replicates the row k of B on each row of processes */
+        for (n = chameleon_2dbc_first( repl, myq, q ); n < C->nt; n += chameleon_2dbc_stride( repl, q )) {
             tempnn = C->get_blkdim( C, n, DIM_n, C->n );
 
-            INSERT_TASK_zplrnt(
-                options,
-                tempkk, tempnn, WB(myp, n),
-                WB->m, k * WB->mb, n * WB->nb, seedB );
+            for (pp = chameleon_2dbc_first( repl, myp, p ); pp < chameleon_2dbc_last( repl, myp, p ); pp++) {
+                INSERT_TASK_zplrnt(
+                    options,
+                    tempkk, tempnn, WB(pp, n),
+                    WB->m, k * WB->mb, n * WB->nb, seedB );
+            }
         }
 
-        for (m = myp; m < C->mt; m += p) {
+        for (m = chameleon_2dbc_first( repl, myp, p ); m < C->mt; m += chameleon_2dbc_stride( repl, p )) {
             tempmm = C->get_blkdim( C, m, DIM_m, C->m );
+            pm     = m % p;
 
-            INSERT_TASK_zplrnt(
-                options,
-                tempmm, tempkk, WA(m, myq),
-                WA->m, m * WA->mb, k * WA->nb, seedA );
+            /* WA(m, qq) replicates the column k of A on each column of processes */
+            for (qq = chameleon_2dbc_first( repl, myq, q ); qq < chameleon_2dbc_last( repl, myq, q ); qq++) {
+                INSERT_TASK_zplrnt(
+                    options,
+                    tempmm, tempkk, WA(m, qq),
+                    WA->m, m * WA->mb, k * WA->nb, seedA );
+            }
 
-            for (n = myq; n < C->nt; n+=q) {
+            for (n = chameleon_2dbc_first( repl, myq, q ); n < C->nt; n += chameleon_2dbc_stride( repl, q )) {
                 tempnn = C->get_blkdim( C, n, DIM_n, C->n );
+                qn     = n % q;
 
                 INSERT_TASK_zgemm(
                     options,
                     ChamNoTrans, ChamNoTrans,
                     tempmm, tempnn, tempkk, C->mb,
-                    1.,    WA(m, myq),
-                           WB(myp, n),
+                    1.,    WA(m, qn),
+                           WB(pm, n),
                     zbeta,  C(m, n));
             }
-            chameleon_data_flush( sequence, WA(m, myq), request->flush );
+            for (qq = chameleon_2dbc_first( repl, myq, q ); qq < chameleon_2dbc_last( repl, myq, q ); qq++) {
+                chameleon_data_flush( sequence, WA(m, qq), request->flush );
+            }
         }
-        for (n = myq; n < C->nt; n+=q) {
-            chameleon_data_flush( sequence, WB(myp, n), request->flush );
+        for (n = chameleon_2dbc_first( repl, myq, q ); n < C->nt; n += chameleon_2dbc_stride( repl, q )) {
+            for (pp = chameleon_2dbc_first( repl, myp, p ); pp < chameleon_2dbc_last( repl, myp, p ); pp++) {
+                chameleon_data_flush( sequence, WB(pp, n), request->flush );
+            }
         }
     }
     (void)chamctxt;

@@ -410,8 +410,15 @@ int chameleon_desc_init_storage( const CHAM_context_t *chamctxt, CHAM_desc_t *de
 
     switch ( (intptr_t)mat ) {
     case CHAMELEON_MAT_CASE_ALLOC_TILE:
-        if ( chamctxt->scheduler == RUNTIME_SCHED_STARPU ) {
-            /* Let's use the allocation on the fly as in OOC */
+        if ( ( chamctxt->scheduler == RUNTIME_SCHED_STARPU ) ||
+             ( chamctxt->scheduler == RUNTIME_SCHED_PARSEC ) )
+        {
+            /*
+             * Let's use the allocation on the fly as in OOC. With PaRSEC, the
+             * tiles are allocated on first use by the runtime descriptor, which
+             * is required by custom data distributions as the global tile
+             * storage assumes a 2D block cyclic one.
+             */
             desc->get_blkaddr = chameleon_getaddr_null;
             desc->mat = NULL;
             break;

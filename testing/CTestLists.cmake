@@ -60,9 +60,9 @@ if (NOT CHAMELEON_SIMULATION)
     endif()
     # LU
     set( TESTS ${TESTS} getrf_nopiv getrs_nopiv gesv_nopiv )
-    if ( CHAMELEON_SCHED_STARPU )
+    if ( CHAMELEON_SCHED_STARPU OR CHAMELEON_SCHED_PARSEC )
       set( TESTS ${TESTS} laswp )
-      if ( HAVE_STARPU_NONE_NONZERO )
+      if ( CHAMELEON_SCHED_PARSEC OR HAVE_STARPU_NONE_NONZERO )
         set( TESTS ${TESTS} getrf getrs gesv )
       endif()
     endif()
@@ -148,7 +148,7 @@ if (NOT CHAMELEON_SIMULATION)
             PROPERTIES ENVIRONMENT "${trtri_env}" )
         endforeach()
 
-        if ( CHAMELEON_SCHED_STARPU )
+        if ( CHAMELEON_SCHED_STARPU OR CHAMELEON_SCHED_PARSEC )
           set( laswp_test_prefix test_${cat}_${prec}laswp )
 
           if ( ${cat} STREQUAL "mpi" )
@@ -165,7 +165,7 @@ if (NOT CHAMELEON_SIMULATION)
           #   add_test( ${laswp_test_prefix}_ppiv_comm_with_task ${laswp_test_cmd} -P ${NP} )
           # endif()
 
-          if ( CHAMELEON_USE_RECURSIVE_TASKS AND
+          if ( CHAMELEON_SCHED_STARPU AND CHAMELEON_USE_RECURSIVE_TASKS AND
                ( ${cat} STREQUAL "shm" OR ${cat} STREQUAL "mpi" ) )
             if ( ${cat} STREQUAL "mpi" )
               set( recursive_mtxfmts 1 )
@@ -203,7 +203,7 @@ if (NOT CHAMELEON_SIMULATION)
           endif()
         endif()
 
-        if ( CHAMELEON_SCHED_STARPU AND HAVE_STARPU_NONE_NONZERO )
+        if ( CHAMELEON_SCHED_PARSEC OR ( CHAMELEON_SCHED_STARPU AND HAVE_STARPU_NONE_NONZERO ) )
           set( getrf_test_prefix test_${cat}_${prec}getrf )
           set( getrf_test_cmd ${FULLPREFIX} -P ${NP} -f input/getrf.in )
 
@@ -227,8 +227,8 @@ if (NOT CHAMELEON_SIMULATION)
           set_tests_properties( ${getrf_test_prefix}_split_laswp_set_gemm
             PROPERTIES ENVIRONMENT "CHAMELEON_GETRF_ALGO=ppiv;CHAMELEON_BATCH_SIZE=0;CHAMELEON_SPLIT_LASWP_GEMM=1" )
 
-          add_test( ${getrf_test_prefix}_split_laswp_set_gemm ${getrf_test_cmd} )
-          set_tests_properties( ${getrf_test_prefix}_split_laswp_set_gemm
+          add_test( ${getrf_test_prefix}_split_laswp_set_gemm_batch ${getrf_test_cmd} )
+          set_tests_properties( ${getrf_test_prefix}_split_laswp_set_gemm_batch
             PROPERTIES ENVIRONMENT "CHAMELEON_GETRF_ALGO=ppiv;CHAMELEON_BATCH_SIZE=3;CHAMELEON_SPLIT_LASWP_GEMM=1" )
 
           # if ( ${cat} STREQUAL "mpi" )

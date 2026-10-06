@@ -100,6 +100,8 @@ CORE_zgeqrt_parsec ( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &m, &n, &ib, &A, &lda, &T, &ldt, &TAU, &WORK );
+    TAU = chameleon_parsec_scratch_align( TAU );
+    WORK = chameleon_parsec_scratch_align( WORK );
 
     CORE_zlaset( ChamUpperLower, ib, n, 0., 0., T, ldt );
     CORE_zgeqrt( m, n, ib, A, lda, T, ldt, TAU, WORK );
@@ -122,11 +124,11 @@ void INSERT_TASK_zgeqrt(const RUNTIME_option_t *options,
         sizeof(int),           &m,                             PARSEC_VALUE,
         sizeof(int),           &n,                             PARSEC_VALUE,
         sizeof(int),           &ib,                            PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INOUT | PARSEC_AFFINITY,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( T, CHAMELEON_Complex64_t, Tm, Tn ), chameleon_parsec_get_arena_index( T ) | PARSEC_OUTPUT,
+        PASSED_BY_REF,         RTBLKADDR( T, CHAMELEON_Complex64_t, Tm, Tn ), chameleon_parsec_get_arena_index( T, Tm, Tn ) | PARSEC_OUTPUT,
         sizeof(int), &(tileT->ld), PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t)*nb,       NULL,                         PARSEC_SCRATCH,
-        sizeof(CHAMELEON_Complex64_t)*ib*nb,    NULL,                         PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*nb ),       NULL,                         PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*ib*nb ),    NULL,                         PARSEC_SCRATCH,
         PARSEC_DTD_ARG_END );
 }

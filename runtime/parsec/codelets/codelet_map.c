@@ -22,18 +22,19 @@ struct parsec_map_args_s {
     int                  m, n;
     cham_map_operator_t *op_fcts;
     void                *op_args;
-    const CHAM_desc_t   *desc[1];
+    const CHAM_desc_t   *desc[3];
 };
 
 static inline int
 CORE_map_one_parsec( parsec_execution_stream_t *context,
                      parsec_task_t             *this_task )
 {
-    struct parsec_map_args_s *pargs = NULL;
+    struct parsec_map_args_s  args;
+    struct parsec_map_args_s *pargs = &args;
     const CHAM_desc_t        *descA;
     CHAM_tile_t               tileA;
 
-    parsec_dtd_unpack_args( this_task, &pargs, &(tileA.mat) );
+    parsec_dtd_unpack_args( this_task, &args, &(tileA.mat) );
 
     descA = pargs->desc[0];
     tileA.rank    = 0;
@@ -46,8 +47,6 @@ CORE_map_one_parsec( parsec_execution_stream_t *context,
     pargs->op_fcts->cpufunc( pargs->op_args, pargs->uplo, pargs->m, pargs->n, 1,
                              descA, &tileA );
 
-    free( pargs );
-
     (void)context;
     return PARSEC_HOOK_RETURN_DONE;
 }
@@ -56,11 +55,12 @@ static inline int
 CORE_map_two_parsec( parsec_execution_stream_t *context,
                      parsec_task_t             *this_task )
 {
-    struct parsec_map_args_s *pargs = NULL;
+    struct parsec_map_args_s  args;
+    struct parsec_map_args_s *pargs = &args;
     const CHAM_desc_t        *descA, *descB;
     CHAM_tile_t               tileA,  tileB;
 
-    parsec_dtd_unpack_args( this_task, &pargs, &(tileA.mat), &(tileB.mat) );
+    parsec_dtd_unpack_args( this_task, &args, &(tileA.mat), &(tileB.mat) );
 
     descA = pargs->desc[0];
     tileA.rank    = 0;
@@ -81,8 +81,6 @@ CORE_map_two_parsec( parsec_execution_stream_t *context,
     pargs->op_fcts->cpufunc( pargs->op_args, pargs->uplo, pargs->m, pargs->n, 2,
                              descA, &tileA, descB, &tileB );
 
-    free( pargs );
-
     (void)context;
     return PARSEC_HOOK_RETURN_DONE;
 }
@@ -91,11 +89,12 @@ static inline int
 CORE_map_three_parsec( parsec_execution_stream_t *context,
                        parsec_task_t             *this_task )
 {
-    struct parsec_map_args_s *pargs = NULL;
+    struct parsec_map_args_s  args;
+    struct parsec_map_args_s *pargs = &args;
     const CHAM_desc_t        *descA, *descB, *descC;
     CHAM_tile_t               tileA,  tileB,  tileC;
 
-    parsec_dtd_unpack_args( this_task, &pargs, &(tileA.mat), &(tileB.mat), &(tileC.mat) );
+    parsec_dtd_unpack_args( this_task, &args, &(tileA.mat), &(tileB.mat), &(tileC.mat) );
 
     descA = pargs->desc[0];
     tileA.rank    = 0;
@@ -124,8 +123,6 @@ CORE_map_three_parsec( parsec_execution_stream_t *context,
     pargs->op_fcts->cpufunc( pargs->op_args, pargs->uplo, pargs->m, pargs->n, 3,
                              descA, &tileA, descB, &tileB, descC, &tileC );
 
-    free( pargs );
-
     (void)context;
     return PARSEC_HOOK_RETURN_DONE;
 }
@@ -136,51 +133,61 @@ void INSERT_TASK_map( const RUNTIME_option_t *options,
                       cham_map_operator_t *op_fcts, void *op_args )
 {
     parsec_taskpool_t        *PARSEC_dtd_taskpool = (parsec_taskpool_t *)(options->sequence->schedopt);
-    struct parsec_map_args_s *pargs      = NULL;
-    size_t                    pargs_size = 0;
-    int                       i;
+    struct parsec_map_args_s  pargs;
+    int                       flags[3] = { 0, 0, 0 };
+    int                       i, aff = -1;
 
     if ( ( ndata < 0 ) || ( ndata > 3 ) ) {
         fprintf( stderr, "INSERT_TASK_map() can handle only 1 to 3 parameters\n" );
         return;
     }
 
-    pargs_size = sizeof( struct parsec_map_args_s ) + sizeof( CHAM_desc_t * ) * (ndata - 1);
-    pargs = malloc( pargs_size );
-    pargs->uplo    = uplo;
-    pargs->m       = m;
-    pargs->n       = n;
-    pargs->op_fcts = op_fcts;
-    pargs->op_args = op_args;
+    /*
+     * The arguments are passed by value: they are copied in the task by
+     * PaRSEC, so nothing has to be released by the ranks that do not execute
+     * the task.
+     */
+    memset( &pargs, 0, sizeof(struct parsec_map_args_s) );
+    pargs.uplo    = uplo;
+    pargs.m       = m;
+    pargs.n       = n;
+    pargs.op_fcts = op_fcts;
+    pargs.op_args = op_args;
     for( i=0; i<ndata; i++ ) {
-        pargs->desc[i] = data[i].desc;
+        pargs.desc[i] = data[i].desc;
+        flags[i] = chameleon_parsec_get_arena_index( data[i].desc, m, n ) | cham_to_parsec_access( data[i].access );
+        /* The task is executed by the owner of the first written data */
+        if ( (aff == -1) && (data[i].access != ChamR) ) {
+            aff = i;
+        }
     }
+    flags[ (aff == -1) ? 0 : aff ] |= PARSEC_AFFINITY;
 
     switch( ndata ) {
     case 1:
         parsec_dtd_insert_task(
             PARSEC_dtd_taskpool, CORE_map_one_parsec, options->priority, PARSEC_DEV_CPU, op_fcts->name,
-            sizeof(struct parsec_map_args_s*), &pargs, PARSEC_VALUE,
-            PASSED_BY_REF, RTBLKADDR( data[0].desc, void, m, n ), chameleon_parsec_get_arena_index( data[0].desc ) | cham_to_parsec_access( data[0].access ),
+            sizeof(struct parsec_map_args_s), &pargs, PARSEC_VALUE,
+            PASSED_BY_REF, RTBLKADDR( data[0].desc, void, m, n ), flags[0],
             PARSEC_DTD_ARG_END );
         break;
 
     case 2:
         parsec_dtd_insert_task(
             PARSEC_dtd_taskpool, CORE_map_two_parsec, options->priority, PARSEC_DEV_CPU, op_fcts->name,
-            sizeof(struct parsec_map_args_s*), &pargs, PARSEC_VALUE,
-            PASSED_BY_REF, RTBLKADDR( data[0].desc, void, m, n ), chameleon_parsec_get_arena_index( data[0].desc ) | cham_to_parsec_access( data[0].access ),
-            PASSED_BY_REF, RTBLKADDR( data[1].desc, void, m, n ), chameleon_parsec_get_arena_index( data[1].desc ) | cham_to_parsec_access( data[1].access ),
+            sizeof(struct parsec_map_args_s), &pargs, PARSEC_VALUE,
+            PASSED_BY_REF, RTBLKADDR( data[0].desc, void, m, n ), flags[0],
+            PASSED_BY_REF, RTBLKADDR( data[1].desc, void, m, n ), flags[1],
             PARSEC_DTD_ARG_END );
         break;
 
     case 3:
         parsec_dtd_insert_task(
             PARSEC_dtd_taskpool, CORE_map_three_parsec, options->priority, PARSEC_DEV_CPU, op_fcts->name,
-            sizeof(struct parsec_map_args_s*), &pargs, PARSEC_VALUE,
-            PASSED_BY_REF, RTBLKADDR( data[0].desc, void, m, n ), chameleon_parsec_get_arena_index( data[0].desc ) | cham_to_parsec_access( data[0].access ),
-            PASSED_BY_REF, RTBLKADDR( data[1].desc, void, m, n ), chameleon_parsec_get_arena_index( data[1].desc ) | cham_to_parsec_access( data[1].access ),
-            PASSED_BY_REF, RTBLKADDR( data[2].desc, void, m, n ), chameleon_parsec_get_arena_index( data[2].desc ) | cham_to_parsec_access( data[2].access ),
+            sizeof(struct parsec_map_args_s), &pargs, PARSEC_VALUE,
+            PASSED_BY_REF, RTBLKADDR( data[0].desc, void, m, n ), flags[0],
+            PASSED_BY_REF, RTBLKADDR( data[1].desc, void, m, n ), flags[1],
+            PASSED_BY_REF, RTBLKADDR( data[2].desc, void, m, n ), flags[2],
             PARSEC_DTD_ARG_END );
         break;
     }

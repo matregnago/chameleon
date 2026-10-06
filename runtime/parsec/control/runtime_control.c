@@ -48,6 +48,15 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
     chamctxt->schedopt = (void *)parsec_init(default_ncores, argc, NULL);
 
     if ( NULL != chamctxt->schedopt ) {
+#if defined(CHAMELEON_USE_MPI)
+        /* PaRSEC uses MPI_COMM_WORLD by default */
+        int same;
+        MPI_Comm_compare( chamctxt->comm, MPI_COMM_WORLD, &same );
+        if ( same != MPI_IDENT ) {
+            parsec_remote_dep_set_ctx( (parsec_context_t *)(chamctxt->schedopt),
+                                       (intptr_t)(chamctxt->comm) );
+        }
+#endif
         chamctxt->nworkers = ncpus;
         chamctxt->nthreads_per_worker = nthreads_per_worker;
         hres = CHAMELEON_SUCCESS;
@@ -65,6 +74,13 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
 void RUNTIME_finalize( CHAM_context_t *chamctxt )
 {
     parsec_context_t *parsec = (parsec_context_t*)chamctxt->schedopt;
+
+    /* Wait for the workers, the context must be started to be waited */
+    parsec_context_start( parsec );
+    parsec_context_wait( parsec );
+
+    chameleon_parsec_taskpool_release_all();
+    chameleon_parsec_arena_fini( parsec );
     parsec_fini(&parsec);
     return;
 }
@@ -93,9 +109,16 @@ void RUNTIME_resume( CHAM_context_t *chamctxt )
  */
 void RUNTIME_barrier( CHAM_context_t *chamctxt )
 {
-    parsec_context_t *parsec = (parsec_context_t*)(chamctxt->schedopt);
-    // This will be a problem with the fake tasks inserted to detect end of DTD algorithms
-    parsec_context_wait( parsec );
+    /*
+     * The tasks of the sequences are completed by their wait, and the
+     * parsec_context_wait() is done at finalize: entering the wait of all the
+     * taskpools of the context while some of them are being released by the
+     * termination detection is not safe.
+     */
+#if defined(CHAMELEON_USE_MPI)
+    MPI_Barrier( chamctxt->comm );
+#endif
+    (void)chamctxt;
     return;
 }
 
@@ -135,7 +158,7 @@ int RUNTIME_comm_rank( const CHAM_context_t *chamctxt )
 {
     int rank = 0;
 #if defined(CHAMELEON_USE_MPI)
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_rank( chamctxt->comm, &rank );
 #endif
 
     (void)chamctxt;
@@ -149,7 +172,7 @@ int RUNTIME_comm_size( const CHAM_context_t *chamctxt )
 {
     int size = 1;
 #if defined(CHAMELEON_USE_MPI)
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_size( chamctxt->comm, &size );
 #endif
 
     (void)chamctxt;

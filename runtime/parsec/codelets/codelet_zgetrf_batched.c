@@ -16,13 +16,18 @@
  *
  * @author Alycia Lisito
  * @author Matteo Marcos
- * @date 2025-12-19
+ * @date 2026-10-05
  * @precisions normal z -> c d s
  *
  */
 #include "chameleon_parsec.h"
 #include "chameleon/tasks_z.h"
+#include "control/compute_z.h"
 
+/*
+ * First version: the batched tasks are forwarded to the single tile tasks, so
+ * there is nothing left to submit at flush time.
+ */
 void
 INSERT_TASK_zgetrf_panel_offdiag_batched( const RUNTIME_option_t *options,
                                           int m, int n, int h, int m0,
@@ -31,17 +36,9 @@ INSERT_TASK_zgetrf_panel_offdiag_batched( const RUNTIME_option_t *options,
                                           void **clargs_ptr,
                                           CHAM_desc_pivot_t *pivot )
 {
-    assert( 0 );
-    (void)options;
-    (void)m;
-    (void)n;
-    (void)h;
-    (void)m0;
-    (void)A;
-    (void)Am;
-    (void)An;
+    INSERT_TASK_zgetrf_percol_offdiag( options, m, n, h, m0, A, Am, An, pivot );
+    (void)ws;
     (void)clargs_ptr;
-    (void)pivot;
 }
 
 void
@@ -50,7 +47,6 @@ INSERT_TASK_zgetrf_panel_offdiag_batched_flush( const RUNTIME_option_t *options,
                                                 void **clargs_ptr,
                                                 CHAM_desc_pivot_t *pivot )
 {
-    assert( 0 );
     (void)options;
     (void)A;
     (void)An;
@@ -68,23 +64,17 @@ INSERT_TASK_zgetrf_panel_blocked_batched( const RUNTIME_option_t *options,
                                           CHAM_ipiv_t *ipiv,
                                           CHAM_desc_pivot_t *pivot )
 {
-    assert( 0 );
-    (void)options;
-    (void)m;
-    (void)n;
-    (void)h;
-    (void)m0;
-    (void)readUp;
-    (void)ws;
-    (void)A;
-    (void)Am;
-    (void)An;
-    (void)U;
-    (void)Um;
-    (void)Un;
+    int ib = ((struct chameleon_pzgetrf_s *)ws)->ib;
+
+    if ( Am == An ) {
+        INSERT_TASK_zgetrf_blocked_diag( options, m, n, h, m0, ib, readUp,
+                                         A, Am, An, U, Um, Un, ipiv, pivot );
+    }
+    else {
+        INSERT_TASK_zgetrf_blocked_offdiag( options, m, n, h, m0, ib, readUp,
+                                            A, Am, An, U, Um, Un, pivot );
+    }
     (void)clargs_ptr;
-    (void)ipiv;
-    (void)pivot;
 }
 
 void
@@ -95,7 +85,6 @@ INSERT_TASK_zgetrf_panel_blocked_batched_flush( const RUNTIME_option_t *options,
                                                 CHAM_ipiv_t *ipiv,
                                                 CHAM_desc_pivot_t *pivot )
 {
-    assert( 0 );
     (void)options;
     (void)A;
     (void)An;

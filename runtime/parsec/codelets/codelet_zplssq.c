@@ -54,8 +54,8 @@ void INSERT_TASK_zplssq( const RUNTIME_option_t *options,
         sizeof(int),           &storev,                           PARSEC_VALUE,
         sizeof(int),           &M,                                PARSEC_VALUE,
         sizeof(int),           &N,                                PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( SCALESUMSQ, double, SCALESUMSQm, SCALESUMSQn ), chameleon_parsec_get_arena_index( SCALESUMSQ) | PARSEC_INPUT,
-        PASSED_BY_REF,         RTBLKADDR( SCLSSQ, double, SCLSSQm, SCLSSQn ), chameleon_parsec_get_arena_index( SCLSSQ) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( SCALESUMSQ, double, SCALESUMSQm, SCALESUMSQn ), chameleon_parsec_get_arena_index( SCALESUMSQ, SCALESUMSQm, SCALESUMSQn ) | PARSEC_INPUT,
+        PASSED_BY_REF,         RTBLKADDR( SCLSSQ, double, SCLSSQm, SCLSSQn ), chameleon_parsec_get_arena_index( SCLSSQ, SCLSSQm, SCLSSQn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         PARSEC_DTD_ARG_END );
 }
 
@@ -83,6 +83,6 @@ void INSERT_TASK_zplssq2( const RUNTIME_option_t *options, int N,
     parsec_dtd_insert_task(
         PARSEC_dtd_taskpool, CORE_zplssq2_parsec, options->priority, PARSEC_DEV_CPU, "plssq2",
         sizeof(int),           &N,                                PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( RESULT, double, RESULTm, RESULTn ), chameleon_parsec_get_arena_index( RESULT) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( RESULT, double, RESULTm, RESULTn ), chameleon_parsec_get_arena_index( RESULT, RESULTm, RESULTn ) | PARSEC_INOUT | PARSEC_AFFINITY,
         PARSEC_DTD_ARG_END );
 }

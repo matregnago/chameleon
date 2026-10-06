@@ -18,6 +18,12 @@ stdenv.mkDerivation {
     hash = "sha256-cgLZeWfznrUjCpEV7YR2uCgoigYVZH63q/Xl35ncpWk=";
   };
 
+  # Races of the DTD interface hit by the Chameleon tests (0001 is upstream a74104665)
+  patches = [
+    ./parsec-patches/0001-data-fix-use-after-free-race-in-self-contained-data-release.patch
+    ./parsec-patches/0002-dtd-two-races-in-the-tracking-of-tile-users.patch
+  ];
+
   postPatch = ''
     substituteInPlace parsec/include/parsec.pc.in \
       --replace-fail 'exec_prefix=''${prefix}/@PARSEC_INSTALL_BINDIR@' 'exec_prefix=@CMAKE_INSTALL_FULL_BINDIR@' \

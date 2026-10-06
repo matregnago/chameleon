@@ -11,13 +11,17 @@
  *
  * @version 1.4.0
  * @author Alycia Lisito
- * @date 2025-12-19
+ * @date 2026-10-05
  * @precisions normal z -> c d s
  *
  */
 #include "chameleon_parsec.h"
 #include "chameleon/tasks_z.h"
 
+/*
+ * First version: the permutation of C and its update are submitted as two
+ * single tile tasks, and the flush has nothing left to submit.
+ */
 void INSERT_TASK_zlaswp_gemm( const RUNTIME_option_t *options,
                               cham_side_t             side,
                               cham_dir_t              dir,
@@ -33,28 +37,14 @@ void INSERT_TASK_zlaswp_gemm( const RUNTIME_option_t *options,
                               const CHAM_desc_t      *C,    int Cm,  int Cn,
                               void                  **clargs_ptr )
 {
-    (void)options;
-    (void)side;
-    (void)dir;
-    (void)m0;
-    (void)m;
-    (void)n;
-    (void)k;
+    const CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
+    const CHAMELEON_Complex64_t mzone = (CHAMELEON_Complex64_t)-1.0;
+
+    INSERT_TASK_zlaswp_set( options, side, dir, m0, m, n, k, ipiv, ipivk,
+                            WA, WAm, WAn, C, Cm, Cn );
+    INSERT_TASK_zgemm( options, ChamNoTrans, ChamNoTrans, m, n, k, C->mb,
+                       mzone, A, Am, An, B, Bm, Bn, zone, C, Cm, Cn );
     (void)ws;
-    (void)ipiv;
-    (void)ipivk;
-    (void)WA;
-    (void)WAm;
-    (void)WAn;
-    (void)A;
-    (void)Am;
-    (void)An;
-    (void)B;
-    (void)Bm;
-    (void)Bn;
-    (void)C;
-    (void)Cm;
-    (void)Cn;
     (void)clargs_ptr;
 }
 

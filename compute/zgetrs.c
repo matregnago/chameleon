@@ -242,9 +242,10 @@ int CHAMELEON_zgetrs_Tile( cham_trans_t trans,
     CHAMELEON_Desc_Flush( A, sequence );
     CHAMELEON_Desc_Flush( B, sequence );
 
-    CHAMELEON_zlaswp_WS_Free( ws );
-
     chameleon_sequence_wait( chamctxt, sequence );
+
+    /* The workspace is used by the tasks: release it after the wait */
+    CHAMELEON_zlaswp_WS_Free( ws );
     status = sequence->status;
     chameleon_sequence_destroy( chamctxt, sequence );
     return status;
@@ -399,7 +400,10 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
                            B, IPIV, sequence, request );
     }
 
+    /* The internal workspace must outlive the tasks using it */
     if ( user_ws == NULL ) {
+        CHAMELEON_Desc_Flush( B, sequence );
+        chameleon_sequence_wait( chamctxt, sequence );
         CHAMELEON_zlaswp_WS_Free( ws );
     }
 

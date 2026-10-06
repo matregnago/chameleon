@@ -48,6 +48,7 @@ CORE_ztstrf_parsec( parsec_execution_stream_t *context,
 
     parsec_dtd_unpack_args(
         this_task, &m, &n, &ib, &nb, &U, &ldu, &A, &lda, &L, &ldl, &IPIV, &WORK, &ldwork, &check_info, &iinfo, &sequence, &request );
+    WORK = chameleon_parsec_scratch_align( WORK );
 
     CORE_ztstrf( m, n, ib, nb, U, ldu, A, lda, L, ldl, IPIV, WORK, ldwork, &info );
 
@@ -78,14 +79,14 @@ void INSERT_TASK_ztstrf(const RUNTIME_option_t *options,
         sizeof(int),                 &n,                                PARSEC_VALUE,
         sizeof(int),                 &ib,                               PARSEC_VALUE,
         sizeof(int),                 &nb,                               PARSEC_VALUE,
-        PASSED_BY_REF,               RTBLKADDR( U, CHAMELEON_Complex64_t, Um, Un ), chameleon_parsec_get_arena_index( U ) | PARSEC_INOUT,
+        PASSED_BY_REF,               RTBLKADDR( U, CHAMELEON_Complex64_t, Um, Un ), chameleon_parsec_get_arena_index( U, Um, Un ) | PARSEC_INOUT,
         sizeof(int), &(tileU->ld), PARSEC_VALUE,
-        PASSED_BY_REF,               RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_INOUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,               RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_INOUT | PARSEC_AFFINITY,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
-        PASSED_BY_REF,               RTBLKADDR( L, CHAMELEON_Complex64_t, Lm, Ln ), chameleon_parsec_get_arena_index( L ) | PARSEC_OUTPUT,
+        PASSED_BY_REF,               RTBLKADDR( L, CHAMELEON_Complex64_t, Lm, Ln ), chameleon_parsec_get_arena_index( L, Lm, Ln ) | PARSEC_OUTPUT,
         sizeof(int), &(tileL->ld), PARSEC_VALUE,
         sizeof(int*),                &IPIV,                             PARSEC_VALUE,
-        sizeof(CHAMELEON_Complex64_t)*ib*nb,    NULL,                 PARSEC_SCRATCH,
+        CHAMELEON_PARSEC_SCRATCH_SIZE( sizeof(CHAMELEON_Complex64_t)*ib*nb ),    NULL,                 PARSEC_SCRATCH,
         sizeof(int),                 &nb,                               PARSEC_VALUE,
         sizeof(int),                 &check_info,                       PARSEC_VALUE,
         sizeof(int),                 &iinfo,                            PARSEC_VALUE,

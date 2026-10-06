@@ -181,7 +181,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
 
     int k, m, n, ib, lp, lq;
     int tempkm, tempkn, tempmm, tempnn;
-    int lookahead, myp, myq, P, Q;
+    int lookahead, myp, myq, p, q, P, Q, repl;
 
     CHAMELEON_Complex64_t zone  = (CHAMELEON_Complex64_t) 1.0;
     CHAMELEON_Complex64_t mzone = (CHAMELEON_Complex64_t)-1.0;
@@ -192,6 +192,7 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
     }
     RUNTIME_options_init(&options, chamctxt, sequence, request);
     RUNTIME_options_set_taskcolor( &options, CHAMELEON_DAG_COLOR_ALGORITHM( getrf_nopiv ) );
+    repl = chameleon_replicated_submission( chamctxt );
 
     ib        = CHAMELEON_IB;
     lookahead = chamctxt->lookahead;
@@ -226,22 +227,23 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
         chameleon_data_flush( sequence, A(k, k), request->flush );
 
         for ( m = k+1; m < A->mt; m++ ) {
+            p = m % P;
 
             /* Skip the row if you are not involved with */
-            if ( ( m % P ) != myp ) {
+            if ( !repl && ( p != myp ) ) {
                 continue;
             }
 
             options.priority = 2*A->nt - 2*k - m;
             tempmm = A->get_blkdim( A, m, DIM_m, A->m );
 
-            assert( A->get_rankof( A, m, k ) == WU->get_rankof( WU, myp + lp, k) );
+            assert( A->get_rankof( A, m, k ) == WU->get_rankof( WU, p + lp, k) );
             INSERT_TASK_ztrsm(
                 &options,
                 ChamRight, ChamUpper, ChamNoTrans, ChamNonUnit,
                 tempmm, tempkn, A->mb,
-                zone, WU(myp + lp, k),
-                      A( m,        k) );
+                zone, WU(p + lp, k),
+                      A( m,      k) );
 
             /* Broadcast A(m,k) into temp buffers through a ring */
             chameleon_pzbcast_tile( ChamRowwise, bcast,
@@ -251,22 +253,23 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
         }
 
         for ( n = k+1; n < A->nt; n++ ) {
+            q = n % Q;
 
             /* Skip the column if you are not involved with */
-            if ( ( n % Q ) != myq ) {
+            if ( !repl && ( q != myq ) ) {
                 continue;
             }
 
             tempnn = A->get_blkdim( A, n, DIM_n, A->n );
             options.priority = 2*A->nt - 2*k - n;
 
-            assert( A->get_rankof( A, k, n ) == WL->get_rankof( WL, k, myq+lq) );
+            assert( A->get_rankof( A, k, n ) == WL->get_rankof( WL, k, q+lq) );
             INSERT_TASK_ztrsm(
                 &options,
                 ChamLeft, ChamLower, ChamNoTrans, ChamUnit,
                 tempkm, tempnn, A->mb,
-                zone, WL(k, myq + lq ),
-                      A( k, n        ));
+                zone, WL(k, q + lq ),
+                      A( k, n      ));
 
             /* Broadcast A(k,n) into temp buffers through a ring */
             chameleon_pzbcast_tile( ChamColumnwise, bcast,
@@ -275,25 +278,26 @@ void chameleon_pzgetrf_nopiv_ws( CHAM_desc_t        *A,
             chameleon_data_flush( sequence, A(k, n), request->flush );
 
             for ( m = k+1; m < A->mt; m++ ) {
+                p = m % P;
 
                 /* Skip the row if you are not involved with */
-                if ( ( m % P ) != myp ) {
+                if ( !repl && ( p != myp ) ) {
                     continue;
                 }
 
                 tempmm = A->get_blkdim( A, m, DIM_m, A->m );
                 options.priority = 2*A->nt - 2*k  - n - m;
 
-                assert( A->get_rankof( A, m, n ) == WL->get_rankof( WL, m, myq + lq) );
-                assert( A->get_rankof( A, m, n ) == WU->get_rankof( WU, myp + lp, n) );
+                assert( A->get_rankof( A, m, n ) == WL->get_rankof( WL, m, q + lq) );
+                assert( A->get_rankof( A, m, n ) == WU->get_rankof( WU, p + lp, n) );
 
                 INSERT_TASK_zgemm(
                     &options,
                     ChamNoTrans, ChamNoTrans,
                     tempmm, tempnn, A->mb, A->mb,
-                    mzone, WL(m, myq + lq ),
-                           WU(myp + lp, n ),
-                    zone,  A( m,        n ));
+                    mzone, WL(m, q + lq ),
+                           WU(p + lp, n ),
+                    zone,  A( m,      n ));
             }
         }
         RUNTIME_iteration_pop( chamctxt );

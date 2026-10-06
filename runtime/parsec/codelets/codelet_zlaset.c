@@ -58,7 +58,7 @@ void INSERT_TASK_zlaset(const RUNTIME_option_t *options,
         sizeof(int),                     &N,           PARSEC_VALUE,
         sizeof(CHAMELEON_Complex64_t),       &alpha,       PARSEC_VALUE,
         sizeof(CHAMELEON_Complex64_t),       &beta,        PARSEC_VALUE,
-        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
+        PASSED_BY_REF,         RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ), chameleon_parsec_get_arena_index( A, Am, An ) | PARSEC_OUTPUT | PARSEC_AFFINITY,
         sizeof(int), &(tileA->ld), PARSEC_VALUE,
         PARSEC_DTD_ARG_END );
 }

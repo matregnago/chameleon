@@ -190,6 +190,13 @@ void *CHAMELEON_zgemm_WS_Alloc( cham_trans_t       transA __attribute__((unused)
         }
     }
 
+    /* The A-stationary algorithm relies on the reduction of C */
+    if ( (options->alg == ChamGemmAlgSummaA) &&
+         !chameleon_runtime_has_reductions( chamctxt ) )
+    {
+        options->alg = ChamGemmAlgGeneric;
+    }
+
     /* Now that we have decided which algorithm, let's allocate the required data structures. */
     if ( options->alg == ChamGemmAlgSummaC )
     {
