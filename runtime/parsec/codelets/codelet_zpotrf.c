@@ -123,6 +123,76 @@ CORE_zpotrf_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
 }
 #endif
 
+#if defined(CHAMELEON_PARSEC_HIP)
+/**
+ * The info of the kernel is read once the stream reached the end of the task.
+ */
+static int
+CORE_zpotrf_parsec_hip_complete( parsec_device_gpu_module_t *gpu_device,
+                                 parsec_gpu_task_t         **gpu_task,
+                                 parsec_gpu_exec_stream_t   *gpu_stream )
+{
+    cham_uplo_t uplo;
+    int tempkm, ldak, iinfo;
+    RUNTIME_sequence_t *sequence;
+    RUNTIME_request_t *request;
+    CHAMELEON_Complex64_t *A;
+    int **hinfo;
+
+    parsec_dtd_unpack_args(
+        (*gpu_task)->ec, &uplo, &tempkm, &A, &ldak, &iinfo, &sequence, &request, &hinfo );
+
+    if ( (sequence->status == CHAMELEON_SUCCESS) && (**hinfo != 0) ) {
+        RUNTIME_sequence_flush( NULL, sequence, request, iinfo + **hinfo );
+    }
+
+    /* Otherwise it is called again at the end of the next stages of the task */
+    (*gpu_task)->complete_stage = NULL;
+
+    (void)gpu_device;
+    (void)gpu_stream;
+    return PARSEC_HOOK_RETURN_DONE;
+}
+
+static int
+CORE_zpotrf_parsec_hip( parsec_device_gpu_module_t *gpu_device,
+                        parsec_gpu_task_t          *gpu_task,
+                        parsec_gpu_exec_stream_t   *gpu_stream )
+{
+    cham_uplo_t uplo;
+    int tempkm, ldak, iinfo, lwork;
+    RUNTIME_sequence_t *sequence;
+    RUNTIME_request_t *request;
+    CHAMELEON_Complex64_t *A;
+    int **hinfo;
+    chameleon_parsec_hip_handles_t *handles = chameleon_parsec_hip_handles( gpu_stream );
+    chameleon_parsec_hip_ws_t      *ws      = chameleon_parsec_hip_ws( gpu_stream );
+    hipDoubleComplex               *work;
+
+    parsec_dtd_unpack_args(
+        gpu_task->ec, &uplo, &tempkm, &A, &ldak, &iinfo, &sequence, &request, &hinfo );
+
+    hipsolverDnZpotrf_bufferSize( handles->hipsolverDn, chameleon_hipblas_const(uplo),
+                                  tempkm, (hipDoubleComplex *)A, ldak, &lwork );
+    work = chameleon_parsec_hip_ws_work( ws, gpu_stream, sizeof(hipDoubleComplex) * (size_t)lwork );
+    if ( work == NULL ) {
+        /* Retry once the device memory has been released */
+        return PARSEC_HOOK_RETURN_AGAIN;
+    }
+
+    HIP_zpotrf( uplo, tempkm, (hipDoubleComplex *)A, ldak, work, lwork, ws->dinfo,
+                handles->hipsolverDn );
+
+    *hinfo = ws->hinfo + (ws->next++ % CHAMELEON_PARSEC_HIP_NINFO);
+    hipMemcpyAsync( *hinfo, ws->dinfo, sizeof(int), hipMemcpyDeviceToHost,
+                    chameleon_parsec_hip_stream( gpu_stream ) );
+    gpu_task->complete_stage = CORE_zpotrf_parsec_hip_complete;
+
+    (void)gpu_device;
+    return PARSEC_HOOK_RETURN_DONE;
+}
+#endif
+
 static parsec_task_class_t *
 zpotrf_task_class( parsec_taskpool_t *tp )
 {
@@ -140,6 +210,9 @@ zpotrf_task_class( parsec_taskpool_t *tp )
 
 #if defined(CHAMELEON_PARSEC_CUDA)
     chameleon_parsec_add_cuda_chore( tp, tc, CORE_zpotrf_parsec_cuda );
+#endif
+#if defined(CHAMELEON_PARSEC_HIP)
+    chameleon_parsec_add_hip_chore( tp, tc, CORE_zpotrf_parsec_hip );
 #endif
     parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_CPU, (void *)CORE_zpotrf_parsec );
     return tc;

@@ -86,6 +86,40 @@ CORE_zsymm_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
 }
 #endif
 
+#if defined(CHAMELEON_PARSEC_HIP)
+static int
+CORE_zsymm_parsec_hip( parsec_device_gpu_module_t *gpu_device,
+                       parsec_gpu_task_t          *gpu_task,
+                       parsec_gpu_exec_stream_t   *gpu_stream )
+{
+    cham_side_t side;
+    cham_uplo_t uplo;
+    int M;
+    int N;
+    hipDoubleComplex alpha; /* 16 bytes aligned: read by hipBLAS with aligned loads */
+    CHAMELEON_Complex64_t *A;
+    int LDA;
+    CHAMELEON_Complex64_t *B;
+    int LDB;
+    hipDoubleComplex beta;
+    CHAMELEON_Complex64_t *C;
+    int LDC;
+    chameleon_parsec_hip_handles_t *handles = chameleon_parsec_hip_handles( gpu_stream );
+
+    parsec_dtd_unpack_args(
+        gpu_task->ec, &side, &uplo, &M, &N, &alpha, &A, &LDA, &B, &LDB, &beta, &C, &LDC );
+
+    HIP_zsymm( side, uplo, M, N,
+               (hipDoubleComplex *)&alpha, (hipDoubleComplex *)A, LDA,
+                                           (hipDoubleComplex *)B, LDB,
+               (hipDoubleComplex *)&beta,  (hipDoubleComplex *)C, LDC,
+               handles->hipblas );
+
+    (void)gpu_device;
+    return PARSEC_HOOK_RETURN_DONE;
+}
+#endif
+
 static parsec_task_class_t *
 zsymm_task_class( parsec_taskpool_t *tp )
 {
@@ -107,6 +141,9 @@ zsymm_task_class( parsec_taskpool_t *tp )
 
 #if defined(CHAMELEON_PARSEC_CUDA)
     chameleon_parsec_add_cuda_chore( tp, tc, CORE_zsymm_parsec_cuda );
+#endif
+#if defined(CHAMELEON_PARSEC_HIP)
+    chameleon_parsec_add_hip_chore( tp, tc, CORE_zsymm_parsec_hip );
 #endif
     parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_CPU, (void *)CORE_zsymm_parsec );
     return tc;
