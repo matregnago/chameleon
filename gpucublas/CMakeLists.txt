@@ -42,6 +42,10 @@ if (CUDAToolkit_FOUND)
   set(GPUCUBLAS_HAVE_CUDA_TOOLKIT ON CACHE INTERNAL "Indicate if cuda kernels are enabled or not" FORCE)
 
   include(SetCMakeCudaArchitectures)
+  # The libstdc++ of GCC >= 14 does not parse with nvcc in C++11 mode
+  if(CMAKE_CUDA_STANDARD LESS 14)
+    set(CMAKE_CUDA_STANDARD 14)
+  endif()
 
   # Check compatibility between the CUDA version and targets
   if(CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 11.1)

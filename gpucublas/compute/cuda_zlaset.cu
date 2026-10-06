@@ -96,19 +96,22 @@ CUDA_zlaset( cham_uplo_t uplo, int m, int n,
 {
     cudaError_t err;
     cudaStream_t stream;
-    struct cudaPointerAttributes attr;
 
     cublasGetStream( handle, &stream );
 
-    cudaPointerGetAttributes( &attr, alpha );
-    assert( attr.memoryType == cudaMemoryTypeHost );
-    assert( attr.hostPointer == alpha );
-    assert( attr.devicePointer == NULL );
+#if !defined(NDEBUG)
+    {
+        /* alpha and beta are read on the host; since CUDA 11, a pageable
+         * pointer is reported as cudaMemoryTypeUnregistered */
+        struct cudaPointerAttributes attr;
 
-    cudaPointerGetAttributes( &attr, beta );
-    assert( attr.memoryType == cudaMemoryTypeHost );
-    assert( attr.hostPointer == beta );
-    assert( attr.devicePointer == NULL );
+        cudaPointerGetAttributes( &attr, alpha );
+        assert( attr.type != cudaMemoryTypeDevice );
+
+        cudaPointerGetAttributes( &attr, beta );
+        assert( attr.type != cudaMemoryTypeDevice );
+    }
+#endif
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
     if( ( cuCreal(*alpha) == 0. ) && ( cuCimag(*alpha) == 0. ) &&
