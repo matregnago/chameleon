@@ -64,12 +64,12 @@ CORE_zgemm_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
     int m;
     int n;
     int k;
-    CHAMELEON_Complex64_t alpha;
+    cuDoubleComplex alpha; /* 16 bytes aligned: read by cuBLAS with aligned loads */
     CHAMELEON_Complex64_t *A;
     int lda;
     CHAMELEON_Complex64_t *B;
     int ldb;
-    CHAMELEON_Complex64_t beta;
+    cuDoubleComplex beta;
     CHAMELEON_Complex64_t *C;
     int ldc;
 

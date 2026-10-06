@@ -63,7 +63,7 @@ CORE_ztrmm_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
     cham_diag_t diag;
     int M;
     int N;
-    CHAMELEON_Complex64_t alpha;
+    cuDoubleComplex alpha; /* 16 bytes aligned: read by cuBLAS with aligned loads */
     CHAMELEON_Complex64_t *A;
     int LDA;
     CHAMELEON_Complex64_t *B;

@@ -52,8 +52,8 @@ CORE_zlaset_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
     cham_uplo_t uplo;
     int M;
     int N;
-    CHAMELEON_Complex64_t alpha;
-    CHAMELEON_Complex64_t beta;
+    cuDoubleComplex alpha; /* 16 bytes aligned: read by cuBLAS with aligned loads */
+    cuDoubleComplex beta;
     CHAMELEON_Complex64_t *A;
     int LDA;
     chameleon_parsec_cuda_handles_t *handles = chameleon_parsec_cuda_handles( gpu_stream );

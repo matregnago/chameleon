@@ -108,10 +108,10 @@ CORE_zgeadd_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
     cham_trans_t trans;
     int M;
     int N;
-    CHAMELEON_Complex64_t alpha;
+    cuDoubleComplex alpha; /* 16 bytes aligned: read by cuBLAS with aligned loads */
     CHAMELEON_Complex64_t *A;
     int LDA;
-    CHAMELEON_Complex64_t beta;
+    cuDoubleComplex beta;
     CHAMELEON_Complex64_t *B;
     int LDB;
     chameleon_parsec_cuda_handles_t *handles = chameleon_parsec_cuda_handles( gpu_stream );

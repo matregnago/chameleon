@@ -61,7 +61,7 @@ CORE_zher2k_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
     cham_trans_t trans;
     int n;
     int k;
-    CHAMELEON_Complex64_t alpha;
+    cuDoubleComplex alpha; /* 16 bytes aligned: read by cuBLAS with aligned loads */
     CHAMELEON_Complex64_t *A;
     int lda;
     CHAMELEON_Complex64_t *B;

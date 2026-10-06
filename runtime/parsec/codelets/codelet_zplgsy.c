@@ -52,7 +52,7 @@ CORE_zplgsy_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
                          parsec_gpu_task_t          *gpu_task,
                          parsec_gpu_exec_stream_t   *gpu_stream )
 {
-    CHAMELEON_Complex64_t bump;
+    cuDoubleComplex bump; /* 16 bytes aligned: read by cuBLAS with aligned loads */
     int m;
     int n;
     CHAMELEON_Complex64_t *A;
