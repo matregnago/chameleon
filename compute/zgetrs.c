@@ -400,7 +400,10 @@ int CHAMELEON_zgetrs_Tile_Async( cham_trans_t        trans,
                            B, IPIV, sequence, request );
     }
 
+    /* The internal workspace must outlive the tasks using it */
     if ( user_ws == NULL ) {
+        CHAMELEON_Desc_Flush( B, sequence );
+        chameleon_sequence_wait( chamctxt, sequence );
         CHAMELEON_zlaswp_WS_Free( ws );
     }
 
