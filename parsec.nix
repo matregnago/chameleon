@@ -11,6 +11,7 @@
   # architectures of the GPUs that will run the kernels (the build machine
   # usually has none, so "native" cannot be used)
   cudaArchitectures ? "70;80;90",
+  autoAddDriverRunpath ? null,
 }:
 
 stdenv.mkDerivation {
@@ -43,7 +44,11 @@ stdenv.mkDerivation {
     cmake
     pkg-config
   ]
-  ++ lib.optionals cudaSupport [ cudaPackages.cuda_nvcc ];
+  ++ lib.optionals cudaSupport [
+    cudaPackages.cuda_nvcc
+    # finds libcuda in /run/opengl-driver on NixOS
+    autoAddDriverRunpath
+  ];
 
   buildInputs = [
     hwloc

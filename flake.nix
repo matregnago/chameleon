@@ -4,6 +4,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     starpu.url = "github:Sacolle/nix-starpu";
+    # runs the Nix binaries with the GPU driver of a non-NixOS host (PCAD)
+    nix-gl-host.url = "github:numtide/nix-gl-host";
+    nix-gl-host.inputs.nixpkgs.follows = "nixpkgs";
     self.submodules = true;
   };
 
@@ -12,6 +15,7 @@
       self,
       nixpkgs,
       starpu,
+      nix-gl-host,
     }:
     let
       system = "x86_64-linux";
@@ -60,9 +64,13 @@
           ];
 
         };
+        # outside NixOS, run the GPU binaries with `nixglhost <cmd>`
         cuda = pkgs.mkShell {
           inputsFrom = [ chameleonCuda ];
-          buildInputs = [ parsecCuda ];
+          buildInputs = [
+            parsecCuda
+            nix-gl-host.defaultPackage.${system}
+          ];
         };
       };
     };
