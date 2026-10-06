@@ -127,7 +127,7 @@ INSERT_TASK_zgemm( const RUNTIME_option_t *options,
     CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
     CHAM_tile_t *tileB = B->get_blktile( B, Bm, Bn );
     CHAM_tile_t *tileC = C->get_blktile( C, Cm, Cn );
-    int devices = PARSEC_DEV_ALL;
+    int devices = CHAMELEON_PARSEC_DEVICES_OF( tileA, tileB, tileC );
 
     /* WARNING: CUDA 12.3 has an issue when m or n or k=1 in double complex,
        thus we disable gemm on gpu in these cases */

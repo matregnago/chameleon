@@ -112,7 +112,7 @@ void INSERT_TASK_ztrsm(const RUNTIME_option_t *options,
     CHAM_tile_t *tileB = B->get_blktile( B, Bm, Bn );
 
     parsec_dtd_insert_task_with_task_class(
-        PARSEC_dtd_taskpool, tc, options->priority, PARSEC_DEV_ALL,
+        PARSEC_dtd_taskpool, tc, options->priority, CHAMELEON_PARSEC_DEVICES_OF( tileA, tileB ),
         PARSEC_DTD_EMPTY_FLAG,                                                    &side,
         PARSEC_DTD_EMPTY_FLAG,                                                    &uplo,
         PARSEC_DTD_EMPTY_FLAG,                                                    &transA,

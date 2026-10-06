@@ -155,7 +155,7 @@ void INSERT_TASK_zpotrf(const RUNTIME_option_t *options,
     CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
 
     parsec_dtd_insert_task_with_task_class(
-        PARSEC_dtd_taskpool, tc, options->priority, PARSEC_DEV_ALL,
+        PARSEC_dtd_taskpool, tc, options->priority, CHAMELEON_PARSEC_DEVICES_OF( tileA ),
         PARSEC_DTD_EMPTY_FLAG, &uplo,
         PARSEC_DTD_EMPTY_FLAG, &n,
         chameleon_parsec_get_arena_index( A, Am, An ) | CHAMELEON_PARSEC_GPU_OUT, RTBLKADDR( A, CHAMELEON_Complex64_t, Am, An ),

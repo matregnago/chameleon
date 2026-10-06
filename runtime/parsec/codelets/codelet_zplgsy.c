@@ -105,7 +105,7 @@ void INSERT_TASK_zplgsy( const RUNTIME_option_t *options,
     parsec_taskpool_t* PARSEC_dtd_taskpool = (parsec_taskpool_t *)(options->sequence->schedopt);
     parsec_task_class_t *tc = chameleon_parsec_task_class( options, CORE_zplgsy_parsec, 1, zplgsy_task_class );
     CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
-    int devices = PARSEC_DEV_ALL;
+    int devices = CHAMELEON_PARSEC_DEVICES_OF( tileA );
 
     /* The output is only partially written: the GPU would push back a tile it did not read */
     if ( (m != tileA->m) || (n != tileA->n) ) {

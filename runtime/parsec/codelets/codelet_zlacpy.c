@@ -103,7 +103,7 @@ void INSERT_TASK_zlacpy( const RUNTIME_option_t *options,
     parsec_task_class_t *tc = chameleon_parsec_task_class( options, CORE_zlacpy_parsec, 2, zlacpy_task_class );
     CHAM_tile_t *tileA = A->get_blktile( A, Am, An );
     CHAM_tile_t *tileB = B->get_blktile( B, Bm, Bn );
-    int devices = PARSEC_DEV_ALL;
+    int devices = CHAMELEON_PARSEC_DEVICES_OF( tileA, tileB );
 
     /* The output is only partially written: the GPU would push back a tile it did not read */
     if ( (uplo != ChamUpperLower) || (m != tileB->m) || (n != tileB->n) ) {

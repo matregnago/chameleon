@@ -32,6 +32,7 @@ extern char **environ;
 
 #if defined(CHAMELEON_PARSEC_CUDA)
 int              chameleon_parsec_ncudas          = 0;
+int              chameleon_parsec_devices         = PARSEC_DEV_ALL;
 parsec_info_id_t chameleon_parsec_cuda_handles_id = PARSEC_INFO_ID_UNDEFINED;
 
 /* Handles of the main thread, for the queries of the algorithms (workspace sizes) */
@@ -156,6 +157,23 @@ chameleon_parsec_cuda_init( void )
     }
     if ( chameleon_parsec_ncudas == 0 ) {
         return;
+    }
+
+    {
+        char *devices = chameleon_getenv( "CHAMELEON_PARSEC_DEVICES" );
+        if ( devices != NULL ) {
+            if ( strcmp( devices, "cpu" ) == 0 ) {
+                chameleon_parsec_devices = PARSEC_DEV_CPU;
+            }
+            else if ( strcmp( devices, "cuda" ) == 0 ) {
+                chameleon_parsec_devices = PARSEC_DEV_CUDA;
+            }
+            else if ( strcmp( devices, "all" ) != 0 ) {
+                chameleon_warning( "chameleon_parsec_cuda_init",
+                                   "CHAMELEON_PARSEC_DEVICES must be cpu, cuda or all" );
+            }
+            chameleon_cleanenv( devices );
+        }
     }
 
     chameleon_parsec_cuda_handles_id =

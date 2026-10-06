@@ -50,6 +50,7 @@ typedef struct chameleon_parsec_cuda_handles_s {
 } chameleon_parsec_cuda_handles_t;
 
 extern int              chameleon_parsec_ncudas;
+extern int              chameleon_parsec_devices;
 extern parsec_info_id_t chameleon_parsec_cuda_handles_id;
 
 static inline chameleon_parsec_cuda_handles_t *
@@ -500,8 +501,40 @@ chameleon_parsec_add_cuda_chore( parsec_taskpool_t *tp, parsec_task_class_t *tc,
  * are thus all pushed out, so that the host copy is always up to date.
  */
 #define CHAMELEON_PARSEC_GPU_OUT PARSEC_PUSHOUT
+
+/**
+ * Devices the tasks with a GPU chore may run on (CHAMELEON_PARSEC_DEVICES=cpu|cuda|all)
+ */
+#define CHAMELEON_PARSEC_DEVICES chameleon_parsec_devices
+
+/**
+ * @brief Devices a task may run on, given its tiles.
+ *
+ * PaRSEC moves a tile between the host and a GPU as a single block of its
+ * span, ld * (n-1) + m elements. When the tile is not contiguous (ld > m, as in
+ * the column major storage), this block holds parts of the other tiles: the
+ * copy back of the GPU would then overwrite them with stale values. These tasks
+ * thus stay on the CPU.
+ *
+ * @param[in] tiles
+ *          The tiles of the task, terminated by NULL.
+ */
+static inline int
+chameleon_parsec_devices_of( const CHAM_tile_t **tiles )
+{
+    for ( ; *tiles != NULL; tiles++ ) {
+        if ( ((*tiles)->ld != (*tiles)->m) && ((*tiles)->n > 1) ) {
+            return PARSEC_DEV_CPU;
+        }
+    }
+    return chameleon_parsec_devices;
+}
+#define CHAMELEON_PARSEC_DEVICES_OF( ... ) \
+    chameleon_parsec_devices_of( (const CHAM_tile_t *[]){ __VA_ARGS__, NULL } )
 #else
 #define CHAMELEON_PARSEC_GPU_OUT 0
+#define CHAMELEON_PARSEC_DEVICES PARSEC_DEV_ALL
+#define CHAMELEON_PARSEC_DEVICES_OF( ... ) PARSEC_DEV_ALL
 #endif
 
 static inline int cham_to_parsec_access( cham_access_t accessA ) {
