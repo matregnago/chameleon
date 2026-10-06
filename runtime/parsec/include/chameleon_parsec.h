@@ -26,6 +26,7 @@
 
 #include <parsec.h>
 #include <parsec/interfaces/dtd/insert_function.h>
+#include <parsec/interfaces/dtd/insert_function_internal.h>
 #include <parsec/mca/device/device.h>
 
 /*
@@ -412,6 +413,67 @@ chameleon_parsec_scratch_align( void *ptr ) {
     uintptr_t addr = (uintptr_t)ptr;
     return (void *)( (addr + CHAMELEON_PARSEC_SCRATCH_ALIGN - 1) & ~((uintptr_t)CHAMELEON_PARSEC_SCRATCH_ALIGN - 1) );
 }
+
+/**
+ * @brief Task classes of the codelets with several incarnations (CPU and GPU).
+ *
+ * A direct parsec_dtd_insert_task() creates a task class with a single
+ * incarnation, so the codelets with a GPU version create their task class with
+ * parsec_dtd_create_task_class() and add a chore per device type.
+ *
+ * A DTD task class belongs to a taskpool, i.e. to a sequence: it is created at
+ * the first insertion of the codelet in the sequence, and destroyed with the
+ * taskpool. All the ranks insert the same tasks in the same order, so the task
+ * classes get the same identifiers everywhere. They are cached with the key of
+ * the direct insertions (CPU body and number of flows), so that the DTD removes
+ * them from its cache when the taskpool destroys them.
+ */
+typedef parsec_task_class_t *(*chameleon_parsec_tc_create_fct_t)( parsec_taskpool_t *tp );
+
+static inline parsec_task_class_t *
+chameleon_parsec_task_class( const RUNTIME_option_t        *options,
+                             void                          *cpu_body,
+                             int                            nb_flows,
+                             chameleon_parsec_tc_create_fct_t create )
+{
+    parsec_taskpool_t       *tp  = (parsec_taskpool_t *)(options->sequence->schedopt);
+    uint64_t                 key = (uint64_t)(uintptr_t)cpu_body + (uint64_t)nb_flows;
+    parsec_dtd_task_class_t *dtc = parsec_dtd_find_task_class( (parsec_dtd_taskpool_t *)tp, key );
+    parsec_task_class_t     *tc;
+
+    if ( dtc != NULL ) {
+        return &(dtc->super);
+    }
+
+    tc = create( tp );
+    assert( tc->nb_flows == nb_flows );
+    parsec_dtd_register_task_class( tp, key, tc );
+    return tc;
+}
+
+#if defined(CHAMELEON_PARSEC_CUDA)
+/**
+ * @brief Add a CUDA chore to a task class, if PaRSEC drives CUDA devices.
+ */
+static inline void
+chameleon_parsec_add_cuda_chore( parsec_taskpool_t *tp, parsec_task_class_t *tc,
+                                 parsec_advance_task_function_t body )
+{
+    if ( chameleon_parsec_ncudas > 0 ) {
+        parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_CUDA, (void *)body );
+    }
+}
+
+/**
+ * The DTD copies the data written by a GPU task back to the host only if the
+ * flow is marked with PARSEC_PUSHOUT: neither a CPU task nor the final flush
+ * fetches it from the GPU. The written flows of the tasks that may run on a GPU
+ * are thus all pushed out, so that the host copy is always up to date.
+ */
+#define CHAMELEON_PARSEC_GPU_OUT PARSEC_PUSHOUT
+#else
+#define CHAMELEON_PARSEC_GPU_OUT 0
+#endif
 
 static inline int cham_to_parsec_access( cham_access_t accessA ) {
     if ( accessA == ChamR ) {
