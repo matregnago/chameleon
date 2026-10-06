@@ -26,6 +26,124 @@
 #if defined(CHAMELEON_USE_MPI)
 #include <mpi.h>
 #endif
+#include <parsec/utils/mca_param.h>
+
+extern char **environ;
+
+#if defined(CHAMELEON_PARSEC_CUDA)
+int              chameleon_parsec_ncudas          = 0;
+parsec_info_id_t chameleon_parsec_cuda_handles_id = PARSEC_INFO_ID_UNDEFINED;
+
+/* Handles of the main thread, for the queries of the algorithms (workspace sizes) */
+static cublasHandle_t     chameleon_parsec_cublas_handle     = NULL;
+static cusolverDnHandle_t chameleon_parsec_cusolverDn_handle = NULL;
+
+/**
+ * @brief Create the cuBLAS and cuSOLVER handles of a CUDA execution stream.
+ *
+ * Called by PaRSEC the first time a task body gets them on this stream, so the
+ * device of the stream is already the current one.
+ */
+static void *
+chameleon_parsec_cuda_handles_create( void *obj, void *user )
+{
+    parsec_cuda_exec_stream_t       *stream  = (parsec_cuda_exec_stream_t *)obj;
+    chameleon_parsec_cuda_handles_t *handles = malloc( sizeof(chameleon_parsec_cuda_handles_t) );
+
+    if ( cublasCreate( &(handles->cublas) ) != CUBLAS_STATUS_SUCCESS ) {
+        chameleon_fatal_error( "chameleon_parsec_cuda_handles_create", "cublasCreate() failed" );
+        free( handles );
+        return NULL;
+    }
+    cublasSetStream( handles->cublas, stream->cuda_stream );
+
+    if ( cusolverDnCreate( &(handles->cusolverDn) ) != CUSOLVER_STATUS_SUCCESS ) {
+        chameleon_fatal_error( "chameleon_parsec_cuda_handles_create", "cusolverDnCreate() failed" );
+        cublasDestroy( handles->cublas );
+        free( handles );
+        return NULL;
+    }
+    cusolverDnSetStream( handles->cusolverDn, stream->cuda_stream );
+
+    (void)user;
+    return handles;
+}
+
+static void
+chameleon_parsec_cuda_handles_destroy( void *obj, void *user )
+{
+    chameleon_parsec_cuda_handles_t *handles = (chameleon_parsec_cuda_handles_t *)obj;
+
+    cublasDestroy( handles->cublas );
+    cusolverDnDestroy( handles->cusolverDn );
+    free( handles );
+    (void)user;
+}
+
+static void
+chameleon_parsec_cuda_init( void )
+{
+    uint32_t i;
+
+    chameleon_parsec_ncudas = 0;
+    for ( i = 0; i < parsec_nb_devices; i++ ) {
+        parsec_device_module_t *device = parsec_mca_device_get( i );
+        if ( (device != NULL) && (device->type == PARSEC_DEV_CUDA) ) {
+            chameleon_parsec_ncudas++;
+        }
+    }
+    if ( chameleon_parsec_ncudas == 0 ) {
+        return;
+    }
+
+    chameleon_parsec_cuda_handles_id =
+        parsec_info_register( &parsec_per_stream_infos, "CHAMELEON::CUDA::HANDLES",
+                              chameleon_parsec_cuda_handles_destroy, NULL,
+                              chameleon_parsec_cuda_handles_create, NULL, NULL );
+    assert( chameleon_parsec_cuda_handles_id != PARSEC_INFO_ID_UNDEFINED );
+
+    cublasCreate( &chameleon_parsec_cublas_handle );
+    cusolverDnCreate( &chameleon_parsec_cusolverDn_handle );
+}
+
+static void
+chameleon_parsec_cuda_fini( void )
+{
+    if ( chameleon_parsec_ncudas == 0 ) {
+        return;
+    }
+
+    parsec_info_unregister( &parsec_per_stream_infos, chameleon_parsec_cuda_handles_id, NULL );
+    chameleon_parsec_cuda_handles_id = PARSEC_INFO_ID_UNDEFINED;
+
+    cublasDestroy( chameleon_parsec_cublas_handle );
+    cusolverDnDestroy( chameleon_parsec_cusolverDn_handle );
+    chameleon_parsec_cublas_handle     = NULL;
+    chameleon_parsec_cusolverDn_handle = NULL;
+    chameleon_parsec_ncudas            = 0;
+}
+#endif /* defined(CHAMELEON_PARSEC_CUDA) */
+
+/**
+ * @brief Give the number of CUDA devices to PaRSEC, unless the user already
+ * did it through the environment. A negative number keeps the PaRSEC default
+ * (all the devices).
+ */
+static void
+chameleon_parsec_set_ncudas( int ncudas )
+{
+    static int set_by_chameleon = 0;
+    char       value[16];
+
+    if ( (ncudas < 0) ||
+         (!set_by_chameleon && (getenv( "PARSEC_MCA_device_cuda_enabled" ) != NULL)) )
+    {
+        return;
+    }
+    snprintf( value, sizeof(value), "%d", ncudas );
+    parsec_setenv_mca_param( "device_cuda_enabled", value, &environ );
+    set_by_chameleon = 1;
+}
 
 /**
  * Initialize CHAMELEON
@@ -45,6 +163,7 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
         default_ncores = ncpus;
     }
     chamctxt->parallel_enabled = CHAMELEON_TRUE;
+    chameleon_parsec_set_ncudas( ncudas );
     chamctxt->schedopt = (void *)parsec_init(default_ncores, argc, NULL);
 
     if ( NULL != chamctxt->schedopt ) {
@@ -59,12 +178,17 @@ int RUNTIME_init( CHAM_context_t *chamctxt,
 #endif
         chamctxt->nworkers = ncpus;
         chamctxt->nthreads_per_worker = nthreads_per_worker;
+#if defined(CHAMELEON_PARSEC_CUDA)
+        chameleon_parsec_cuda_init();
+        chamctxt->ncudas = chameleon_parsec_ncudas;
+#else
+        chamctxt->ncudas = 0;
+#endif
         hres = CHAMELEON_SUCCESS;
     }
 
     free(argc);
 
-    (void)ncudas;
     return hres;
 }
 
@@ -80,6 +204,9 @@ void RUNTIME_finalize( CHAM_context_t *chamctxt )
     parsec_context_wait( parsec );
 
     chameleon_parsec_taskpool_release_all();
+#if defined(CHAMELEON_PARSEC_CUDA)
+    chameleon_parsec_cuda_fini();
+#endif
     chameleon_parsec_arena_fini( parsec );
     parsec_fini(&parsec);
     return;
@@ -186,18 +313,29 @@ void RUNTIME_set_minmax_submitted_tasks( int min, int max ) {
 
 #if !defined(CHAMELEON_SIMULATION)
 #if defined(CHAMELEON_USE_CUDA)
+/*
+ * The task bodies get the handles of their stream with
+ * chameleon_parsec_cuda_handles(). These ones belong to the main thread and are
+ * only meant for the queries of the algorithms, as the workspace sizes.
+ */
 cublasHandle_t
 RUNTIME_get_cublas_handle()
 {
-    assert(0);
+#if defined(CHAMELEON_PARSEC_CUDA)
+    return chameleon_parsec_cublas_handle;
+#else
     return NULL;
+#endif
 }
 
 cusolverDnHandle_t
 RUNTIME_get_cusolverDn_handle()
 {
-    assert(0);
+#if defined(CHAMELEON_PARSEC_CUDA)
+    return chameleon_parsec_cusolverDn_handle;
+#else
     return NULL;
+#endif
 }
 #elif defined(CHAMELEON_USE_HIP)
 hipblasHandle_t

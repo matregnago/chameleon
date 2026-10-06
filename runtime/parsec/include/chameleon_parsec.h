@@ -28,6 +28,41 @@
 #include <parsec/interfaces/dtd/insert_function.h>
 #include <parsec/mca/device/device.h>
 
+/*
+ * The CUDA incarnations of the codelets require both Chameleon and PaRSEC to be
+ * built with CUDA.
+ */
+#if defined(CHAMELEON_USE_CUDA) && defined(PARSEC_HAVE_DEV_CUDA_SUPPORT) && !defined(CHAMELEON_SIMULATION)
+#define CHAMELEON_PARSEC_CUDA
+#include <parsec/parsec_internal.h>
+#include <parsec/mca/device/device_gpu.h>
+#include <parsec/mca/device/cuda/device_cuda.h>
+#endif
+
+#if defined(CHAMELEON_PARSEC_CUDA)
+/**
+ * @brief Library handles of a PaRSEC CUDA execution stream, bound to it.
+ */
+typedef struct chameleon_parsec_cuda_handles_s {
+    cublasHandle_t     cublas;
+    cusolverDnHandle_t cusolverDn;
+} chameleon_parsec_cuda_handles_t;
+
+extern int              chameleon_parsec_ncudas;
+extern parsec_info_id_t chameleon_parsec_cuda_handles_id;
+
+static inline chameleon_parsec_cuda_handles_t *
+chameleon_parsec_cuda_handles( parsec_gpu_exec_stream_t *gpu_stream ) {
+    return (chameleon_parsec_cuda_handles_t *)parsec_info_get( &(gpu_stream->infos),
+                                                               chameleon_parsec_cuda_handles_id );
+}
+
+static inline cudaStream_t
+chameleon_parsec_cuda_stream( parsec_gpu_exec_stream_t *gpu_stream ) {
+    return ((parsec_cuda_exec_stream_t *)gpu_stream)->cuda_stream;
+}
+#endif
+
 /**
  * @brief Common header of every Chameleon data collection.
  *
