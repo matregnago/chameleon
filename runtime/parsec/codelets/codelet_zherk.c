@@ -79,6 +79,37 @@ CORE_zherk_parsec_cuda( parsec_device_gpu_module_t *gpu_device,
 }
 #endif
 
+#if defined(CHAMELEON_PARSEC_HIP)
+static int
+CORE_zherk_parsec_hip( parsec_device_gpu_module_t *gpu_device,
+                       parsec_gpu_task_t          *gpu_task,
+                       parsec_gpu_exec_stream_t   *gpu_stream )
+{
+    cham_uplo_t uplo;
+    cham_trans_t trans;
+    int n;
+    int k;
+    double alpha;
+    CHAMELEON_Complex64_t *A;
+    int lda;
+    double beta;
+    CHAMELEON_Complex64_t *C;
+    int ldc;
+    chameleon_parsec_hip_handles_t *handles = chameleon_parsec_hip_handles( gpu_stream );
+
+    parsec_dtd_unpack_args(
+        gpu_task->ec, &uplo, &trans, &n, &k, &alpha, &A, &lda, &beta, &C, &ldc );
+
+    HIP_zherk( uplo, trans, n, k,
+               &alpha, (hipDoubleComplex *)A, lda,
+               &beta,  (hipDoubleComplex *)C, ldc,
+               handles->hipblas );
+
+    (void)gpu_device;
+    return PARSEC_HOOK_RETURN_DONE;
+}
+#endif
+
 static parsec_task_class_t *
 zherk_task_class( parsec_taskpool_t *tp )
 {
@@ -98,6 +129,9 @@ zherk_task_class( parsec_taskpool_t *tp )
 
 #if defined(CHAMELEON_PARSEC_CUDA)
     chameleon_parsec_add_cuda_chore( tp, tc, CORE_zherk_parsec_cuda );
+#endif
+#if defined(CHAMELEON_PARSEC_HIP)
+    chameleon_parsec_add_hip_chore( tp, tc, CORE_zherk_parsec_hip );
 #endif
     parsec_dtd_task_class_add_chore( tp, tc, PARSEC_DEV_CPU, (void *)CORE_zherk_parsec );
     return tc;

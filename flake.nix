@@ -42,6 +42,12 @@
         parsec = parsecCuda;
         cudaSupport = true;
       };
+      parsecHip = pkgs.callPackage ./parsec.nix { hipSupport = true; };
+      chameleonHip = pkgs.callPackage ./chameleon.nix {
+        starpu = starpuPkg;
+        parsec = parsecHip;
+        hipSupport = true;
+      };
     in
     {
       packages.${system} = {
@@ -49,6 +55,8 @@
         parsec = parsec;
         parsec-cuda = parsecCuda;
         chameleon-cuda = chameleonCuda;
+        parsec-hip = parsecHip;
+        chameleon-hip = chameleonHip;
       };
       devShells.${system} = {
         default = pkgs.mkShell {
@@ -74,6 +82,14 @@
           inputsFrom = [ chameleonCuda ];
           buildInputs = [
             parsecCuda
+            nix-gl-host.defaultPackage.${system}
+          ];
+        };
+        # ROCm build; outside NixOS, run the GPU binaries with `nixglhost <cmd>`
+        hip = pkgs.mkShell {
+          inputsFrom = [ chameleonHip ];
+          buildInputs = [
+            parsecHip
             nix-gl-host.defaultPackage.${system}
           ];
         };

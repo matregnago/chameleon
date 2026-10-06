@@ -12,7 +12,14 @@
   # usually has none, so "native" cannot be used)
   cudaArchitectures ? "70;80;90",
   autoAddDriverRunpath ? null,
+  # HIP device (ROCm); PaRSEC cannot drive CUDA and HIP devices at the same time
+  hipSupport ? false,
+  rocmPackages ? null,
+  perl,
 }:
+
+assert !(cudaSupport && hipSupport);
+
 
 stdenv.mkDerivation {
   pname = "parsec";
@@ -50,6 +57,11 @@ stdenv.mkDerivation {
     cudaPackages.cuda_nvcc
     # finds libcuda in /run/opengl-driver on NixOS
     autoAddDriverRunpath
+  ]
+  # the HIP device is generated from the CUDA one by hipify-perl
+  ++ lib.optionals hipSupport [
+    perl
+    rocmPackages.hipify
   ];
 
   buildInputs = [
@@ -59,12 +71,13 @@ stdenv.mkDerivation {
   ++ lib.optionals cudaSupport [
     cudaPackages.cuda_cudart
     cudaPackages.cuda_cccl
-  ];
+  ]
+  ++ lib.optionals hipSupport [ rocmPackages.clr ];
 
   cmakeFlags = [
     "-DPARSEC_DIST_WITH_MPI=ON"
     "-DPARSEC_GPU_WITH_CUDA=${if cudaSupport then "ON" else "OFF"}"
-    "-DPARSEC_GPU_WITH_HIP=OFF"
+    "-DPARSEC_GPU_WITH_HIP=${if hipSupport then "ON" else "OFF"}"
     "-DPARSEC_GPU_WITH_LEVEL_ZERO=OFF"
   ]
   ++ lib.optionals cudaSupport [ "-DCMAKE_CUDA_ARCHITECTURES=${cudaArchitectures}" ];

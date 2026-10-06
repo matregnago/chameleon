@@ -184,7 +184,7 @@ if ( CHAMELEON_SCHED_PARSEC OR CHAMELEON_SCHED_STARPU )
 endif()
 
 set(CHAMELEON_ENABLE_HIP OFF CACHE INTERNAL "Tells if HIP might be supported by the runtime")
-if ( CHAMELEON_SCHED_STARPU )
+if ( CHAMELEON_SCHED_PARSEC OR CHAMELEON_SCHED_STARPU )
     set(CHAMELEON_ENABLE_HIP ON FORCE)
 endif()
 
@@ -221,12 +221,12 @@ if (CHAMELEON_ENABLE_CUDA AND NOT CHAMELEON_USE_CUDA)
     message("-- ${BoldGreen}CHAMELEON_USE_CUDA is set to OFF, turn it ON to use CUDA (unsupported by OpenMP and Quark)${ColourReset}")
 endif()
 
-# Enable HIP kernels if StarPU (only if StarPU runtime is enabled)
+# Enable HIP kernels (only if StarPU or PaRSEC runtime is enabled)
 cmake_dependent_option(CHAMELEON_USE_HIP
                     "Enable HIP kernels with ROCM backend" OFF
                     "CHAMELEON_ENABLE_HIP" OFF)
 if (CHAMELEON_ENABLE_HIP AND NOT CHAMELEON_USE_HIP)
-    message("-- ${BoldGreen}CHAMELEON_USE_HIP is set to OFF, turn it ON to use HIP (unsupported by OpenMP, ParSEC, Quark)${ColourReset}")
+    message("-- ${BoldGreen}CHAMELEON_USE_HIP is set to OFF, turn it ON to use HIP (unsupported by OpenMP and Quark)${ColourReset}")
 endif()
 
 # Enable Hmat-OSS kernels
