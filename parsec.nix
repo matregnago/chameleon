@@ -28,9 +28,11 @@ stdenv.mkDerivation {
   };
 
   # Races of the DTD interface hit by the Chameleon tests (the former 0001 is
-  # upstream since a74104665)
+  # upstream since a74104665), and the coherence of the GPU copies with the CPU
+  # tasks of the fpointer API (0003)
   patches = [
     ./parsec-patches/0002-dtd-two-races-in-the-tracking-of-tile-users.patch
+    ./parsec-patches/0003-dtd-cpu-hook-of-the-fpointer-api-keeps-gpu-copies-coherent.patch
   ];
 
   postPatch = ''
