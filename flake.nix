@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     starpu.url = "github:Sacolle/nix-starpu";
+    # same nixpkgs (and so the same openmpi) for StarPU and Chameleon
+    starpu.inputs.nixpkgs.follows = "nixpkgs";
     # runs the Nix binaries with the GPU driver of a non-NixOS host (PCAD)
     nix-gl-host.url = "github:numtide/nix-gl-host";
     nix-gl-host.inputs.nixpkgs.follows = "nixpkgs";
@@ -25,23 +27,38 @@
         inherit system;
         config.allowUnfree = true;
       };
-      starpuPkg = (
+      mkStarpu =
+        enableCUDA:
         starpu.packages.${system}.default.override {
-          enableCUDA = false;
+          inherit enableCUDA;
+          enableMPI = true;
           enableTrace = true;
-        }
-      );
+          # nix-starpu turns shared libs off with MPI (needed only for SMPI);
+          # chameleon is a shared library and needs a shared libstarpumpi.
+          # The MPI tests of `make check` hang in the Nix sandbox.
+          extraOptions = [
+            "--enable-shared"
+            "--disable-mpi-check"
+          ];
+        };
+      starpuPkg = mkStarpu false;
+      starpuCuda = mkStarpu true;
       parsec = pkgs.callPackage ./parsec.nix { };
+      parsecCuda = pkgsUnfree.callPackage ./parsec.nix { cudaSupport = true; };
+      # the runtime is chosen with `runtime = "parsec" | "starpu"`, e.g.
+      #   chameleon.override { runtime = "starpu"; }
       chameleon = pkgs.callPackage ./chameleon.nix {
         starpu = starpuPkg;
         parsec = parsec;
       };
-      parsecCuda = pkgsUnfree.callPackage ./parsec.nix { cudaSupport = true; };
       chameleonCuda = pkgsUnfree.callPackage ./chameleon.nix {
-        starpu = starpuPkg;
+        starpu = starpuCuda;
         parsec = parsecCuda;
         cudaSupport = true;
       };
+      chameleonStarpu = chameleon.override { runtime = "starpu"; };
+      chameleonCudaStarpu = chameleonCuda.override { runtime = "starpu"; };
+      # HIP is PaRSEC only: the StarPU package is not built with HIP
       parsecHip = pkgs.callPackage ./parsec.nix { hipSupport = true; };
       chameleonHip = pkgs.callPackage ./chameleon.nix {
         starpu = starpuPkg;
@@ -52,11 +69,19 @@
     {
       packages.${system} = {
         default = chameleon;
+        # chameleon / chameleon-cuda use PaRSEC; the *-starpu ones use StarPU
+        chameleon = chameleon;
+        chameleon-parsec = chameleon;
+        chameleon-starpu = chameleonStarpu;
+        chameleon-cuda = chameleonCuda;
+        chameleon-cuda-parsec = chameleonCuda;
+        chameleon-cuda-starpu = chameleonCudaStarpu;
         parsec = parsec;
         parsec-cuda = parsecCuda;
-        chameleon-cuda = chameleonCuda;
         parsec-hip = parsecHip;
         chameleon-hip = chameleonHip;
+        starpu = starpuPkg;
+        starpu-cuda = starpuCuda;
       };
       devShells.${system} = {
         default = pkgs.mkShell {

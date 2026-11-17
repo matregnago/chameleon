@@ -11,6 +11,10 @@
   starpu,
   parsec,
   python3,
+  # runtime used by chameleon: "parsec" or "starpu" (CHAMELEON_SCHED)
+  runtime ? "parsec",
+  # StarPU must be built with MPI (enableMPI) when this is on
+  mpiSupport ? true,
   cudaSupport ? false,
   cudaPackages ? null,
   # CHAMELEON_CUDA_TARGETS: names or sm_xx of the GPUs that will run the kernels
@@ -21,10 +25,17 @@
   hipArchitectures ? "gfx90a;gfx942;gfx1100",
 }:
 
+assert lib.assertOneOf "runtime" runtime [
+  "parsec"
+  "starpu"
+];
 assert !(cudaSupport && hipSupport);
+# the StarPU of this flake is not built with HIP
+assert lib.assertMsg (!(hipSupport && runtime == "starpu"))
+  "chameleon: HIP is only supported with runtime = \"parsec\"";
 
 stdenv.mkDerivation {
-  pname = "chameleon";
+  pname = "chameleon-${runtime}";
   version = "1.4.0";
 
   src = ./.;
@@ -42,10 +53,10 @@ stdenv.mkDerivation {
     openblas
     lapack
     hwloc
-    openmpi
-    # starpu
-    parsec
   ]
+  ++ lib.optionals mpiSupport [ openmpi ]
+  ++ lib.optionals (runtime == "parsec") [ parsec ]
+  ++ lib.optionals (runtime == "starpu") [ starpu ]
   ++ lib.optionals cudaSupport [
     cudaPackages.cuda_cudart
     cudaPackages.cuda_cccl
@@ -62,8 +73,8 @@ stdenv.mkDerivation {
   ];
   cmakeFlags = [
     "-DBUILD_SHARED_LIBS=ON"
-    "-DCHAMELEON_SCHED=PARSEC"
-    "-DCHAMELEON_USE_MPI=ON"
+    "-DCHAMELEON_SCHED=${lib.toUpper runtime}"
+    (lib.cmakeBool "CHAMELEON_USE_MPI" mpiSupport)
   ]
   ++ lib.optionals cudaSupport [
     "-DCHAMELEON_USE_CUDA=ON"
